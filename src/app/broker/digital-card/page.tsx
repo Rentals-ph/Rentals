@@ -22,6 +22,21 @@ export default function BrokerDigitalCard() {
 
   useEffect(() => {
     const fetchBrokerData = async () => {
+      const role = typeof window !== 'undefined' ? (localStorage.getItem('user_role') || localStorage.getItem('agent_role')) : null
+      // /agents/me is only for role 'agent'; brokers get 403
+      if (role === 'broker') {
+        const name = localStorage.getItem('user_name') || localStorage.getItem('agent_name') || 'Broker'
+        const agentId = localStorage.getItem('agent_id') || localStorage.getItem('user_id')
+        setAgent({
+          id: agentId ? parseInt(agentId) : 0,
+          first_name: name.split(' ')[0] || 'Broker',
+          last_name: name.split(' ').slice(1).join(' ') || '',
+          email: '',
+          full_name: name,
+        } as Agent)
+        setLoading(false)
+        return
+      }
       try {
         const agentData = await agentsApi.getCurrent()
         setAgent(agentData)

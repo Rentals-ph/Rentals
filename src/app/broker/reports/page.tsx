@@ -174,8 +174,7 @@ export default function ReportsPage() {
 
           {/* Desktop Table View */}
           <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 md:hidden"> {/* rp-table-wrapper rp-table-desktop */}
-            <table className="w-full border-collapse min-w-[900px]"> {/* rp-table */}
-              <thead>
+            <table className="w-full border-collapse min-w-[900px]"><thead>
                 <tr>
                   <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200 w-12"> {/* rp-th-check */}
                     <input
@@ -191,8 +190,7 @@ export default function ReportsPage() {
                   <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">Most Popular Listing</th>
                   <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">Inquiry-to-Listing Ratio</th>
                 </tr>
-              </thead>
-              <tbody>
+              </thead><tbody>
                 {productivityData.map((row, index) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="py-3 px-4 border-b border-gray-100 w-12"> {/* rp-td-check */}
@@ -210,8 +208,7 @@ export default function ReportsPage() {
                     <td className="py-3 px-4 border-b border-gray-100 text-gray-700 text-center">{row.ratio}</td> {/* rp-td-num */}
                   </tr>
                 ))}
-              </tbody>
-            </table>
+              </tbody></table>
           </div>
 
           {/* Mobile Card View */}

@@ -8,6 +8,7 @@ use App\Services\ListingAssistantService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use OpenApi\Attributes as OA;
 
 class ListingAssistantController extends Controller
@@ -554,8 +555,8 @@ class ListingAssistantController extends Controller
             'floor_area_unit' => 'Square Meters',
             'amenities' => $data['amenities'] ?? [],
             'furnishing' => $this->mapFurnishingStatus($data['furnishing_status'] ?? null),
-            'city' => $data['location'] ?? '',
-            'street_address' => $data['address'] ?? '',
+            'city' => Str::limit($data['location'] ?? '', 100, ''),
+            'street_address' => $data['address'] ?? (strlen($data['location'] ?? '') > 100 ? ($data['location'] ?? '') : ''),
             'country' => 'Philippines',
             'latitude' => isset($data['latitude']) ? (string) $data['latitude'] : null,
             'longitude' => isset($data['longitude']) ? (string) $data['longitude'] : null,

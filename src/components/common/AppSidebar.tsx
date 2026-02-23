@@ -63,9 +63,12 @@ function AppSidebar() {
   const isAgentRoute = pathname?.startsWith('/agent')
   const isBrokerRoute = pathname?.startsWith('/broker')
 
-  // Fetch user data for agent/broker
+  // Fetch user data for agent/broker (only /agents/me for agents; brokers use localStorage)
   useEffect(() => {
     if (!isAgentRoute && !isBrokerRoute) return
+
+    const role = typeof window !== 'undefined' ? (localStorage.getItem('user_role') || localStorage.getItem('agent_role')) : null
+    const isAgent = role === 'agent'
 
     const fetchUserData = async () => {
       try {
@@ -78,8 +81,8 @@ function AppSidebar() {
           setUserName(storedName)
         }
 
-        // Try to fetch current agent data
-        if (isAgentRoute || isBrokerRoute) {
+        // /agents/me is only for users with role 'agent'; brokers/admins get 403
+        if (isAgent && (isAgentRoute || isBrokerRoute)) {
           try {
             const agentData = await agentsApi.getCurrent()
             
@@ -114,6 +117,7 @@ function AppSidebar() {
             }
           }
         }
+        // For brokers/admins we rely on localStorage only (no /agents/me call)
       } catch (error) {
         console.error('Error in fetchUserData:', error)
         // Fallback to localStorage values

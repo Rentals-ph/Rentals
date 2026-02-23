@@ -74,40 +74,49 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('auth_token')
       // You can add redirect logic here if needed
     }
-    
-    // Log error for debugging - safely extract all properties
-    const errorInfo: Record<string, any> = {
-      url: error.config?.url || 'unknown',
-      method: error.config?.method?.toUpperCase() || 'unknown',
-      status: error.response?.status || 'unknown',
-      statusText: error.response?.statusText || 'unknown',
+
+    if (error.response.status === 403) {
+      const serverMessage =
+        (error.response.data && typeof error.response.data === 'object' && (error.response.data as { message?: string }).message) ||
+        error.response.statusText
+      // Augment the original error so callers get the server message; avoid creating a new Error so stack trace stays in axios
+      error.message = serverMessage
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('API 403 Forbidden:', error.config?.url, serverMessage)
+      }
+      return Promise.reject(error)
     }
     
-    // Safely extract response data (might be circular or non-serializable)
+    // Build a plain, serializable snapshot so console always shows content (avoids {} from getters/late serialization)
+    const msg = error?.message ?? (error instanceof Error ? error.message : String(error))
+    const errorInfo: Record<string, unknown> = {
+      message: msg,
+      url: error?.config?.url ?? 'unknown',
+      method: String(error?.config?.method ?? 'unknown').toUpperCase(),
+      status: error?.response?.status ?? 'unknown',
+      statusText: error?.response?.statusText ?? 'unknown',
+    }
     try {
-      if (error.response?.data) {
-        // Try to stringify to check if it's serializable
-        JSON.stringify(error.response.data)
-        errorInfo.data = error.response.data
+      if (error?.response?.data != null) {
+        try {
+          JSON.stringify(error.response.data)
+          errorInfo.data = error.response.data
+        } catch {
+          errorInfo.data = '[Non-serializable data]'
+        }
       } else {
         errorInfo.data = null
       }
-    } catch (e) {
-      // If data is not serializable, just log a message
+    } catch {
       errorInfo.data = '[Non-serializable data]'
-      errorInfo.dataType = typeof error.response?.data
     }
-    
-    // Add error message if available
-    if (error.message) {
-      errorInfo.message = error.message
-    }
-    
-    // Log error with more details for debugging
     if (process.env.NODE_ENV === 'development') {
-      console.error('API Error:', errorInfo)
+      try {
+        console.error('API Error:', JSON.stringify(errorInfo, null, 2))
+      } catch {
+        console.error('API Error:', errorInfo.message ?? msg, errorInfo)
+      }
     } else {
-      // In production, only log if there's meaningful error info
       if (errorInfo.message || errorInfo.status || errorInfo.data) {
         console.error('API Error:', errorInfo)
       }
