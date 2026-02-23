@@ -247,7 +247,7 @@ export default function BrokerDashboard() {
           </div>
 
           {/* Two-column layout: Left = Team Performance + Top Performers | Right = Pending Approvals + Listings by Status + Recent Activity */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 mb-6">
+          <div className="grid grid-cols-1  gap-6 mb-6">
             {/* Left column */}
             <div className="flex flex-col gap-6">
               {/* Team Performance */}
@@ -286,115 +286,10 @@ export default function BrokerDashboard() {
                 </svg>
               </div>
 
-              {/* Top Performers */}
-              <div className="bg-white rounded-xl border border-gray-200/80 p-6 shadow-sm">
-                <h3 className="text-base font-bold text-gray-900 m-0 mb-5">Top Performers</h3>
-                {loading ? (
-                  <div className="text-center py-8 text-gray-500 text-sm">Loading...</div>
-                ) : topPerformers.length > 0 ? (
-                  <div className="flex flex-col gap-4">
-                    {topPerformers.map((performer, index) => (
-                      <div className="flex items-center gap-3" key={index}>
-                        <div
-                          className="w-11 h-11 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0"
-                          style={{ background: performer.color }}
-                        >
-                          {getInitials(performer.name)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-semibold text-gray-900 truncate">{performer.name}</div>
-                          <div className="text-xs text-gray-500">{performer.deals} deals closed</div>
-                        </div>
-                        <div className="text-sm font-bold text-gray-900 flex-shrink-0">{performer.amount}</div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500 text-sm">No performers data</div>
-                )}
-              </div>
+              
             </div>
 
-            {/* Right column: Pending Approvals, Listings by Status, Recent Activity */}
-            <div className="flex flex-col gap-6">
-              {/* Pending Approvals - side card */}
-              <div className="bg-white rounded-xl border border-gray-200/80 p-6 shadow-sm">
-                <h3 className="text-base font-bold text-gray-900 m-0 mb-5">Pending Approvals</h3>
-                <div className="flex flex-col gap-4">
-                  {pendingApprovals.map((approval, index) => (
-                    <div className="flex gap-3" key={index}>
-                      <div
-                        className="w-11 h-11 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0"
-                        style={{ background: approval.color }}
-                      >
-                        {getInitials(approval.name)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-gray-900">{approval.name}</div>
-                        <div className="text-xs text-gray-500 mb-2">{approval.description}</div>
-                        <div className="flex gap-2">
-                          <button type="button" className="py-1.5 px-3 bg-emerald-50 text-emerald-600 text-xs font-medium rounded-md border-0 cursor-pointer hover:bg-emerald-100 transition-colors">
-                            Approve
-                          </button>
-                          <button type="button" className="py-1.5 px-3 bg-gray-100 text-gray-600 text-xs font-medium rounded-md border-0 cursor-pointer hover:bg-gray-200 transition-colors">
-                            Reject
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <Link href="/broker/approvals" className="block text-center mt-5 pt-4 border-t border-gray-100 text-sm font-medium text-blue-600 no-underline hover:text-blue-700">
-                  View All (5)
-                </Link>
-              </div>
-
-              {/* Listings by Status - doughnut */}
-              <div className="bg-white rounded-xl border border-gray-200/80 p-6 shadow-sm">
-                <h3 className="text-base font-bold text-gray-900 m-0 mb-5">Listings by Status</h3>
-                <div className="flex items-center justify-center py-2">
-                  <svg viewBox="0 0 200 200" className="w-full max-w-[200px] h-auto">
-                    <circle cx="100" cy="100" r="70" fill="none" stroke="#3B82F6" strokeWidth="35" strokeDasharray={`${0.5 * 439.82} 439.82`} transform="rotate(-90 100 100)" />
-                    <circle cx="100" cy="100" r="70" fill="none" stroke="#10B981" strokeWidth="35" strokeDasharray={`${0.224 * 439.82} 439.82`} strokeDashoffset={`${-0.5 * 439.82}`} transform="rotate(-90 100 100)" />
-                    <circle cx="100" cy="100" r="70" fill="none" stroke="#F59E0B" strokeWidth="35" strokeDasharray={`${0.188 * 439.82} 439.82`} strokeDashoffset={`${-(0.5 + 0.224) * 439.82}`} transform="rotate(-90 100 100)" />
-                    <circle cx="100" cy="100" r="70" fill="none" stroke="#EF4444" strokeWidth="35" strokeDasharray={`${0.0882 * 439.82} 439.82`} strokeDashoffset={`${-(0.5 + 0.224 + 0.188) * 439.82}`} transform="rotate(-90 100 100)" />
-                  </svg>
-                </div>
-                <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs">
-                  <span className="text-gray-600"><span className="inline-block w-2 h-2 rounded-full bg-blue-500 align-middle mr-1" /> Active 50%</span>
-                  <span className="text-gray-600"><span className="inline-block w-2 h-2 rounded-full bg-emerald-500 align-middle mr-1" /> Sold 22.4%</span>
-                  <span className="text-gray-600"><span className="inline-block w-2 h-2 rounded-full bg-amber-500 align-middle mr-1" /> Pending 18.8%</span>
-                  <span className="text-gray-600"><span className="inline-block w-2 h-2 rounded-full bg-red-500 align-middle mr-1" /> Expired 8.82%</span>
-                </div>
-              </div>
-
-              {/* Recent Activity */}
-              <div className="bg-white rounded-xl border border-gray-200/80 p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-base font-bold text-gray-900 m-0">Recent Activity</h3>
-                  <Link href="#" className="text-sm font-medium text-blue-600 no-underline hover:text-blue-700">View All</Link>
-                </div>
-                <div className="flex flex-col gap-4">
-                  {recentActivity.map((activity, index) => (
-                    <div className="flex gap-3" key={index}>
-                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-base flex-shrink-0 ${
-                        activity.color === 'green' ? 'bg-emerald-100 text-emerald-600' :
-                        activity.color === 'blue' ? 'bg-blue-100 text-blue-600' :
-                        activity.color === 'purple' ? 'bg-violet-100 text-violet-600' :
-                        activity.color === 'orange' ? 'bg-amber-100 text-amber-600' :
-                        'bg-red-100 text-red-600'
-                      }`}>
-                        <ActivityIcon type={activity.icon} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm text-gray-900"><strong>{activity.name}</strong> {activity.action}</div>
-                        <div className="text-xs text-gray-500">{activity.time}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            
           </div>
 
           {/* Recent Listings - full width */}
@@ -408,7 +303,7 @@ export default function BrokerDashboard() {
             {loading ? (
               <div className="text-center py-8 text-gray-500">Loading listings...</div>
             ) : recentProperties.length > 0 ? (
-              <div className="grid grid-cols-4 gap-5 xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-1">
+              <div className="grid grid-cols-4 gap-5 xl:grid-cols-4 lg:grid-cols-2 md:grid-cols-1">
                 {recentProperties.map((property) => {
                   const agent = topPerformers[0]
                   const agentColor = agent?.color || '#3B82F6'
