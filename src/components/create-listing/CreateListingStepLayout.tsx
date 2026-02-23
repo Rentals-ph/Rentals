@@ -1,0 +1,131 @@
+'use client'
+
+import { useMemo } from 'react'
+import AppSidebar from '../common/AppSidebar'
+import { FiCheck } from 'react-icons/fi'
+import type { ReactNode } from 'react'
+
+export interface CreateListingStepLayoutProps {
+  /** Header element (e.g. AgentHeader or BrokerHeader) */
+  header: ReactNode
+  /** Labels for each step in the progress stepper */
+  stepLabels: string[]
+  /** Current step index (0-based) */
+  currentStepIndex: number
+  /** Name of current step for breadcrumb (e.g. "Basic Information") */
+  breadcrumbStepName: string
+  /** Optional: base path for "Create Listing" breadcrumb link (e.g. /agent/create-listing). If not set, breadcrumb is text only. */
+  createListingPath?: string
+  children: ReactNode
+}
+
+function ProgressRing({ percent }: { percent: number }) {
+  const { radius, stroke, normalizedRadius, circumference, strokeDashoffset } = useMemo(() => {
+    const r = 26
+    const s = 6
+    const nr = r - s / 2
+    const c = nr * 2 * Math.PI
+    const offset = c - (percent / 100) * c
+    return {
+      radius: r,
+      stroke: s,
+      normalizedRadius: nr,
+      circumference: c,
+      strokeDashoffset: offset
+    }
+  }, [percent])
+
+  return (
+    <div className="relative w-13 h-13 flex-shrink-0">
+      <svg height={radius * 2} width={radius * 2} className="-rotate-90">
+        <circle
+          stroke="#E5E7EB"
+          fill="transparent"
+          strokeWidth={stroke}
+          r={normalizedRadius}
+          cx={radius}
+          cy={radius}
+        />
+        <circle
+          stroke="#2563EB"
+          fill="transparent"
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={`${circumference} ${circumference}`}
+          style={{ strokeDashoffset }}
+          r={normalizedRadius}
+          cx={radius}
+          cy={radius}
+          className="transition-all duration-250 ease-in"
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-900">{percent}%</div>
+    </div>
+  )
+}
+
+export function CreateListingStepLayout({
+  header,
+  stepLabels,
+  currentStepIndex,
+  breadcrumbStepName,
+  createListingPath,
+  children,
+}: CreateListingStepLayoutProps) {
+  const percent = stepLabels.length > 0
+    ? Math.round(((currentStepIndex + 1) / stepLabels.length) * 100)
+    : 0
+
+  return (
+    <div className="flex min-h-screen bg-gray-50 font-outfit">
+      <AppSidebar />
+      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4">
+        {header}
+
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
+          {createListingPath ? (
+            <a href={createListingPath} className="text-gray-900 hover:text-blue-600 no-underline">
+              Create Listing
+            </a>
+          ) : (
+            <span className="text-gray-900">Create Listing</span>
+          )}
+          <span className="text-gray-400 font-medium">&gt;</span>
+          <span className="text-gray-400 font-semibold">{breadcrumbStepName}</span>
+        </div>
+
+        {/* Progress Stepper Card */}
+        <div className="flex items-center gap-4 p-6 mb-6 bg-white rounded-xl shadow-sm border border-gray-100 md:flex-col md:items-start">
+          <div className="flex items-center gap-3 min-w-[220px]">
+            <ProgressRing percent={percent} />
+            <div className="text-sm font-semibold text-gray-600">Completion Status</div>
+          </div>
+
+          <div className="flex-1 grid items-start gap-0 md:w-full md:overflow-x-auto md:pb-1.5 md:justify-start w-full" style={{ gridTemplateColumns: `repeat(${stepLabels.length}, minmax(0, 1fr))` }}>
+            {stepLabels.map((label, idx) => {
+              const step = idx + 1
+              const isActive = step === currentStepIndex + 1
+              const isDone = step < currentStepIndex + 1
+              return (
+                <div className="flex flex-col items-center min-w-0 flex-shrink-0" key={label}>
+                  <div className="w-full flex items-center relative">
+                    <div className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-base flex-shrink-0 relative z-10 ${isActive ? 'bg-blue-600 text-white' : isDone ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-400'}`}>
+                      {isDone ? <FiCheck className="text-lg" /> : step}
+                    </div>
+                    {idx !== stepLabels.length - 1 && (
+                      <div className={`h-1.5 rounded-full flex-1 ml-2 mr-2 min-w-0 ${isDone ? 'bg-blue-600' : 'bg-gray-200'}`} />
+                    )}
+                  </div>
+                  <div className={`mt-2 text-xs font-semibold text-center leading-tight ${isActive ? 'text-blue-600' : 'text-gray-400'}`}>{label}</div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {children}
+      </main>
+    </div>
+  )
+}

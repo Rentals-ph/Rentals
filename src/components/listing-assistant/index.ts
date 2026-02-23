@@ -14,6 +14,7 @@ export { ListingAssistantChat } from './ListingAssistantChat'
 export { ConversationalListingAssistant } from './ConversationalListingAssistant'
 export { LocationPicker } from './LocationPicker'
 export { InlineLocationMap } from './InlineLocationMap'
+export { CreateListingBanner } from './CreateListingBanner'
 
 // Default export
 export { ListingAssistantChat as default } from './ListingAssistantChat'

@@ -19,6 +19,7 @@ import {
   FiBarChart2,
   FiLayers,
 } from 'react-icons/fi'
+import { CreateListingBanner } from '../../components/listing-assistant'
 
 // Mock data for Top Performers (display like image: name, deals closed, amount)
 const topPerformersMock = [
@@ -188,7 +189,6 @@ export default function BrokerDashboard() {
             title="Dashboard Overview"
             subtitle={`Welcome back, ${userName}! Here's what's happening with your team.`}
             showNotifications
-            showAddListing
           />
 
           {/* Stats Cards - 4 compact box cards */}
@@ -245,6 +245,9 @@ export default function BrokerDashboard() {
               </div>
             </div>
           </div>
+
+          {/* Create New Listing - same style as agent dashboard */}
+          <CreateListingBanner createListingHref="/broker/create-listing" />
 
           {/* Two-column layout: Left = Team Performance + Top Performers | Right = Pending Approvals + Listings by Status + Recent Activity */}
           <div className="grid grid-cols-1  gap-6 mb-6">
