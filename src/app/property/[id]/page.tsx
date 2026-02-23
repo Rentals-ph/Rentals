@@ -747,6 +747,9 @@ export default function PropertyDetailsPage() {
                           parking={0}
                           propertySize={propertySize}
                           location={prop.location}
+                          city={prop.city}
+                          streetAddress={prop.street_address}
+                          stateProvince={prop.state_province}
                         />
                       </div>
                     )

@@ -119,6 +119,9 @@ function PropertiesForRent() {
                   parking={0}
                   propertySize={propertySize}
                   location={property.location}
+                  city={property.city}
+                  streetAddress={property.street_address}
+                  stateProvince={property.state_province}
                 />
               )
             })}

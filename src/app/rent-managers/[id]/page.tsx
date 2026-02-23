@@ -648,6 +648,9 @@ export default function RentManagerDetailsPage() {
                             parking={0}
                             propertySize={propertySize}
                             location={p.location}
+                            city={p.city}
+                            streetAddress={p.street_address}
+                            stateProvince={p.state_province}
                           />
                         </div>
                       )

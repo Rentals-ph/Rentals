@@ -1237,6 +1237,9 @@ function PropertiesContent() {
                           parking: 0, // Parking not in backend model, defaulting to 0
                           propertySize,
                           location: property.location,
+                          city: property.city,
+                          streetAddress: property.street_address,
+                          stateProvince: property.state_province,
                         }
 
                         return viewMode === 'horizontal' ? (

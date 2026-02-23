@@ -22,7 +22,11 @@ interface VerticalPropertyCardProps {
   bathrooms?: number
   parking?: number
   propertySize?: string
+  /** Full location string (fallback when city/street/state not provided) */
   location?: string
+  city?: string | null
+  streetAddress?: string | null
+  stateProvince?: string | null
 }
 
 function VerticalPropertyCard({
@@ -43,7 +47,11 @@ function VerticalPropertyCard({
   parking: _parking = 2,
   propertySize = '24 sqm',
   location,
+  city,
+  streetAddress,
+  stateProvince,
 }: VerticalPropertyCardProps) {
+  const locationLine = [streetAddress, city, stateProvince].filter(Boolean).join(', ') || location
   const router = useRouter()
   const [showSharePopup, setShowSharePopup] = useState(false)
   const [imageHovered, setImageHovered] = useState(false)
@@ -85,7 +93,7 @@ function VerticalPropertyCard({
 
   const handleShare = (platform: 'facebook' | 'whatsapp' | 'gmail') => {
     const propertyUrl = id ? `${window.location.origin}/property/${id}` : window.location.href
-    const shareText = `${title}${location ? `, ${location}` : ''} - ${price}`
+    const shareText = `${title}${locationLine ? `, ${locationLine}` : ''} - ${price}`
     switch (platform) {
       case 'facebook':
         window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(propertyUrl)}`, '_blank')
@@ -149,9 +157,14 @@ function VerticalPropertyCard({
           <span className="text-gray-500 text-xs font-medium">{priceType}</span>
         </div>
         <p className="text-blue-600 text-3xl font-bold leading-tight">{price}</p>
-        <h3 className="text-gray-900 text-base font-semibold leading-snug line-clamp-2">
-          {title}{location ? `, ${location}` : ''}
-        </h3>
+        <div className="min-w-0">
+          <h3 className="text-gray-900 text-base font-semibold leading-snug line-clamp-2">
+            {title}
+            {locationLine ? (
+              <span className="text-gray-500 font-normal">, {locationLine}</span>
+            ) : null}
+          </h3>
+        </div>
 
         {/* Bed, bath, size */}
         <div className="flex items-center gap-4 text-gray-600 text-sm">
