@@ -58,7 +58,7 @@ export default function BrokerListingAssistantPage() {
     const firstImage = images[0] || undefined
 
     const price = extractedData.price
-      ? formatPrice(extractedData.price as number) + (extractedData.price_type ? `/${extractedData.price_type}` : '')
+      ? formatPrice(extractedData.price as number)
       : undefined
 
     const propertyType = extractedData.property_type
@@ -68,6 +68,7 @@ export default function BrokerListingAssistantPage() {
     return {
       title: extractedData.property_name as string || 'New Property Listing',
       price: price || 'Price TBD',
+      priceType: extractedData.price_type || 'Monthly',
       propertyType: propertyType || 'Property',
       location: extractedData.location as string || extractedData.address as string,
       bedrooms: extractedData.bedrooms as number,
@@ -76,7 +77,6 @@ export default function BrokerListingAssistantPage() {
       propertySize: extractedData.area_sqm ? `${extractedData.area_sqm} sqm` : undefined,
       image: firstImage,
       images: images.length > 0 ? images : undefined,
-      date: new Date().toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' }),
     }
   }
 

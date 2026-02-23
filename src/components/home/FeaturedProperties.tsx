@@ -203,7 +203,7 @@ const FeaturedProperties = () => {
                     <VerticalPropertyCard 
                       id={property.id}
                       propertyType={property.type}
-                      date={formatDate(property.published_at)}
+                      priceType={property.price_type || 'Monthly'}
                       price={formatPrice(property.price)}
                       title={property.title}
                       image={mainImage}

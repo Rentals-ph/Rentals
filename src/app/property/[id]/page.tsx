@@ -724,7 +724,7 @@ export default function PropertyDetailsPage() {
                         <VerticalPropertyCard
                           id={prop.id}
                           propertyType={prop.type}
-                          date={formatDate(prop.published_at)}
+                          priceType={prop.price_type || 'Monthly'}
                           price={formatPrice(prop.price)}
                           title={prop.title}
                           image={mainImg}

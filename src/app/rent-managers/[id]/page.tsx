@@ -635,7 +635,7 @@ export default function RentManagerDetailsPage() {
                           <VerticalPropertyCard
                             id={p.id}
                             propertyType={p.type}
-                            date={formatDate(p.published_at)}
+                            priceType={p.price_type || 'Monthly'}
                             price={formatPrice(p.price)}
                             title={p.title}
                             image={mainImg}

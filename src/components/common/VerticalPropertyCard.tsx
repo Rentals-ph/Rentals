@@ -8,7 +8,7 @@ import { FiChevronLeft, FiChevronRight, FiMail, FiHeart } from 'react-icons/fi'
 interface VerticalPropertyCardProps {
   id?: number | string
   propertyType?: string
-  date?: string
+  priceType?: string
   price?: string
   title?: string
   image?: string
@@ -28,8 +28,8 @@ interface VerticalPropertyCardProps {
 function VerticalPropertyCard({
   id,
   propertyType = 'Commercial Spaces',
-  date = 'Sat 05, 2024',
-  price = '₱1200/Month',
+  priceType = 'Monthly',
+  price = '₱1,200',
   title = 'Azure Residences - 2BR Corner Suite',
   image = ASSETS.PLACEHOLDER_PROPERTY_MAIN,
   images: imagesProp,
@@ -146,7 +146,7 @@ function VerticalPropertyCard({
       <div className="flex flex-col flex-1 p-4 gap-3 overflow-hidden">
         <div className="flex justify-between items-center gap-2">
           <span className="text-blue-600 text-xs font-semibold uppercase tracking-wide">{propertyType}</span>
-          <span className="text-gray-400 text-xs">{date}</span>
+          <span className="text-gray-500 text-xs font-medium">{priceType}</span>
         </div>
         <p className="text-blue-600 text-3xl font-bold leading-tight">{price}</p>
         <h3 className="text-gray-900 text-base font-semibold leading-snug line-clamp-2">
