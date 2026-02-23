@@ -32,9 +32,21 @@ class GroqService
                 ? env('GROQ_API_KEY', $this->apiKey)
                 : env('OPENAI_API_KEY', $this->apiKey);
 
+            // Configure HTTP client for Windows SSL compatibility
+            $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+            $verifySSL = env('HTTP_VERIFY_SSL', $isWindows ? 'false' : 'true');
+            $verifySSL = filter_var($verifySSL, FILTER_VALIDATE_BOOLEAN);
+            
+            $httpClient = new \GuzzleHttp\Client([
+                'verify' => $verifySSL,
+                'timeout' => 60,
+                'connect_timeout' => 10,
+            ]);
+
             $this->client = OpenAI::factory()
                 ->withApiKey($apiKey)
                 ->withBaseUri($baseUri)
+                ->withHttpClient($httpClient)
                 ->make();
 
             $this->model = $this->provider === 'groq'
@@ -94,7 +106,9 @@ class GroqService
 
             $url = "{$this->baseUrl}/{$this->model}:generateContent?key={$this->apiKey}";
 
-            $response = Http::post($url, $requestBody);
+            // Configure HTTP client with SSL settings for Windows compatibility
+            $httpClient = $this->getHttpClient();
+            $response = $httpClient->post($url, $requestBody);
 
             if (!$response->successful()) {
                 Log::error('Gemini API request failed', [
@@ -623,6 +637,22 @@ PROMPT
         }
 
         return implode("\n", $formatted);
+    }
+
+    /**
+     * Get HTTP client with Windows-compatible SSL configuration
+     */
+    protected function getHttpClient()
+    {
+        $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+        $verifySSL = env('HTTP_VERIFY_SSL', $isWindows ? 'false' : 'true');
+        $verifySSL = filter_var($verifySSL, FILTER_VALIDATE_BOOLEAN);
+        
+        return Http::withOptions([
+            'verify' => $verifySSL,
+            'timeout' => 60,
+            'connect_timeout' => 10,
+        ]);
     }
 }
 
