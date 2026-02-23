@@ -1,0 +1,1114 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2024-01-01",
+  "assets": {
+    "logos": {
+      "LOGO_HERO_MAIN": {
+        "id": "LOGO_HERO_MAIN",
+        "path": "/assets/logos/rentals-logo-hero-13c7b5.png",
+        "category": "logos",
+        "description": "Main hero logo for Rentals.ph",
+        "originalName": "rentals-logo-hero-13c7b5.png"
+      },
+      "LOGO_HERO_NEW": {
+        "id": "LOGO_HERO_NEW",
+        "path": "/assets/logos/rentals-logo-hero-new-13c7b5.png",
+        "category": "logos",
+        "description": "New version of hero logo",
+        "originalName": "rentals-logo-hero-new-13c7b5.png"
+      },
+      "LOGO_FOOTER": {
+        "id": "LOGO_FOOTER",
+        "path": "/assets/logos/rentals-logo-footer.png",
+        "category": "logos",
+        "description": "Footer logo",
+        "originalName": "rentals-logo-footer.png"
+      },
+      "LOGO_FOOTER_NEW": {
+        "id": "LOGO_FOOTER_NEW",
+        "path": "/assets/logos/rentals-logo-footer-new.png",
+        "category": "logos",
+        "description": "New footer logo",
+        "originalName": "rentals-logo-footer-new.png"
+      },
+      "LOGO_FOOTER_WHITE": {
+        "id": "LOGO_FOOTER_WHITE",
+        "path": "/assets/logos/rentals-logo-white.png",
+        "category": "logos",
+        "description": "White footer logo",
+        "originalName": "rentals-logo-white.png"
+      },
+      "LOGO_ICON": {
+        "id": "LOGO_ICON",
+        "path": "/assets/logos/rental-ph-logo.svg",
+        "category": "logos",
+        "description": "Icon logo SVG",
+        "originalName": "rental-ph-logo.svg"
+      },
+      "LOGO_ICON_PREVIEW_10": {
+        "id": "LOGO_ICON_PREVIEW_10",
+        "path": "/assets/logos/rentals-ph-logo-icon-removebg-preview-10.png",
+        "category": "logos",
+        "description": "Icon preview version 10",
+        "originalName": "rentals-ph-logo-icon-removebg-preview-10.png"
+      },
+      "LOGO_PREVIEW_10": {
+        "id": "LOGO_PREVIEW_10",
+        "path": "/assets/logos/rentals-ph-logo-removebg-preview-10.png",
+        "category": "logos",
+        "description": "Logo preview version 10",
+        "originalName": "rentals-ph-logo-removebg-preview-10.png"
+      },
+      "LOGO_PREVIEW_11": {
+        "id": "LOGO_PREVIEW_11",
+        "path": "/assets/logos/rentals-ph-logo-removebg-preview-11.png",
+        "category": "logos",
+        "description": "Logo preview version 11",
+        "originalName": "rentals-ph-logo-removebg-preview-11.png"
+      },
+      "LOGO_PREVIEW_12": {
+        "id": "LOGO_PREVIEW_12",
+        "path": "/assets/logos/rentals-ph-logo-removebg-preview-12.png",
+        "category": "logos",
+        "description": "Logo preview version 12",
+        "originalName": "rentals-ph-logo-removebg-preview-12.png"
+      },
+      "LOGO_PREVIEW_13": {
+        "id": "LOGO_PREVIEW_13",
+        "path": "/assets/logos/rentals-ph-logo-removebg-preview-13.png",
+        "category": "logos",
+        "description": "Logo preview version 13",
+        "originalName": "rentals-ph-logo-removebg-preview-13.png"
+      },
+      "LOGO_PREVIEW_20": {
+        "id": "LOGO_PREVIEW_20",
+        "path": "/assets/logos/rentals-ph-logo-removebg-preview-20.png",
+        "category": "logos",
+        "description": "Logo preview version 20",
+        "originalName": "rentals-ph-logo-removebg-preview-20.png"
+      },
+      "LOGO_PREVIEW_21": {
+        "id": "LOGO_PREVIEW_21",
+        "path": "/assets/logos/rentals-ph-logo-removebg-preview-21.png",
+        "category": "logos",
+        "description": "Logo preview version 21",
+        "originalName": "rentals-ph-logo-removebg-preview-21.png"
+      },
+      "LOGO_PREVIEW_22": {
+        "id": "LOGO_PREVIEW_22",
+        "path": "/assets/logos/rentals-ph-logo-removebg-preview-22.png",
+        "category": "logos",
+        "description": "Logo preview version 22",
+        "originalName": "rentals-ph-logo-removebg-preview-22.png"
+      },
+      "LOGO_PREVIEW_23": {
+        "id": "LOGO_PREVIEW_23",
+        "path": "/assets/logos/rentals-ph-logo-removebg-preview-23.png",
+        "category": "logos",
+        "description": "Logo preview version 23",
+        "originalName": "rentals-ph-logo-removebg-preview-23.png"
+      },
+      "LOGO_PREVIEW_24": {
+        "id": "LOGO_PREVIEW_24",
+        "path": "/assets/logos/rentals-ph-logo-removebg-preview-24.png",
+        "category": "logos",
+        "description": "Logo preview version 24",
+        "originalName": "rentals-ph-logo-removebg-preview-24.png"
+      },
+      "LOGO_AI_BOX": {
+        "id": "LOGO_AI_BOX",
+        "path": "/assets/logos/rentalaibox.svg",
+        "category": "logos",
+        "description": "RentalAI box logo for AI assistant button",
+        "originalName": "rentalaibox.svg"
+      },
+      "LOGO_AI": {
+        "id": "LOGO_AI",
+        "path": "/assets/logos/rentalai-logo.svg",
+        "category": "logos",
+        "description": "RentalAI logo icon",
+        "originalName": "RentalAI-logo.svg"
+      }
+    },
+    "icons": {
+      "ICON_QUOTE_1": {
+        "id": "ICON_QUOTE_1",
+        "path": "/assets/icons/quote-icon-1.svg",
+        "category": "icons",
+        "description": "Quote icon variant 1",
+        "originalName": "quote-icon-1.svg"
+      },
+      "ICON_QUOTE_2": {
+        "id": "ICON_QUOTE_2",
+        "path": "/assets/icons/quote-icon-2.svg",
+        "category": "icons",
+        "description": "Quote icon variant 2",
+        "originalName": "quote-icon-2.svg"
+      },
+      "ICON_PIN_ORANGE": {
+        "id": "ICON_PIN_ORANGE",
+        "path": "/assets/icons/pin-orange.svg",
+        "category": "icons",
+        "description": "Orange pin icon",
+        "originalName": "pin-orange.svg"
+      },
+      "ICON_BED_0": {
+        "id": "ICON_BED_0",
+        "path": "/assets/icons/bed0.svg",
+        "category": "icons",
+        "description": "Bed icon variant 0",
+        "originalName": "bed0.svg"
+      },
+      "ICON_BED_1": {
+        "id": "ICON_BED_1",
+        "path": "/assets/icons/bed1.svg",
+        "category": "icons",
+        "description": "Bed icon variant 1",
+        "originalName": "bed1.svg"
+      },
+      "ICON_BED_2": {
+        "id": "ICON_BED_2",
+        "path": "/assets/icons/bed2.svg",
+        "category": "icons",
+        "description": "Bed icon variant 2",
+        "originalName": "bed2.svg"
+      },
+      "ICON_BED_3": {
+        "id": "ICON_BED_3",
+        "path": "/assets/icons/bed3.svg",
+        "category": "icons",
+        "description": "Bed icon variant 3",
+        "originalName": "bed3.svg"
+      },
+      "ICON_SHOWER_0": {
+        "id": "ICON_SHOWER_0",
+        "path": "/assets/icons/shower0.svg",
+        "category": "icons",
+        "description": "Shower icon variant 0",
+        "originalName": "shower0.svg"
+      },
+      "ICON_SHOWER_1": {
+        "id": "ICON_SHOWER_1",
+        "path": "/assets/icons/shower1.svg",
+        "category": "icons",
+        "description": "Shower icon variant 1",
+        "originalName": "shower1.svg"
+      },
+      "ICON_SHOWER_2": {
+        "id": "ICON_SHOWER_2",
+        "path": "/assets/icons/shower2.svg",
+        "category": "icons",
+        "description": "Shower icon variant 2",
+        "originalName": "shower2.svg"
+      },
+      "ICON_SHOWER_3": {
+        "id": "ICON_SHOWER_3",
+        "path": "/assets/icons/shower3.svg",
+        "category": "icons",
+        "description": "Shower icon variant 3",
+        "originalName": "shower3.svg"
+      },
+      "ICON_SIZE_0": {
+        "id": "ICON_SIZE_0",
+        "path": "/assets/icons/size0.svg",
+        "category": "icons",
+        "description": "Size icon variant 0",
+        "originalName": "size0.svg"
+      },
+      "ICON_SIZE_1": {
+        "id": "ICON_SIZE_1",
+        "path": "/assets/icons/size1.svg",
+        "category": "icons",
+        "description": "Size icon variant 1",
+        "originalName": "size1.svg"
+      },
+      "ICON_SIZE_2": {
+        "id": "ICON_SIZE_2",
+        "path": "/assets/icons/size2.svg",
+        "category": "icons",
+        "description": "Size icon variant 2",
+        "originalName": "size2.svg"
+      },
+      "ICON_SIZE_3": {
+        "id": "ICON_SIZE_3",
+        "path": "/assets/icons/size3.svg",
+        "category": "icons",
+        "description": "Size icon variant 3",
+        "originalName": "size3.svg"
+      },
+      "ICON_HEART_OUTLINE_0": {
+        "id": "ICON_HEART_OUTLINE_0",
+        "path": "/assets/icons/mdi-heart-outline0.svg",
+        "category": "icons",
+        "description": "Heart outline icon variant 0",
+        "originalName": "mdi-heart-outline0.svg"
+      },
+      "ICON_HEART_OUTLINE_1": {
+        "id": "ICON_HEART_OUTLINE_1",
+        "path": "/assets/icons/mdi-heart-outline1.svg",
+        "category": "icons",
+        "description": "Heart outline icon variant 1",
+        "originalName": "mdi-heart-outline1.svg"
+      },
+      "ICON_HEART_OUTLINE_2": {
+        "id": "ICON_HEART_OUTLINE_2",
+        "path": "/assets/icons/mdi-heart-outline2.svg",
+        "category": "icons",
+        "description": "Heart outline icon variant 2",
+        "originalName": "mdi-heart-outline2.svg"
+      },
+      "ICON_HEART_OUTLINE_3": {
+        "id": "ICON_HEART_OUTLINE_3",
+        "path": "/assets/icons/mdi-heart-outline3.svg",
+        "category": "icons",
+        "description": "Heart outline icon variant 3",
+        "originalName": "mdi-heart-outline3.svg"
+      },
+      "ICON_SHARE_0": {
+        "id": "ICON_SHARE_0",
+        "path": "/assets/icons/ic-baseline-share0.svg",
+        "category": "icons",
+        "description": "Share icon variant 0",
+        "originalName": "ic-baseline-share0.svg"
+      },
+      "ICON_SHARE_1": {
+        "id": "ICON_SHARE_1",
+        "path": "/assets/icons/ic-baseline-share1.svg",
+        "category": "icons",
+        "description": "Share icon variant 1",
+        "originalName": "ic-baseline-share1.svg"
+      },
+      "ICON_SHARE_2": {
+        "id": "ICON_SHARE_2",
+        "path": "/assets/icons/ic-baseline-share2.svg",
+        "category": "icons",
+        "description": "Share icon variant 2",
+        "originalName": "ic-baseline-share2.svg"
+      },
+      "ICON_SHARE_3": {
+        "id": "ICON_SHARE_3",
+        "path": "/assets/icons/ic-baseline-share3.svg",
+        "category": "icons",
+        "description": "Share icon variant 3",
+        "originalName": "ic-baseline-share3.svg"
+      },
+      "ICON_WHATSAPP_0": {
+        "id": "ICON_WHATSAPP_0",
+        "path": "/assets/icons/ic-baseline-whatsapp0.svg",
+        "category": "icons",
+        "description": "WhatsApp icon variant 0",
+        "originalName": "ic-baseline-whatsapp0.svg"
+      },
+      "ICON_WHATSAPP_1": {
+        "id": "ICON_WHATSAPP_1",
+        "path": "/assets/icons/ic-baseline-whatsapp1.svg",
+        "category": "icons",
+        "description": "WhatsApp icon variant 1",
+        "originalName": "ic-baseline-whatsapp1.svg"
+      },
+      "ICON_WHATSAPP_2": {
+        "id": "ICON_WHATSAPP_2",
+        "path": "/assets/icons/ic-baseline-whatsapp2.svg",
+        "category": "icons",
+        "description": "WhatsApp icon variant 2",
+        "originalName": "ic-baseline-whatsapp2.svg"
+      },
+      "ICON_WHATSAPP_3": {
+        "id": "ICON_WHATSAPP_3",
+        "path": "/assets/icons/ic-baseline-whatsapp3.svg",
+        "category": "icons",
+        "description": "WhatsApp icon variant 3",
+        "originalName": "ic-baseline-whatsapp3.svg"
+      },
+      "ICON_SEARCH": {
+        "id": "ICON_SEARCH",
+        "path": "/assets/icons/iconamoon-search-bold0.svg",
+        "category": "icons",
+        "description": "Search icon",
+        "originalName": "iconamoon-search-bold0.svg"
+      },
+      "ICON_ARROW_UP_0": {
+        "id": "ICON_ARROW_UP_0",
+        "path": "/assets/icons/eva-arrow-up-fill0.svg",
+        "category": "icons",
+        "description": "Arrow up icon variant 0",
+        "originalName": "eva-arrow-up-fill0.svg"
+      },
+      "ICON_ARROW_UP_1": {
+        "id": "ICON_ARROW_UP_1",
+        "path": "/assets/icons/eva-arrow-up-fill1.svg",
+        "category": "icons",
+        "description": "Arrow up icon variant 1",
+        "originalName": "eva-arrow-up-fill1.svg"
+      },
+      "ICON_ARROW_UP_2": {
+        "id": "ICON_ARROW_UP_2",
+        "path": "/assets/icons/eva-arrow-up-fill2.svg",
+        "category": "icons",
+        "description": "Arrow up icon variant 2",
+        "originalName": "eva-arrow-up-fill2.svg"
+      },
+      "ICON_ARROW_UP_3": {
+        "id": "ICON_ARROW_UP_3",
+        "path": "/assets/icons/eva-arrow-up-fill3.svg",
+        "category": "icons",
+        "description": "Arrow up icon variant 3",
+        "originalName": "eva-arrow-up-fill3.svg"
+      },
+      "ICON_ARROW_UP_4": {
+        "id": "ICON_ARROW_UP_4",
+        "path": "/assets/icons/eva-arrow-up-fill4.svg",
+        "category": "icons",
+        "description": "Arrow up icon variant 4",
+        "originalName": "eva-arrow-up-fill4.svg"
+      },
+      "ICON_ARROW_UP_5": {
+        "id": "ICON_ARROW_UP_5",
+        "path": "/assets/icons/eva-arrow-up-fill5.svg",
+        "category": "icons",
+        "description": "Arrow up icon variant 5",
+        "originalName": "eva-arrow-up-fill5.svg"
+      },
+      "ICON_ARROW_UP_6": {
+        "id": "ICON_ARROW_UP_6",
+        "path": "/assets/icons/eva-arrow-up-fill6.svg",
+        "category": "icons",
+        "description": "Arrow up icon variant 6",
+        "originalName": "eva-arrow-up-fill6.svg"
+      },
+      "ICON_ARROW_OUTLINED_0": {
+        "id": "ICON_ARROW_OUTLINED_0",
+        "path": "/assets/icons/weui-arrow-outlined0.svg",
+        "category": "icons",
+        "description": "Arrow outlined icon variant 0",
+        "originalName": "weui-arrow-outlined0.svg"
+      },
+      "ICON_ARROW_OUTLINED_1": {
+        "id": "ICON_ARROW_OUTLINED_1",
+        "path": "/assets/icons/weui-arrow-outlined1.svg",
+        "category": "icons",
+        "description": "Arrow outlined icon variant 1",
+        "originalName": "weui-arrow-outlined1.svg"
+      },
+      "ICON_ARROW_OUTLINED_2": {
+        "id": "ICON_ARROW_OUTLINED_2",
+        "path": "/assets/icons/weui-arrow-outlined2.svg",
+        "category": "icons",
+        "description": "Arrow outlined icon variant 2",
+        "originalName": "weui-arrow-outlined2.svg"
+      },
+      "ICON_ARROW_OUTLINED_3": {
+        "id": "ICON_ARROW_OUTLINED_3",
+        "path": "/assets/icons/weui-arrow-outlined3.svg",
+        "category": "icons",
+        "description": "Arrow outlined icon variant 3",
+        "originalName": "weui-arrow-outlined3.svg"
+      },
+      "ICON_ARROW_OUTLINED_4": {
+        "id": "ICON_ARROW_OUTLINED_4",
+        "path": "/assets/icons/weui-arrow-outlined4.svg",
+        "category": "icons",
+        "description": "Arrow outlined icon variant 4",
+        "originalName": "weui-arrow-outlined4.svg"
+      },
+      "ICON_ARROW_OUTLINED_5": {
+        "id": "ICON_ARROW_OUTLINED_5",
+        "path": "/assets/icons/weui-arrow-outlined5.svg",
+        "category": "icons",
+        "description": "Arrow outlined icon variant 5",
+        "originalName": "weui-arrow-outlined5.svg"
+      },
+      "ICON_ARROW_OUTLINED_6": {
+        "id": "ICON_ARROW_OUTLINED_6",
+        "path": "/assets/icons/weui-arrow-outlined6.svg",
+        "category": "icons",
+        "description": "Arrow outlined icon variant 6",
+        "originalName": "weui-arrow-outlined6.svg"
+      },
+      "ICON_ARROW_OUTLINED_7": {
+        "id": "ICON_ARROW_OUTLINED_7",
+        "path": "/assets/icons/weui-arrow-outlined7.svg",
+        "category": "icons",
+        "description": "Arrow outlined icon variant 7",
+        "originalName": "weui-arrow-outlined7.svg"
+      },
+      "ICON_SOCIAL_0": {
+        "id": "ICON_SOCIAL_0",
+        "path": "/assets/icons/social-icons0.svg",
+        "category": "icons",
+        "description": "Social icons variant 0",
+        "originalName": "social-icons0.svg"
+      },
+      "ICON_SOCIAL_1": {
+        "id": "ICON_SOCIAL_1",
+        "path": "/assets/icons/social-icons1.svg",
+        "category": "icons",
+        "description": "Social icons variant 1",
+        "originalName": "social-icons1.svg"
+      }
+    },
+    "images": {
+      "placeholders": {
+        "PLACEHOLDER_PROPERTY_MAIN": {
+          "id": "PLACEHOLDER_PROPERTY_MAIN",
+          "path": "/assets/images/placeholders/property-main.png",
+          "category": "images",
+          "subcategory": "placeholders",
+          "description": "Main property placeholder image",
+          "originalName": "property-main.png"
+        },
+        "PLACEHOLDER_PROPERTY_MAIN_NEW": {
+          "id": "PLACEHOLDER_PROPERTY_MAIN_NEW",
+          "path": "/assets/images/placeholders/property-main-new.png",
+          "category": "images",
+          "subcategory": "placeholders",
+          "description": "New main property placeholder image",
+          "originalName": "property-main-new.png"
+        },
+        "PLACEHOLDER_PROPERTY": {
+          "id": "PLACEHOLDER_PROPERTY",
+          "path": "/assets/images/placeholders/property-placeholder.jpg",
+          "category": "images",
+          "subcategory": "placeholders",
+          "description": "Property placeholder JPG",
+          "originalName": "property-placeholder.jpg"
+        },
+        "PLACEHOLDER_PROFILE": {
+          "id": "PLACEHOLDER_PROFILE",
+          "path": "/assets/images/placeholders/profile-placeholder.png",
+          "category": "images",
+          "subcategory": "placeholders",
+          "description": "Profile placeholder image",
+          "originalName": "profile-placeholder.png"
+        },
+        "PLACEHOLDER_TESTIMONIAL_PERSON": {
+          "id": "PLACEHOLDER_TESTIMONIAL_PERSON",
+          "path": "/assets/images/placeholders/testimonial-person.png",
+          "category": "images",
+          "subcategory": "placeholders",
+          "description": "Testimonial person placeholder",
+          "originalName": "testimonial-person.png"
+        }
+      },
+      "blog": {
+        "BLOG_IMAGE_MAIN": {
+          "id": "BLOG_IMAGE_MAIN",
+          "path": "/storage/images/posts/1/featured.png",
+          "category": "images",
+          "subcategory": "blog",
+          "description": "Main blog image (migrated to storage)",
+          "originalName": "blog-main.png"
+        },
+        "BLOG_IMAGE_1": {
+          "id": "BLOG_IMAGE_1",
+          "path": "/storage/images/posts/2/featured.png",
+          "category": "images",
+          "subcategory": "blog",
+          "description": "Blog image 1 (migrated to storage)",
+          "originalName": "blog-image.png"
+        },
+        "BLOG_IMAGE_2": {
+          "id": "BLOG_IMAGE_2",
+          "path": "/storage/images/posts/3/featured.png",
+          "category": "images",
+          "subcategory": "blog",
+          "description": "Blog image 2 (migrated to storage)",
+          "originalName": "blog-image2.png"
+        }
+      },
+      "contact": {
+        "CONTACT_PERSON": {
+          "id": "CONTACT_PERSON",
+          "path": "/assets/images/contact/contact-person.png",
+          "category": "images",
+          "subcategory": "contact",
+          "description": "Contact person image",
+          "originalName": "contact-person.png"
+        }
+      },
+      "testimonials": {
+        "TESTIMONIAL_ELAINE": {
+          "id": "TESTIMONIAL_ELAINE",
+          "path": "/storage/images/testimonials/1/avatar.png",
+          "category": "images",
+          "subcategory": "testimonials",
+          "description": "Testimonial photo - Elaine (migrated to storage)",
+          "originalName": "testimonial-elaine.png"
+        },
+        "TESTIMONIAL_JAVIE": {
+          "id": "TESTIMONIAL_JAVIE",
+          "path": "/storage/images/testimonials/2/avatar.png",
+          "category": "images",
+          "subcategory": "testimonials",
+          "description": "Testimonial photo - Javie (migrated to storage)",
+          "originalName": "testimonial-javie.png"
+        },
+        "TESTIMONIAL_RICA": {
+          "id": "TESTIMONIAL_RICA",
+          "path": "/storage/images/testimonials/3/avatar.png",
+          "category": "images",
+          "subcategory": "testimonials",
+          "description": "Testimonial photo - Rica (migrated to storage)",
+          "originalName": "testimonial-rica.png"
+        },
+        "TESTIMONIAL_ELAINE_10": {
+          "id": "TESTIMONIAL_ELAINE_10",
+          "path": "/storage/images/testimonials/1/avatar-10.png",
+          "category": "images",
+          "subcategory": "testimonials",
+          "description": "Elaine testimonial variant 10 (migrated to storage)",
+          "originalName": "elaine-10.png"
+        },
+        "TESTIMONIAL_JAVIE_10": {
+          "id": "TESTIMONIAL_JAVIE_10",
+          "path": "/storage/images/testimonials/2/avatar-10.png",
+          "category": "images",
+          "subcategory": "testimonials",
+          "description": "Javie testimonial variant 10 (migrated to storage)",
+          "originalName": "javie-10.png"
+        },
+        "TESTIMONIAL_RICA_10": {
+          "id": "TESTIMONIAL_RICA_10",
+          "path": "/storage/images/testimonials/3/avatar-10.png",
+          "category": "images",
+          "subcategory": "testimonials",
+          "description": "Rica testimonial variant 10 (migrated to storage)",
+          "originalName": "rica-10.png"
+        }
+      },
+      "about": {
+        "ABOUT_TROPICAL_TRAVEL": {
+          "id": "ABOUT_TROPICAL_TRAVEL",
+          "path": "/assets/images/about/tropical-travel-real-estate.png",
+          "category": "images",
+          "subcategory": "about",
+          "description": "Tropical travel real estate image",
+          "originalName": "tropical-travel-real-estate.png"
+        },
+        "ABOUT_RENTPH_CARES": {
+          "id": "ABOUT_RENTPH_CARES",
+          "path": "/assets/images/about/rentph-cares.png",
+          "category": "images",
+          "subcategory": "about",
+          "description": "RentPH cares image",
+          "originalName": "rentph-cares.png"
+        },
+        "ABOUT_TRUSTED_PARTNER": {
+          "id": "ABOUT_TRUSTED_PARTNER",
+          "path": "/assets/images/about/your-trusted-rental-partner.png",
+          "category": "images",
+          "subcategory": "about",
+          "description": "Your trusted rental partner image",
+          "originalName": "your-trusted-rental-partner.png"
+        },
+        "ABOUT_TRANSFORMING": {
+          "id": "ABOUT_TRANSFORMING",
+          "path": "/assets/images/about/transforming-real-estate.png",
+          "category": "images",
+          "subcategory": "about",
+          "description": "Transforming real estate image",
+          "originalName": "transforming-real-estate.png"
+        },
+        "ABOUT_COMPREHENSIVE": {
+          "id": "ABOUT_COMPREHENSIVE",
+          "path": "/assets/images/about/comprehensive-rental-solution.png",
+          "category": "images",
+          "subcategory": "about",
+          "description": "Comprehensive rental solution image",
+          "originalName": "comprehensive-rental-solution.png"
+        },
+        "ABOUT_BACKGROUND": {
+          "id": "ABOUT_BACKGROUND",
+          "path": "/assets/images/about/aboutusbackgroundphoto.svg",
+          "category": "images",
+          "subcategory": "about",
+          "description": "About us background photo",
+          "originalName": "aboutusbackgroundphoto.svg"
+        },
+        "ABOUT_LANDING_PAGE": {
+          "id": "ABOUT_LANDING_PAGE",
+          "path": "/assets/images/about/landing-page.jpg",
+          "category": "images",
+          "subcategory": "about",
+          "description": "Landing page image",
+          "originalName": "Landing Page.jpg"
+        },
+        "ABOUT_ISTOCK_10": {
+          "id": "ABOUT_ISTOCK_10",
+          "path": "/assets/images/about/istockphoto-511061090-612-x-612-10.png",
+          "category": "images",
+          "subcategory": "about",
+          "description": "iStock photo variant 10",
+          "originalName": "istockphoto-511061090-612-x-612-10.png"
+        },
+        "ABOUT_ISTOCK_11": {
+          "id": "ABOUT_ISTOCK_11",
+          "path": "/assets/images/about/istockphoto-511061090-612-x-612-11.png",
+          "category": "images",
+          "subcategory": "about",
+          "description": "iStock photo variant 11",
+          "originalName": "istockphoto-511061090-612-x-612-11.png"
+        },
+        "ABOUT_UNSPLASH_0": {
+          "id": "ABOUT_UNSPLASH_0",
+          "path": "/assets/images/about/unsplash-eh-it-1-hg-4-hs0.png",
+          "category": "images",
+          "subcategory": "about",
+          "description": "Unsplash image variant 0",
+          "originalName": "unsplash-eh-it-1-hg-4-hs0.png"
+        },
+        "ABOUT_UNSPLASH_1": {
+          "id": "ABOUT_UNSPLASH_1",
+          "path": "/assets/images/about/unsplash-eh-it-1-hg-4-hs1.png",
+          "category": "images",
+          "subcategory": "about",
+          "description": "Unsplash image variant 1",
+          "originalName": "unsplash-eh-it-1-hg-4-hs1.png"
+        },
+        "ABOUT_UNSPLASH_2": {
+          "id": "ABOUT_UNSPLASH_2",
+          "path": "/assets/images/about/unsplash-eh-it-1-hg-4-hs2.png",
+          "category": "images",
+          "subcategory": "about",
+          "description": "Unsplash image variant 2",
+          "originalName": "unsplash-eh-it-1-hg-4-hs2.png"
+        },
+        "ABOUT_UNSPLASH_3": {
+          "id": "ABOUT_UNSPLASH_3",
+          "path": "/assets/images/about/unsplash-eh-it-1-hg-4-hs3.png",
+          "category": "images",
+          "subcategory": "about",
+          "description": "Unsplash image variant 3",
+          "originalName": "unsplash-eh-it-1-hg-4-hs3.png"
+        }
+      }
+    },
+    "backgrounds": {
+      "BG_HERO_LANDING": {
+        "id": "BG_HERO_LANDING",
+        "path": "/assets/backgrounds/landing-hero-bg-784ecf.png",
+        "category": "backgrounds",
+        "description": "Hero landing page background",
+        "originalName": "landing-hero-bg-784ecf.png"
+      },
+      "BG_HERO_LANDING_2": {
+        "id": "BG_HERO_LANDING_2",
+        "path": "/assets/backgrounds/landing-hero-bg-2-784ecf.png",
+        "category": "backgrounds",
+        "description": "Hero landing page background",
+        "originalName": "landing-hero-bg-784ecf.png"
+      },
+      "BG_HERO_LANDING_NEW": {
+        "id": "BG_HERO_LANDING_NEW",
+        "path": "/assets/backgrounds/landing-hero-bg-new-784ecf.png",
+        "category": "backgrounds",
+        "description": "New hero landing page background",
+        "originalName": "landing-hero-bg-new-784ecf.png"
+      },
+        "BG_LOGIN": {
+          "id": "BG_LOGIN",
+          "path": "/assets/backgrounds/login-bg.png",
+          "category": "backgrounds",
+          "description": "Login modal background image",
+          "originalName": "login-bg.png"
+        },
+      "BG_CONTACT_US": {
+        "id": "BG_CONTACT_US",
+        "path": "/assets/backgrounds/background-contactus.png",
+        "category": "backgrounds",
+        "description": "Contact us page background",
+        "originalName": "background-contactus.png"
+      },
+      "BG_TESTIMONIALS": {
+        "id": "BG_TESTIMONIALS",
+        "path": "/assets/backgrounds/testimonials-bg.png",
+        "category": "backgrounds",
+        "description": "Testimonials section background",
+        "originalName": "testimonials-bg.png"
+      },
+      "BG_RENT_MANAGERS": {
+        "id": "BG_RENT_MANAGERS",
+        "path": "/assets/backgrounds/rent-managers-bg.png",
+        "category": "backgrounds",
+        "description": "Rent managers section background",
+        "originalName": "rent-managers-bg.png"
+        },
+        "BG_BLOG": {
+          "id": "BG_BLOG",
+          "path": "/assets/backgrounds/blog-bg.png",
+          "category": "backgrounds",
+          "description": "Blog section background",
+          "originalName": "blog-bg.png"
+        },
+        "BG_NEWS": {
+          "id": "BG_NEWS",
+          "path": "/assets/backgrounds/news-bg.png",
+          "category": "backgrounds",
+          "description": "News section background",
+          "originalName": "news-bg.png"
+        },
+        "BG_CONTACT_HORIZONTAL": {
+          "id": "BG_CONTACT_HORIZONTAL",
+          "path": "/assets/backgrounds/contact-horizontal-bg.png",
+          "category": "backgrounds",
+          "description": "Contact horizontal section background",
+          "originalName": "contact-horizontal-bg.png"
+        },
+        "BG_CONTACT_VERTICAL": {
+          "id": "BG_CONTACT_VERTICAL",
+          "path": "/assets/backgrounds/contact-vertical-bg.png",
+          "category": "backgrounds",
+          "description": "Contact vertical section background",
+          "originalName": "contact-vertical-bg.png"
+        }
+      
+    },
+    "decorative": {
+      "DECORATIVE_VECTOR_1": {
+        "id": "DECORATIVE_VECTOR_1",
+        "path": "/assets/decorative/decorative-vector-1.svg",
+        "category": "decorative",
+        "description": "Decorative vector 1",
+        "originalName": "decorative-vector-1.svg"
+      },
+      "DECORATIVE_VECTOR_2": {
+        "id": "DECORATIVE_VECTOR_2",
+        "path": "/assets/decorative/decorative-vector-2.svg",
+        "category": "decorative",
+        "description": "Decorative vector 2",
+        "originalName": "decorative-vector-2.svg"
+      },
+      "DECORATIVE_VECTOR_3": {
+        "id": "DECORATIVE_VECTOR_3",
+        "path": "/assets/decorative/decorative-vector-3.svg",
+        "category": "decorative",
+        "description": "Decorative vector 3",
+        "originalName": "decorative-vector-3.svg"
+      },
+      "DECORATIVE_RECTANGLE_320": {
+        "id": "DECORATIVE_RECTANGLE_320",
+        "path": "/assets/decorative/rectangle-320.svg",
+        "category": "decorative",
+        "description": "Rectangle decorative element 320",
+        "originalName": "rectangle-320.svg"
+      },
+      "DECORATIVE_RECTANGLE_340": {
+        "id": "DECORATIVE_RECTANGLE_340",
+        "path": "/assets/decorative/rectangle-340.svg",
+        "category": "decorative",
+        "description": "Rectangle decorative element 340",
+        "originalName": "rectangle-340.svg"
+      },
+      "DECORATIVE_RECTANGLE_510": {
+        "id": "DECORATIVE_RECTANGLE_510",
+        "path": "/assets/decorative/rectangle-510.svg",
+        "category": "decorative",
+        "description": "Rectangle decorative element 510",
+        "originalName": "rectangle-510.svg"
+      },
+      "DECORATIVE_RECTANGLE_511": {
+        "id": "DECORATIVE_RECTANGLE_511",
+        "path": "/assets/decorative/rectangle-511.svg",
+        "category": "decorative",
+        "description": "Rectangle decorative element 511",
+        "originalName": "rectangle-511.svg"
+      },
+      "DECORATIVE_RECTANGLE_512": {
+        "id": "DECORATIVE_RECTANGLE_512",
+        "path": "/assets/decorative/rectangle-512.svg",
+        "category": "decorative",
+        "description": "Rectangle decorative element 512",
+        "originalName": "rectangle-512.svg"
+      },
+      "DECORATIVE_RECTANGLE_513": {
+        "id": "DECORATIVE_RECTANGLE_513",
+        "path": "/assets/decorative/rectangle-513.svg",
+        "category": "decorative",
+        "description": "Rectangle decorative element 513",
+        "originalName": "rectangle-513.svg"
+      }
+    },
+    "vectors": {
+      "VECTOR_0": {
+        "id": "VECTOR_0",
+        "path": "/assets/vectors/vector0.svg",
+        "category": "vectors",
+        "description": "Vector graphic 0",
+        "originalName": "vector0.svg"
+      },
+      "VECTOR_1": {
+        "id": "VECTOR_1",
+        "path": "/assets/vectors/vector1.svg",
+        "category": "vectors",
+        "description": "Vector graphic 1",
+        "originalName": "vector1.svg"
+      },
+      "VECTOR_2": {
+        "id": "VECTOR_2",
+        "path": "/assets/vectors/vector2.svg",
+        "category": "vectors",
+        "description": "Vector graphic 2",
+        "originalName": "vector2.svg"
+      },
+      "VECTOR_10": {
+        "id": "VECTOR_10",
+        "path": "/assets/vectors/vector-10.svg",
+        "category": "vectors",
+        "description": "Vector graphic 10",
+        "originalName": "vector-10.svg"
+      },
+      "VECTOR_20": {
+        "id": "VECTOR_20",
+        "path": "/assets/vectors/vector-20.svg",
+        "category": "vectors",
+        "description": "Vector graphic 20",
+        "originalName": "vector-20.svg"
+      },
+      "VECTOR_30": {
+        "id": "VECTOR_30",
+        "path": "/assets/vectors/vector-30.svg",
+        "category": "vectors",
+        "description": "Vector graphic 30",
+        "originalName": "vector-30.svg"
+      },
+      "VECTOR_WAVE_1": {
+        "id": "VECTOR_WAVE_1",
+        "path": "/assets/vectors/wave-vector-1.svg",
+        "category": "vectors",
+        "description": "Wave vector 1",
+        "originalName": "wave-vector-1.svg"
+      },
+      "VECTOR_WAVE_2": {
+        "id": "VECTOR_WAVE_2",
+        "path": "/assets/vectors/wave-vector-2.svg",
+        "category": "vectors",
+        "description": "Wave vector 2",
+        "originalName": "wave-vector-2.svg"
+      },
+      "VECTOR_WAVE_3": {
+        "id": "VECTOR_WAVE_3",
+        "path": "/assets/vectors/wave-vector-3.svg",
+        "category": "vectors",
+        "description": "Wave vector 3",
+        "originalName": "wave-vector-3.svg"
+      }
+    },
+    "partners": {
+      "PARTNER_1": {
+        "id": "PARTNER_1",
+        "path": "/assets/partners/partner1.svg",
+        "category": "partners",
+        "description": "Partner logo 1",
+        "originalName": "partner1.svg"
+      },
+      "PARTNER_2": {
+        "id": "PARTNER_2",
+        "path": "/assets/partners/partner2.svg",
+        "category": "partners",
+        "description": "Partner logo 2",
+        "originalName": "partner2.svg"
+      },
+      "PARTNER_3": {
+        "id": "PARTNER_3",
+        "path": "/assets/partners/partner3.svg",
+        "category": "partners",
+        "description": "Partner logo 3",
+        "originalName": "partner3.svg"
+      },
+      "PARTNER_5": {
+        "id": "PARTNER_5",
+        "path": "/assets/partners/partner5.svg",
+        "category": "partners",
+        "description": "Partner logo 5",
+        "originalName": "partner5.svg"
+      }
+    },
+    "groups": {
+      "GROUP_0": {
+        "id": "GROUP_0",
+        "path": "/assets/groups/group0.svg",
+        "category": "groups",
+        "description": "Group graphic 0",
+        "originalName": "group0.svg"
+      },
+      "GROUP_1": {
+        "id": "GROUP_1",
+        "path": "/assets/groups/group1.svg",
+        "category": "groups",
+        "description": "Group graphic 1",
+        "originalName": "group1.svg"
+      },
+      "GROUP_2": {
+        "id": "GROUP_2",
+        "path": "/assets/groups/group2.svg",
+        "category": "groups",
+        "description": "Group graphic 2",
+        "originalName": "group2.svg"
+      },
+      "GROUP_3": {
+        "id": "GROUP_3",
+        "path": "/assets/groups/group3.svg",
+        "category": "groups",
+        "description": "Group graphic 3",
+        "originalName": "group3.svg"
+      },
+      "GROUP_4": {
+        "id": "GROUP_4",
+        "path": "/assets/groups/group4.svg",
+        "category": "groups",
+        "description": "Group graphic 4",
+        "originalName": "group4.svg"
+      },
+      "GROUP_18980": {
+        "id": "GROUP_18980",
+        "path": "/assets/groups/group-18980.svg",
+        "category": "groups",
+        "description": "Group graphic 18980",
+        "originalName": "group-18980.svg"
+      },
+      "GROUP_18981": {
+        "id": "GROUP_18981",
+        "path": "/assets/groups/group-18981.svg",
+        "category": "groups",
+        "description": "Group graphic 18981",
+        "originalName": "group-18981.svg"
+      },
+      "GROUP_18982": {
+        "id": "GROUP_18982",
+        "path": "/assets/groups/group-18982.svg",
+        "category": "groups",
+        "description": "Group graphic 18982",
+        "originalName": "group-18982.svg"
+      },
+      "GROUP_18983": {
+        "id": "GROUP_18983",
+        "path": "/assets/groups/group-18983.svg",
+        "category": "groups",
+        "description": "Group graphic 18983",
+        "originalName": "group-18983.svg"
+      },
+      "GROUP_18990": {
+        "id": "GROUP_18990",
+        "path": "/assets/groups/group-18990.svg",
+        "category": "groups",
+        "description": "Group graphic 18990",
+        "originalName": "group-18990.svg"
+      },
+      "GROUP_18991": {
+        "id": "GROUP_18991",
+        "path": "/assets/groups/group-18991.svg",
+        "category": "groups",
+        "description": "Group graphic 18991",
+        "originalName": "group-18991.svg"
+      },
+      "GROUP_18992": {
+        "id": "GROUP_18992",
+        "path": "/assets/groups/group-18992.svg",
+        "category": "groups",
+        "description": "Group graphic 18992",
+        "originalName": "group-18992.svg"
+      },
+      "GROUP_18993": {
+        "id": "GROUP_18993",
+        "path": "/assets/groups/group-18993.svg",
+        "category": "groups",
+        "description": "Group graphic 18993",
+        "originalName": "group-18993.svg"
+      },
+      "GROUP_19000": {
+        "id": "GROUP_19000",
+        "path": "/assets/groups/group-19000.svg",
+        "category": "groups",
+        "description": "Group graphic 19000",
+        "originalName": "group-19000.svg"
+      },
+      "GROUP_19001": {
+        "id": "GROUP_19001",
+        "path": "/assets/groups/group-19001.svg",
+        "category": "groups",
+        "description": "Group graphic 19001",
+        "originalName": "group-19001.svg"
+      },
+      "GROUP_19002": {
+        "id": "GROUP_19002",
+        "path": "/assets/groups/group-19002.svg",
+        "category": "groups",
+        "description": "Group graphic 19002",
+        "originalName": "group-19002.svg"
+      },
+      "GROUP_19003": {
+        "id": "GROUP_19003",
+        "path": "/assets/groups/group-19003.svg",
+        "category": "groups",
+        "description": "Group graphic 19003",
+        "originalName": "group-19003.svg"
+      },
+      "GROUP_19004": {
+        "id": "GROUP_19004",
+        "path": "/assets/groups/group-19004.svg",
+        "category": "groups",
+        "description": "Group graphic 19004",
+        "originalName": "group-19004.svg"
+      },
+      "GROUP_19005": {
+        "id": "GROUP_19005",
+        "path": "/assets/groups/group-19005.svg",
+        "category": "groups",
+        "description": "Group graphic 19005",
+        "originalName": "group-19005.svg"
+      },
+      "GROUP_19006": {
+        "id": "GROUP_19006",
+        "path": "/assets/groups/group-19006.svg",
+        "category": "groups",
+        "description": "Group graphic 19006",
+        "originalName": "group-19006.svg"
+      },
+      "GROUP_19007": {
+        "id": "GROUP_19007",
+        "path": "/assets/groups/group-19007.svg",
+        "category": "groups",
+        "description": "Group graphic 19007",
+        "originalName": "group-19007.svg"
+      },
+      "GROUP_19700": {
+        "id": "GROUP_19700",
+        "path": "/assets/groups/group-19700.svg",
+        "category": "groups",
+        "description": "Group graphic 19700",
+        "originalName": "group-19700.svg"
+      },
+      "GROUP_19740": {
+        "id": "GROUP_19740",
+        "path": "/assets/groups/group-19740.svg",
+        "category": "groups",
+        "description": "Group graphic 19740",
+        "originalName": "group-19740.svg"
+      },
+      "GROUP_19750": {
+        "id": "GROUP_19750",
+        "path": "/assets/groups/group-19750.svg",
+        "category": "groups",
+        "description": "Group graphic 19750",
+        "originalName": "group-19750.svg"
+      }
+    },
+    "frames": {
+      "FRAME_0": {
+        "id": "FRAME_0",
+        "path": "/assets/frames/frame0.svg",
+        "category": "frames",
+        "description": "Frame graphic 0",
+        "originalName": "frame0.svg"
+      },
+      "FRAME_1": {
+        "id": "FRAME_1",
+        "path": "/assets/frames/frame1.svg",
+        "category": "frames",
+        "description": "Frame graphic 1",
+        "originalName": "frame1.svg"
+      }
+    }
+  }
+}
+

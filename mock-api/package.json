@@ -1,0 +1,13 @@
+{
+  "name": "rentals-ph-mock-api",
+  "version": "1.0.0",
+  "description": "Mock API server for Rentals.ph frontend development",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["mock", "api", "server"],
+  "author": "",
+  "license": "MIT"
+}
+

@@ -1,0 +1,6 @@
+export { default as Hero } from './Hero'
+export { default as FeaturedProperties } from './FeaturedProperties'
+export { default as Testimonials } from './Testimonials'
+export { default as Blogs } from './Blogs'
+export { default as Partners } from '../common/Partners'
+export { default as PropertiesForRent } from './PropertiesForRent'
