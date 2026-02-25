@@ -166,7 +166,8 @@ export default function RentManagersPage() {
               className="bg-white p-4 sm:p-6"
               style={{
                 borderRadius: '16px',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+                boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                border: '3px solid  rgb(29, 78, 216)'
               }}
             >
               <div className="flex flex-col items-center text-center gap-3 sm:gap-4">
@@ -205,7 +206,7 @@ export default function RentManagersPage() {
 
       {/* Search and Filter Row - Full Width */}
       <div className="top-search-bar-container sticky top-0 z-40 bg-white mt-6 sm:mt-10 border-b border-gray-200 py-3 sm:py-5 px-4 sm:px-6 md:px-10 lg:px-[150px] mb-6 sm:mb-8 shadow-md">
-        <div className="max-w-[1200px] mx-auto">
+        <div className=" mx-auto">
           <div className="top-search-bar flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full">
               <div className="search-input-container flex-1 w-full sm:min-w-[200px] relative">
                 <svg 
@@ -320,12 +321,12 @@ export default function RentManagersPage() {
                   {viewMode === 'grid' ? (
                     <>
                       {/* Circular Headshot */}
-                      <div className="w-full flex justify-center pt-6 pb-4">
+                      <div className="w-full flex justify-center pb-4">
                         <div 
-                          className="relative rounded-full overflow-hidden flex-shrink-0"
+                          className="relative overflow-hidden flex-shrink-0"
                           style={{
-                            width: '96px',
-                            height: '96px',
+                            width: '100%',
+                            height: '100%',
                             backgroundColor: '#2563EB'
                           }}
                         >

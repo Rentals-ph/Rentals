@@ -25,7 +25,7 @@ export default function PropertyDetailsPage() {
   const [showShareMenu, setShowShareMenu] = useState(false)
   const [showImageModal, setShowImageModal] = useState(false)
   const [modalImageIndex, setModalImageIndex] = useState(0)
-  const [formMode, setFormMode] = useState<'inquiry' | 'contact'>('inquiry')
+  const [formMode, setFormMode] = useState<'inquiry' | 'comments' | 'review'>('inquiry')
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -166,10 +166,10 @@ export default function PropertyDetailsPage() {
     }))
   }
 
-  const handleFormModeChange = (mode: 'inquiry' | 'contact') => {
+  const handleFormModeChange = (mode: 'inquiry' | 'comments' | 'review') => {
     setFormMode(mode)
     // Reset form when switching modes
-    if (mode === 'inquiry' && property) {
+    if (property && mode === 'inquiry') {
       setFormData({
         firstName: '',
         lastName: '',
@@ -177,7 +177,16 @@ export default function PropertyDetailsPage() {
         email: '',
         message: `I'm Interested In This Property ${property.title} And I'd Like To Know More Details.`
       })
+    } else if (mode === 'comments') {
+      setFormData({
+        firstName: '',
+        lastName: '',
+        phone: '',
+        email: '',
+        message: ''
+      })
     } else {
+      // review mode
       setFormData({
         firstName: '',
         lastName: '',
@@ -208,17 +217,30 @@ export default function PropertyDetailsPage() {
           subject: `Inquiry about ${property.title}`,
         })
         alert('Inquiry submitted successfully!')
-      } else {
+      } else if (formMode === 'comments') {
         await messagesApi.send({
           recipient_id: property.agent_id,
+          property_id: property.id,
           sender_name: `${formData.firstName} ${formData.lastName}`,
           sender_email: formData.email,
           sender_phone: formData.phone,
           message: formData.message,
-          type: 'contact',
-          subject: `Contact from ${formData.firstName} ${formData.lastName}`,
+          type: 'general',
+          subject: `Comment on ${property.title}`,
         })
-        alert('Message sent successfully!')
+        alert('Comment submitted successfully!')
+      } else {
+        await messagesApi.send({
+          recipient_id: property.agent_id,
+          property_id: property.id,
+          sender_name: `${formData.firstName} ${formData.lastName}`,
+          sender_email: formData.email,
+          sender_phone: formData.phone,
+          message: formData.message,
+          type: 'general',
+          subject: `Review for ${property.title}`,
+        })
+        alert('Review submitted successfully!')
       }
       
       // Reset form
@@ -382,7 +404,7 @@ export default function PropertyDetailsPage() {
         <>
 
 
-          <main className="px-4 sm:px-6 md:px-10 lg:px-[150px] py-8 max-w-[var(--page-max-width,1400px)] mx-auto">
+          <main className="px-4 sm:px-6 md:px-10 lg:px-[150px] py-8  mx-auto">
             {/* 1. Property Images: one large left, two stacked right */}
             {property && (() => {
               const allImages = getPropertyImages(property)
@@ -390,9 +412,9 @@ export default function PropertyDetailsPage() {
               const img1 = allImages[1] || allImages[0] || ASSETS.PLACEHOLDER_PROPERTY_MAIN
               const img2 = allImages[2] || allImages[0] || ASSETS.PLACEHOLDER_PROPERTY_MAIN
               return (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-3 mb-8 rounded-xl overflow-hidden">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-3 mb-6 rounded-xl overflow-hidden">
                   <div
-                    className="md:col-span-2 relative aspect-[4/3] md:aspect-auto md:min-h-[320px] bg-gray-100 cursor-pointer"
+                    className="md:col-span-2 relative aspect-[16/9] md:aspect-auto md:min-h-[180px] bg-gray-100 cursor-pointer"
                     onClick={() => { setModalImageIndex(0); setShowImageModal(true) }}
                     onContextMenu={(e) => e.preventDefault()}
                   >
@@ -406,14 +428,14 @@ export default function PropertyDetailsPage() {
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-1 gap-2 sm:gap-3">
                     <div
-                      className="aspect-[4/3] bg-gray-100 cursor-pointer rounded-r-none md:rounded-b-none overflow-hidden"
+                      className="aspect-[16/9] bg-gray-100 cursor-pointer rounded-r-none md:rounded-b-none overflow-hidden"
                       onClick={() => { setModalImageIndex(1); setShowImageModal(true) }}
                       onContextMenu={(e) => e.preventDefault()}
                     >
                       <img src={img1} alt="" className="w-full h-full object-cover" draggable={false} onError={(e) => { e.currentTarget.src = ASSETS.PLACEHOLDER_PROPERTY_MAIN }} />
                     </div>
                     <div
-                      className="aspect-[4/3] bg-gray-100 cursor-pointer overflow-hidden"
+                      className="aspect-[16/9] bg-gray-100 cursor-pointer overflow-hidden"
                       onClick={() => { setModalImageIndex(2); setShowImageModal(true) }}
                       onContextMenu={(e) => e.preventDefault()}
                     >
@@ -427,20 +449,20 @@ export default function PropertyDetailsPage() {
             {/* 2. Price, title, type, location + heart & share */}
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
               <div>
-                <p className="text-3xl sm:text-4xl font-bold text-[#205ed7] m-0">
+                <p className="text-3xl sm:text-6xl font-bold text-[#205ed7] m-0">
                   {formatPrice(property.price)}
                   {formatPriceType(property.price_type) && (
                     <span className="text-xl sm:text-2xl font-semibold text-gray-500 ml-2">/{formatPriceType(property.price_type)}</span>
                   )}
                 </p>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mt-2 mb-1">{property.title}</h1>
-                <p className="text-sm text-gray-500 m-0">{property.type}</p>
-                <p className="text-gray-600 text-sm mt-1 flex items-center gap-1.5">
+                <h1 className="text-xl sm:text-5xl font-semibold text-gray-800 mt-2 mb-1">{property.title}</h1>
+                <p className="text-3xl text-rental-blue-600 m-0">{property.type}</p>
+                <p className="text-gray-600 text-xl mt-1 flex items-center gap-1.5">
                   <svg className="w-4 h-4 flex-shrink-0 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                     <circle cx="12" cy="10" r="3" />
                   </svg>
-                  {property.location}
+                  {([property.street_address, property.city, property.state_province].filter(Boolean).join(', ')) || property.location}
                 </p>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
@@ -465,68 +487,97 @@ export default function PropertyDetailsPage() {
               </div>
             </div>
 
-            {/* 3. Property Manager: avatar, name, Rent Manager, verified + View My Page | Show My Listings | Inquire now */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 py-6 border-y border-gray-200 mb-8">
-              <div className="flex items-center gap-4 flex-shrink-0">
-                <div className="w-14 h-14 rounded-full bg-[#205ed7] flex items-center justify-center text-white text-lg font-bold overflow-hidden relative">
-                  <span className="absolute inset-0 flex items-center justify-center">
-                    {(property.agent?.first_name?.charAt(0) || property.rent_manager?.name?.charAt(0) || 'R')}
-                  </span>
-                  {property.agent?.id && (
-                    <img
-                      src={resolveAgentAvatar(property.agent.id.toString(), property.agent.id)}
-                      alt=""
-                      className="absolute inset-0 w-full h-full object-cover"
-                      onError={(e) => { e.currentTarget.style.display = 'none' }}
-                    />
-                  )}
-                </div>
+            {/* 3. Property Manager Card */}
+            <div className="w-full max-w-sm bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden mb-8">
+              {/* Top: Agent photo */}
+              <div className="relative w-full h-44 bg-gray-100">
+                <span className="absolute inset-0 flex items-center justify-center text-white text-2xl font-bold bg-[#205ed7]">
+                  {(property.agent?.first_name?.charAt(0) || property.rent_manager?.name?.charAt(0) || 'R')}
+                </span>
+                {property.agent?.id && (
+                  <img
+                    src={resolveAgentAvatar(property.agent.id.toString(), property.agent.id)}
+                    alt={property.agent?.full_name || property.rent_manager?.name || 'Agent'}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.currentTarget.style.display = 'none' }}
+                  />
+                )}
+              </div>
+
+              {/* Middle: Name, role, listings link */}
+              <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between gap-4">
                 <div>
-                  <p className="font-semibold text-gray-800 m-0">
-                    {property.agent?.first_name && property.agent?.last_name ? `${property.agent.first_name} ${property.agent.last_name}` : property.agent?.full_name || property.rent_manager?.name || 'Rental.Ph Official'}
+                  <p className="text-lg font-bold text-gray-900 m-0 leading-tight">
+                    {property.agent?.first_name && property.agent?.last_name
+                      ? `${property.agent.first_name} ${property.agent.last_name}`
+                      : property.agent?.full_name
+                      || property.rent_manager?.name
+                      || 'Rental.Ph Official'}
                   </p>
-                  <p className="text-gray-600 text-sm m-0 flex items-center gap-1.5">
+                  <p className="text-sm text-rental-blue-600 m-0">
                     {property.agent ? getRentManagerRole(property.agent.verified) : getRentManagerRole(property.rent_manager?.is_official)}
-                    {(property.agent?.verified || property.rent_manager?.is_official) && (
-                      <span className="inline-flex items-center text-[#205ed7]" title="Verified">
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>
-                      </span>
-                    )}
                   </p>
                 </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 {property.agent_id && (
                   <Link
                     href={`/rent-managers/${property.agent_id}`}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 border-2 border-[#205ed7] text-[#205ed7] font-semibold rounded-lg hover:bg-[#205ed7]/5 transition-colors"
+                    className="text-sm font-semibold text-[#205ed7] whitespace-nowrap"
                   >
-                    View My Page
+                    View Listings
                   </Link>
                 )}
-                {property.agent_id && (
+              </div>
+
+              {/* Contact info */}
+              <div className="px-5 py-4 space-y-3 text-sm text-gray-800">
+                {(property.agent?.email || property.rent_manager?.email) && (
+                  <div className="flex items-center gap-3">
+                    <span className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M4 4h16v16H4z" />
+                        <path d="M4 4l8 7 8-7" />
+                      </svg>
+                    </span>
+                    <span className="truncate">
+                      {property.agent?.email || property.rent_manager?.email}
+                    </span>
+                  </div>
+                )}
+                {property.agent?.phone && (
+                  <div className="flex items-center gap-3">
+                    <span className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.06 2h3A2 2 0 0 1 9 3.72a12.84 12.84 0 0 0 .7 2.11 2 2 0 0 1-.45 2.11L8.09 9.11a16 16 0 0 0 6 6l1.17-1.17a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.11.7A2 2 0 0 1 22 16.92z" />
+                      </svg>
+                    </span>
+                    <span>{property.agent.phone}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* CTA button */}
+              {property.agent_id && (
+                <div className="px-5 pb-5 pt-1">
                   <Link
                     href={`/rent-managers/${property.agent_id}`}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 border-2 border-[#205ed7] text-[#205ed7] font-semibold rounded-lg hover:bg-[#205ed7]/5 transition-colors"
+                    className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-[#205ed7] text-white font-semibold shadow-sm hover:bg-[#1a4bb5] transition-colors"
                   >
-                    Show My Listings
+                    View My Listing
+                    <span className="inline-flex items-center justify-center">
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M5 12h14" />
+                        <path d="M13 6l6 6-6 6" />
+                      </svg>
+                    </span>
                   </Link>
-                )}
-                <button
-                  type="button"
-                  onClick={() => document.getElementById('inquiry-form')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#205ed7] text-white font-semibold rounded-lg hover:bg-[#1a4bb5] transition-colors"
-                >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
-                  Inquire now
-                </button>
-              </div>
+                </div>
+              )}
             </div>
 
             {/* 4. Property Overview */}
             <div className="mb-8">
               <h2 className="text-xl font-bold text-gray-800 mb-4">Property Overview</h2>
-              <p className="text-gray-600 leading-relaxed m-0">
+              <p className="text-gray-600 text-xl leading-relaxed m-0">
                 {showFullDescription ? property.description : property.description.substring(0, 400)}
                 {!showFullDescription && property.description.length > 400 && (
                   <>
@@ -541,8 +592,8 @@ export default function PropertyDetailsPage() {
 
             {/* 5. Property Details: bed, garage, bathroom icons */}
             <div className="mb-8">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Property Details</h2>
-              <div className="flex flex-wrap gap-6 sm:gap-10">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Property Details</h2>
+              <div className="flex flex-wrap gap-6 text-xl sm:gap-10">
                 <div className="flex items-center gap-2 text-gray-700">
                   <svg className="w-6 h-6 text-gray-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
                   <span>{property.bedrooms} Bedrooms</span>
@@ -560,11 +611,11 @@ export default function PropertyDetailsPage() {
 
             {/* 6. Amenities: icon boxes with orange border */}
             <div className="mb-8">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Amenities</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Amenities</h2>
               <div className="flex flex-wrap gap-3">
                 {property.amenities && property.amenities.length > 0 ? (
                   property.amenities.slice(0, 8).map((amenity, index) => (
-                    <div key={index} className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg border-2 border-[#f97316] bg-white flex items-center justify-center p-2" title={amenity}>
+                    <div key={index} className="w-14 h-[auto] sm:w-[auto] sm:h-[auto] rounded-full border-2 border-[#f97316] flex items-center px-5 justify-center p-2 bg-gray-200"  title={amenity}>
                       <span className="text-xs sm:text-sm font-medium text-gray-700 text-center truncate w-full">{amenity}</span>
                     </div>
                   ))
@@ -599,21 +650,44 @@ export default function PropertyDetailsPage() {
             </div>
 
             {/* Inquiry / Contact form (for Inquire now scroll target) */}
-            <div id="inquiry-form" className="scroll-mt-8 bg-white rounded-xl border border-gray-200 p-6 mb-10">
-              <div className="flex border-b border-gray-200 mb-6">
+            <div id="inquiry-form" className="scroll-mt-8 bg-white rounded-xl border border-gray-200 py-6 mb-10">
+              <div className="flex border-b border-gray-200 mb-6"
+              style={{ borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#E5E7EB' }}>
                 <button
                   type="button"
-                  className={`px-6 py-3 font-semibold border-b-2 transition-colors ${formMode === 'inquiry' ? 'border-[#205ed7] text-[#205ed7]' : 'border-transparent text-gray-600 hover:text-gray-800'}`}
+                  className={`px-6 py-3 font-semibold border-b-2 transition-colors ${formMode === 'inquiry' ? 'text-[#205ed7]' : 'text-gray-600 hover:text-gray-800'}`}
+                  style={{
+                    borderBottomWidth: '2px',
+                    borderBottomStyle: 'solid',
+                    borderBottomColor: formMode === 'inquiry' ? '#205ed7' : 'transparent',
+                  }}
                   onClick={() => handleFormModeChange('inquiry')}
                 >
                   Property Inquiry
                 </button>
                 <button
                   type="button"
-                  className={`px-6 py-3 font-semibold border-b-2 transition-colors ${formMode === 'contact' ? 'border-[#205ed7] text-[#205ed7]' : 'border-transparent text-gray-600 hover:text-gray-800'}`}
-                  onClick={() => handleFormModeChange('contact')}
+                  className={`px-6 py-3 font-semibold border-b-2 transition-colors ${formMode === 'comments' ? 'text-[#205ed7]' : 'text-gray-600 hover:text-gray-800'}`}
+                  style={{
+                    borderBottomWidth: '2px',
+                    borderBottomStyle: 'solid',
+                    borderBottomColor: formMode === 'comments' ? '#205ed7' : 'transparent',
+                  }}
+                  onClick={() => handleFormModeChange('comments')}
                 >
-                  Contact Rent Manager
+                  Comments
+                </button>
+                <button
+                  type="button"
+                  className={`px-6 py-3 font-semibold border-b-2 transition-colors ${formMode === 'review' ? 'text-[#205ed7]' : 'text-gray-600 hover:text-gray-800'}`}
+                  style={{
+                    borderBottomWidth: '2px',
+                    borderBottomStyle: 'solid',
+                    borderBottomColor: formMode === 'review' ? '#205ed7' : 'transparent',
+                  }}
+                  onClick={() => handleFormModeChange('review')}
+                >
+                  Write a Review
                 </button>
               </div>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -621,17 +695,35 @@ export default function PropertyDetailsPage() {
                 <input type="text" name="lastName" placeholder={formMode === 'inquiry' ? 'Lastname' : 'Last Name'} value={formData.lastName} onChange={handleInputChange} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#205ed7]" required />
                 <input type="text" name="phone" placeholder="Phone" value={formData.phone} onChange={handleInputChange} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#205ed7]" required />
                 <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleInputChange} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#205ed7]" required />
-                <textarea name="message" placeholder={formMode === 'inquiry' ? 'Your inquiry message' : 'Your message'} value={formData.message} onChange={handleInputChange} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#205ed7]" rows={4} required />
+                <textarea
+                  name="message"
+                  placeholder={
+                    formMode === 'inquiry'
+                      ? 'Your inquiry message'
+                      : formMode === 'comments'
+                        ? 'Your comment'
+                        : 'Your review'
+                  }
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#205ed7]"
+                  rows={4}
+                  required
+                />
                 <button type="submit" className="w-full bg-[#205ed7] text-white py-3 rounded-lg font-semibold hover:bg-[#1a4bb5] transition-colors">
-                  {formMode === 'inquiry' ? 'Send Inquiry' : 'Contact'}
+                  {formMode === 'inquiry'
+                    ? 'Send Inquiry'
+                    : formMode === 'comments'
+                      ? 'Submit Comment'
+                      : 'Submit Review'}
                 </button>
               </form>
             </div>
           </main>
 
           {/* Similar Properties */}
-          <section className="px-4 sm:px-6 md:px-10 lg:px-[150px] py-12 bg-gray-50">
-            <div className="max-w-[var(--page-max-width,1400px)] mx-auto">
+          <section className="lg:px-[150px] py-12 bg-gray-50">
+            <div className=" mx-auto">
               <h2 className="text-3xl font-bold mb-8 text-gray-800">Similar Properties</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {similarProperties.length > 0 ? (
@@ -821,4 +913,3 @@ export default function PropertyDetailsPage() {
     </div>
   )
 }
-

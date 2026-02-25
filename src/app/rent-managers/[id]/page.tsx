@@ -636,6 +636,9 @@ export default function RentManagerDetailsPage() {
                           parking={0}
                           propertySize={propertySize}
                           location={p.location}
+                          city={p.city}
+                          streetAddress={p.street_address}
+                          stateProvince={p.state_province}
                         />
                       ) : (
                         <div key={p.id} className="w-full min-w-0 [&>article]:w-full [&>article]:min-w-0 [&>article]:max-w-full [&>article]:h-full">

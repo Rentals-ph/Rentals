@@ -24,6 +24,9 @@ interface HorizontalPropertyCardProps {
   parking?: number
   propertySize?: string
   location?: string
+  city?: string | null
+  streetAddress?: string | null
+  stateProvince?: string | null
 }
 
 function HorizontalPropertyCard({
@@ -44,7 +47,11 @@ function HorizontalPropertyCard({
   parking: _parking = 2,
   propertySize = '24 sqm',
   location,
+  city,
+  streetAddress,
+  stateProvince,
 }: HorizontalPropertyCardProps) {
+  const locationLine = [streetAddress, city, stateProvince].filter(Boolean).join(', ') || location
   const router = useRouter()
   const [showSharePopup, setShowSharePopup] = useState(false)
   const [imageHovered, setImageHovered] = useState(false)
@@ -74,7 +81,7 @@ function HorizontalPropertyCard({
 
   const handleShare = (platform: SharePlatform) => {
     const propertyUrl = id ? `${window.location.origin}/property/${id}` : window.location.href
-    const shareText = `${title}${location ? `, ${location}` : ''} - ${price}`
+      const shareText = `${title}${locationLine ? `, ${locationLine}` : ''} - ${price}`
     switch (platform) {
       case 'facebook':
         window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(propertyUrl)}`, '_blank')
@@ -94,11 +101,11 @@ function HorizontalPropertyCard({
     <article
       onClick={handleCardClick}
       style={{ cursor: id ? 'pointer' : 'default' }}
-      className="w-full bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col sm:flex-row items-stretch shadow-sm hover:shadow-md transition-all duration-200 h-[240px] min-h-[240px] max-h-[240px]"
+      className="w-full bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col sm:flex-row items-stretch shadow-sm hover:shadow-md transition-all duration-200 min-h-[350px] max-h-[380px]"
     >
       {/* Left: Property image with hover arrows */}
       <div
-        className="relative w-full sm:w-[45%] min-h-[200px] sm:min-h-0 sm:flex-shrink-0 overflow-hidden rounded-t-2xl sm:rounded-l-2xl sm:rounded-tr-none bg-gray-100"
+        className="relative w-full sm:w-[50%] min-h-[250px] sm:min-h-0 sm:flex-shrink-0 overflow-hidden rounded-t-2xl sm:rounded-l-2xl sm:rounded-tr-none bg-gray-100"
         onMouseEnter={() => setImageHovered(true)}
         onMouseLeave={() => setImageHovered(false)}
       >
@@ -139,9 +146,12 @@ function HorizontalPropertyCard({
           <span className="text-gray-400 text-xs flex-shrink-0">{date}</span>
         </div>
 
-        <p className="text-blue-600 text-2xl font-bold leading-tight">{price}</p>
-        <h3 className="text-gray-900 text-lg font-semibold leading-snug line-clamp-2">
-          {title}{location ? `, ${location}` : ''}
+        <p className="text-blue-600 text-4xl font-bold leading-tight">{price}</p>
+        <h3 className="text-gray-900 text-lg font-semibold leading-snug">
+          {title}
+          {locationLine ? (
+            <span className="text-gray-500 font-normal">, {locationLine}</span>
+          ) : null}
         </h3>
 
         {/* Bed, bath, size */}

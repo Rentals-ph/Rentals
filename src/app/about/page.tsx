@@ -17,15 +17,21 @@ export default function AboutPage() {
           <img
             src={ASSETS.ABOUT_BACKGROUND}
             alt="About Us background"
-            className="w-full h-full object-cover object-center opacity-90"
+            className="w-full h-full object-cover object-center"
           />
-          {/* Light overlay for readability */}
-          <div className="absolute inset-0 bg-white/25 backdrop-blur-[1px]" />
+          {/* Gradient overlay method matched with Blog hero */}
+          <div
+            className="absolute top-0 left-0 w-full h-full z-[2]"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(32, 94, 215, 0.85) 0%, rgba(32, 94, 215, 0.75) 50%, rgba(254, 142, 10, 0.85) 100%)',
+            }}
+          />
         </div>
 
         <div className="relative z-[3] max-w-[var(--page-max-width)] mx-auto px-4 py-20 w-full flex items-center justify-center flex-1">
           <div className="text-center flex flex-col items-center justify-center mt-10">
-            <h1 className="font-extrabold text-3xl sm:text-4xl md:text-5xl leading-tight m-0 tracking-tight">
+            <h1 className="font-extrabold text-3xl sm:text-6xl md:text-8xl leading-tight m-0 tracking-tight">
               <span className="text-[#205ed7]">About</span>{" "}
               <span className="text-[#f97316]">Rentals.ph</span>
             </h1>

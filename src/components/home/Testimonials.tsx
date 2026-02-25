@@ -40,7 +40,7 @@ const Testimonials = () => {
   }
 
   return (
-    <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden mb-0 px-6 md:px-10 lg:px-[150px] py-12" id="testimonials">
+    <section className="relative min-h-[80vh] flex items-center justify-center overflow-x-visible overflow-y-hidden mb-0 lg:pl-[150px] py-12" id="testimonials">
       {/* Background image - non-interactive */}
       <div 
         className="absolute inset-0 z-[1] bg-cover bg-center bg-no-repeat pointer-events-none"
@@ -96,7 +96,7 @@ const Testimonials = () => {
                 <p className="text-white font-outfit text-lg">Loading testimonials...</p>
               </div>
             ) : testimonials.length > 0 ? (
-              <div className="flex gap-6 pb-4 snap-x snap-mandatory pr-4 md:pr-8 w-max max-w-full" ref={scrollRef} style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}>
+              <div className="flex gap-6 pb-4 snap-x snap-mandatory pr-4 md:pr-8 w-max" ref={scrollRef} style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}>
                 {testimonials.map((testimonial) => (
                   <TestimonialCard
                     key={testimonial.id}
