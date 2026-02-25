@@ -67,7 +67,14 @@ const FeaturedProperties = () => {
 
   // Helper function to format price
   const formatPrice = (price: number): string => {
-    return `₱${price.toLocaleString('en-US')}/Month`
+    return `₱${price.toLocaleString('en-US')}`
+  }
+
+  // Helper function to format price type
+  const formatPriceType = (priceType: string | null | undefined): string | undefined => {
+    if (!priceType) return undefined
+    // Capitalize first letter and make rest lowercase for consistency
+    return priceType.charAt(0).toUpperCase() + priceType.slice(1).toLowerCase()
   }
 
   // Helper function to format date
@@ -203,7 +210,7 @@ const FeaturedProperties = () => {
                     <VerticalPropertyCard 
                       id={property.id}
                       propertyType={property.type}
-                      priceType={property.price_type || 'Monthly'}
+                      priceType={formatPriceType(property.price_type)}
                       price={formatPrice(property.price)}
                       title={property.title}
                       image={mainImage}

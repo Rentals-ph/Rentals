@@ -32,7 +32,7 @@ interface VerticalPropertyCardProps {
 function VerticalPropertyCard({
   id,
   propertyType = 'Commercial Spaces',
-  priceType = 'Monthly',
+  priceType,
   price = '₱1,200',
   title = 'Azure Residences - 2BR Corner Suite',
   image = ASSETS.PLACEHOLDER_PROPERTY_MAIN,
@@ -154,9 +154,13 @@ function VerticalPropertyCard({
       <div className="flex flex-col flex-1 p-4 gap-3 overflow-hidden">
         <div className="flex justify-between items-center gap-2">
           <span className="text-blue-600 text-xs font-semibold uppercase tracking-wide">{propertyType}</span>
-          <span className="text-gray-500 text-xs font-medium">{priceType}</span>
         </div>
-        <p className="text-blue-600 text-3xl font-bold leading-tight">{price}</p>
+        <div className="flex items-baseline gap-2">
+          <p className="text-blue-600 text-3xl font-bold leading-tight">{price}</p>
+          {priceType && (
+            <span className="text-gray-500 text-sm font-medium">{priceType}</span>
+          )}
+        </div>
         <div className="min-w-0">
           <h3 className="text-gray-900 text-base font-semibold leading-snug line-clamp-2">
             {title}

@@ -116,7 +116,14 @@ export default function RentManagerDetailsPage() {
 
   // Helper functions
   const formatPrice = (price: number): string => {
-    return `₱${price.toLocaleString('en-US')}/Month`
+    return `₱${price.toLocaleString('en-US')}`
+  }
+
+  // Helper function to format price type
+  const formatPriceType = (priceType: string | null | undefined): string | undefined => {
+    if (!priceType) return undefined
+    // Capitalize first letter and make rest lowercase for consistency
+    return priceType.charAt(0).toUpperCase() + priceType.slice(1).toLowerCase()
   }
 
   const formatDate = (dateString: string | null): string => {
@@ -635,7 +642,7 @@ export default function RentManagerDetailsPage() {
                           <VerticalPropertyCard
                             id={p.id}
                             propertyType={p.type}
-                            priceType={p.price_type || 'Monthly'}
+                            priceType={formatPriceType(p.price_type)}
                             price={formatPrice(p.price)}
                             title={p.title}
                             image={mainImg}

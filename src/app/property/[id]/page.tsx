@@ -79,7 +79,14 @@ export default function PropertyDetailsPage() {
   }, [id])
 
   const formatPrice = (price: number): string => {
-    return `₱${price.toLocaleString('en-US')}/Month`
+    return `₱${price.toLocaleString('en-US')}`
+  }
+
+  // Helper function to format price type
+  const formatPriceType = (priceType: string | null | undefined): string | undefined => {
+    if (!priceType) return undefined
+    // Capitalize first letter and make rest lowercase for consistency
+    return priceType.charAt(0).toUpperCase() + priceType.slice(1).toLowerCase()
   }
 
   const formatDate = (dateString: string | null): string => {
@@ -528,7 +535,12 @@ export default function PropertyDetailsPage() {
                 {/* Property Title Card */}
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <div className="flex items-start justify-between mb-4">
-                    <p className="text-3xl font-bold text-blue-600">{formatPrice(property.price)}</p>
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-3xl font-bold text-blue-600">{formatPrice(property.price)}</p>
+                      {formatPriceType(property.price_type) && (
+                        <span className="text-gray-500 text-lg font-medium">{formatPriceType(property.price_type)}</span>
+                      )}
+                    </div>
                     <div className="flex items-center gap-2">
                       <div className="relative">
                         <button 
@@ -724,7 +736,7 @@ export default function PropertyDetailsPage() {
                         <VerticalPropertyCard
                           id={prop.id}
                           propertyType={prop.type}
-                          priceType={prop.price_type || 'Monthly'}
+                          priceType={formatPriceType(prop.price_type)}
                           price={formatPrice(prop.price)}
                           title={prop.title}
                           image={mainImg}
