@@ -119,7 +119,7 @@ const Blogs = () => {
             {/* Left Small Blog Card */}
             <div className="flex-1 min-w-0 lg:max-w-[28%] flex relative transition-all duration-600">
               <Link href={leftBlog.id === 'placeholder' ? '#' : `/blog/${leftBlog.id}`} className="no-underline w-full h-full">
-                <article className="bg-white rounded-xl sm:rounded-2xl overflow-hidden flex flex-col h-full group shadow-xl transition-shadow">
+                <article className="bg-white rounded-xl sm:rounded-2xl overflow-hidden flex flex-col h-full group shadow-[0_4px_14px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.12)] transition-shadow">
                   <div className="w-full h-[140px] sm:h-[190px] overflow-hidden flex-shrink-0">
                     <img
                       src={getImageUrl(leftBlog.image)}
@@ -164,7 +164,7 @@ const Blogs = () => {
             {/* Center Large Blog Card */}
             <div className="flex-[2] min-w-0 flex relative transition-all duration-600 order-2 lg:order-none">
               <Link href={centerBlog.id === 'placeholder' ? '#' : `/blog/${centerBlog.id}`} className="no-underline w-full h-full">
-                <article className="relative rounded-xl sm:rounded-2xl overflow-hidden group h-[360px] sm:h-[450px] lg:h-[520px]">
+                <article className="relative rounded-xl sm:rounded-2xl overflow-hidden group h-[360px] sm:h-[450px] lg:h-[520px] shadow-[0_4px_14px_rgba(0,0,0,0.08)]">
                   <div className="absolute inset-0 w-full h-full">
                     <img
                       src={getImageUrl(centerBlog.image)}
@@ -210,7 +210,7 @@ const Blogs = () => {
             {/* Right Small Blog Card */}
             <div className="flex-1 min-w-0 lg:max-w-[28%] flex relative transition-all duration-600 order-3">
               <Link href={rightBlog.id === 'placeholder' ? '#' : `/blog/${rightBlog.id}`} className="no-underline w-full h-full">
-                <article className="bg-white rounded-xl sm:rounded-2xl overflow-hidden flex flex-col h-full group shadow-xl transition-shadow">
+                <article className="bg-white rounded-xl sm:rounded-2xl overflow-hidden flex flex-col h-full group shadow-[0_4px_14px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.12)] transition-shadow">
                   <div className="w-full h-[140px] sm:h-[190px] overflow-hidden flex-shrink-0">
                     <img
                       src={getImageUrl(rightBlog.image)}

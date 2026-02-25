@@ -82,7 +82,7 @@ function Hero() {
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant'; message: string; properties?: Property[] }>>([
     {
       role: 'assistant',
-      message: 'Hello! I\'m your Rentals AI. How can I help you find the perfect rental property today?'
+      message: 'Hello! I\'m Rental Assist. How can I help you find the perfect rental property today?'
     }
   ])
   const [conversationId, setConversationId] = useState<string | undefined>()
@@ -213,7 +213,7 @@ function Hero() {
     setChatMessages([
       {
         role: 'assistant',
-        message: 'Hello! I\'m your Rentals AI. How can I help you find the perfect rental property today?'
+        message: 'Hello! I\'m Rental Assist. How can I help you find the perfect rental property today?'
       }
     ])
     setShowMenu(false)
@@ -613,7 +613,7 @@ function Hero() {
               className="absolute left-4 w-9 h-9 flex-shrink-0"
             />
             {/* Text - centered */}
-            <span className="w-full text-center font-bold text-lg leading-tight">RentalsAI</span>
+            <span className="w-full text-center font-bold text-lg leading-tight">Rental Assist</span>
           </div>
         </button>
 
@@ -633,7 +633,7 @@ function Hero() {
                       className=" w-9 h-9 flex-shrink-0"
                     />
                     <div>
-                      <h3 className="font-outfit text-lg font-semibold text-gray-900">Rentals AI</h3>
+                      <h3 className="font-outfit text-lg font-semibold text-gray-900">Rental Assist</h3>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -830,22 +830,22 @@ function Hero() {
             </div>
           ) : (
             <>
-              {/* White container with 80% opacity and rounded borders */}
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 w-full shadow-lg">
-                <div className="bg-white rounded-xl w-full border-2 border-black flex items-center overflow-hidden transition-shadow hover:shadow-md md:flex-row flex-col md:h-auto">
+              {/* Light search bar container */}
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 w-full shadow-lg">
+                <div className="bg-gray-50/90 rounded-xl w-full border border-gray-200 flex items-center overflow-hidden transition-shadow hover:shadow-md md:flex-row flex-col md:h-auto">
                     <input 
                       type="text" 
-                      className="flex-1 border-none outline-none bg-transparent text-gray-900 font-outfit text-base font-normal px-8 min-w-[250px] md:h-[57px] h-auto py-4 md:py-0 w-full md:w-auto md:border-b-0 border-b border-gray-300/65" 
+                      className="flex-1 border-none outline-none bg-transparent text-gray-900 font-outfit text-base font-normal px-8 min-w-[250px] md:h-[57px] h-auto py-4 md:py-0 w-full md:w-auto md:border-b-0 border-b border-gray-200" 
                       placeholder="What are you looking for?"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyPress={handleKeyPress}
                     />
 
-                    <div className="md:block hidden w-px h-[67px] bg-black/30 flex-shrink-0" />
+                    <div className="md:block hidden w-px h-[67px] bg-gray-200 flex-shrink-0" />
 
                     <select 
-                      className="text-gray-700 font-outfit text-base font-normal bg-transparent border-none outline-none cursor-pointer appearance-none md:py-5 py-4 pr-[50px] md:pl-9 pl-5 md:min-w-[180px] w-full md:w-auto transition-colors hover:text-[#205ED7] focus:text-[#205ED7] bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%229%22%20height%3D%226%22%20viewBox%3D%220%200%209%206%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M1%201L4.5%205L8%201%22%20stroke%3D%22%23000000%22%20stroke-width%3D%221%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat md:bg-[right_36px_center] bg-[right_20px_center] bg-[length:9px_6px] md:border-b-0 border-b border-gray-300/65"
+                      className="text-gray-700 font-outfit text-base font-normal bg-transparent border-none outline-none cursor-pointer appearance-none md:py-5 py-4 pr-[50px] md:pl-9 pl-5 md:min-w-[180px] w-full md:w-auto transition-colors hover:text-[#205ED7] focus:text-[#205ED7] bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%229%22%20height%3D%226%22%20viewBox%3D%220%200%209%206%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M1%201L4.5%205L8%201%22%20stroke%3D%236b7280%22%20stroke-width%3D%221%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat md:bg-[right_36px_center] bg-[right_20px_center] bg-[length:9px_6px] md:border-b-0 border-b border-gray-200"
                       value={propertyType}
                       onChange={(e) => setPropertyType(e.target.value)}
                     >
@@ -857,10 +857,10 @@ function Hero() {
                       <option value="office">Office Spaces</option>
                     </select>
                     
-                    <div className="md:block hidden w-px h-[67px] bg-black/30 flex-shrink-0" />
+                    <div className="md:block hidden w-px h-[67px] bg-gray-200 flex-shrink-0" />
                     
                     <select 
-                      className="text-gray-700 font-outfit text-base font-normal bg-transparent border-none outline-none cursor-pointer appearance-none md:py-5 py-4 pr-[50px] md:pl-9 pl-5 md:min-w-[180px] w-full md:w-auto transition-colors hover:text-[#205ED7] focus:text-[#205ED7] bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%229%22%20height%3D%226%22%20viewBox%3D%220%200%209%206%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M1%201L4.5%205L8%201%22%20stroke%3D%22%23000000%22%20stroke-width%3D%221%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat md:bg-[right_36px_center] bg-[right_20px_center] bg-[length:9px_6px]"
+                      className="text-gray-700 font-outfit text-base font-normal bg-transparent border-none outline-none cursor-pointer appearance-none md:py-5 py-4 pr-[50px] md:pl-9 pl-5 md:min-w-[180px] w-full md:w-auto transition-colors hover:text-[#205ED7] focus:text-[#205ED7] bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%229%22%20height%3D%226%22%20viewBox%3D%220%200%209%206%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M1%201L4.5%205L8%201%22%20stroke%3D%236b7280%22%20stroke-width%3D%221%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat md:bg-[right_36px_center] bg-[right_20px_center] bg-[length:9px_6px] md:border-b-0 border-b border-gray-200"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
                     >
@@ -891,14 +891,10 @@ function Hero() {
                     </button>
 
                     <button 
-                      className="bg-[#FE8E0A] md:rounded-r-xl rounded-xl w-full md:w-[135px] md:h-[67px] h-[50px] border-none cursor-pointer flex items-center justify-center transition-all hover:bg-[#ff7700] hover:shadow-lg active:scale-[0.98] flex-shrink-0 relative overflow-hidden group"
+                      className="bg-[#FE8E0A] md:rounded-r-xl rounded-xl w-full md:w-[135px] md:h-[67px] h-[50px] border-none cursor-pointer flex items-center justify-center transition-all hover:bg-[#ff7700] hover:shadow-lg active:scale-[0.98] flex-shrink-0 relative overflow-hidden group font-outfit font-semibold text-white text-base"
                       onClick={handleSearch}
                     >
-                      <span className="sr-only">Search</span>
-                      <svg className="md:w-12 md:h-12 w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="11" cy="11" r="6" stroke="white" strokeWidth="2.5"/>
-                        <line x1="15.5" y1="15.5" x2="20" y2="20" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-                      </svg>
+                      Search
                     </button>
                   </div>
 

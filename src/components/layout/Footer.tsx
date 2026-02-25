@@ -1,61 +1,79 @@
 import Link from 'next/link'
-import { ASSETS } from '@/utils/assets'
 
 const Footer = () => {
   return (
     <footer className="bg-[#0A369D] text-white px-4 sm:px-6 md:px-10 lg:px-20 xl:px-[150px] pt-8 sm:pt-12 pb-4 sm:pb-5 relative bottom-0" id="contact">
-      <div className="w-full mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr] gap-8 sm:gap-10 md:gap-15 lg:gap-[120px] items-start">
-        <div className="flex flex-col gap-1.5 md:col-span-2 lg:col-span-1">
-          <Link href="/">
+      <div className="w-full mx-auto flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8 lg:gap-12">
+        {/* Left: Logo (with tagline in image) + subtitle */}
+        <div className="flex flex-col gap-0">
+          <Link href="/" className="inline-flex items-center no-underline">
             <img
-              src={ASSETS.LOGO_FOOTER_WHITE}
-              alt="Rentals.ph logo"
-              className="w-[180px] sm:w-[200px] md:w-[225px] h-auto object-contain"
+              src="/assets/logos/rentals-logo-footer-tagline.png"
+              alt="Rentals.ph - Philippines #1 Property Rental Website"
+              className="h-14 sm:h-16 md:h-[72px] w-auto object-contain object-left"
             />
           </Link>
-          <p className="text-white font-outfit text-base sm:text-lg md:text-xl font-normal leading-relaxed mt-6 sm:mt-8 max-w-[360px]">
+          <p className="text-white font-outfit text-base sm:text-lg font-normal leading-relaxed mt-5 sm:mt-6 max-w-[320px]">
             Unlock the door to your new beginning.
           </p>
-          <div className="flex gap-4 sm:gap-6 items-center mt-6 sm:mt-8">
-            <a href="#facebook" className="flex items-center justify-center transition-opacity hover:opacity-80" aria-label="Facebook">
-              <svg width="48" height="48" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="30" cy="30" r="15" fill="white"/>
-                <path d="M33.75 31.875H36.5625L37.5 27.1875H33.75V24.8438C33.75 23.6156 33.75 22.5 36.0938 22.5H37.5V18.6656C37.0828 18.6094 35.6859 18.4688 34.2047 18.4688C31.1109 18.4688 29.0625 20.2406 29.0625 23.8313V27.1875H25.7813V31.875H29.0625V42.6563H33.75V31.875Z" fill="#002D84"/>
+        </div>
+
+        {/* Right: Main nav row, legal row, social row — all right-aligned */}
+        <div className="flex flex-col items-start lg:items-end gap-6 sm:gap-7">
+          {/* Main nav: Home, Properties, News, Contact — single horizontal row */}
+          <nav className="flex flex-wrap gap-6 sm:gap-8 lg:gap-10" aria-label="Footer navigation">
+            <Link href="/" className="text-white font-outfit text-sm sm:text-base font-normal hover:text-white/90 transition-colors">
+              Home
+            </Link>
+            <Link href="/properties" className="text-white font-outfit text-sm sm:text-base font-normal hover:text-white/90 transition-colors">
+              Properties
+            </Link>
+            <Link href="/news" className="text-white font-outfit text-sm sm:text-base font-normal hover:text-white/90 transition-colors">
+              News
+            </Link>
+            <Link href="/contact" className="text-white font-outfit text-sm sm:text-base font-normal hover:text-white/90 transition-colors">
+              Contact
+            </Link>
+          </nav>
+          {/* Legal — horizontal row */}
+          <div className="flex flex-wrap gap-4 sm:gap-6 lg:gap-8">
+            <a href="#terms" className="text-white/90 font-outfit text-xs sm:text-sm font-normal hover:text-white transition-colors">
+              Terms of Service
+            </a>
+            <a href="#privacy" className="text-white/90 font-outfit text-xs sm:text-sm font-normal hover:text-white transition-colors">
+              Privacy Policy
+            </a>
+          </div>
+          {/* Social icons — horizontal row */}
+          <div className="flex gap-3 sm:gap-4 items-center">
+            <a href="#facebook" className="flex items-center justify-center w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 transition-opacity" aria-label="Facebook">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
               </svg>
             </a>
-            <a href="#instagram" className="flex items-center justify-center transition-opacity hover:opacity-80" aria-label="Instagram">
-              <svg width="48" height="48" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="30" cy="30" r="15" fill="white"/>
-                <path d="M30 22.5C26.55 22.5 23.75 25.3 23.75 28.75V31.25C23.75 34.7 26.55 37.5 30 37.5H32.5C35.95 37.5 38.75 34.7 38.75 31.25V28.75C38.75 25.3 35.95 22.5 32.5 22.5H30ZM30 24.375H32.5C34.95 24.375 36.875 26.3 36.875 28.75V31.25C36.875 33.7 34.95 35.625 32.5 35.625H30C27.55 35.625 25.625 33.7 25.625 31.25V28.75C25.625 26.3 27.55 24.375 30 24.375ZM34.0625 25.3125C33.5469 25.3125 33.125 25.7344 33.125 26.25C33.125 26.7656 33.5469 27.1875 34.0625 27.1875C34.5781 27.1875 35 26.7656 35 26.25C35 25.7344 34.5781 25.3125 34.0625 25.3125ZM31.25 26.875C29.1797 26.875 27.5 28.5547 27.5 30.625C27.5 32.6953 29.1797 34.375 31.25 34.375C33.3203 34.375 35 32.6953 35 30.625C35 28.5547 33.3203 26.875 31.25 26.875ZM31.25 28.75C32.3203 28.75 33.125 29.5547 33.125 30.625C33.125 31.6953 32.3203 32.5 31.25 32.5C30.1797 32.5 29.375 31.6953 29.375 30.625C29.375 29.5547 30.1797 28.75 31.25 28.75Z" fill="#002D84"/>
+            <a href="#instagram" className="flex items-center justify-center w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 transition-opacity" aria-label="Instagram">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z" />
+              </svg>
+            </a>
+            <a href="#whatsapp" className="flex items-center justify-center w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 transition-opacity" aria-label="WhatsApp">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
               </svg>
             </a>
           </div>
         </div>
-
-        <div className="flex flex-col gap-1.5">
-          <h3 className="text-white font-outfit text-base sm:text-lg font-bold mb-2 sm:mb-2.5 tracking-wider">LINKS</h3>
-          <Link href="/" className="text-white font-outfit text-sm sm:text-[15px] md:text-[18px] font-light leading-relaxed block transition-colors hover:text-rental-orange-500">Home</Link>
-          <Link href="/about" className="text-white font-outfit text-sm sm:text-[15px] md:text-[18px] font-light leading-relaxed block transition-colors hover:text-rental-orange-500">About</Link>
-          <Link href="/blog" className="text-white font-outfit text-sm sm:text-[15px] md:text-[18px] font-light leading-relaxed block transition-colors hover:text-rental-orange-500">Blog</Link>
-          <Link href="/news" className="text-white font-outfit text-sm sm:text-[15px] md:text-[18px] font-light leading-relaxed block transition-colors hover:text-rental-orange-500">News</Link>
-          <Link href="/contact" className="text-white font-outfit text-sm sm:text-[15px] md:text-[18px] font-light leading-relaxed block transition-colors hover:text-rental-orange-500">Contact</Link>
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <h3 className="text-white font-outfit text-base sm:text-lg font-bold mb-2 sm:mb-2.5 tracking-wider">LEGAL</h3>
-          <a href="#terms" className="text-white font-outfit text-sm sm:text-[15px] md:text-[18px] font-light leading-relaxed block transition-colors hover:text-rental-orange-500">Terms of Service</a>
-          <a href="#privacy" className="text-white font-outfit text-sm sm:text-[15px] md:text-[18px] font-light leading-relaxed block transition-colors hover:text-rental-orange-500">Privacy Policy</a>
-        </div>
       </div>
 
-      <div className="border-t border-white/20 w-full py-2 sm:py-2.5 mx-auto mt-6 sm:mt-8">
-        <p className="text-white font-outfit text-sm sm:text-base md:text-lg font-medium leading-relaxed text-center m-0 px-4">
-          © 2026 Rental.ph. All rights reserved.
-        </p>
-      </div>
+      {/* Separator */}
+      <div className="border-t border-white/30 w-full my-6 sm:my-8" />
+
+      {/* Copyright — centered below separator */}
+      <p className="text-white font-outfit text-sm sm:text-base font-normal text-center m-0 px-4">
+        © 2026 Rentals.ph. All rights reserved.
+      </p>
     </footer>
   )
 }
 
 export default Footer
-

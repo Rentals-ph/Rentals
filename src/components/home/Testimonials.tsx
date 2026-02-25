@@ -40,23 +40,24 @@ const Testimonials = () => {
   }
 
   return (
-    <section className="relative top-0 min-h-[80vh] flex items-center justify-center overflow-hidden mb-0 px-6 md:px-10 lg:px-[150px] py-12" id="testimonials">
-      {/* Background image */}
+    <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden mb-0 px-6 md:px-10 lg:px-[150px] py-12" id="testimonials">
+      {/* Background image - non-interactive */}
       <div 
-        className="absolute top-0 left-0 w-full h-full z-[1] bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 z-[1] bg-cover bg-center bg-no-repeat pointer-events-none"
         style={{ 
           backgroundImage: 'url(/assets/backgrounds/testimonials-bg.png)',
           backgroundColor: 'rgba(32, 94, 215, 0.4)'
         }}
       />
       
-      {/* Overlay */}
-      <div className="absolute top-0 left-0 w-full h-full z-[2]" style={{ background: 'rgba(32, 94, 215, 0.2)' }}>
-        <div className="absolute top-0 left-0 w-full h-full bg-black/20" />
-      </div>
+      {/* Overlay - non-interactive so cards can scroll and receive clicks */}
+      <div 
+        className="absolute inset-0 z-[2] pointer-events-none" 
+        style={{ background: 'linear-gradient(to bottom, rgba(32, 94, 215, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%)' }}
+      />
       
       {/* Main content container */}
-      <div className="relative z-[3] w-full mx-auto">
+      <div className="relative z-[3] w-full mx-auto min-w-0">
         <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-8 lg:gap-[50px] items-start w-full">
           {/* Left Section - Promotional Block */}
           <div className="flex flex-col gap-0 relative pt-0 w-full">
@@ -89,13 +90,13 @@ const Testimonials = () => {
           </div>
 
           {/* Right Section - Testimonials Cards (Horizontal Scroll) */}
-          <div className="w-full overflow-hidden">
+          <div className="w-full min-w-0 overflow-x-auto overflow-y-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <p className="text-white font-outfit text-lg">Loading testimonials...</p>
               </div>
             ) : testimonials.length > 0 ? (
-              <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide" ref={scrollRef}>
+              <div className="flex gap-6 pb-4 snap-x snap-mandatory pr-4 md:pr-8 w-max max-w-full" ref={scrollRef} style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}>
                 {testimonials.map((testimonial) => (
                   <TestimonialCard
                     key={testimonial.id}

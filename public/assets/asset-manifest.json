@@ -649,6 +649,30 @@
           "description": "iStock photo variant 11",
           "originalName": "istockphoto-511061090-612-x-612-11.png"
         },
+        "ABOUT_OUR_STORY": {
+          "id": "ABOUT_OUR_STORY",
+          "path": "/assets/images/about/our-story.png",
+          "category": "images",
+          "subcategory": "about",
+          "description": "Our Story - house model on blueprints with keys",
+          "originalName": "our-story.png"
+        },
+        "ABOUT_OUR_MISSION": {
+          "id": "ABOUT_OUR_MISSION",
+          "path": "/assets/images/about/our-mission.png",
+          "category": "images",
+          "subcategory": "about",
+          "description": "Our Mission - contract signing and professional service",
+          "originalName": "our-mission.png"
+        },
+        "ABOUT_OUR_VISION": {
+          "id": "ABOUT_OUR_VISION",
+          "path": "/assets/images/about/our-vision.png",
+          "category": "images",
+          "subcategory": "about",
+          "description": "Our Vision - technology and rental platform",
+          "originalName": "our-vision.png"
+        },
         "ABOUT_UNSPLASH_0": {
           "id": "ABOUT_UNSPLASH_0",
           "path": "/assets/images/about/unsplash-eh-it-1-hg-4-hs0.png",

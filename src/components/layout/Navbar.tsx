@@ -346,7 +346,7 @@ const Navbar = () => {
                 )}
               </div>
             ) : (
-              <button className="rounded-full !border-2 !border-rental-orange-500 bg-transparent text-rental-orange-500 px-3 sm:px-5 h-10 sm:h-12 font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer inline-flex items-center justify-center hover:bg-rental-orange-500 hover:text-white transition-colors" onClick={handleLoginClick}>
+              <button className="rounded-full !border-2 !border-rental-orange-500 bg-transparent text-rental-orange-500 px-3 sm:px-5 h-10 sm:h-12 font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer inline-flex items-center justify-center hover:bg-rental-orange-500 hover:text-white active:scale-95 transition-all duration-200" onClick={handleLoginClick}>
                 <span className="hidden sm:inline">Login / Register</span>
                 <span className="sm:hidden">Login</span>
               </button>
@@ -501,7 +501,7 @@ const Navbar = () => {
           ) : (
             <div className="px-6 py-5 border-t border-gray-200 mt-auto">
               <button 
-                className="w-full rounded-full !border-2 !border-rental-orange-500 bg-transparent text-rental-orange-500 px-5 h-12 font-outfit text-[13px] sm:text-[15px] font-medium cursor-pointer inline-flex items-center justify-center hover:bg-rental-orange-500 hover:text-white transition-colors" 
+                className="w-full rounded-full !border-2 !border-rental-orange-500 bg-transparent text-rental-orange-500 px-5 h-12 font-outfit text-[13px] sm:text-[15px] font-medium cursor-pointer inline-flex items-center justify-center hover:bg-rental-orange-500 hover:text-white active:scale-95 transition-all duration-200" 
                 onClick={() => {
                   handleLoginClick()
                   setIsMobileMenuOpen(false)

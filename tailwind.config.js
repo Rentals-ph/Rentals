@@ -64,7 +64,7 @@ export default {
         },
       },
       animation: {
-        'partners-scroll': 'partners-scroll 18s linear infinite',
+        'partners-scroll': 'partners-scroll 28s linear infinite',
         'heroBackgroundAnimation': 'heroBackgroundAnimation 20s ease-in-out infinite',
         'slideInRight': 'slideInRight 0.3s ease-out',
       },

@@ -120,7 +120,7 @@ const FeaturedProperties = () => {
         const firstSlot = carousel.querySelector('.featured-property-card-slot') as HTMLElement
         if (firstSlot) {
           const cardWidth = firstSlot.offsetWidth
-          const gap = 28 // gap-7 = 1.75rem
+          const gap = 40 // gap-10 = 2.5rem
           const itemWidth = cardWidth + gap
           const totalItems = 6 // one set of cards
           const resetPoint = itemWidth * totalItems
@@ -168,15 +168,15 @@ const FeaturedProperties = () => {
             </p>
           </div>
 
-          <Link href="/properties" className="text-rental-blue-600 font-outfit text-base font-medium no-underline flex items-center gap-2 hover:text-rental-orange-500 transition-colors">
-            View All Properties <span>→</span>
+          <Link href="/properties" className="text-rental-blue-600 font-outfit text-base font-medium no-underline flex items-center gap-2 hover:text-rental-orange-500 transition-colors border-2 border-rental-blue-600 rounded-lg px-4 py-2 hover:border-rental-orange-500">
+            View More Properties <span>→</span>
           </Link>
         </div>
       </div>
 
       <div className="relative w-full mt-6 overflow-hidden">
         <div 
-          className="flex gap-7 overflow-x-auto overflow-y-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-2"
+          className="flex gap-10 overflow-x-auto overflow-y-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-2"
           ref={propertyCarouselRef}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
@@ -205,7 +205,7 @@ const FeaturedProperties = () => {
                 return (
                   <div
                     key={`property-${setIndex}-${property.id}`}
-                    className="featured-property-card-slot flex-shrink-0 w-[320px] min-w-[320px]"
+                    className="featured-property-card-slot flex-shrink-0 w-[320px] min-w-[320px] mx-1"
                   >
                     <VerticalPropertyCard 
                       id={property.id}
