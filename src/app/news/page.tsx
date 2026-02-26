@@ -7,6 +7,7 @@ import Footer from '../../components/layout/Footer'
 import { newsApi } from '../../api'
 import type { News } from '../../api/endpoints/news'
 import { ASSETS } from '@/utils/assets'
+import { NewsArticleSkeleton } from '../../components/common/NewsArticleSkeleton'
 
 export default function NewsPage() {
   const [news, setNews] = useState<News[]>([])
@@ -155,9 +156,25 @@ export default function NewsPage() {
         
         <main className="relative z-10 mx-auto w-full px-4 sm:px-6 md:px-10 lg:px-[150px] py-8 sm:py-12">
           {loading ? (
-            <div className="text-center py-20">
-              <p className="text-gray-600">Loading news...</p>
-            </div>
+            <>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-12 items-stretch">
+                <div className="lg:col-span-1 flex">
+                  <NewsArticleSkeleton variant="feature" className="w-full" />
+                </div>
+                <div className="flex flex-col gap-4">
+                  <NewsArticleSkeleton variant="card" className="w-full" />
+                  <div className="grid grid-cols-2 gap-4">
+                    <NewsArticleSkeleton variant="card" />
+                    <NewsArticleSkeleton variant="card" />
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <NewsArticleSkeleton key={i} variant="card" />
+                ))}
+              </div>
+            </>
           ) : (
             <>
               {/* Header Section - Two Columns Layout */}

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import TestimonialCard from '../common/TestimonialCard'
+import { TestimonialCardSkeleton } from '../common/TestimonialCardSkeleton'
 import { testimonialsApi } from '../../api'
 import type { Testimonial } from '../../types'
 import { ASSETS } from '@/utils/assets'
@@ -97,8 +98,10 @@ const Testimonials = () => {
           {/* Right Section - Testimonials Cards (Horizontal Scroll) */}
           <div className="w-full min-w-0 overflow-x-auto overflow-y-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <p className="text-white font-outfit text-lg">Loading testimonials...</p>
+              <div className="flex gap-6 pb-4 pr-4 md:pr-8 w-max">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <TestimonialCardSkeleton key={i} />
+                ))}
               </div>
             ) : testimonials.length > 0 ? (
               <div className="flex gap-6 pb-4 snap-x snap-mandatory pr-4 md:pr-8 w-max" ref={scrollRef} style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}>

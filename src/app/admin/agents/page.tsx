@@ -251,7 +251,30 @@ export default function AgentsPage() {
           </div>
 
           {loading ? (
-            <div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>
+            <div className="agents-table-container">
+              <table className="agents-table">
+                <thead>
+                  <tr>
+                    <th><span className="block h-4 w-24 rounded bg-gray-100 animate-pulse mx-auto" /></th>
+                    <th><span className="block h-4 w-16 rounded bg-gray-100 animate-pulse mx-auto" /></th>
+                    <th><span className="block h-4 w-16 rounded bg-gray-100 animate-pulse mx-auto" /></th>
+                    <th><span className="block h-4 w-20 rounded bg-gray-100 animate-pulse mx-auto" /></th>
+                    <th><span className="block h-4 w-16 rounded bg-gray-100 animate-pulse mx-auto" /></th>
+                    <th><span className="block h-4 w-20 rounded bg-gray-100 animate-pulse mx-auto" /></th>
+                    <th><span className="block h-4 w-16 rounded bg-gray-100 animate-pulse mx-auto" /></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i}>
+                      {Array.from({ length: 7 }).map((_, j) => (
+                        <td key={j}><span className="block h-4 rounded bg-gray-200 animate-pulse" style={{ width: j === 6 ? 80 : '70%' }} /></td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
             <div className="agents-table-container">
               <table className="agents-table">

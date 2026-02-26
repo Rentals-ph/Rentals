@@ -24,16 +24,17 @@ export default function AboutPage() {
             className="absolute top-0 left-0 w-full h-full z-[2]"
             style={{
               background:
-                'linear-gradient(135deg, rgba(32, 94, 215, 0.85) 0%, rgba(32, 94, 215, 0.75) 50%, rgba(254, 142, 10, 0.85) 100%)',
+                'linear-gradient(135deg, rgba(32, 94, 215, 0.85) 0%, rgba(105, 187, 255, 0.75) 50%, rgba(254, 142, 10, 0.85) 100%)',
+                opacity: 0.85,
             }}
           />
         </div>
 
         <div className="relative z-[3] max-w-[var(--page-max-width)] mx-auto px-4 py-20 w-full flex items-center justify-center flex-1">
           <div className="text-center flex flex-col items-center justify-center">
-            <h1 className="font-extrabold text-2xl text-white sm:text-4xl md:text-6xl leading-tight m-0 tracking-tight">
-              <span >About</span>{" "}
-              <span >Rentals.ph</span>
+            <h1 className="font-extrabold text-2xl sm:text-4xl md:text-8xl leading-tight m-0 tracking-tight">
+              <span className="text-rental-blue-500">About</span>{" "}
+              <span className="text-rental-orange-500">Rentals.ph</span>
             </h1>
             <p className="text-base sm:text-lg font-semibold text-white m-0 mt-2">
               We provide full service at every step.

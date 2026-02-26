@@ -208,3 +208,20 @@ img {
 nextjs-portal {
   position: absolute !important;
 }
+
+/* Map view: property popup card (Leaflet) */
+.leaflet-popup-content-wrapper.property-map-popup-wrapper,
+.property-map-popup-wrapper.leaflet-popup-content-wrapper {
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+.leaflet-popup-content-wrapper .leaflet-popup-content {
+  margin: 0;
+  min-width: 0;
+}
+.property-map-popup-wrapper .leaflet-popup-content {
+  margin: 0;
+  width: 100%;
+}

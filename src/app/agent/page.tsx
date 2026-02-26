@@ -277,7 +277,20 @@ export default function AgentDashboard() {
             </div>
             <div className="flex flex-col gap-4">
               {loading ? (
-                <div className="py-8 text-center text-gray-500">Loading listings...</div>
+                <>
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-gray-50 animate-pulse">
+                      <div className="w-full sm:w-32 h-40 sm:h-24 rounded-lg bg-gray-200 flex-shrink-0" />
+                      <div className="flex-1 space-y-2">
+                        <span className="block h-4 w-3/4 rounded bg-gray-200" />
+                        <span className="block h-3 w-full rounded bg-gray-100" />
+                        <span className="block h-3 w-1/2 rounded bg-gray-100" />
+                        <span className="block h-4 w-20 rounded bg-gray-200" />
+                      </div>
+                      <div className="h-9 w-20 rounded bg-gray-200" />
+                    </div>
+                  ))}
+                </>
               ) : listings.length === 0 ? (
                 <div className="py-8 text-center text-gray-500">No listings yet. Create your first listing!</div>
               ) : (

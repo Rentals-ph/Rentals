@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import VerticalPropertyCard from '../common/VerticalPropertyCard'
+import { VerticalPropertyCardSkeleton } from '../common/VerticalPropertyCardSkeleton'
 import { propertiesApi } from '../../api'
 import type { Property } from '../../types'
 import type { PaginatedResponse } from '../../api/types'
@@ -227,14 +228,9 @@ const FeaturedProperties = () => {
           </p>
         </div>
 
-        <Link
-          href="/properties"
-          className="absolute right-0 text-rental-blue-500 bg-white font-outfit text-base font-medium no-underline flex items-center gap-2 hover:bg-blue-200 transition-colors border-2 border-rental-blue-500 rounded-2xl px-5 py-2"
-          style={{ border: '2px solid #205ED7' }}
-        >
-          View More Properties
-        </Link>
+        
       </div>
+      
       </div>
 
       {/* Location filter row - same style as properties subcategory row, centered */}
@@ -255,6 +251,13 @@ const FeaturedProperties = () => {
             </button>
           ))}
         </div>
+        <Link
+          href="/properties"
+          className="absolute right-[150px] text-rental-blue-500 bg-white font-outfit text-base font-medium no-underline flex items-center gap-2 hover:bg-blue-200 transition-colors border-2 border-rental-blue-500 rounded-2xl px-5 py-2"
+          style={{ border: '2px solid #205ED7' }}
+        >
+          View More Properties
+        </Link>
       </div>
 
       <div className="relative w-full mt-6 overflow-hidden">
@@ -266,7 +269,14 @@ const FeaturedProperties = () => {
           style={{ scrollBehavior: 'auto' }}
         >
           {loading || (selectedLocation !== 'All Locations' && browseLoading) ? (
-            <div className="p-8 text-center w-full min-w-0">Loading properties...</div>
+            Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={`skeleton-${i}`}
+                className="featured-property-card-slot flex-shrink-0 w-[420px] min-w-[420px] mx-1"
+              >
+                <VerticalPropertyCardSkeleton />
+              </div>
+            ))
           ) : carouselProperties.length > 0 ? (
             // Render items multiple times for seamless infinite loop; each card in a fixed-width slot so they display properly
             Array.from({ length: 4 }).map((_, setIndex) => (

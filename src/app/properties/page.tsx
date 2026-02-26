@@ -7,7 +7,9 @@ import Navbar from '../../components/layout/Navbar'
 import Footer from '../../components/layout/Footer'
 import VerticalPropertyCard from '../../components/common/VerticalPropertyCard'
 import HorizontalPropertyCard from '../../components/common/HorizontalPropertyCard'
-import PublicPropertiesMap from '../../components/common/PublicPropertiesMap'
+import { VerticalPropertyCardSkeleton } from '../../components/common/VerticalPropertyCardSkeleton'
+import { HorizontalPropertyCardSkeleton } from '../../components/common/HorizontalPropertyCardSkeleton'
+import PublicPropertiesMap, { type PublicPropertiesMapHandle } from '../../components/common/PublicPropertiesMap'
 // import './page.css' // Removed - converted to Tailwind
 import PageHeader from '../../components/layout/PageHeader'
 import { propertiesApi } from '../../api/endpoints/properties'
@@ -41,6 +43,7 @@ function PropertiesContent() {
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const itemsPerPage = 9
+  const mapRef = useRef<PublicPropertiesMapHandle>(null)
 
   // Initialize state from URL query parameters
   useEffect(() => {
@@ -1200,9 +1203,18 @@ function PropertiesContent() {
 
           <div className="properties-content-wrapper">
             {loading ? (
-              <div className="no-results">
-                <h3 className="no-results-title">Loading Properties...</h3>
-                <p className="no-results-text">Please wait while we fetch the latest properties</p>
+              <div className={viewMode === 'horizontal'
+                ? 'properties-list flex flex-col gap-4 sm:gap-6'
+                : 'properties-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-4 sm:gap-6'}>
+                {Array.from({ length: viewMode === 'horizontal' ? 4 : 8 }).map((_, i) =>
+                  viewMode === 'horizontal' ? (
+                    <HorizontalPropertyCardSkeleton key={i} />
+                  ) : (
+                    <div key={i} className="w-full min-w-0 [&>article]:w-full [&>article]:min-w-0 [&>article]:max-w-full [&>article]:h-full">
+                      <VerticalPropertyCardSkeleton />
+                    </div>
+                  )
+                )}
               </div>
             ) : error ? (
               <div className="no-results">
@@ -1212,10 +1224,56 @@ function PropertiesContent() {
             ) : paginatedProperties.length > 0 ? (
               <>
                 {viewMode === 'map' ? (
-                  <div className="properties-map-container w-full h-[calc(100vh-300px)] min-h-[600px] rounded-lg overflow-hidden border border-gray-200">
-                    <PublicPropertiesMap 
-                      properties={paginatedProperties}
-                    />
+                  <div className="properties-map-wrapper relative w-full h-[calc(100vh-300px)] min-h-[600px] rounded-lg overflow-hidden border border-gray-200">
+                    <div className="absolute inset-0 z-0">
+                      <PublicPropertiesMap
+                        ref={mapRef}
+                        properties={paginatedProperties}
+                      />
+                    </div>
+                    {/* Right overlay panel: simple property cards */}
+                    <div
+                      className="absolute top-4 right-4 bottom-4 z-10 w-full max-w-[260px] sm:max-w-[280px] flex flex-col rounded-xl overflow-hidden"
+                      style={{ backgroundColor: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)' }}
+                    >
+                      <div className="flex-shrink-0 px-4 py-3 border-b border-white/20">
+                        <h3 className="text-sm font-semibold text-white uppercase tracking-wide">
+                          Properties on map
+                        </h3>
+                        <p className="text-xs text-white/80 mt-0.5">
+                          {paginatedProperties.length} listing{paginatedProperties.length !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                      <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                        {paginatedProperties.map((prop) => {
+                          const mainImg = prop.image_url || prop.image || ASSETS.PLACEHOLDER_PROPERTY_MAIN
+                          return (
+                            <button
+                              key={prop.id}
+                              type="button"
+                              onClick={() => mapRef.current?.flyToProperty(prop)}
+                              className="w-full text-left rounded-lg overflow-hidden flex gap-3 p-2.5 transition-colors hover:bg-white/15 focus:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/40"
+                            >
+                              <div
+                                className="flex-shrink-0 w-16 h-16 rounded-md bg-gray-700 bg-cover bg-center"
+                                style={{ backgroundImage: `url(${mainImg})` }}
+                              />
+                              <div className="min-w-0 flex-1 py-0.5">
+                                <p className="text-sm font-medium text-white truncate">
+                                  {prop.title}
+                                </p>
+                                <p className="text-xs text-white/80 mt-0.5 truncate">
+                                  {prop.location || prop.city || '—'}
+                                </p>
+                                <p className="text-sm font-semibold text-white mt-1">
+                                  {formatPrice(prop.price)}
+                                </p>
+                              </div>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <>

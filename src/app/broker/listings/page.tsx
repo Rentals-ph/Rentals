@@ -328,7 +328,19 @@ export default function ListingsPage() {
 
             <div className="grid grid-cols-2 gap-5.5 mt-1.5 lg:grid-cols-1"> {/* aml-grid */}
               {loading ? (
-                <div className="p-8 text-center col-span-full">Loading listings...</div>
+                <>
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="bg-white rounded-[14px] border border-gray-200 overflow-hidden shadow-sm flex gap-0">
+                      <div className="w-[190px] min-w-[190px] h-[120px] bg-gray-200 animate-pulse" />
+                      <div className="flex-1 p-4 space-y-2">
+                        <span className="block h-4 w-20 rounded bg-gray-200 animate-pulse" />
+                        <span className="block h-5 w-full rounded bg-gray-200 animate-pulse" />
+                        <span className="block h-3 w-2/3 rounded bg-gray-100 animate-pulse" />
+                        <span className="block h-4 w-24 rounded bg-gray-200 animate-pulse" />
+                      </div>
+                    </div>
+                  ))}
+                </>
               ) : (() => {
                 // Filter listings based on selected filter
                 const filteredListings = selectedFilter === 'all' 

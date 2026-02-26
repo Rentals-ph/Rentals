@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Pagination from '../common/Pagination'
+import { BlogCardSkeleton } from '../common/BlogCardSkeleton'
 import { blogsApi } from '../../api'
 import type { Blog } from '../../types'
 import { ASSETS } from '@/utils/assets'
@@ -113,8 +114,29 @@ const Blogs = () => {
         </div>
 
         {loading ? (
-          <div className="text-center p-10">
-            <p>Loading blogs...</p>
+          <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-10 items-stretch w-full overflow-visible relative">
+            <div className="flex-1 min-w-0 lg:max-w-[28%] flex">
+              <BlogCardSkeleton size="small" className="w-full" />
+            </div>
+            <div className="flex-[2] min-w-0 flex">
+              <article className="relative rounded-xl sm:rounded-2xl overflow-hidden w-full h-[360px] sm:h-[450px] lg:h-[520px] bg-gray-200 animate-pulse">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex flex-col justify-end p-4 sm:p-5 md:p-5 z-10">
+                  <div className="flex justify-between mb-2">
+                    <span className="h-4 w-20 rounded bg-white/30 animate-pulse" />
+                    <span className="h-4 w-16 rounded bg-white/20 animate-pulse" />
+                  </div>
+                  <span className="block h-7 w-full max-w-[90%] rounded bg-white/30 animate-pulse mb-2" />
+                  <div className="space-y-2 mb-3">
+                    <span className="block h-3 w-full rounded bg-white/20 animate-pulse" />
+                    <span className="block h-3 w-4/5 rounded bg-white/20 animate-pulse" />
+                  </div>
+                  <span className="h-4 w-28 rounded bg-white/20 animate-pulse" />
+                </div>
+              </article>
+            </div>
+            <div className="flex-1 min-w-0 lg:max-w-[28%] flex">
+              <BlogCardSkeleton size="small" className="w-full" />
+            </div>
           </div>
         ) : (
           <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-10 items-stretch w-full overflow-visible relative">

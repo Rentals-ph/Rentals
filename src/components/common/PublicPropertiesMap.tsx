@@ -1,24 +1,35 @@
 'use client'
 
-import { useEffect, useRef, useState, useMemo } from 'react'
+import { useEffect, useRef, useState, useMemo, forwardRef, useImperativeHandle } from 'react'
 import 'leaflet/dist/leaflet.css'
-import type { Map, Marker, TileLayer } from 'leaflet'
+import type { Map as LeafletMap, Marker, TileLayer } from 'leaflet'
 import type { Property } from '@/types'
 import { ASSETS } from '@/utils/assets'
 import { resolvePropertyImage } from '@/utils/imageResolver'
+
+function formatPrice(price: number): string {
+  return `₱${price.toLocaleString('en-US')}`
+}
+
+export interface PublicPropertiesMapHandle {
+  flyToProperty: (property: Property) => void
+}
 
 interface PublicPropertiesMapProps {
   properties: Property[]
   onPropertyClick?: (property: Property) => void
 }
 
-export default function PublicPropertiesMap({ properties, onPropertyClick }: PublicPropertiesMapProps) {
+const PublicPropertiesMap = forwardRef<PublicPropertiesMapHandle, PublicPropertiesMapProps>(function PublicPropertiesMap(
+  { properties, onPropertyClick },
+  ref
+) {
   const mapContainerRef = useRef<HTMLDivElement>(null)
-  const mapRef = useRef<Map | null>(null)
+  const mapRef = useRef<LeafletMap | null>(null)
   const tileLayerRef = useRef<TileLayer | null>(null)
   const markersRef = useRef<Marker[]>([])
+  const markersByPropertyIdRef = useRef<Map<number, Marker>>(new Map())
   const [leafletLoaded, setLeafletLoaded] = useState(false)
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
   const initializedRef = useRef(false)
 
   // Memoize filtered properties to prevent unnecessary recalculations
@@ -28,8 +39,25 @@ export default function PublicPropertiesMap({ properties, onPropertyClick }: Pub
     })
   }, [properties])
 
+  useImperativeHandle(ref, () => ({
+    flyToProperty(property: Property) {
+      const lat = property.latitude && property.longitude
+        ? parseFloat(property.latitude)
+        : null
+      const lng = property.latitude && property.longitude
+        ? parseFloat(property.longitude)
+        : null
+      if (!mapRef.current || lat == null || lng == null) return
+      mapRef.current.flyTo([lat, lng], 15, { duration: 0.6 })
+      const marker = markersByPropertyIdRef.current.get(property.id)
+      if (marker) {
+        setTimeout(() => marker.openPopup(), 400)
+      }
+    },
+  }), [])
+
   // Helper function to create marker
-  const createMarker = (property: Property, L: any, map: Map) => {
+  const createMarker = (property: Property, L: any, map: LeafletMap) => {
     const lat = parseFloat(property.latitude!)
     const lng = parseFloat(property.longitude!)
 
@@ -76,72 +104,68 @@ export default function PublicPropertiesMap({ properties, onPropertyClick }: Pub
       imageUrl = ASSETS.PLACEHOLDER_PROPERTY_MAIN
     }
 
-    // Create popup content with property details
+    const title = (property.title || 'Property').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+    const typeStr = (property.type || 'Property').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+    const locationStr = (property.location || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+    const priceStr = formatPrice(property.price ?? 0)
+
+    // Improved popup card: cleaner layout, price, location
     const popupContent = `
-      <div style="
-        background: white;
-        border-radius: 8px;
+      <div class="property-map-popup" style="
+        background: #fff;
+        border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        min-width: 280px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.06);
+        min-width: 300px;
+        max-width: 320px;
+        font-family: system-ui, -apple-system, sans-serif;
       ">
         <div style="
           width: 100%;
-          height: 180px;
+          height: 160px;
           background-image: url('${imageUrl}');
           background-size: cover;
           background-position: center;
-          background-color: #f3f4f6;
+          background-color: #f1f5f9;
         "></div>
-        <div style="padding: 16px;">
-          <h4 style="
-            margin: 0 0 8px 0;
-            font-size: 16px;
-            font-weight: 600;
-            color: #111827;
-            line-height: 1.3;
-          ">${(property.title || 'Property').replace(/"/g, '&quot;')}</h4>
-          <p style="
-            margin: 0 0 12px 0;
-            font-size: 14px;
-            color: #2563EB;
-            font-weight: 500;
-          ">${(property.type || 'Property').replace(/"/g, '&quot;')}</p>
-            <a 
-              href="/property/${property.id}" 
-              style="
+        <div style="padding: 14px 16px 16px;">
+          <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #2563eb; text-transform: uppercase; letter-spacing: 0.02em;">${typeStr}</p>
+          <h4 style="margin: 0 0 8px 0; font-size: 15px; font-weight: 600; color: #0f172a; line-height: 1.35;">${title}</h4>
+          <p style="margin: 0 0 10px 0; font-size: 13px; color: #64748b;">${locationStr || 'Location not specified'}</p>
+          <p style="margin: 0 0 12px 0; font-size: 16px; font-weight: 700; color: #0f172a;">${priceStr}</p>
+          <a 
+            href="/property/${property.id}" 
+            style="
               display: block;
               width: 100%;
-              padding: 10px 16px;
-              background-color: #2563EB;
+              padding: 10px 14px;
+              background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
               color: white;
               text-align: center;
               text-decoration: none;
-              border-radius: 6px;
-              font-weight: 500;
-              font-size: 14px;
-              transition: background-color 0.2s;
+              border-radius: 8px;
+              font-weight: 600;
+              font-size: 13px;
+              box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
             "
-            onmouseover="this.style.backgroundColor='#1d4ed8'"
-            onmouseout="this.style.backgroundColor='#2563EB'"
+            onmouseover="this.style.opacity='0.92'"
+            onmouseout="this.style.opacity='1'"
           >
-            Details
+            View details
           </a>
         </div>
       </div>
     `
 
-    // Handle marker click
     marker.on('click', () => {
-      setSelectedProperty(property)
       if (onPropertyClick) {
         onPropertyClick(property)
       }
     })
 
     marker.bindPopup(popupContent, {
-      maxWidth: 300,
-      className: 'property-popup'
+      maxWidth: 340,
+      className: 'property-map-popup-wrapper',
     })
 
     return marker
@@ -230,10 +254,14 @@ export default function PublicPropertiesMap({ properties, onPropertyClick }: Pub
           propertiesWithCoords.forEach((property) => {
             const marker = createMarker(property, L, map)
             markersRef.current.push(marker)
+            markersByPropertyIdRef.current.set(property.id, marker)
           })
         }, 100)
 
-        return () => clearTimeout(timeoutId)
+        return () => {
+          clearTimeout(timeoutId)
+          markersByPropertyIdRef.current.clear()
+        }
       }
 
       // Container is ready, initialize immediately
@@ -277,6 +305,7 @@ export default function PublicPropertiesMap({ properties, onPropertyClick }: Pub
       propertiesWithCoords.forEach((property) => {
         const marker = createMarker(property, L, map)
         markersRef.current.push(marker)
+        markersByPropertyIdRef.current.set(property.id, marker)
       })
     } else if (mapRef.current && initializedRef.current) {
       // Map already initialized, just update markers
@@ -287,11 +316,13 @@ export default function PublicPropertiesMap({ properties, onPropertyClick }: Pub
         map.removeLayer(marker)
       })
       markersRef.current = []
+      markersByPropertyIdRef.current.clear()
 
       // Add new markers
       propertiesWithCoords.forEach((property) => {
         const marker = createMarker(property, L, map)
         markersRef.current.push(marker)
+        markersByPropertyIdRef.current.set(property.id, marker)
       })
 
       // Update bounds if we have properties
@@ -311,6 +342,7 @@ export default function PublicPropertiesMap({ properties, onPropertyClick }: Pub
         }
       })
       markersRef.current = []
+      markersByPropertyIdRef.current.clear()
     }
   }, [leafletLoaded, propertiesWithCoords, onPropertyClick])
 
@@ -343,4 +375,6 @@ export default function PublicPropertiesMap({ properties, onPropertyClick }: Pub
       />
     </div>
   )
-}
+})
+
+export default PublicPropertiesMap

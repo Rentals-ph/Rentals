@@ -304,7 +304,18 @@ export default function BrokerDashboard() {
               </Link>
             </div>
             {loading ? (
-              <div className="text-center py-8 text-gray-500">Loading listings...</div>
+              <div className="grid grid-cols-4 gap-5 xl:grid-cols-4 lg:grid-cols-2 md:grid-cols-1">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="rounded-xl overflow-hidden border border-gray-200">
+                    <div className="h-44 bg-gray-200 animate-pulse" />
+                    <div className="p-4 space-y-2">
+                      <span className="block h-5 w-24 rounded bg-gray-200 animate-pulse" />
+                      <span className="block h-4 w-full rounded bg-gray-100 animate-pulse" />
+                      <span className="block h-4 w-2/3 rounded bg-gray-100 animate-pulse" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : recentProperties.length > 0 ? (
               <div className="grid grid-cols-4 gap-5 xl:grid-cols-4 lg:grid-cols-2 md:grid-cols-1">
                 {recentProperties.map((property) => {

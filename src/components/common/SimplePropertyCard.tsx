@@ -42,7 +42,7 @@ function SimplePropertyCard({
           }}
         />
         <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-1 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 md:p-3">
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 rounded-md bg-black/40 px-2 py-1.5 md:px-1.5 md:py-1">
             <h3 className="m-0 font-outfit text-base font-semibold leading-snug text-white line-clamp-2 [text-shadow:0_1px_2px_rgba(0,0,0,0.3)] md:text-sm">
               {title}
             </h3>

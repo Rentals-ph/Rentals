@@ -405,9 +405,26 @@ export default function PropertyDetailsPage() {
       <Navbar />
 
       {loading ? (
-        <div className="text-center py-10 px-6 md:px-10 lg:px-[150px]">
-          <p>Loading property details...</p>
-        </div>
+        <main className="px-4 sm:px-6 md:px-10 lg:px-[150px] py-8 mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-3 mb-6 rounded-xl overflow-hidden h-[240px] sm:h-[280px] md:h-[400px]">
+            <div className="md:col-span-2 rounded-l-xl bg-gray-200 animate-pulse" />
+            <div className="flex flex-col gap-2">
+              <div className="flex-1 rounded-r-xl bg-gray-200 animate-pulse" />
+              <div className="flex-1 rounded-r-xl bg-gray-200 animate-pulse" />
+            </div>
+          </div>
+          <div className="space-y-3 mb-6">
+            <span className="block h-8 w-3/4 rounded bg-gray-200 animate-pulse" />
+            <span className="block h-6 w-32 rounded bg-gray-200 animate-pulse" />
+            <span className="block h-4 w-full max-w-[400px] rounded bg-gray-100 animate-pulse" />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-16 rounded-lg bg-gray-100 animate-pulse" />
+            ))}
+          </div>
+          <div className="h-24 rounded-xl bg-gray-100 animate-pulse" />
+        </main>
       ) : !property ? (
         <div className="text-center py-10 px-6 md:px-10 lg:px-[150px]">
           <p>Property not found</p>

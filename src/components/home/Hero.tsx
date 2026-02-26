@@ -1,13 +1,15 @@
 'use client'
 
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef, Suspense, lazy } from 'react'
 import { useRouter } from 'next/navigation'
 import { ASSETS, getAsset } from '@/utils/assets'
 import { api, type PropertySearchResponse, type ConversationMessage } from '@/lib/api'
 import { Property } from '@/types'
 import { getImageUrl } from '@/utils/storage'
-import SimplePropertyCard from '@/components/common/SimplePropertyCard'
+import { SimplePropertyCardSkeleton } from '@/components/common/SimplePropertyCardSkeleton'
 import HeroBanner from './HeroBanner'
+
+const SimplePropertyCard = lazy(() => import('@/components/common/SimplePropertyCard'))
 
 const CONVERSATION_ID_KEY = 'rentals_ph_conversation_id'
 
@@ -841,26 +843,46 @@ function Hero() {
                   </button>
                 </form>
               </div>
-              {/* Properties Panel - Right side when in chat mode - Only show when properties exist */}
-              {latestProperties && latestProperties.properties.length > 0 && (  
-                <div 
-                  key={`properties-${latestProperties.messageIndex}-${latestProperties.properties.length}-${latestProperties.timestamp || Date.now()}`}
+              {/* Properties Panel - Right side when in chat mode - Show when properties exist or while loading */}
+              {((latestProperties && latestProperties.properties.length > 0) || (isChatMode && isLoading)) && (
+                <div
+                  key={latestProperties ? `properties-${latestProperties.messageIndex}-${latestProperties.properties.length}-${latestProperties.timestamp ?? Date.now()}` : 'properties-loading'}
                   className="w-full md:w-[340px] md:max-w-[340px] bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden flex flex-col flex-shrink-0 h-full"
                 >
                   <div className="p-4 px-5 border-b border-gray-200 bg-gradient-to-r from-rental-blue-50 to-white flex-shrink-0">
-                    <h3 className="font-outfit text-base font-semibold text-gray-900 m-0">{latestProperties.title}</h3>
+                    <h3 className="font-outfit text-base font-semibold text-gray-900 m-0">
+                      {latestProperties?.title ?? (isLoading ? 'Searching...' : 'Properties')}
+                    </h3>
                   </div>
                   <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
-                    {latestProperties.properties.map((property, index) => (
-                      <SimplePropertyCard
-                        key={`${property.id}-${index}-${latestProperties.messageIndex}`}
-                        id={property.id}
-                        title={property.title}
-                        location={property.location || property.city || property.street_address || undefined}
-                        price={`₱${property.price.toLocaleString()}${property.price_type ? `/${property.price_type}` : ''}`}
-                        image={property.image_url || (property.image ? getImageUrl(property.image) : ASSETS.PLACEHOLDER_PROPERTY_MAIN)}
-                      />
-                    ))}
+                    {isLoading && (!latestProperties || latestProperties.properties.length === 0) ? (
+                      <>
+                        {[1, 2, 3].map((i) => (
+                          <SimplePropertyCardSkeleton key={`skeleton-${i}`} />
+                        ))}
+                      </>
+                    ) : latestProperties && latestProperties.properties.length > 0 ? (
+                      <Suspense
+                        fallback={
+                          <>
+                            {[1, 2, 3].map((i) => (
+                              <SimplePropertyCardSkeleton key={`skeleton-${i}`} />
+                            ))}
+                          </>
+                        }
+                      >
+                        {latestProperties.properties.map((property, index) => (
+                          <SimplePropertyCard
+                            key={`${property.id}-${index}-${latestProperties.messageIndex}`}
+                            id={property.id}
+                            title={property.title}
+                            location={property.location || property.city || property.street_address || undefined}
+                            price={`₱${property.price.toLocaleString()}${property.price_type ? `/${property.price_type}` : ''}`}
+                            image={property.image_url || (property.image ? getImageUrl(property.image) : ASSETS.PLACEHOLDER_PROPERTY_MAIN)}
+                          />
+                        ))}
+                      </Suspense>
+                    ) : null}
                   </div>
                 </div>
               )}
@@ -1024,7 +1046,7 @@ function Hero() {
           type="button"
           onClick={scrollToContent}
           aria-label="Scroll to content below"
-          className={`absolute bottom-[130px] left-0 right-0 mx-auto w-fit z-20 flex flex-col items-center gap-1 transition-all duration-300 ease-out ${
+          className={`absolute bottom-[40px] left-0 right-0 mx-auto w-fit z-[110] flex flex-col items-center gap-1 transition-all duration-300 ease-out ${
             showScrollArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
         >
@@ -1032,7 +1054,7 @@ function Hero() {
             More below
           </span>
           <svg
-            className="w-5 h-5 text-[#205ED7] drop-shadow-[0_1px_2px_rgba(255,255,255,0.9)] animate-bounce"
+            className="w-5 h-5 text-white drop-shadow-[0_1px_2px_rgba(255,255,255,0.9)] animate-bounce"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"

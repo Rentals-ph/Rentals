@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Navbar from '../../components/layout/Navbar'
 import Footer from '../../components/layout/Footer'
 import PopularRentManagers from '../../components/rent-managers/PopularRentManagers'
+import { RentManagerCardSkeleton } from '../../components/common/RentManagerCardSkeleton'
 import { agentsApi, propertiesApi } from '../../api'
 import { getApiBaseUrl } from '../../config/api'
 import { ASSETS } from '@/utils/assets'
@@ -309,8 +310,10 @@ export default function RentManagersPage() {
 
           {/* Manager Cards Grid */}
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              <p>Loading rent managers...</p>
+            <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6' : 'flex flex-col gap-4'}>
+              {Array.from({ length: viewMode === 'grid' ? 9 : 4 }).map((_, i) => (
+                <RentManagerCardSkeleton key={i} variant={viewMode === 'grid' ? 'grid' : 'list'} />
+              ))}
             </div>
           ) : filteredManagers.length > 0 ? (
             <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6' : 'flex flex-col gap-4'}>

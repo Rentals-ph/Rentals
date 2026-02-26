@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import VerticalPropertyCard from '../common/VerticalPropertyCard'
+import { VerticalPropertyCardSkeleton } from '../common/VerticalPropertyCardSkeleton'
 import { propertiesApi } from '../../api'
 import type { Property } from '../../types'
 import type { PaginatedResponse } from '../../api/types'
@@ -82,8 +83,12 @@ function PropertiesForRent() {
         </div>
 
         {loading ? (
-          <div className="p-10 text-center">
-            <p>Loading properties...</p>
+          <div className="mx-auto grid w-full max-w-[1280px] grid-cols-3 justify-items-center gap-8 lg:grid-cols-2 lg:gap-6 md:grid-cols-1 md:gap-5">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="w-full max-w-[420px]">
+                <VerticalPropertyCardSkeleton />
+              </div>
+            ))}
           </div>
         ) : properties.length > 0 ? (
           <div className="mx-auto grid w-full max-w-[1280px] grid-cols-3 justify-items-center gap-8 lg:grid-cols-2 lg:gap-6 md:grid-cols-1 md:gap-5">

@@ -312,7 +312,31 @@ export default function UserManagementPage() {
           </div>
 
           {loading ? (
-            <div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>
+            <div className="properties-table-container">
+              <table className="properties-table">
+                <thead>
+                  <tr>
+                    <th><span className="block h-4 w-8 rounded bg-gray-100 animate-pulse mx-auto" /></th>
+                    <th><span className="block h-4 w-16 rounded bg-gray-100 animate-pulse mx-auto" /></th>
+                    <th><span className="block h-4 w-20 rounded bg-gray-100 animate-pulse mx-auto" /></th>
+                    <th><span className="block h-4 w-12 rounded bg-gray-100 animate-pulse mx-auto" /></th>
+                    <th><span className="block h-4 w-16 rounded bg-gray-100 animate-pulse mx-auto" /></th>
+                    <th><span className="block h-4 w-16 rounded bg-gray-100 animate-pulse mx-auto" /></th>
+                    <th><span className="block h-4 w-20 rounded bg-gray-100 animate-pulse mx-auto" /></th>
+                    <th><span className="block h-4 w-16 rounded bg-gray-100 animate-pulse mx-auto" /></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i}>
+                      {Array.from({ length: 8 }).map((_, j) => (
+                        <td key={j}><span className="block h-4 rounded bg-gray-200 animate-pulse" style={{ width: j === 7 ? 80 : '70%' }} /></td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
             <div className="properties-table-container">
               <table className="properties-table">

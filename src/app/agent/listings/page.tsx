@@ -381,7 +381,19 @@ export default function AgentMyListings() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-1.5"> {/* aml-grid */}
             {loading ? (
-              <div className="p-6 sm:p-8 text-center col-span-full text-sm sm:text-base">Loading listings...</div>
+              <>
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="bg-white rounded-[12px] sm:rounded-[14px] border border-gray-200 overflow-hidden shadow-sm flex flex-col sm:flex-row gap-0">
+                    <div className="w-full sm:w-[140px] sm:min-w-[140px] md:w-[190px] aspect-[16/10] sm:aspect-auto sm:h-[120px] bg-gray-200 animate-pulse flex-shrink-0" />
+                    <div className="p-4 flex-1 space-y-2">
+                      <span className="block h-4 w-24 rounded bg-gray-200 animate-pulse" />
+                      <span className="block h-5 w-full rounded bg-gray-200 animate-pulse" />
+                      <span className="block h-3 w-2/3 rounded bg-gray-100 animate-pulse" />
+                      <span className="block h-4 w-20 rounded bg-gray-200 animate-pulse" />
+                    </div>
+                  </div>
+                ))}
+              </>
             ) : (() => {
               // Filter listings based on selected filter
               const filteredListings = selectedFilter === 'all' 

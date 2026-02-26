@@ -7,7 +7,7 @@ import Footer from '../../components/layout/Footer'
 import { blogsApi } from '../../api'
 import type { Blog } from '../../types'
 import { ASSETS } from '@/utils/assets'
-import { Pagination } from '../../components/common'
+import { Pagination, BlogCardSkeleton } from '../../components/common'
 
 export default function BlogPage() {
   const [currentPage, setCurrentPage] = useState(1)
@@ -124,8 +124,20 @@ export default function BlogPage() {
 
       <main className="mx-auto w-full px-4 sm:px-6 md:px-10 lg:px-[150px] pt-8 sm:pt-12">
         {loading ? (
-          <div className="text-center py-20">
-            <p className="text-gray-600">Loading blogs...</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div className="sm:col-span-2 lg:col-span-1">
+              <BlogCardSkeleton size="large" className="w-full h-full" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <BlogCardSkeleton key={i} size="small" className="w-full" />
+              ))}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 col-span-full">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <BlogCardSkeleton key={i} size="small" className="w-full" />
+              ))}
+            </div>
           </div>
         ) : (
           <>

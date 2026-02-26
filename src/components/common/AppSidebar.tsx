@@ -293,7 +293,6 @@ function AppSidebar() {
   // Agent sidebar content
   const renderAgentSidebar = () => (
     <>
-      <NavLink href="/" icon={FiLayout} label="Home" active={isActive('/') && !pathname?.includes('//')} />
       <NavLink href="/agent" icon={FiHome} label="Dashboard" active={isActive('/agent') && !pathname?.includes('/agent/')} />
       <NavLink href="/agent/inbox" icon={FiMail} label="Inbox" active={isActive('/agent/inbox')} badge />
       <NavLink href="/agent/downloadables" icon={FiDownload} label="Downloadables" active={isActive('/agent/downloadables')} />
