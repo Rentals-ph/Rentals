@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ASSETS } from '@/utils/assets'
-import { FiChevronLeft, FiChevronRight, FiMail } from 'react-icons/fi'
+import { FiChevronLeft, FiChevronRight, FiMail, FiMapPin } from 'react-icons/fi'
 import SharePopup, { type SharePlatform } from './SharePopup'
 
 interface HorizontalPropertyCardProps {
@@ -52,6 +52,7 @@ function HorizontalPropertyCard({
   stateProvince,
 }: HorizontalPropertyCardProps) {
   const locationLine = [streetAddress, city, stateProvince].filter(Boolean).join(', ') || location
+  const fullAddress = locationLine
   const router = useRouter()
   const [showSharePopup, setShowSharePopup] = useState(false)
   const [imageHovered, setImageHovered] = useState(false)
@@ -196,10 +197,16 @@ function HorizontalPropertyCard({
         <p className="text-blue-600 text-4xl font-bold leading-tight">{price}</p>
         <h3 className="text-gray-900 text-lg font-semibold leading-snug">
           {title}
-          {locationLine ? (
-            <span className="text-gray-500 font-normal">, {locationLine}</span>
-          ) : null}
         </h3>
+        {locationLine ? (
+          <div
+            className="flex items-center gap-1.5 text-gray-500 font-normal min-w-0"
+            title={fullAddress}
+          >
+            <FiMapPin className="w-4 h-4 flex-shrink-0 text-gray-400" aria-hidden />
+            <span className="truncate" title={fullAddress}>{locationLine}</span>
+          </div>
+        ) : null}
 
         {/* Bed, bath, size */}
         <div className="flex items-center gap-4 text-gray-600 text-sm">

@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { FiMapPin } from 'react-icons/fi'
 import { ASSETS } from '@/utils/assets'
 import { resolvePropertyImage } from '@/utils/imageResolver'
 
@@ -95,8 +96,17 @@ function ModernPropertyCard({
         </div>
 
         <h3 className="m-0 min-h-[50px] font-outfit text-lg font-semibold leading-snug text-gray-900 line-clamp-2 md:min-h-[44px] md:text-base xs:min-h-[42px] xs:text-sm">
-          {title}{location ? `, ${location}` : ''}
+          {title}
         </h3>
+        {location ? (
+          <div
+            className="flex items-center gap-1.5 font-outfit text-sm text-gray-500 min-w-0 md:text-xs"
+            title={location}
+          >
+            <FiMapPin className="h-4 w-4 flex-shrink-0 text-gray-400 md:h-3.5 md:w-3.5" aria-hidden />
+            <span className="truncate" title={location}>{location}</span>
+          </div>
+        ) : null}
 
         <div className="flex gap-5 border-y border-gray-100 py-3 md:gap-4 md:py-2.5 xs:gap-3">
           <div className="flex items-center gap-2 font-outfit text-sm font-semibold text-gray-700 md:text-xs md:gap-1.5 xs:text-xs">

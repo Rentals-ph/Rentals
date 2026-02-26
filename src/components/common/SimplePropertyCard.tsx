@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { FiMapPin } from 'react-icons/fi'
 import { ASSETS } from '@/utils/assets'
 
 interface SimplePropertyCardProps {
@@ -47,8 +48,12 @@ function SimplePropertyCard({
               {title}
             </h3>
             {location && (
-              <p className="m-0 font-outfit text-sm font-normal leading-snug text-white/90 line-clamp-1 [text-shadow:0_1px_2px_rgba(0,0,0,0.3)] md:text-xs">
-                {location}
+              <p
+                className="m-0 flex items-center gap-1.5 font-outfit text-sm font-normal leading-snug text-white/90 line-clamp-1 [text-shadow:0_1px_2px_rgba(0,0,0,0.3)] md:text-xs min-w-0"
+                title={location}
+              >
+                <FiMapPin className="flex-shrink-0 w-3.5 h-3.5 text-white/80 md:w-3 md:h-3" aria-hidden />
+                <span className="truncate">{location}</span>
               </p>
             )}
             <p className="m-0 mt-1 font-outfit text-lg font-bold leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.4)] md:text-base">

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ASSETS } from '@/utils/assets'
-import { FiChevronLeft, FiChevronRight, FiMail, FiHeart } from 'react-icons/fi'
+import { FiChevronLeft, FiChevronRight, FiMail, FiHeart, FiMapPin } from 'react-icons/fi'
 
 interface VerticalPropertyCardProps {
   id?: number | string
@@ -52,6 +52,7 @@ function VerticalPropertyCard({
   stateProvince,
 }: VerticalPropertyCardProps) {
   const locationLine = [streetAddress, city].filter(Boolean).join(' ') || location
+  const fullAddress = [streetAddress, city, stateProvince].filter(Boolean).join(', ') || location || locationLine
   const router = useRouter()
   const [showSharePopup, setShowSharePopup] = useState(false)
   const [imageHovered, setImageHovered] = useState(false)
@@ -213,8 +214,14 @@ function VerticalPropertyCard({
             {title}
           </h3>
           {locationLine ? (
-              <span className="text-gray-500 font-normal">{locationLine}</span>
-            ) : null}
+            <div
+              className="flex items-center gap-1.5 text-gray-500 font-normal min-w-0"
+              title={fullAddress}
+            >
+              <FiMapPin className="w-4 h-4 flex-shrink-0 text-gray-400" aria-hidden />
+              <span className="truncate" title={fullAddress}>{locationLine}</span>
+            </div>
+          ) : null}
         </div>
 
         {/* Bed, bath, size */}
