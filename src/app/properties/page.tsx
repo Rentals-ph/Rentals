@@ -471,7 +471,7 @@ function PropertiesContent() {
       
         <div className="top-search-bar-container sticky top-0 z-30 bg-white p-3 sm:pt-5 px-4 sm:px-6 md:px-10 lg:px-[150px]">
              <div className="top-search-bar flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full border-b border-gray-200 pb-3 sm:pb-5"
-             style={{ borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#E5E7EB'}}
+             style={{ borderBottomWidth: '2px', borderBottomStyle: 'solid', borderBottomColor: '#E5E7EB'}}
              >
               <div className="search-input-container flex-1 w-full sm:min-w-[200px] relative">
                 <svg className="search-icon absolute left-3 sm:left-4 top-3 w-4 h-4 sm:w-5 sm:h-5 text-gray-500 pointer-events-none" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -565,7 +565,7 @@ function PropertiesContent() {
           </div>
 
       {/* (Secondary sticky search bar removed – top search bar is now sticky instead) */}
-      <main className="properties-main-layout flex flex-col lg:flex-row gap-4 sm:gap-6 mx-auto px-4 sm:px-6 md:px-10 lg:px-[150px] pb-4 sm:py-6 max-w-[1920px]">
+      <main className="properties-main-layout flex flex-col lg:flex-row gap-4 sm:gap-6 mx-auto px-4 sm:px-6 md:px-10 lg:px-[150px] pb-4 sm:py-2 max-w-[1920px]">
         {/* Dropdown Filter Menu - Mobile */}
         {isSidebarOpen && (
           <>
@@ -891,10 +891,10 @@ function PropertiesContent() {
         {/* Desktop Sidebar - Hidden on mobile */}
         <div className="properties-sidebar w-[280px] flex-shrink-0 hidden lg:block md:hidden">
           <div className="advance-search-section bg-white rounded-xl border border-gray-200 pr-5 mb-6 shadow-sm w-full">
-            <h2 className="section-title text-lg font-semibold text-gray-900 mb-4 font-outfit">Advance Search</h2>
+            <h2 className="section-title text-2xl font-semibold text-gray-900 mb-4 font-outfit">Advance Search</h2>
             <div className="filter-group mb-4">
               <select
-                className="filter-select w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 text-sm font-medium cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="filter-select w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 text-base font-medium cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={selectedLocation}
                 onChange={(e) => setSelectedLocation(e.target.value)}
               >
@@ -907,7 +907,7 @@ function PropertiesContent() {
 
             <div className="filter-group mb-4">
               <select
-                className="filter-select w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 text-sm font-medium cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="filter-select w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 text-base font-medium cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
               >
@@ -919,7 +919,7 @@ function PropertiesContent() {
 
             <div className="filter-group mb-4">
               <select
-                className="filter-select w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 text-sm font-medium cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="filter-select w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 text-base font-medium cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={minBaths}
                 onChange={(e) => setMinBaths(e.target.value)}
               >
@@ -932,7 +932,7 @@ function PropertiesContent() {
 
             <div className="filter-group mb-4">
               <select
-                className="filter-select w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 text-sm font-medium cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="filter-select w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 text-base font-medium cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={minBeds}
                 onChange={(e) => setMinBeds(e.target.value)}
               >
@@ -945,49 +945,63 @@ function PropertiesContent() {
 
             <div className="filter-group price-range-group mb-4 w-full">
               <label className="price-range-label block text-sm font-medium text-gray-700 mb-2 font-outfit">Price Range</label>
-              <div className="price-range-inputs-container w-full">
-                <div className="price-range-inputs flex flex-col gap-2 mb-3">
+              <div className="price-range-inputs-container w-full space-y-3">
+                {/* Min and Max inputs on same row */}
+                <div className="price-range-inputs flex items-center gap-2">
                   <input
                     type="number"
-                    className="price-input flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="price-input flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Min"
                     value={priceMin}
                     onChange={(e) => setPriceMin(e.target.value)}
                     min="0"
                   />
-                  <div className="price-range-separator text-gray-500 text-sm font-medium">
-                    <span>To</span>
-                  </div>
+                  <span className="text-gray-500 text-sm font-medium flex-shrink-0">To</span>
                   <input
                     type="number"
-                    className="price-input flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="price-input flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Max"
                     value={priceMax}
                     onChange={(e) => setPriceMax(e.target.value)}
                     min="0"
                   />
                 </div>
-                <div className="price-range-sliders flex flex-col gap-2">
-                  <input
-                    type="range"
-                    min="0"
-                    max="200000"
-                    step="1000"
-                    value={priceMin || 0}
-                    onChange={(e) => setPriceMin(e.target.value)}
-                    className="price-range-slider w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                    aria-label="Minimum price"
-                  />
-                  <input
-                    type="range"
-                    min="0"
-                    max="200000"
-                    step="1000"
-                    value={priceMax || 200000}
-                    onChange={(e) => setPriceMax(e.target.value)}
-                    className="price-range-slider w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                    aria-label="Maximum price"
-                  />
+                {/* Sliders with value labels below */}
+                <div className="price-range-sliders space-y-4">
+                  <div>
+                    <input
+                      type="range"
+                      min="0"
+                      max={Number(priceMax) || 200000}
+                      step="1000"
+                      value={Math.min(Number(priceMin) || 0, Number(priceMax) || 200000)}
+                      onChange={(e) => {
+                        const v = e.target.value
+                        setPriceMin(v)
+                        if (Number(priceMax) && Number(v) > Number(priceMax)) setPriceMax(v)
+                      }}
+                      className="price-range-slider w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                      aria-label="Minimum price"
+                    />
+                    <p className="text-xs text-gray-600 mt-1 font-medium">Min: {formatPrice(Number(priceMin) || 0)}</p>
+                  </div>
+                  <div>
+                    <input
+                      type="range"
+                      min={Number(priceMin) || 0}
+                      max="200000"
+                      step="1000"
+                      value={Math.max(Number(priceMax) || 200000, Number(priceMin) || 0)}
+                      onChange={(e) => {
+                        const v = e.target.value
+                        setPriceMax(v)
+                        if (Number(priceMin) > Number(v)) setPriceMin(v)
+                      }}
+                      className="price-range-slider w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                      aria-label="Maximum price"
+                    />
+                    <p className="text-xs text-gray-600 mt-1 font-medium">Max: {formatPrice(Number(priceMax) || 200000)}</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1207,7 +1221,7 @@ function PropertiesContent() {
                   <>
                     <div className={viewMode === 'horizontal' 
                       ? 'properties-list flex flex-col gap-4 sm:gap-6' 
-                      : 'properties-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6'}>
+                      : 'properties-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-4 sm:gap-6'}>
                       {paginatedProperties.map(property => {
                         const propertySize = property.area 
                           ? `${property.area} sqft` 

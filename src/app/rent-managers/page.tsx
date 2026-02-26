@@ -1,10 +1,11 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '../../components/layout/Navbar'
 import Footer from '../../components/layout/Footer'
+import PopularRentManagers from '../../components/rent-managers/PopularRentManagers'
 import { agentsApi, propertiesApi } from '../../api'
 import { getApiBaseUrl } from '../../config/api'
 import { ASSETS } from '@/utils/assets'
@@ -40,7 +41,9 @@ export default function RentManagersPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedProvince, setSelectedProvince] = useState('')
   const [selectedCity, setSelectedCity] = useState('')
+  const [selectedLicense, setSelectedLicense] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const searchParams = useSearchParams()
 
   const features = [
     { id: 1, icon: '/assets/icons/secure.svg', alt: 'secure', title: 'Property Management', description: 'Expert handling of property listings, maintenance coordination, and tenant relations.' },
@@ -89,7 +92,7 @@ export default function RentManagersPage() {
             listings: propertiesCountByAgent[a.id] || 0,
             email: a.email,
             phone: a.phone || undefined,
-            image: a.profile_image || a.image || a.avatar || null,
+            image: a.profile_image || a.image || a.avatar || a.image_path || null,
           } as RentManagerInfo
         })
         setManagers(mapped)
@@ -103,6 +106,14 @@ export default function RentManagersPage() {
     return () => { mounted = false }
   }, [])
 
+  // Sync URL params (from PopularRentManagers links) into filter state
+  useEffect(() => {
+    const location = searchParams.get('location')
+    const license = searchParams.get('license')
+    if (location) setSelectedProvince(location)
+    if (license) setSelectedLicense(license)
+  }, [searchParams])
+
   const uniqueLocations = Array.from(new Set(managers.map((m) => m.location))).filter(Boolean)
 
   const filteredManagers = managers.filter((m) => {
@@ -113,6 +124,7 @@ export default function RentManagersPage() {
     }
     if (selectedProvince && !m.location.toLowerCase().includes(selectedProvince.toLowerCase())) return false
     if (selectedCity && !m.location.toLowerCase().includes(selectedCity.toLowerCase())) return false
+    if (selectedLicense && !m.role.toLowerCase().includes(selectedLicense.toLowerCase())) return false
     return true
   })
 
@@ -203,6 +215,9 @@ export default function RentManagersPage() {
           ))}
         </div>
       </div>
+
+      {/* Popular Rent Manager Searches - agent-focused (similar to PopularSearches) */}
+   
 
       {/* Search and Filter Row - Full Width */}
       <div className="top-search-bar-container sticky top-0 z-40 bg-white mt-6 sm:mt-10 border-b border-gray-200 py-3 sm:py-5 px-4 sm:px-6 md:px-10 lg:px-[150px] mb-6 sm:mb-8 shadow-md">
@@ -320,20 +335,18 @@ export default function RentManagersPage() {
                 >
                   {viewMode === 'grid' ? (
                     <>
-                      {/* Circular Headshot */}
-                      <div className="w-full flex justify-center pb-4">
+                      {/* Card image - fixed aspect so container has height */}
+                      <div className="w-full pt-0 pb-4">
                         <div 
-                          className="relative overflow-hidden flex-shrink-0"
+                          className="relative overflow-hidden flex-shrink-0 w-full aspect-[4/3] rounded-t-2xl"
                           style={{
-                            width: '100%',
-                            height: '100%',
                             backgroundColor: '#2563EB'
                           }}
                         >
                           <img 
                             src={getAgentImageUrl(manager.image, manager.id)} 
                             alt={manager.name}
-                            className="w-full h-full object-cover"
+                            className="absolute inset-0 w-full h-full object-cover"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement
                               target.style.display = 'none'
@@ -345,7 +358,7 @@ export default function RentManagersPage() {
                             className="absolute inset-0 flex items-center justify-center text-white font-bold"
                             style={{ 
                               display: manager.image ? 'none' : 'flex',
-                              fontSize: '24px'
+                              fontSize: 'clamp(20px, 5vw, 28px)'
                             }}
                           >
                             <span>{getInitials(manager.name)}</span>
@@ -354,7 +367,7 @@ export default function RentManagersPage() {
                       </div>
                       
                       {/* Card Body */}
-                      <div className="px-3 sm:px-4 pb-3 sm:pb-4">
+                      <div className="px-3 sm:px-8 pb-3 sm:pb-4">
                         {/* Name Row with Listing Count */}
                         <div className="flex items-center justify-between mb-1 gap-2">
                           <h3 
@@ -569,7 +582,7 @@ export default function RentManagersPage() {
           )}
         </section>
       </main>
-
+      <PopularRentManagers />
       {/* CTA Section */}
       <section className="relative py-12 sm:py-16 px-4 sm:px-6 md:px-10 lg:px-[150px] overflow-hidden" style={{ minHeight: '300px' }}>
         {/* Background Image */}
@@ -598,13 +611,13 @@ export default function RentManagersPage() {
           <p className="text-white text-base sm:text-lg md:text-xl mb-6 sm:mb-8 max-w-2xl">
             Join us together with the most trusted managers to help people find their perfect home.
           </p>
-          <button className="bg-white text-blue-600 font-semibold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-full hover:bg-gray-50 transition-all duration-200 flex items-center gap-2 sm:gap-3 group">
-            <span>Join now!</span>
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-600 flex items-center justify-center group-hover:bg-blue-700 transition-colors duration-200">
-              <svg width="14" height="14" className="sm:w-4 sm:h-4" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6 12L10 8L6 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <button  style={{ background: "rgba(32, 94, 215, 0.9)" }}  className="inline-flex items-center gap-3 px-8 py-4 bg-white text-white font-outfit text-base font-semibold rounded-full transition-all hover:bg-rental-orange-600 hover:gap-4 w-fit">
+            <span>Join now</span>
+            <span className="transition-transform items-center justify-center flex">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-            </div>
+            </span>
           </button>
         </div>
       </section>

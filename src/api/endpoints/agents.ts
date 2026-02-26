@@ -52,6 +52,7 @@ export interface Agent {
   verified?: boolean
   properties_count?: number
   image?: string | null
+  image_path?: string | null
   avatar?: string | null
   profile_image?: string | null
   created_at?: string | null

@@ -93,20 +93,22 @@ const Blogs = () => {
   return (
     <section id="blog" className="bg-white px-4 sm:px-6 md:px-10 lg:px-[150px] w-full mt-0 min-h-[70vh] flex flex-col justify-center py-6 sm:py-8">
       <div className="w-full mx-auto overflow-visible py-4 sm:py-5">
-        <div className="flex flex-col sm:flex-row justify-between items-start mb-4 sm:mb-6 gap-4">
-          <div>
-            <h2 className="text-gray-900 font-outfit text-2xl sm:text-3xl font-bold leading-tight tracking-tight m-0 mb-2 sm:mb-2.5">
+        <div className="relative flex justify-center items-start mb-4 sm:mb-6">
+          <div className="text-center">
+            <h2 className="text-gray-900 font-outfit text-2xl sm:text-4xl font-bold leading-tight tracking-tight m-0 mb-2 sm:mb-2.5">
               Blogs
             </h2>
             <p className="text-gray-600 font-outfit text-sm sm:text-base font-light leading-snug tracking-tight m-0">
-              We Share Our Knowledge
+              Find the latest news and insights from the rentals.ph team.
             </p>
           </div>
-          <Link href="/blog" className="text-rental-blue-600 font-outfit text-sm sm:text-base font-medium no-underline flex items-center gap-2 sm:gap-3.5 tracking-tight leading-none hover:text-rental-orange-500 transition-colors">
+
+          <Link
+            href="/blog"
+            className="absolute right-0 text-rental-blue-500 bg-white font-outfit text-base font-medium no-underline flex items-center gap-2 hover:bg-blue-200 transition-colors border-2 border-rental-blue-500 rounded-2xl px-5 py-2"
+            style={{ border: '2px solid #205ED7' }}
+          >
             Visit Blogs
-            <svg width="12" height="14" className="sm:w-[14px] sm:h-4" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M7 1L13 8L7 15M13 8H1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
           </Link>
         </div>
 
@@ -149,11 +151,8 @@ const Blogs = () => {
                       </div>
                     </div>
                     <div className="mt-auto">
-                      <span className="text-rental-blue-600 font-outfit text-sm sm:text-base font-medium flex items-center gap-1.5 sm:gap-2 group-hover:text-rental-orange-500 transition-colors">
+                      <span className="bg-rental-blue-600 px-4 py-2 rounded-lg text-white font-outfit text-sm sm:text-base font-medium flex items-center gap-1.5 sm:gap-2 hover:bg-rental-blue-700 transition-colors">
                         Read More
-                        <svg width="16" height="14" className="sm:w-5 sm:h-[17px]" viewBox="0 0 20 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M12 1L19 8.5L12 16M19 8.5H1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
                       </span>
                     </div>
                   </div>
@@ -173,7 +172,7 @@ const Blogs = () => {
                     />
                   </div>
                   <div className="absolute inset-0 bg-black/30 z-10"></div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-4 sm:p-5 md:p-6 z-20">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-4 sm:p-5 md:p-5 z-20">
                     <div className="flex justify-between items-center mb-2 sm:mb-3">
                       <span className="text-white font-outfit text-xs sm:text-sm md:text-base font-semibold uppercase tracking-wider">{centerBlog.category}</span>
                       <span className="text-white/90 font-outfit text-xs sm:text-sm md:text-base">{formatReadTime(centerBlog.read_time)}</span>
@@ -195,11 +194,8 @@ const Blogs = () => {
                       </div>
                     </div>
                     <div>
-                      <span className="text-white font-outfit text-sm sm:text-base md:text-lg font-medium flex items-center gap-2 sm:gap-3 group-hover:text-rental-orange-500 transition-colors">
+                      <span className="bg-rental-blue-600 px-4 py-2 rounded-lg text-white font-outfit text-sm sm:text-base font-medium flex items-center gap-1.5 sm:gap-2 hover:bg-rental-blue-700 transition-colors">
                         Read More
-                        <svg width="16" height="14" className="sm:w-5 sm:h-[17px]" viewBox="0 0 20 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M12 1L19 8.5L12 16M19 8.5H1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
                       </span>
                     </div>
                   </div>
@@ -240,11 +236,8 @@ const Blogs = () => {
                       </div>
                     </div>
                     <div className="mt-auto">
-                      <span className="text-rental-blue-600 font-outfit text-sm sm:text-base font-medium flex items-center gap-1.5 sm:gap-2 group-hover:text-rental-orange-500 transition-colors">
+                      <span className="bg-rental-blue-600 px-4 py-2 rounded-lg text-white font-outfit text-sm sm:text-base font-medium flex items-center gap-1.5 sm:gap-2 hover:bg-rental-blue-700 transition-colors">
                         Read More
-                        <svg width="16" height="14" className="sm:w-5 sm:h-[17px]" viewBox="0 0 20 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M12 1L19 8.5L12 16M19 8.5H1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
                       </span>
                     </div>
                   </div>

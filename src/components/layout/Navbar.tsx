@@ -213,7 +213,7 @@ const Navbar = () => {
   return (
     <>
       <header className="relative z-50 bg-white shadow-md overflow-x-hidden overflow-y-hidden">
-        <div className="flex items-center justify-between gap-2 px-3 sm:px-4 py-3 sm:py-5 md:px-10 lg:px-20 max-w-full min-w-0 overflow-x-hidden overflow-y-hidden">
+        <div className="flex items-center justify-between gap-2 px-3 sm:px-4 py-3 sm:py-5 md:px-10 lg:px-[150px] max-w-full min-w-0 overflow-x-hidden overflow-y-hidden">
           {/* Mobile: toggle + logo side by side. Desktop: logo only in this group */}
           <div className="flex items-center gap-2 flex-shrink-0">
             <button 
@@ -234,38 +234,42 @@ const Navbar = () => {
 
           {/* Desktop Navigation Centered - lg breakpoint so nav fits without overflow */}
           <div className="hidden lg:flex flex-1 justify-center items-center min-w-0 overflow-hidden">
-            <nav className="flex items-center gap-0 xl:gap-4 2xl:gap-8 justify-center w-full min-w-0">
-              <Link href="/" className={`text-rental-blue-600 font-outfit text-sm lg:text-base px-1 lg:px-2 xl:px-2.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
+            <nav className="flex items-center gap-0 xl:gap-2 2xl:gap-8 justify-center w-full min-w-0">
+              <Link href="/" className={`text-rental-blue-600 font-outfit text-sm lg:text-sm md:px-1 xl:px-0.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
                 HOME
               </Link>
-              <Link href="/about" className={`text-rental-blue-600 font-outfit text-sm lg:text-base px-1 lg:px-2 xl:px-2.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/about' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
+              <Link href="/about" className={`text-rental-blue-600 font-outfit text-sm lg:text-sm md:px-1 xl:px-0.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/about' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
                 ABOUT US
               </Link>
-              <Link href="/properties" className={`text-rental-blue-600 font-outfit text-sm lg:text-base px-1 lg:px-2 xl:px-2.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/properties' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
+              <Link href="/properties" className={`text-rental-blue-600 font-outfit text-sm lg:text-sm md:px-1 xl:px-0.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/properties' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
                 PROPERTIES
               </Link>
-              <Link href="/rent-managers" className={`text-rental-blue-600 font-outfit text-sm lg:text-base px-1 lg:px-2 xl:px-2.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/rent-managers' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
-                RENT MANAGERS
+              <Link href="/rent-managers" className={`text-rental-blue-600 font-outfit text-sm lg:text-sm md:px-1 xl:px-0.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/rent-managers' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
+                BROKERS/AGENTS
               </Link>
-              <Link href="/blog" className={`text-rental-blue-600 font-outfit text-sm lg:text-base px-1 lg:px-2 xl:px-2.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/blog' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
+              <Link href="/blog" className={`text-rental-blue-600 font-outfit text-sm lg:text-sm md:px-1 xl:px-0.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/blog' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
                 BLOG  
               </Link>
-              <Link href="/news" className={`text-rental-blue-600 font-outfit text-sm lg:text-base px-1 lg:px-2 xl:px-2.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/news' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
+              <Link href="/news" className={`text-rental-blue-600 font-outfit text-sm lg:text-sm md:px-1 xl:px-0.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/news' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
                 NEWS
               </Link>
-              <Link href="/contact" className={`text-rental-blue-600 font-outfit text-sm lg:text-base px-1 lg:px-2 xl:px-2.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/contact' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
+              <Link href="/contact" className={`text-rental-blue-600 font-outfit text-sm lg:text-sm md:px-1 xl:px-0.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/contact' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
                 CONTACT US
               </Link>
             </nav>
           </div>
           {/* User/Profile section */}
-          <div className="hidden lg:flex items-center justify-end flex-shrink-0 min-w-0">
+          <div className="hidden lg:flex items-center justify-end flex-shrink-0 min-w-0 rounded-full"
+          style={{
+            border: '2px solid #FE8E0A',
+          }}
+          >
             {isUserLoggedIn ? (
               <div className="relative" ref={userMenuRef}>
                 <button
                   type="button"
                   onClick={() => setShowUserMenu((prev) => !prev)}
-                  className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg border border-transparent hover:bg-gray-100 hover:border-gray-200 transition-colors outline-none focus:ring-2 focus:ring-rental-blue-500/30 focus:ring-offset-1"
+                  className="flex items-center gap-2.5 px-2 py-1.5 rounded-full border border-transparent hover:bg-gray-100 hover:border-gray-200 transition-colors outline-none focus:ring-2 focus:ring-rental-blue-500/30 focus:ring-offset-1"
                   aria-expanded={showUserMenu}
                   aria-haspopup="true"
                   aria-label="Open user menu"
@@ -346,7 +350,7 @@ const Navbar = () => {
                 )}
               </div>
             ) : (
-              <button className="rounded-full !border-2 !border-rental-orange-500 bg-transparent text-rental-orange-500 px-3 sm:px-5 h-10 sm:h-12 font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer inline-flex items-center justify-center hover:bg-rental-orange-500 hover:text-white active:scale-95 transition-all duration-200" onClick={handleLoginClick}>
+              <button className="rounded-full !border-2 !border-rental-orange-500 bg-transparent text-rental-orange-500 px-3 sm:px-5 h-8 sm:h-10 font-outfit text-xs sm:text-sm md:text-sm font-medium cursor-pointer inline-flex items-center justify-center hover:bg-rental-orange-500 hover:text-white active:scale-95 transition-all duration-200" onClick={handleLoginClick}>
                 <span className="hidden sm:inline">Login / Register</span>
                 <span className="sm:hidden">Login</span>
               </button>

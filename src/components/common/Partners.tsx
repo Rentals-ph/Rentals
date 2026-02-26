@@ -35,7 +35,7 @@ const Partners = () => {
       </div>
 
       {/* Content Layer */}
-      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 text-center mt-32 sm:mt-48 pb-10">
+      <div className="relative z-10 w-full lg:px-[150px] mx-auto px-4 text-center mt-32 sm:mt-48 pb-10">
         <h2 className="font-outfit font-extrabold text-4xl sm:text-5xl tracking-tight leading-tight mb-2">
           <span className="text-[#2563eb]">OUR</span> <span className="text-[#f97316]">PARTNERS</span>
         </h2>
@@ -44,7 +44,7 @@ const Partners = () => {
         </p>
 
         <div className="relative w-full overflow-hidden flex items-center">
-          <div className="flex w-max animate-[partners-scroll_28s_linear_infinite] items-center gap-12 sm:gap-20 pr-12 sm:pr-20">
+          <div className="flex w-max animate-[partners-scroll_18s_linear_infinite] items-center gap-12 sm:gap-20 pr-12 sm:pr-20">
             {/* First Set */}
             <img src={ASSETS.PARTNER_1} alt="Taft Properties" className="h-16 sm:h-20 lg:h-24 w-auto object-contain drop-shadow-sm transition-transform hover:scale-105" />
             <img src={ASSETS.PARTNER_2} alt="Cebu Landmasters" className="h-16 sm:h-20 lg:h-24 w-auto object-contain drop-shadow-sm transition-transform hover:scale-105" />

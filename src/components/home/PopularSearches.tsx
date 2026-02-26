@@ -114,7 +114,7 @@ export default function PopularSearches() {
   return (
     <section className="bg-white min-h-[50vh] flex px-6 sm:px-10 md:px-20 lg:px-[150px] py-12 flex-col justify-center">
       <div className="w-full mx-auto">
-        <h2 className="text-center font-outfit text-2xl md:text-3xl font-bold text-gray-900 mb-8">
+        <h2 className="text-center font-outfit text-2xl md:text-4xl font-bold text-gray-900">
           Popular Real Estate Searches
         </h2>
 
@@ -138,19 +138,18 @@ export default function PopularSearches() {
           </button>
         </div>
 
-        {/* Grid of categories */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-x-[60px] md:gap-y-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-x-[60px] md:gap-y-2 items-start">
           {categories.map(category => {
             const items = (data as any)[category] as { label: string; type: string; location: string }[]
             const isExpanded = showMore[category]
             const visibleItems = isExpanded ? items : items.slice(0, INITIAL_VISIBLE)
 
             return (
-              <div key={category} className="flex flex-col">
-                <h3 className="font-outfit text-lg font-bold text-gray-700 tracking-wide mb-4 pb-2">
+              <div key={category} className="grid grid-rows-subgrid row-span-3 flex flex-col">
+                <h3 className="font-outfit text-base font-bold text-gray-700 tracking-wide pb-2">
                   {category.toUpperCase()}
                 </h3>
-                <ul className="list-none p-0 m-0 flex flex-col gap-3">
+                <ul className="list-none p-0 m-0 flex flex-col gap-1">
                   {visibleItems.map((item, idx) => (
                     <li key={idx}>
                       <Link

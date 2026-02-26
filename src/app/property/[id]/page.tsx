@@ -8,7 +8,7 @@ import Footer from '../../../components/layout/Footer'
 import VerticalPropertyCard from '../../../components/common/VerticalPropertyCard'
 import SharePopup, { type SharePlatform, type ShareOption } from '../../../components/common/SharePopup'
 import PropertyLocationMap from '../../../components/common/PropertyLocationMap'
-import { propertiesApi, messagesApi } from '../../../api'
+import { propertiesApi, messagesApi, agentsApi } from '../../../api'
 import type { Property } from '../../../types'
 import { ASSETS } from '@/utils/assets'
 import { resolveAgentAvatar } from '@/utils/imageResolver'
@@ -19,6 +19,7 @@ export default function PropertyDetailsPage() {
   const id = params?.id as string
   const [showFullDescription, setShowFullDescription] = useState(false)
   const [property, setProperty] = useState<Property | null>(null)
+  const [fetchedAgent, setFetchedAgent] = useState<{ id: number; first_name?: string | null; last_name?: string | null; full_name?: string; verified?: boolean } | null>(null)
   const [similarProperties, setSimilarProperties] = useState<Property[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
@@ -47,6 +48,7 @@ export default function PropertyDetailsPage() {
         
         const data = await propertiesApi.getById(propertyId)
         setProperty(data)
+        setFetchedAgent(null)
         setSelectedImageIndex(0) // Reset to first image when property changes
         // Set initial message for inquiry mode
         setFormData({
@@ -56,7 +58,17 @@ export default function PropertyDetailsPage() {
           email: '',
           message: `I'm Interested In This Property ${data.title} And I'd Like To Know More Details.`
         })
-        
+
+        // If property has agent_id but no nested agent/rent_manager, fetch agent so we can show name/role
+        if (data.agent_id && !data.agent && !data.rent_manager) {
+          try {
+            const agentData = await agentsApi.getById(data.agent_id)
+            setFetchedAgent(agentData)
+          } catch {
+            setFetchedAgent(null)
+          }
+        }
+
         // Fetch similar properties (same type or location)
         const allPropertiesResponse = await propertiesApi.getAll()
         // Handle both array and paginated response
@@ -412,9 +424,9 @@ export default function PropertyDetailsPage() {
               const img1 = allImages[1] || allImages[0] || ASSETS.PLACEHOLDER_PROPERTY_MAIN
               const img2 = allImages[2] || allImages[0] || ASSETS.PLACEHOLDER_PROPERTY_MAIN
               return (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-3 mb-6 rounded-xl overflow-hidden">
+                <div className="grid grid-cols-1 grid-rows-2 md:grid-rows-1 md:grid-cols-3 gap-2 sm:gap-3 mb-6 rounded-xl overflow-hidden h-[240px] sm:h-[280px] md:h-[400px]">
                   <div
-                    className="md:col-span-2 relative aspect-[16/9] md:aspect-auto md:min-h-[180px] bg-gray-100 cursor-pointer"
+                    className="md:col-span-2 relative min-h-0 bg-gray-100 cursor-pointer"
                     onClick={() => { setModalImageIndex(0); setShowImageModal(true) }}
                     onContextMenu={(e) => e.preventDefault()}
                   >
@@ -426,16 +438,16 @@ export default function PropertyDetailsPage() {
                       onError={(e) => { e.currentTarget.src = ASSETS.PLACEHOLDER_PROPERTY_MAIN }}
                     />
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-1 gap-2 sm:gap-3">
+                  <div className="grid grid-cols-2 md:grid-cols-1 md:grid-rows-2 gap-2 sm:gap-3 min-h-0 h-full">
                     <div
-                      className="aspect-[16/9] bg-gray-100 cursor-pointer rounded-r-none md:rounded-b-none overflow-hidden"
+                      className="min-h-0 bg-gray-100 cursor-pointer rounded-r-none md:rounded-b-none overflow-hidden"
                       onClick={() => { setModalImageIndex(1); setShowImageModal(true) }}
                       onContextMenu={(e) => e.preventDefault()}
                     >
                       <img src={img1} alt="" className="w-full h-full object-cover" draggable={false} onError={(e) => { e.currentTarget.src = ASSETS.PLACEHOLDER_PROPERTY_MAIN }} />
                     </div>
                     <div
-                      className="aspect-[16/9] bg-gray-100 cursor-pointer overflow-hidden"
+                      className="min-h-0 bg-gray-100 cursor-pointer overflow-hidden"
                       onClick={() => { setModalImageIndex(2); setShowImageModal(true) }}
                       onContextMenu={(e) => e.preventDefault()}
                     >
@@ -447,17 +459,18 @@ export default function PropertyDetailsPage() {
             })()}
 
             {/* 2. Price, title, type, location + heart & share */}
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 ">
               <div>
-                <p className="text-3xl sm:text-6xl font-bold text-[#205ed7] m-0">
+                <p className="text-1xl text-rental-blue-600 m-0">{property.type}</p>
+                <p className="text-3xl sm:text-5xl font-bold text-[#205ed7] m-0">
                   {formatPrice(property.price)}
                   {formatPriceType(property.price_type) && (
                     <span className="text-xl sm:text-2xl font-semibold text-gray-500 ml-2">/{formatPriceType(property.price_type)}</span>
                   )}
                 </p>
-                <h1 className="text-xl sm:text-5xl font-semibold text-gray-800 mt-2 mb-1">{property.title}</h1>
-                <p className="text-3xl text-rental-blue-600 m-0">{property.type}</p>
-                <p className="text-gray-600 text-xl mt-1 flex items-center gap-1.5">
+                <h1 className="text-xl sm:text-3xl font-semibold text-gray-800 mt-2 mb-1">{property.title}</h1>
+                
+                <p className="text-gray-600 text-1xl mt-1 flex items-center gap-1.5">
                   <svg className="w-4 h-4 flex-shrink-0 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                     <circle cx="12" cy="10" r="3" />
@@ -487,92 +500,106 @@ export default function PropertyDetailsPage() {
               </div>
             </div>
 
-            {/* 3. Property Manager Card */}
-            <div className="w-full max-w-sm bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden mb-8">
-              {/* Top: Agent photo */}
-              <div className="relative w-full h-44 bg-gray-100">
-                <span className="absolute inset-0 flex items-center justify-center text-white text-2xl font-bold bg-[#205ed7]">
-                  {(property.agent?.first_name?.charAt(0) || property.rent_manager?.name?.charAt(0) || 'R')}
-                </span>
-                {property.agent?.id && (
-                  <img
-                    src={resolveAgentAvatar(property.agent.id.toString(), property.agent.id)}
-                    alt={property.agent?.full_name || property.rent_manager?.name || 'Agent'}
-                    className="w-full h-full object-cover"
-                    onError={(e) => { e.currentTarget.style.display = 'none' }}
-                  />
-                )}
-              </div>
-
-              {/* Middle: Name, role, listings link */}
-              <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-lg font-bold text-gray-900 m-0 leading-tight">
-                    {property.agent?.first_name && property.agent?.last_name
-                      ? `${property.agent.first_name} ${property.agent.last_name}`
-                      : property.agent?.full_name
-                      || property.rent_manager?.name
-                      || 'Rental.Ph Official'}
-                  </p>
-                  <p className="text-sm text-rental-blue-600 m-0">
-                    {property.agent ? getRentManagerRole(property.agent.verified) : getRentManagerRole(property.rent_manager?.is_official)}
-                  </p>
-                </div>
-                {property.agent_id && (
-                  <Link
-                    href={`/rent-managers/${property.agent_id}`}
-                    className="text-sm font-semibold text-[#205ed7] whitespace-nowrap"
-                  >
-                    View Listings
-                  </Link>
-                )}
-              </div>
-
-              {/* Contact info */}
-              <div className="px-5 py-4 space-y-3 text-sm text-gray-800">
-                {(property.agent?.email || property.rent_manager?.email) && (
-                  <div className="flex items-center gap-3">
-                    <span className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M4 4h16v16H4z" />
-                        <path d="M4 4l8 7 8-7" />
-                      </svg>
-                    </span>
-                    <span className="truncate">
-                      {property.agent?.email || property.rent_manager?.email}
-                    </span>
+            {/* 3. Agent card: name, role, View My Page, Show My Listings, Inquire now */}
+            {(property.agent_id || property.agent || property.rent_manager) && (() => {
+              const agent = property.agent || (fetchedAgent ? { id: fetchedAgent.id, first_name: fetchedAgent.first_name, last_name: fetchedAgent.last_name, full_name: fetchedAgent.full_name, verified: fetchedAgent.verified } : null)
+              const rentManager = property.rent_manager
+              const displayName = agent
+                ? (agent.first_name && agent.last_name ? `${agent.first_name} ${agent.last_name}` : (agent as { full_name?: string }).full_name || 'Rental.Ph Official')
+                : (rentManager?.name || 'Rental.Ph Official')
+              const role = agent
+                ? getRentManagerRole((agent as { verified?: boolean }).verified)
+                : getRentManagerRole(rentManager?.is_official)
+              const agentId = property.agent_id || agent?.id || rentManager?.id
+              const isVerified = agent ? (agent as { verified?: boolean }).verified : rentManager?.is_official
+              return (
+                <div className="flex flex-col sm:flex-row sm:items-center mt-4 gap-4 sm:gap-6 p-4 sm:p-5 rounded-2xl border border-gray-200 bg-white shadow-sm mb-8"
+                style={{
+                  borderBottomWidth: '1px',
+                  borderBottomStyle: 'solid',
+                  borderBottomColor: '#E5E7EB',
+                  borderTopWidth: '1px',
+                  borderTopStyle: 'solid',
+                  borderTopColor: '#E5E7EB',
+                }}
+                >
+                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#205ed7] flex items-center justify-center text-white text-xl font-bold flex-shrink-0 overflow-hidden">
+                      {agentId ? (
+                        <>
+                          <img
+                            src={resolveAgentAvatar(agentId.toString(), agentId)}
+                            alt={displayName}
+                            className="absolute inset-0 w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none'
+                              const fallback = e.currentTarget.nextElementSibling
+                              if (fallback) (fallback as HTMLElement).classList.remove('hidden')
+                            }}
+                          />
+                          <span className="hidden absolute inset-0 flex items-center justify-center bg-[#205ed7] text-white text-xl font-bold">{displayName.charAt(0).toUpperCase()}</span>
+                        </>
+                      ) : (
+                        <span>{displayName.charAt(0).toUpperCase()}</span>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-lg font-bold text-gray-900 m-0 flex items-center gap-1.5 flex-wrap">
+                        {displayName}
+                        {isVerified && (
+                          <svg className="w-5 h-5 text-[#205ed7] flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-label="Verified">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                          </svg>
+                        )}
+                      </p>
+                      <p className="text-sm text-gray-500 m-0">{role}</p>
+                    </div>
                   </div>
-                )}
-                {property.agent?.phone && (
-                  <div className="flex items-center gap-3">
-                    <span className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 flex-shrink-0">
+                    {agentId && (
+                      <>
+                        <Link
+                          href={`/rent-managers/${agentId}`}
+                          className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl border-2 border-[#205ed7] text-[#205ed7] font-semibold hover:bg-[#205ed7] hover:text-white transition-colors"
+                          style={{
+                            borderWidth: '2px',
+                            borderStyle: 'solid',
+                            borderColor: '#205ed7',
+                          }}
+                        >
+                          View My Page
+                        </Link>
+                        <Link
+                          href={`/rent-managers/${agentId}`}
+                          className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl border-2 border-[#205ed7] text-[#205ed7] font-semibold hover:bg-[#205ed7] hover:text-white transition-colors"
+                          style={{
+                            borderWidth: '2px',
+                            borderStyle: 'solid',
+                            borderColor: '#205ed7',
+                          }}
+                        >
+                          Show My Listings
+                        </Link>
+                      </>
+                    )}
+                    <a
+                      href="#inquiry-form"
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#205ed7] text-white font-semibold hover:bg-[#1a4bb5] transition-colors"
+                      style={{
+                        borderWidth: '2px',
+                        borderStyle: 'solid',
+                        borderColor: '#205ed7',
+                      }}
+                    >
                       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.06 2h3A2 2 0 0 1 9 3.72a12.84 12.84 0 0 0 .7 2.11 2 2 0 0 1-.45 2.11L8.09 9.11a16 16 0 0 0 6 6l1.17-1.17a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.11.7A2 2 0 0 1 22 16.92z" />
+                        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
                       </svg>
-                    </span>
-                    <span>{property.agent.phone}</span>
+                      Inquire now
+                    </a>
                   </div>
-                )}
-              </div>
-
-              {/* CTA button */}
-              {property.agent_id && (
-                <div className="px-5 pb-5 pt-1">
-                  <Link
-                    href={`/rent-managers/${property.agent_id}`}
-                    className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-[#205ed7] text-white font-semibold shadow-sm hover:bg-[#1a4bb5] transition-colors"
-                  >
-                    View My Listing
-                    <span className="inline-flex items-center justify-center">
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M5 12h14" />
-                        <path d="M13 6l6 6-6 6" />
-                      </svg>
-                    </span>
-                  </Link>
                 </div>
-              )}
-            </div>
+              )
+            })()}
 
             {/* 4. Property Overview */}
             <div className="mb-8">
@@ -725,7 +752,7 @@ export default function PropertyDetailsPage() {
           <section className="lg:px-[150px] py-12 bg-gray-50">
             <div className=" mx-auto">
               <h2 className="text-3xl font-bold mb-8 text-gray-800">Similar Properties</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {similarProperties.length > 0 ? (
                   similarProperties.map(prop => {
                     const propertySize = prop.area 

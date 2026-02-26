@@ -63,7 +63,7 @@ class ListingAssistantController extends Controller
                         new OA\Property(property: "form_ready", type: "boolean"),
                         new OA\Property(property: "can_generate_description", type: "boolean"),
                         new OA\Property(property: "description", type: "string", nullable: true),
-                        new OA\Property(property: "warnings", type: "array"),
+                        new OA\Property(property: "warnings", type: "array", items: new OA\Items(type: "string")),
                     ]
                 )
             ),
@@ -267,7 +267,7 @@ class ListingAssistantController extends Controller
                         new OA\Property(property: "missing_fields", type: "array", items: new OA\Items(type: "string")),
                         new OA\Property(property: "skipped_fields", type: "array", items: new OA\Items(type: "string")),
                         new OA\Property(property: "form_ready", type: "boolean"),
-                        new OA\Property(property: "messages", type: "array"),
+                        new OA\Property(property: "messages", type: "array", items: new OA\Items(type: "object")),
                     ]
                 )
             ),
@@ -858,9 +858,10 @@ class ListingAssistantController extends Controller
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
+                required: ["latitude", "longitude"],
                 properties: [
-                    new OA\Property(property: "latitude", type: "number", required: true),
-                    new OA\Property(property: "longitude", type: "number", required: true),
+                    new OA\Property(property: "latitude", type: "number"),
+                    new OA\Property(property: "longitude", type: "number"),
                 ]
             )
         ),
@@ -913,9 +914,10 @@ class ListingAssistantController extends Controller
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
+                required: ["field", "value"],
                 properties: [
-                    new OA\Property(property: "field", type: "string", required: true),
-                    new OA\Property(property: "value", type: "string", required: true),
+                    new OA\Property(property: "field", type: "string"),
+                    new OA\Property(property: "value", type: "string"),
                     new OA\Property(property: "next_step", type: "string", nullable: true),
                 ]
             )

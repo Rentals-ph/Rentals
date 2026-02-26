@@ -56,19 +56,54 @@ function HorizontalPropertyCard({
   const [showSharePopup, setShowSharePopup] = useState(false)
   const [imageHovered, setImageHovered] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const hoverIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const displayImages = imagesProp?.length ? imagesProp : [image]
   const currentImage = displayImages[currentImageIndex] ?? image
   const hasMultipleImages = displayImages.length > 1
 
+  const HOVER_DELAY_MS = 1500
+
+  const clearHoverTimers = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current)
+      hoverTimeoutRef.current = null
+    }
+    if (hoverIntervalRef.current) {
+      clearInterval(hoverIntervalRef.current)
+      hoverIntervalRef.current = null
+    }
+  }
+
   const goPrev = (e: React.MouseEvent) => {
     e.stopPropagation()
     setCurrentImageIndex((i) => (i - 1 + displayImages.length) % displayImages.length)
   }
-  const goNext = (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const goNext = (e?: React.MouseEvent) => {
+    e?.stopPropagation()
     setCurrentImageIndex((i) => (i + 1) % displayImages.length)
   }
+
+  const handleImageAreaMouseEnter = () => {
+    setImageHovered(true)
+    if (!hasMultipleImages) return
+    clearHoverTimers()
+    hoverTimeoutRef.current = setTimeout(() => {
+      hoverTimeoutRef.current = null
+      goNext()
+      hoverIntervalRef.current = setInterval(goNext, HOVER_DELAY_MS)
+    }, HOVER_DELAY_MS)
+  }
+
+  const handleImageAreaMouseLeave = () => {
+    setImageHovered(false)
+    clearHoverTimers()
+  }
+
+  useEffect(() => {
+    return () => clearHoverTimers()
+  }, [])
 
   const handleCardClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a') || (e.target as HTMLElement).closest('svg')) {
@@ -101,22 +136,34 @@ function HorizontalPropertyCard({
     <article
       onClick={handleCardClick}
       style={{ cursor: id ? 'pointer' : 'default' }}
-      className="w-full bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col sm:flex-row items-stretch shadow-sm hover:shadow-md transition-all duration-200 min-h-[350px] max-h-[380px]"
+      className="w-full bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col sm:flex-row items-stretch shadow-sm hover:shadow-md transition-all duration-200 min-h-[350px] max-h-[350px]"
     >
       {/* Left: Property image with hover arrows */}
       <div
         className="relative w-full sm:w-[50%] min-h-[250px] sm:min-h-0 sm:flex-shrink-0 overflow-hidden rounded-t-2xl sm:rounded-l-2xl sm:rounded-tr-none bg-gray-100"
-        onMouseEnter={() => setImageHovered(true)}
-        onMouseLeave={() => setImageHovered(false)}
+        onMouseEnter={handleImageAreaMouseEnter}
+        onMouseLeave={handleImageAreaMouseLeave}
       >
-        <img
-          src={currentImage}
-          alt={title}
-          className="w-full h-full min-h-[200px] sm:min-h-0 object-cover object-center"
-          onError={(e) => {
-            e.currentTarget.src = ASSETS.PLACEHOLDER_PROPERTY_MAIN
+        <div
+          className="flex h-full min-h-[200px] sm:min-h-0 transition-transform duration-300 ease-out"
+          style={{
+            width: `${displayImages.length * 100}%`,
+            transform: `translateX(-${currentImageIndex * (100 / displayImages.length)}%)`,
           }}
-        />
+        >
+          {displayImages.map((src, i) => (
+            <div key={i} className="flex-shrink-0 h-full" style={{ width: `${100 / displayImages.length}%` }}>
+              <img
+                src={src}
+                alt={`${title} ${i + 1}`}
+                className="w-full h-full min-h-[200px] sm:min-h-0 object-cover object-center"
+                onError={(e) => {
+                  e.currentTarget.src = ASSETS.PLACEHOLDER_PROPERTY_MAIN
+                }}
+              />
+            </div>
+          ))}
+        </div>
         {hasMultipleImages && imageHovered && (
           <>
             <button

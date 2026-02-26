@@ -66,7 +66,7 @@ const Footer = () => {
       </div>
 
       {/* Separator */}
-      <div className="border-t border-white/30 w-full my-6 sm:my-8" />
+      <div className="border-t border-white/30 w-full my-2 sm:mt-8" style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: 'rgb(229, 231, 235)' }}/>
 
       {/* Copyright — centered below separator */}
       <p className="text-white font-outfit text-sm sm:text-base font-normal text-center m-0 px-4">

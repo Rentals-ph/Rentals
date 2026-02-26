@@ -51,26 +51,61 @@ function VerticalPropertyCard({
   streetAddress,
   stateProvince,
 }: VerticalPropertyCardProps) {
-  const locationLine = [streetAddress, city, stateProvince].filter(Boolean).join(', ') || location
+  const locationLine = [streetAddress, city].filter(Boolean).join(' ') || location
   const router = useRouter()
   const [showSharePopup, setShowSharePopup] = useState(false)
   const [imageHovered, setImageHovered] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const shareButtonRef = useRef<HTMLButtonElement>(null)
   const sharePopupRef = useRef<HTMLDivElement>(null)
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const hoverIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const displayImages = imagesProp?.length ? imagesProp : [image]
   const currentImage = displayImages[currentImageIndex] ?? image
   const hasMultipleImages = displayImages.length > 1
 
+  const HOVER_DELAY_MS = 1500 // 1.5s before first auto-advance, then every 1.5s
+
+  const clearHoverTimers = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current)
+      hoverTimeoutRef.current = null
+    }
+    if (hoverIntervalRef.current) {
+      clearInterval(hoverIntervalRef.current)
+      hoverIntervalRef.current = null
+    }
+  }
+
   const goPrev = (e: React.MouseEvent) => {
     e.stopPropagation()
     setCurrentImageIndex((i) => (i - 1 + displayImages.length) % displayImages.length)
   }
-  const goNext = (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const goNext = (e?: React.MouseEvent) => {
+    e?.stopPropagation()
     setCurrentImageIndex((i) => (i + 1) % displayImages.length)
   }
+
+  const handleImageAreaMouseEnter = () => {
+    setImageHovered(true)
+    if (!hasMultipleImages) return
+    clearHoverTimers()
+    hoverTimeoutRef.current = setTimeout(() => {
+      hoverTimeoutRef.current = null
+      goNext()
+      hoverIntervalRef.current = setInterval(goNext, HOVER_DELAY_MS)
+    }, HOVER_DELAY_MS)
+  }
+
+  const handleImageAreaMouseLeave = () => {
+    setImageHovered(false)
+    clearHoverTimers()
+  }
+
+  useEffect(() => {
+    return () => clearHoverTimers()
+  }, [])
 
   const handleCardClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a') || (e.target as HTMLElement).closest('svg')) {
@@ -110,24 +145,36 @@ function VerticalPropertyCard({
 
   return (
     <article
-      className="group bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col w-full max-w-[400px] h-full shadow-sm hover:shadow-md transition-all duration-200"
+      className="group bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col w-full max-w-[550px] h-full shadow-sm hover:shadow-md transition-all duration-200"
       onClick={handleCardClick}
       style={{ cursor: id ? 'pointer' : 'default', borderWidth: '1px', borderStyle: 'solid', borderColor: 'rgb(229, 231, 235)' }}
     >
       {/* Property image with hover arrows */}
       <div
         className="relative w-full aspect-[4/3] overflow-hidden rounded-t-xl bg-gray-100"
-        onMouseEnter={() => setImageHovered(true)}
-        onMouseLeave={() => setImageHovered(false)}
+        onMouseEnter={handleImageAreaMouseEnter}
+        onMouseLeave={handleImageAreaMouseLeave}
       >
-        <img
-          src={currentImage}
-          alt={title}
-          className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-[1.02]"
-          onError={(e) => {
-            e.currentTarget.src = ASSETS.PLACEHOLDER_PROPERTY_MAIN
+        <div
+          className="flex h-full transition-transform duration-300 ease-out group-hover:scale-[1.02] origin-center"
+          style={{
+            width: `${displayImages.length * 100}%`,
+            transform: `translateX(-${currentImageIndex * (100 / displayImages.length)}%)`,
           }}
-        />
+        >
+          {displayImages.map((src, i) => (
+            <div key={i} className="flex-shrink-0 w-full h-full" style={{ width: `${100 / displayImages.length}%` }}>
+              <img
+                src={src}
+                alt={`${title} ${i + 1}`}
+                className="w-full h-full object-cover object-center"
+                onError={(e) => {
+                  e.currentTarget.src = ASSETS.PLACEHOLDER_PROPERTY_MAIN
+                }}
+              />
+            </div>
+          ))}
+        </div>
         {hasMultipleImages && imageHovered && (
           <>
             <button
@@ -151,7 +198,7 @@ function VerticalPropertyCard({
       </div>
 
       {/* Content */}
-      <div className="flex flex-col flex-1 p-4 gap-3 overflow-hidden">
+      <div className="flex flex-col flex-1 px-8 py-4 gap-3 overflow-hidden">
         <div className="flex justify-between items-center gap-2">
           <span className="text-blue-600 text-xs font-semibold uppercase tracking-wide">{propertyType}</span>
         </div>
@@ -162,12 +209,12 @@ function VerticalPropertyCard({
           )}
         </div>
         <div className="min-w-0">
-          <h3 className="text-gray-900 text-base font-semibold leading-snug line-clamp-2">
+          <h3 className="text-gray-900 text-lg font-semibold leading-snug line-clamp-2">
             {title}
-            {locationLine ? (
-              <span className="text-gray-500 font-normal">, {locationLine}</span>
-            ) : null}
           </h3>
+          {locationLine ? (
+              <span className="text-gray-500 font-normal">{locationLine}</span>
+            ) : null}
         </div>
 
         {/* Bed, bath, size */}
@@ -180,6 +227,7 @@ function VerticalPropertyCard({
               <path d="M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2" />
             </svg>
             {bedrooms}
+            <span className="text-gray-500 font-normal">Bedrooms</span>
           </span>
           <span className="flex items-center gap-1.5">
             <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 flex-shrink-0">
@@ -189,6 +237,7 @@ function VerticalPropertyCard({
               <path d="M3 18h18" />
             </svg>
             {bathrooms}
+            <span className="text-gray-500 font-normal">Bathrooms</span>
           </span>
           <span className="flex items-center gap-1.5">
             <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 flex-shrink-0">
@@ -197,6 +246,7 @@ function VerticalPropertyCard({
               <rect x="2" y="10" width="20" height="4" rx="1" />
             </svg>
             {propertySize}
+            <span className="text-gray-500 font-normal">Size</span>
           </span>
         </div>
 

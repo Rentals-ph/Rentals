@@ -80,26 +80,43 @@ export default function BlogPage() {
     <div className="flex min-h-screen flex-col bg-white overflow-x-hidden">
       <Navbar />
       
-      {/* Hero Section with BLOG background */}
+      {/* Hero Section - blog hero background with paper & laptop illustrations */}
       <section className="w-full relative min-h-[500px] flex flex-col overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full z-[1]">
           <img
-            src={ASSETS.BG_BLOG}
-            alt="Blog background"
+            src="/assets/images/blog/blog-hero-bg.png"
+            alt=""
             className="w-full h-full object-cover object-center"
           />
-          <div 
-            className="absolute top-0 left-0 w-full h-full z-[2]"
-            style={{ 
-              background: 'linear-gradient(135deg, rgba(32, 94, 215, 0.85) 0%, rgba(32, 94, 215, 0.75) 50%, rgba(254, 142, 10, 0.85) 100%)' 
-            }}
-          />
+          <div className="absolute inset-0 z-[2] bg-gradient-to-b from-[#224580]/20 to-transparent" aria-hidden />
         </div>
         <div className="relative z-[3] max-w-[var(--page-max-width)] mx-auto px-4 sm:px-6 md:px-10 lg:px-[150px] py-16 sm:py-24 md:py-32 w-full flex items-center justify-center flex-1">
-          <div className="text-center flex flex-col items-center justify-center max-w-[800px]">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl xl:text-9xl font-bold text-white font-outfit uppercase m-0">
-              BLOG
-            </h1>
+          <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-8 w-full max-w-6xl">
+            {/* Left: paper/clipboard illustration */}
+            <div className="hidden lg:block flex-shrink-0 w-32 xl:w-40 order-1">
+              <img
+                src="/assets/images/blog/blog-paper.png"
+                alt=""
+                className="w-full h-auto object-contain"
+              />
+            </div>
+            {/* Center: title + description */}
+            <div className="flex flex-col items-center justify-center text-center flex-1 order-2 min-w-0">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-rental-orange-500 font-outfit uppercase m-0 mb-4 sm:mb-6">
+                BLOGS
+              </h1>
+              <p className="text-white font-outfit text-sm sm:text-base md:text-lg max-w-[720px] leading-relaxed m-0">
+                Stay Ahead Of The Curve With Expert Insights, Market Trends, And Essential Guides To Philippine Real Estate. From Investment Tips To Neighborhood Spotlights, We Bring You The Stories Shaping The Future Of Homeownership.
+              </p>
+            </div>
+            {/* Right: laptop illustration */}
+            <div className="hidden lg:block flex-shrink-0 w-32 xl:w-40 order-3">
+              <img
+                src="/assets/images/blog/blog-laptop.png"
+                alt=""
+                className="w-full h-auto object-contain"
+              />
+            </div>
           </div>
         </div>
         <div className="relative z-[3] w-full h-3 bg-rental-orange-500" />
@@ -163,14 +180,13 @@ export default function BlogPage() {
               {/* Right Column - Trending Articles */}
               <div className="lg:col-span-1">
                 <div className="mb-6">
-                  {/* TRENDINGS Header with colorful background */}
-                  <div className="mb-6 px-6 py-4 rounded-lg" style={{
-                    background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 25%, #fbbf24 50%, #f59e0b 75%, #d97706 100%)',
-                    backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0.1) 20px)'
-                  }}>
-                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900 font-outfit uppercase">
-                      TRENDINGS
-                    </h2>
+                  {/* TRENDINGS Header - wooden banner image */}
+                  <div className="mb-6 rounded-lg overflow-hidden">
+                    <img
+                      src="/assets/images/blog/trending-banner.png"
+                      alt="Trendings"
+                      className="w-full h-auto object-cover object-center"
+                    />
                   </div>
                   
                   {/* Trending Posts */}

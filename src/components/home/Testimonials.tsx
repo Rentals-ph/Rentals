@@ -55,6 +55,11 @@ const Testimonials = () => {
         className="absolute inset-0 z-[2] pointer-events-none" 
         style={{ background: 'linear-gradient(to bottom, rgba(32, 94, 215, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%)' }}
       />
+      {/* Smooth blend into Partners section (dark blue #062858) */}
+      <div 
+        className="absolute bottom-0 left-0 right-0 h-[35%] min-h-[140px] z-[2] pointer-events-none" 
+        style={{ background: 'linear-gradient(to bottom, transparent 0%, rgba(6, 40, 88, 0.4) 50%, #062858 100%)' }}
+      />
       
       {/* Main content container */}
       <div className="relative z-[3] w-full mx-auto min-w-0">
@@ -69,10 +74,10 @@ const Testimonials = () => {
               </div>
             </div>
             <div className="flex flex-col gap-4">
-              <h1 className="font-outfit text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight">
+              <h1 className="font-outfit text-4xl md:text-4xl font-bold text-white tracking-tight">
                 Testimonials
               </h1>
-              <h2 className="font-outfit text-2xl md:text-3xl font-semibold text-white mb-3 leading-tight">
+              <h2 className="font-outfit text-2xl md:text-3xl font-semibold text-white leading-tight">
                 Trusted By The Industry's Best
               </h2>
               <p className="font-outfit text-base md:text-lg font-normal leading-relaxed text-white/95 mb-6 max-w-md">
