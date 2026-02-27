@@ -694,7 +694,7 @@ export default function PropertyDetailsPage() {
             </div>
 
             {/* Inquiry / Contact form (for Inquire now scroll target) */}
-            <div id="inquiry-form" className="scroll-mt-8 bg-white rounded-xl border border-gray-200 py-6 mb-10">
+            <div id="inquiry-form" className="scroll-mt-8 bg-white rounded-xl border border-gray-200 py-6 px-10 mb-10">
               <div className="flex border-b border-gray-200 mb-6"
               style={{ borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#E5E7EB' }}>
                 <button

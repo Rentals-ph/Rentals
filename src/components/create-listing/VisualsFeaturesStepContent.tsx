@@ -155,6 +155,10 @@ export function VisualsFeaturesStepContent({
   }
 
   const handleNext = () => {
+    if (images.length < 5) {
+      alert('Please upload at least 5 photos of the property before continuing.')
+      return
+    }
     updateData({
       images,
       videoUrl,
@@ -201,7 +205,7 @@ export function VisualsFeaturesStepContent({
               Drop files here or click to upload
             </p>
             <p className="text-sm text-gray-600">
-              Upload high-quality images of your property (max 10mb each)
+              Upload high-quality images of your property. For best results, add at least 5 photos.
             </p>
           </div>
           {images.length > 0 && (

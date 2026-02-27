@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import AppSidebar from '../../components/common/AppSidebar'
-import AgentHeader from '../../components/agent/AgentHeader'
-import EditPropertyModal from '../../components/agent/EditPropertyModal'
+import AppSidebar from '@/components/common/AppSidebar'
+import AgentHeader from '@/components/agent/AgentHeader'
+import EditPropertyModal from '@/components/agent/EditPropertyModal'
+import PropertyMapPopupCard from '@/components/common/PropertyMapPopupCard'
 import { propertiesApi, agentsApi } from '../../api'
 import type { Property } from '../../types'
 import { ASSETS } from '@/utils/assets'
@@ -275,67 +276,70 @@ export default function AgentDashboard() {
               <h2 className="text-xl font-bold text-gray-900">Recent Listings</h2>
               <Link href="/agent/listings" className="text-sm text-blue-600 font-medium hover:underline">View All</Link>
             </div>
-            <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {loading ? (
-                <>
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-gray-50 animate-pulse">
-                      <div className="w-full sm:w-32 h-40 sm:h-24 rounded-lg bg-gray-200 flex-shrink-0" />
-                      <div className="flex-1 space-y-2">
-                        <span className="block h-4 w-3/4 rounded bg-gray-200" />
-                        <span className="block h-3 w-full rounded bg-gray-100" />
-                        <span className="block h-3 w-1/2 rounded bg-gray-100" />
-                        <span className="block h-4 w-20 rounded bg-gray-200" />
-                      </div>
-                      <div className="h-9 w-20 rounded bg-gray-200" />
-                    </div>
-                  ))}
-                </>
-              ) : listings.length === 0 ? (
-                <div className="py-8 text-center text-gray-500">No listings yet. Create your first listing!</div>
-              ) : (
-                listings.map((listing) => (
-                  <div key={listing.id || listing.title} className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
-                    <div className="w-full sm:w-32 h-40 sm:h-24 rounded-lg overflow-hidden flex-shrink-0">
-                      <img 
-                        src={listing.image} 
-                        alt={listing.title} 
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement
-                          target.src = ASSETS.PLACEHOLDER_PROPERTY_MAIN
-                        }} 
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-base font-semibold text-gray-900 mb-1 truncate">{listing.title}</h4>
-                      <p className="text-sm text-gray-600 mb-1 line-clamp-2">{listing.details}</p>
-                      <p className="text-base font-bold text-blue-600">{listing.price}</p>
-                    </div>
-                    <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between gap-2">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${listing.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                        {listing.status === 'active' ? 'Active' : 'Pending'}
-                      </span>
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          className="w-8 h-8 rounded-lg bg-white hover:bg-blue-50 flex items-center justify-center text-gray-600 hover:text-blue-600 transition-colors duration-200 border border-gray-200"
-                          title="Edit"
-                          onClick={() => handleEditClick(listing.id)}
-                        >
-                          <FiEdit3 />
-                        </button>
-                        <button 
-                          className="w-8 h-8 rounded-lg bg-white hover:bg-blue-50 flex items-center justify-center text-gray-600 hover:text-blue-600 transition-colors duration-200 border border-gray-200" 
-                          title="View"
-                          onClick={() => handleViewClick(listing)}
-                        >
-                          <FiEye />
-                        </button>
-                      </div>
+                Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex flex-col gap-2">
+                    <div className="h-40 w-full animate-pulse overflow-hidden rounded-2xl bg-gray-200 sm:h-44" />
+                    <div className="space-y-2 rounded-xl bg-gray-50 p-3">
+                      <span className="block h-4 w-3/4 rounded bg-gray-200" />
+                      <span className="block h-3 w-full rounded bg-gray-100" />
+                      <span className="block h-3 w-1/2 rounded bg-gray-100" />
                     </div>
                   </div>
                 ))
+              ) : listings.length === 0 ? (
+                <div className="py-8 text-center text-gray-500">No listings yet. Create your first listing!</div>
+              ) : (
+                listings.map((listing) => {
+                  const property = recentProperties.find((p) => p.id === listing.id) ?? null
+                  const location =
+                    property?.location ||
+                    property?.street_address ||
+                    property?.city ||
+                    'Address not available'
+
+                  return (
+                    <div key={listing.id || listing.title} className="flex flex-col gap-2">
+                      <PropertyMapPopupCard
+                        id={listing.id}
+                        title={listing.title}
+                        type={property?.type ?? null}
+                        location={location}
+                        priceLabel={listing.price}
+                        imageUrl={listing.image}
+                      />
+                      <div className="flex items-center justify-between gap-2 px-1">
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-medium ${
+                            listing.status === 'active'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-yellow-100 text-yellow-700'
+                          }`}
+                        >
+                          {listing.status === 'active' ? 'Active' : 'Pending'}
+                        </span>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-colors duration-200 hover:bg-blue-50 hover:text-blue-600"
+                            title="Edit"
+                            onClick={() => handleEditClick(listing.id)}
+                          >
+                            <FiEdit3 />
+                          </button>
+                          <button
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-colors duration-200 hover:bg-blue-50 hover:text-blue-600"
+                            title="View"
+                            onClick={() => handleViewClick(listing)}
+                          >
+                            <FiEye />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })
               )}
             </div>
           </div>

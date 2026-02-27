@@ -43,20 +43,20 @@ function SimplePropertyCard({
           }}
         />
         <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-1 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 md:p-3">
-          <div className="flex flex-col gap-1 rounded-md bg-black/40 px-2 py-1.5 md:px-1.5 md:py-1">
-            <h3 className="m-0 font-outfit text-base font-semibold leading-snug text-white line-clamp-2 [text-shadow:0_1px_2px_rgba(0,0,0,0.3)] md:text-sm">
+          <div className="flex flex-col gap-1 rounded-md bg-black/40 px-2 md:px-1.5 md:py-1">
+            <h3 className=" font-outfit text-lg font-semibold leading-snug text-white line-clamp-2 [text-shadow:0_1px_2px_rgba(0,0,0,0.3)] md:text-lg">
               {title}
             </h3>
             {location && (
               <p
-                className="m-0 flex items-center gap-1.5 font-outfit text-sm font-normal leading-snug text-white/90 line-clamp-1 [text-shadow:0_1px_2px_rgba(0,0,0,0.3)] md:text-xs min-w-0"
+                className="flex items-center gap-1.5 font-outfit text-lg font-normal text-white/90 line-clamp-1 [text-shadow:0_1px_2px_rgba(0,0,0,0.3)] md:text-lg min-w-0"
                 title={location}
               >
                 <FiMapPin className="flex-shrink-0 w-3.5 h-3.5 text-white/80 md:w-3 md:h-3" aria-hidden />
                 <span className="truncate">{location}</span>
               </p>
             )}
-            <p className="m-0 mt-1 font-outfit text-lg font-bold leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.4)] md:text-base">
+            <p className="m-0 mt-1 font-outfit text-xl font-bold leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.4)] md:text-xl">
               {price}
             </p>
           </div>

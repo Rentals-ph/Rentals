@@ -221,7 +221,7 @@ export default function AgentCreateListingPropertyImages() {
             <FiUploadCloud className="text-[40px] text-blue-600 mb-2.5" /> {/* acpi-dropzone-icon */}
             <p className="m-0 mb-1 text-lg font-semibold text-gray-900">Drop files here or click to upload</p> {/* acpi-dropzone-title */}
             <p className="m-0 mb-2.5 text-sm text-gray-600">
-              Upload high-quality images of your property (max 10mb each)
+              Upload high-quality images of your property. For best results, add at least 5 photos.
             </p> {/* acpi-dropzone-text */}
             <p className="m-0 max-w-[540px] text-xs text-gray-500">
               You can drag and drop multiple files at once. The first image will be set as the default
@@ -286,6 +286,10 @@ export default function AgentCreateListingPropertyImages() {
             <button
               className="aclc-next-btn"
               onClick={() => {
+                if (images.length < 5) {
+                  alert('Please upload at least 5 photos of the property before continuing.')
+                  return
+                }
                 updateData({ images, videoUrl })
                 router.push('/agent/create-listing/pricing')
               }}

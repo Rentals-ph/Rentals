@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import AppSidebar from '../../../components/common/AppSidebar'
-import AgentHeader from '../../../components/agent/AgentHeader'
-import EditPropertyModal from '../../../components/agent/EditPropertyModal'
+import AppSidebar from '@/components/common/AppSidebar'
+import AgentHeader from '@/components/agent/AgentHeader'
+import EditPropertyModal from '@/components/agent/EditPropertyModal'
 import { propertiesApi, agentsApi } from '../../../api'
 import type { Property } from '../../../types'
 import {
@@ -17,6 +17,7 @@ import {
 import { ASSETS } from '@/utils/assets'
 import { resolvePropertyImage } from '@/utils/imageResolver'
 import PropertiesMap from '../../../components/agent/PropertiesMap'
+import PropertyMapPopupCard from '@/components/common/PropertyMapPopupCard'
 // import './page.css' // Removed - converted to Tailwind
 
 type ListingStatus = 'active' | 'rented' | 'hidden'
@@ -379,7 +380,7 @@ export default function AgentMyListings() {
             })()}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-1.5"> {/* aml-grid */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6 mt-1.5"> {/* aml-grid */}
             {loading ? (
               <>
                 {Array.from({ length: 4 }).map((_, i) => (
@@ -394,7 +395,7 @@ export default function AgentMyListings() {
                   </div>
                 ))}
               </>
-            ) : (() => {
+              ) : (() => {
               // Filter listings based on selected filter
               const filteredListings = selectedFilter === 'all' 
                 ? listings 
@@ -411,47 +412,39 @@ export default function AgentMyListings() {
                   }
                 </div>
               ) : (
-                filteredListings.map((l) => (
-                <div key={l.id} className="bg-white rounded-[12px] sm:rounded-[14px] border border-gray-200 overflow-hidden shadow-sm flex flex-col sm:flex-row gap-0"> {/* aml-card */}
-                <div className="relative w-full sm:w-[140px] sm:min-w-[140px] md:w-[190px] md:min-w-[190px] aspect-[16/10] sm:aspect-auto sm:h-auto bg-gray-100 flex-shrink-0"> {/* aml-card-media */}
-                  <img
-                    src={l.image}
-                    alt={l.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement
-                      target.src = ASSETS.PLACEHOLDER_PROPERTY_MAIN
-                    }}
-                  />
-                  <div className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 bg-white/90 backdrop-blur-sm rounded-full w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-blue-600 text-xs sm:text-sm shadow-sm" title="Pinned"> {/* aml-pin */}
-                    <FiMapPin />
-                  </div>
-                  <button 
-                    className="absolute bottom-2 right-2 sm:bottom-2.5 sm:right-2.5 bg-blue-600 text-white text-[10px] sm:text-xs font-semibold py-1 px-2.5 sm:py-1.5 sm:px-3.5 rounded-lg border-0 cursor-pointer transition-all duration-200 hover:bg-blue-700 active:scale-95" 
-                    type="button"
-                    onClick={() => handleEditClick(l.id)}
-                  > {/* aml-edit-btn */}
-                    Edit
-                  </button>
-                </div>
+                filteredListings.map((l) => {
+                  const property = properties.find((p) => p.id === l.id) ?? null
+                  const priceTypeLabel = property?.price_type
+                    ? property.price_type.charAt(0).toUpperCase() +
+                      property.price_type.slice(1).toLowerCase()
+                    : null
+                  const priceLabel =
+                    property && property.price != null
+                      ? priceTypeLabel
+                        ? `₱${property.price.toLocaleString('en-US')} / ${priceTypeLabel}`
+                        : `₱${property.price.toLocaleString('en-US')}`
+                      : null
 
-                <div className="flex-1 p-3 sm:p-4 flex flex-col gap-2 sm:gap-2.5 min-w-0"> {/* aml-card-body */}
-                  <div className="font-semibold text-sm sm:text-base text-gray-900 leading-snug line-clamp-2">{l.title}</div> {/* aml-card-title */}
-                  <div className="flex items-start gap-1.5 text-gray-600 text-xs sm:text-sm"> {/* aml-card-address */}
-                    <FiMapPin className="flex-shrink-0 mt-0.5 text-sm sm:text-base" /> {/* aml-address-icon */}
-                    <span className="line-clamp-2 min-w-0">{l.address}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-2 sm:gap-3 mt-auto pt-2 border-t border-gray-100"> {/* aml-card-meta */}
-                    {renderStars(l.rating)}
-                    <div className="flex items-center gap-1 sm:gap-1.5 text-gray-600 text-[10px] sm:text-xs"> {/* aml-views */}
-                      <FiEye className="text-xs sm:text-sm flex-shrink-0" />
-                      <span>Viewed({l.views})</span>
+                  return (
+                    <div key={l.id} className="relative">
+                      <PropertyMapPopupCard
+                        id={l.id}
+                        title={l.title}
+                        type={property?.type ?? null}
+                        location={l.address}
+                        priceLabel={priceLabel}
+                        imageUrl={l.image}
+                      />
+                      <button
+                        className="absolute right-4 top-4 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-blue-600 shadow-sm ring-1 ring-blue-100 transition hover:bg-blue-50"
+                        type="button"
+                        onClick={() => handleEditClick(l.id)}
+                      >
+                        Edit
+                      </button>
                     </div>
-                  </div>
-                </div>
-              </div>
-                ))
+                  )
+                })
               )
             })()}
           </div>

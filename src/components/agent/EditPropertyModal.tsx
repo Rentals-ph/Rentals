@@ -180,7 +180,6 @@ export default function EditPropertyModal({
     if (files.length === 0) return
     
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
-    const maxSize = 10 * 1024 * 1024 // 10MB
     
     const validFiles: File[] = []
     const newPreviews: string[] = []
@@ -189,12 +188,6 @@ export default function EditPropertyModal({
       // Validate file type
       if (!validTypes.includes(file.type)) {
         alert(`Invalid file type: ${file.name}. Please upload a JPEG, JPG, PNG, GIF, or WEBP image.`)
-        return
-      }
-      
-      // Validate file size
-      if (file.size > maxSize) {
-        alert(`Image file ${file.name} is too large. Maximum size is 10MB. Current size: ${(file.size / 1024 / 1024).toFixed(2)}MB`)
         return
       }
       
@@ -259,12 +252,6 @@ export default function EditPropertyModal({
           const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
           if (!validTypes.includes(imageFile.type)) {
             throw new Error(`Invalid image type: ${imageFile.type}. Please upload a JPEG, JPG, PNG, GIF, or WEBP image.`)
-          }
-          
-          // Verify file size (max 10MB)
-          const maxSize = 10 * 1024 * 1024 // 10MB in bytes
-          if (imageFile.size > maxSize) {
-            throw new Error(`Image file ${imageFile.name} is too large. Maximum size is 10MB. Current size: ${(imageFile.size / 1024 / 1024).toFixed(2)}MB`)
           }
           
           // Append each image file with indexed keys for Laravel

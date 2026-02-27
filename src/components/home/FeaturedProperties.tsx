@@ -234,7 +234,7 @@ const FeaturedProperties = () => {
       </div>
 
       {/* Location filter row - same style as properties subcategory row, centered */}
-      <div className="flex justify-center mt-4 mb-2">
+      <div className="flex justify-center mb-2">
         <div className="subcategory-row flex items-center gap-0 flex-wrap rounded-lg" style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: '#E5E7EB' }}>
           {locations.map((loc) => (
             <button
