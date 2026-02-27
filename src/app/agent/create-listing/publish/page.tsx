@@ -10,6 +10,7 @@ import { compressImage } from '../../../../utils/imageCompression'
 import { uploadWithProgress } from '../../../../utils/uploadProgress'
 import { uploadPropertyMainImage } from '../../../../utils/imageUpload'
 import { getApiBaseUrl } from '../../../../config/api'
+import { formatPrice } from '../../../../utils/format'
 
 import {
   FiCheck,
@@ -99,7 +100,7 @@ export default function AgentCreateListingPublish() {
   const propertyData = {
     category: data.category || 'Not Set',
     title: data.title || 'Not Set',
-    price: data.price ? `₱${data.price}` : 'Not Set',
+    price: data.price != null ? formatPrice(Number(data.price)) : 'Not Set',
     priceType: data.priceType || 'Monthly',
     location: data.street 
       ? `${data.street}, ${data.city || ''}, ${data.state || ''}`.trim()

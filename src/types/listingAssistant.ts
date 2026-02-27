@@ -364,7 +364,7 @@ export const LISTING_STATUS_LABELS: Record<ListingStatus, string> = {
  */
 export function formatPrice(price: number | null | undefined): string {
   if (price === null || price === undefined) return '—';
-  return `₱${price.toLocaleString('en-PH')}`;
+  return `₱${price.toLocaleString('en-US')}`;
 }
 
 /**

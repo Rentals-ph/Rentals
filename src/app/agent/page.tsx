@@ -85,8 +85,8 @@ export default function AgentDashboard() {
       const transformedListings: ListingData[] = recent.map((property: Property) => {
         const area = property.area ? `${property.area}${property.floor_area_unit || ' sqm'}` : 'N/A'
         const price = property.price_type
-          ? `₱${property.price.toLocaleString()}/${property.price_type}`
-          : `₱${property.price.toLocaleString()}/month`
+          ? `₱${property.price.toLocaleString('en-US')}/${property.price_type}`
+          : `₱${property.price.toLocaleString('en-US')}/month`
         const imageUrl = property.image_url || property.image || ASSETS.PLACEHOLDER_PROPERTY_MAIN
         return {
           id: property.id,
@@ -199,8 +199,8 @@ export default function AgentDashboard() {
                 <h3 className="text-[10px] font-medium text-gray-600 mb-0.5 leading-tight">Revenue</h3>
                 <p className="text-lg font-bold text-gray-900 leading-tight truncate">
                   {statsLoading ? '...' : stats.totalRevenue >= 1000 
-                    ? `₱${(stats.totalRevenue / 1000).toFixed(0)}K`
-                    : `₱${stats.totalRevenue}`}
+                    ? `₱${(stats.totalRevenue / 1000).toLocaleString('en-US')}K`
+                    : `₱${stats.totalRevenue.toLocaleString('en-US')}`}
                 </p>
               </div>
             </div>

@@ -147,7 +147,7 @@ export default function BrokerDashboard() {
               return {
                 name,
                 deals: item.count,
-                amount: `₱${(item.count * 50000).toLocaleString()}`,
+                amount: `₱${(item.count * 50000).toLocaleString('en-US')}`,
                 color: colors[index] || '#3B82F6',
               }
             })
@@ -335,7 +335,7 @@ export default function BrokerDashboard() {
                         </span>
                       </div>
                       <div className="p-4 flex flex-col gap-2">
-                        <div className="text-lg font-bold text-gray-900">₱{property.price?.toLocaleString()}/{property.price_type || 'mo'}</div>
+                        <div className="text-lg font-bold text-gray-900">₱{property.price != null ? property.price.toLocaleString('en-US') : 'N/A'}/{property.price_type || 'mo'}</div>
                         <div className="text-xs text-gray-500">{property.bedrooms ?? 0} bd | {property.bathrooms ?? 0} ba</div>
                         <div className="text-sm text-gray-700 line-clamp-2">{property.location || property.street_address || 'Address not available'}</div>
                         <div className="flex items-center gap-2 pt-2 mt-auto border-t border-gray-100">

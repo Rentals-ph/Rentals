@@ -1142,7 +1142,7 @@ function PropertiesContent() {
                     )}
                     {priceMin && (
                       <span className="filter-chip inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm border border-blue-200">
-                        Min Price: ₱{parseInt(priceMin).toLocaleString()}
+                        Min Price: ₱{(Number(priceMin) || 0).toLocaleString('en-US')}
                         <button 
                           onClick={() => removeFilter('priceMin')} 
                           aria-label="Remove min price filter"
@@ -1152,7 +1152,7 @@ function PropertiesContent() {
                     )}
                     {priceMax && (
                       <span className="filter-chip inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm border border-blue-200">
-                        Max Price: ₱{parseInt(priceMax).toLocaleString()}
+                        Max Price: ₱{(Number(priceMax) || 0).toLocaleString('en-US')}
                         <button 
                           onClick={() => removeFilter('priceMax')} 
                           aria-label="Remove max price filter"

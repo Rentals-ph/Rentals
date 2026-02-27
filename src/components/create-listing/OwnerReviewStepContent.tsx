@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useCreateListing } from '../../contexts/CreateListingContext'
 import { compressImage } from '../../utils/imageCompression'
 import { uploadWithProgress } from '../../utils/uploadProgress'
+import { formatPrice } from '../../utils/format'
 import { getApiBaseUrl } from '../../config/api'
 import {
   FiArrowLeft,
@@ -112,7 +113,7 @@ export function OwnerReviewStepContent({
   const propertyData = {
     category: data.category || 'Not Set',
     title: data.title || 'Not Set',
-    price: displayPrice ? `₱${displayPrice}` : 'Not Set',
+    price: displayPrice != null && displayPrice !== '' ? formatPrice(Number(displayPrice)) : 'Not Set',
     priceType: displayPriceType || 'Monthly',
     location: data.street
       ? `${data.street}, ${data.city || ''}, ${data.state || ''}`.trim()

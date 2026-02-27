@@ -91,7 +91,7 @@ export default function PublicPageBuilderPage() {
 
   const formatPropertyPrice = (property: any) => {
     if (!property) return ''
-    return `₱${property.price?.toLocaleString() || ''}${property.price_type ? `/${property.price_type}` : '/mo'}`
+    return `₱${property.price != null ? property.price.toLocaleString('en-US') : ''}${property.price_type ? `/${property.price_type}` : '/mo'}`
   }
 
   const formatPropertyDate = (property: any) => {

@@ -1268,7 +1268,7 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
 
   // Helper function to format property price
   const formatPropertyPrice = (property: Property) => {
-    return `₱${property.price.toLocaleString()}${property.price_type ? `/${property.price_type}` : '/mo'}`
+    return `₱${property.price.toLocaleString('en-US')}${property.price_type ? `/${property.price_type}` : '/mo'}`
   }
   
   // Helper function to format property date
@@ -2826,7 +2826,7 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
                           <div style={{ fontWeight: '600', marginBottom: '4px' }}>{property.title}</div>
                           <div style={{ fontSize: '14px', color: '#6B7280' }}>{property.location}</div>
                           <div style={{ fontSize: '14px', color: '#3B82F6', marginTop: '4px' }}>
-                            ₱{property.price.toLocaleString()}{property.price_type ? `/${property.price_type}` : '/mo'}
+                            ₱{property.price.toLocaleString('en-US')}{property.price_type ? `/${property.price_type}` : '/mo'}
                           </div>
                         </div>
                         {featuredListings.some(l => l.id === property.id) && (

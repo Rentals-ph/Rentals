@@ -32,7 +32,7 @@ export default function AgentRentEstimate() {
     const bonus = location.trim() ? 4000 : 0
     const kw = keyword.trim() ? 2000 : 0
     const computed = base + bonus + kw
-    setEstimate(computed ? `P${computed.toLocaleString()} /month` : null)
+    setEstimate(computed ? `₱${computed.toLocaleString('en-US')} /month` : null)
   }
 
   return (

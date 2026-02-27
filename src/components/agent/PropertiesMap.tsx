@@ -153,7 +153,7 @@ export default function PropertiesMap({ properties, agentId, className }: Proper
             ${property.type || 'Property'}
           </p>
           <p style="margin: 0 0 4px 0; font-size: 12px; color: #6B7280;">
-            ₱${property.price?.toLocaleString() || 'N/A'} ${property.price_type || 'Monthly'}
+            ₱${property.price != null ? property.price.toLocaleString('en-US') : 'N/A'} ${property.price_type || 'Monthly'}
           </p>
           <p style="margin: 0; font-size: 11px; color: ${property.published_at ? '#10B981' : '#DC2626'};">
             ${property.published_at ? '● Active' : '● Hidden'}

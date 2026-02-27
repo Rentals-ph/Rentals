@@ -33,7 +33,7 @@ function HorizontalPropertyCard({
   id,
   propertyType = 'Commercial Spaces',
   date = 'Sat 05, 2024',
-  price = '₱1200/Month',
+  price = '₱1,200/Month',
   title = 'Azure Residences - 2BR Corner Suite',
   image = ASSETS.PLACEHOLDER_PROPERTY_MAIN,
   images: imagesProp,

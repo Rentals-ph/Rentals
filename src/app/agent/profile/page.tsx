@@ -113,8 +113,8 @@ export default function AgentMyProfile() {
             : 'Not published'
           
           const price = property.price_type 
-            ? `₱${property.price.toLocaleString()}/${property.price_type}`
-            : `₱${property.price.toLocaleString()}/Month`
+            ? `₱${property.price.toLocaleString('en-US')}/${property.price_type}`
+            : `₱${property.price.toLocaleString('en-US')}/Month`
           
           const area = property.area ? property.area : 0
           

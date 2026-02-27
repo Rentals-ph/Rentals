@@ -877,7 +877,7 @@ function Hero() {
                             id={property.id}
                             title={property.title}
                             location={property.location || property.city || property.street_address || undefined}
-                            price={`₱${property.price.toLocaleString()}${property.price_type ? `/${property.price_type}` : ''}`}
+                            price={`₱${property.price.toLocaleString('en-US')}${property.price_type ? `/${property.price_type}` : ''}`}
                             image={property.image_url || (property.image ? getImageUrl(property.image) : ASSETS.PLACEHOLDER_PROPERTY_MAIN)}
                           />
                         ))}
