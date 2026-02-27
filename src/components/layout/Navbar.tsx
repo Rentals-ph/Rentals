@@ -350,7 +350,7 @@ const Navbar = () => {
                 )}
               </div>
             ) : (
-              <button className="rounded-full !border-2 !border-rental-orange-500 bg-transparent text-rental-orange-500 px-3 sm:px-5 h-8 sm:h-10 font-outfit text-xs sm:text-sm md:text-sm font-medium cursor-pointer inline-flex items-center justify-center hover:bg-rental-orange-500 hover:text-white active:scale-95 transition-all duration-200" onClick={handleLoginClick}>
+              <button className="rounded-full !border-2 !border-rental-blue-600 bg-transparent text-rental-blue-600 px-3 sm:px-5 h-8 sm:h-10 font-outfit text-xs sm:text-sm md:text-sm font-medium cursor-pointer inline-flex items-center justify-center hover:bg-rental-blue-600 hover:text-white hover:scale-105 hover:shadow-[0_4px_14px_rgba(0,0,0,0.15)] active:scale-95 transition-all duration-200" onClick={handleLoginClick}>
                 <span className="hidden sm:inline">Login / Register</span>
                 <span className="sm:hidden">Login</span>
               </button>

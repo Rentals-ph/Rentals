@@ -203,7 +203,7 @@ export default function AgentInbox() {
           )}
 
           <div className="relative mb-5"> {/* inbox-search */}
-            <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg" /> {/* search-icon */}
+            <FiSearch className="absolute left-4 top-3 text-gray-400 text-lg" /> {/* search-icon */}
             <input
               type="text"
               placeholder="Search"

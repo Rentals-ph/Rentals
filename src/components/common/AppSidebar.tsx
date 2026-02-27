@@ -299,9 +299,6 @@ function AppSidebar() {
       <NavLink href="/agent/digital-card" icon={FiCreditCard} label="Digital Business Card" active={isActive('/agent/digital-card')} />
       <NavLink href="/agent/page-builder" icon={FiSettings} label="Page Builder" active={isActive('/agent/page-builder')} />
       <NavLink href="/agent/listings" icon={FiList} label="My Listings" active={isActive('/agent/listings')} />
-      <NavLink href="/agent/tracker" icon={FiBarChart2} label="Rental Tracker" active={isActive('/agent/tracker')} />
-      <NavLink href="/agent/rent-estimate" icon={FiFileText} label="Rent Estimate" active={isActive('/agent/rent-estimate')} />
-      <NavLink href="/agent/blogs" icon={FiBookOpen} label="Share Blogs" active={isActive('/agent/blogs')} />
     </>
   )
 
@@ -324,12 +321,9 @@ function AppSidebar() {
   // Admin sidebar content
   const renderAdminSidebar = () => (
     <>
-      <NavLink href="/" icon={FiLayout} label="Home" active={isActive('/') && !pathname?.includes('//')} />
       <NavLink href="/admin" icon={FiHome} label="Dashboard" active={isActive('/admin')} />
-      <NavLink href="/admin/agents" icon={FiUsers} label="Agents" active={isActive('/admin/agents')} />
-      <NavLink href="/admin/properties" icon={FiLayers} label="Properties" active={isActive('/admin/properties')} />
-      <NavLink href="/admin/revenue" icon={FiDollarSign} label="Revenue" active={isActive('/admin/revenue')} />
-      <NavLink href="/admin/users" icon={FiUsers} label="Users" active={isActive('/admin/users')} />
+      <NavLink href="/admin/agents" icon={FiUsers} label="User Management" active={isActive('/admin/agents')} />
+      <NavLink href="/admin/properties" icon={FiLayers} label="Property Management" active={isActive('/admin/properties')} />
     </>
   )
 

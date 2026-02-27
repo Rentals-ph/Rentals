@@ -45,71 +45,10 @@ export default function AdminDashboard() {
               <p className="text-xs font-medium text-emerald-600">↑ 8% from last month</p>
             </div>
           </div>
-
-          <div className="bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm transition-all duration-200 hover:shadow-md">
-            <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-emerald-100 text-emerald-600">
-              <FiCheckCircle />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-sm font-medium text-gray-600 mb-2">Monthly Bookings</h3>
-              <p className="text-3xl font-bold text-gray-900 mb-1">342</p>
-              <p className="text-xs font-medium text-emerald-600">↑ 15% from last month</p>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm transition-all duration-200 hover:shadow-md">
-            <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-emerald-100 text-emerald-600">
-              <FiDollarSign />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-sm font-medium text-gray-600 mb-2">Revenue</h3>
-              <p className="text-3xl font-bold text-gray-900 mb-1">$24,890</p>
-              <p className="text-xs font-medium text-emerald-600">↑ 22% from last month</p>
-            </div>
-          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-6 mb-8 lg:grid-cols-1">
-          <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Revenue Overview</h2>
-            <div className="w-full h-[200px]">
-              <svg className="w-full h-full" viewBox="0 0 400 200" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M 20 160 L 80 120 L 140 80 L 200 100 L 260 60 L 320 40 L 380 30"
-                  fill="none"
-                  stroke="#3B82F6"
-                  strokeWidth="3"
-                  className="transition-all duration-300" /* chart-line */
-                />
-                <path
-                  d="M 20 160 L 80 120 L 140 80 L 200 100 L 260 60 L 320 40 L 380 30 L 380 200 L 20 200 Z"
-                  fill="url(#areaGradient)"
-                />
-                <g>
-                  <text x="20" y="195" fontSize="12" fill="#6B7280">Jan</text>
-                  <text x="80" y="195" fontSize="12" fill="#6B7280">Feb</text>
-                  <text x="140" y="195" fontSize="12" fill="#6B7280">Mar</text>
-                  <text x="200" y="195" fontSize="12" fill="#6B7280">Apr</text>
-                  <text x="260" y="195" fontSize="12" fill="#6B7280">May</text>
-                  <text x="320" y="195" fontSize="12" fill="#6B7280">Jun</text>
-                </g>
-                <g>
-                  <text x="5" y="200" fontSize="12" fill="#6B7280">0</text>
-                  <text x="5" y="160" fontSize="12" fill="#6B7280">5k</text>
-                  <text x="5" y="120" fontSize="12" fill="#6B7280">10k</text>
-                  <text x="5" y="80" fontSize="12" fill="#6B7280">15k</text>
-                  <text x="5" y="40" fontSize="12" fill="#6B7280">20k</text>
-                  <text x="5" y="10" fontSize="12" fill="#6B7280">25k</text>
-                </g>
-              </svg>
-            </div>
-          </div>
+          
 
           <div className="bg-white rounded-2xl p-6 shadow-sm">
             <h2 className="text-lg font-bold text-gray-900 mb-4">Property Types</h2>

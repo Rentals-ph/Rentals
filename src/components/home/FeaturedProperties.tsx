@@ -159,7 +159,7 @@ const FeaturedProperties = () => {
     const carousel = propertyCarouselRef.current
     if (!carousel || loading || carouselProperties.length === 0) return
 
-    const scrollSpeed = 0.4 // pixels per frame (smooth slow scroll)
+    const scrollSpeed = 0 // pixels per frame (smooth slow scroll)
     let scrollAccumulator = 0 // sub-pixel accumulator so slow speeds don't round to 0
     let animationFrameId: number | null = null
     let isRunning = true
@@ -218,12 +218,13 @@ const FeaturedProperties = () => {
       className="border-t-0 relative min-h-[60vh] flex px-6 md:px-10 lg:px-[150px] flex-col justify-center py-12 pb-4 before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-gray-200 before:to-transparent after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-gray-200 after:to-transparent"
     >
       <div className="w-full">
-      <div className="relative flex justify-center items-end mb-4">
+      <div className="relative flex justify-center items-end mb-4"
+      style={{ borderBottom: '2px solid #E5E7EB' }}>
         <div className="text-center">
-          <h2 className="font-outfit text-4xl font-bold text-gray-900 m-0 leading-tight tracking-tight">
+          <h2 className="font-outfit text-5xl font-bold text-gray-900 m-0 leading-tight tracking-tight">
             Featured Properties
           </h2>
-          <p className="text-gray-600 font-outfit text-base font-light mt-2">
+          <p className="text-gray-600 font-outfit text-lg font-light mb-5 mt-2">
             Handpicked properties from our verified agents
           </p>
         </div>
@@ -235,7 +236,7 @@ const FeaturedProperties = () => {
 
       {/* Location filter row - same style as properties subcategory row, centered */}
       <div className="flex justify-center mb-2">
-        <div className="subcategory-row flex items-center gap-0 flex-wrap rounded-lg" style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: '#E5E7EB' }}>
+        <div className="subcategory-row flex items-center gap-0 flex-wrap p-1 rounded-lg" style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: '#E5E7EB' }}>
           {locations.map((loc) => (
             <button
               key={loc}

@@ -239,7 +239,7 @@ export default function AgentDashboard() {
         </div>
 
         {/* Create New Listing Banner */}
-        <div className="mb-8 px-10">
+        <div className="mb-8 ">
           <div
             className="p-6 md:p-8 shadow-lg text-white overflow-hidden rounded-xl relative bg-gradient-to-r from-blue-600 to-blue-700"
             style={{
@@ -300,26 +300,9 @@ export default function AgentDashboard() {
                     'Address not available'
 
                   return (
+                    
                     <div key={listing.id || listing.title} className="flex flex-col gap-2">
-                      <PropertyMapPopupCard
-                        id={listing.id}
-                        title={listing.title}
-                        type={property?.type ?? null}
-                        location={location}
-                        priceLabel={listing.price}
-                        imageUrl={listing.image}
-                      />
-                      <div className="flex items-center justify-between gap-2 px-1">
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-medium ${
-                            listing.status === 'active'
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : 'bg-yellow-100 text-yellow-700'
-                          }`}
-                        >
-                          {listing.status === 'active' ? 'Active' : 'Pending'}
-                        </span>
-                        <div className="flex gap-2">
+                      <div className="flex gap-2 justify-end">
                           <button
                             type="button"
                             className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-colors duration-200 hover:bg-blue-50 hover:text-blue-600"
@@ -336,7 +319,16 @@ export default function AgentDashboard() {
                             <FiEye />
                           </button>
                         </div>
-                      </div>
+                      <PropertyMapPopupCard
+                        id={listing.id}
+                        title={listing.title}
+                        type={property?.type ?? null}
+                        location={location}
+                        priceLabel={listing.price}
+                        imageUrl={listing.image}
+                        
+                      />
+                        
                     </div>
                   )
                 })
@@ -345,22 +337,7 @@ export default function AgentDashboard() {
           </div>
         </div>
 
-        {/* Rental Management Tools */}
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Rental Management Tools</h2>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-1">
-            <Link href="/agent/create-listing" className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white hover:shadow-lg transition-all duration-200 flex flex-col items-center text-center gap-3">
-              <FiPlus className="text-4xl" />
-              <h3 className="text-lg font-bold">Create Listing</h3>
-              <p className="text-orange-100 text-sm">Add new property</p>
-            </Link>
-            <Link href="/agent/listings" className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white hover:shadow-lg transition-all duration-200 flex flex-col items-center text-center gap-3">
-              <FiList className="text-4xl" />
-              <h3 className="text-lg font-bold">My Listings</h3>
-              <p className="text-blue-100 text-sm">Manage properties</p>
-            </Link>
-          </div>
-        </div>
+        
       </main>
 
      

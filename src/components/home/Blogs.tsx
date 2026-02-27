@@ -96,23 +96,26 @@ const Blogs = () => {
       <div className="w-full mx-auto overflow-visible py-4 sm:py-5">
         <div className="relative flex justify-center items-start mb-4 sm:mb-6">
           <div className="text-center">
-            <h2 className="text-gray-900 font-outfit text-2xl sm:text-4xl font-bold leading-tight tracking-tight m-0 mb-2 sm:mb-2.5">
+            
+            <h2 className="text-gray-900 font-outfit text-2xl sm:text-5xl font-bold leading-tight tracking-tight m-0 mb-2 sm:mb-2.5">
               Blogs
             </h2>
-            <p className="text-gray-600 font-outfit text-sm sm:text-base font-light leading-snug tracking-tight m-0">
-              Find the latest news and insights from the rentals.ph team.
-            </p>
-          </div>
-
-          <Link
+            <Link
             href="/blog"
-            className="absolute right-0 text-rental-blue-500 bg-white font-outfit text-base font-medium no-underline flex items-center gap-2 hover:bg-blue-200 transition-colors border-2 border-rental-blue-500 rounded-2xl px-5 py-2"
+            className="absolute right-0 bottom-0 text-rental-blue-500 bg-white font-outfit text-base font-medium no-underline flex items-center gap-2 hover:bg-blue-200 transition-colors border-2 border-rental-blue-500 rounded-2xl px-5 py-2"
             style={{ border: '2px solid #205ED7' }}
           >
             Visit Blogs
           </Link>
-        </div>
+            <p className="text-gray-600 font-outfit text-lg font-light leading-snug tracking-tight m-0">
+              Find the latest news and insights from the rentals.ph team.
+            </p>
+            
+          </div>
 
+          
+        </div>
+        
         {loading ? (
           <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-10 items-stretch w-full overflow-visible relative">
             <div className="flex-1 min-w-0 lg:max-w-[28%] flex">
@@ -137,14 +140,14 @@ const Blogs = () => {
             <div className="flex-1 min-w-0 lg:max-w-[28%] flex">
               <BlogCardSkeleton size="small" className="w-full" />
             </div>
+            
           </div>
         ) : (
           <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-10 items-stretch w-full overflow-visible relative">
             {/* Left Small Blog Card */}
             <div className="flex-1 min-w-0 lg:max-w-[28%] flex relative transition-all duration-600">
               <Link href={leftBlog.id === 'placeholder' ? '#' : `/blog/${leftBlog.id}`} className="no-underline w-full h-full">
-                <article className="bg-white rounded-xl sm:rounded-2xl overflow-hidden flex flex-col h-full group shadow-[0_4px_14px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.12)] transition-shadow">
-                  <div className="w-full h-[140px] sm:h-[190px] overflow-hidden flex-shrink-0">
+              <article className="bg-white rounded-xl sm:rounded-2xl overflow-hidden flex flex-col h-full group shadow-[0_0_14px_rgba(0,0,0,0.08)] hover:shadow-[0_0_14px_rgba(0,0,0,0.12)] transition-shadow">                  <div className="w-full h-[140px] sm:h-[190px] overflow-hidden flex-shrink-0">
                     <img
                       src={getImageUrl(leftBlog.image)}
                       alt={leftBlog.title}
@@ -185,7 +188,7 @@ const Blogs = () => {
             {/* Center Large Blog Card */}
             <div className="flex-[2] min-w-0 flex relative transition-all duration-600 order-2 lg:order-none">
               <Link href={centerBlog.id === 'placeholder' ? '#' : `/blog/${centerBlog.id}`} className="no-underline w-full h-full">
-                <article className="relative rounded-xl sm:rounded-2xl overflow-hidden group h-[360px] sm:h-[450px] lg:h-[520px] shadow-[0_4px_14px_rgba(0,0,0,0.08)]">
+                <article className="relative rounded-xl sm:rounded-2xl overflow-hidden group h-[360px] sm:h-[450px] lg:h-[520px] shadow-[0_0_14px_rgba(0,0,0,0.08)]">
                   <div className="absolute inset-0 w-full h-full">
                     <img
                       src={getImageUrl(centerBlog.image)}
@@ -216,7 +219,7 @@ const Blogs = () => {
                       </div>
                     </div>
                     <div>
-                      <span className="bg-rental-blue-600 px-4 py-2 rounded-lg text-white font-outfit text-sm sm:text-base font-medium flex items-center gap-1.5 sm:gap-2 hover:bg-rental-blue-700 transition-colors">
+                      <span className=" px-4 py-2 rounded-lg text-white font-outfit text-sm sm:text-base font-medium flex items-center gap-1.5 sm:gap-2 hover:bg-rental-blue-700 transition-colors">
                         Read More
                       </span>
                     </div>
@@ -228,7 +231,7 @@ const Blogs = () => {
             {/* Right Small Blog Card */}
             <div className="flex-1 min-w-0 lg:max-w-[28%] flex relative transition-all duration-600 order-3">
               <Link href={rightBlog.id === 'placeholder' ? '#' : `/blog/${rightBlog.id}`} className="no-underline w-full h-full">
-                <article className="bg-white rounded-xl sm:rounded-2xl overflow-hidden flex flex-col h-full group shadow-[0_4px_14px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.12)] transition-shadow">
+              <article className="bg-white rounded-xl sm:rounded-2xl overflow-hidden flex flex-col h-full group shadow-[0_0_14px_rgba(0,0,0,0.08)] hover:shadow-[0_0_14px_rgba(0,0,0,0.12)] transition-shadow">
                   <div className="w-full h-[140px] sm:h-[190px] overflow-hidden flex-shrink-0">
                     <img
                       src={getImageUrl(rightBlog.image)}

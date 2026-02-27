@@ -757,6 +757,20 @@
         "description": "Rent managers section background",
         "originalName": "rent-managers-bg.png"
         },
+      "BG_RENT_MANAGERS_HERO": {
+        "id": "BG_RENT_MANAGERS_HERO",
+        "path": "/assets/backgrounds/rent-manager-hero-bg.png",
+        "category": "backgrounds",
+        "description": "Rent managers hero section background",
+        "originalName": "rent-manager-hero-bg.png"
+        },
+      "BG_RENT_MANAGERS_FOOTER": {
+        "id": "BG_RENT_MANAGERS_FOOTER",
+        "path": "/assets/backgrounds/rent-managers-footer.png",
+        "category": "backgrounds",
+        "description": "Rent managers footer background",
+        "originalName": "rent-managers-footer.png"
+      },
         "BG_BLOG": {
           "id": "BG_BLOG",
           "path": "/assets/backgrounds/blog-bg.png",

@@ -54,7 +54,7 @@ export default function AgentsPage() {
       if (filter !== 'all') {
         params.append('status', filter)
       }
-      
+
       const response = await api.get<Agent[]>(`/admin/agents?${params.toString()}`)
       if (response.success && response.data) {
         setAgents(response.data)
@@ -95,7 +95,7 @@ export default function AgentsPage() {
 
   const handleApprove = async () => {
     if (!selectedAgent) return
-    
+
     try {
       const response = await api.post(`/admin/agents/${selectedAgent.id}/approve`, {
         notes: approvalNotes
@@ -121,7 +121,7 @@ export default function AgentsPage() {
       setError('Please provide a reason for rejection')
       return
     }
-    
+
     try {
       const response = await api.post(`/admin/agents/${selectedAgent.id}/reject`, {
         notes: rejectionNotes
@@ -142,192 +142,182 @@ export default function AgentsPage() {
     }
   }
 
+  const getStatusStyles = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-amber-100 text-amber-800 border-amber-200'
+      case 'approved':
+      case 'active':
+        return 'bg-emerald-100 text-emerald-800 border-emerald-200'
+      case 'rejected':
+      case 'inactive':
+        return 'bg-red-100 text-red-800 border-red-200'
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200'
+    }
+  }
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'pending': return 'Pending'
+      case 'approved': return 'Approved'
+      case 'rejected': return 'Rejected'
+      case 'active': return 'Active'
+      case 'inactive': return 'Inactive'
+      default: return status
+    }
+  }
+
   const filteredAgents = filter === 'pending' ? pendingAgents : agents
 
-  return (
-    <div className="admin-dashboard">
-      <AppSidebar/>
+  const modalBackdrop = 'fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]'
+  const modalPanel = 'bg-white rounded-xl shadow-xl w-[90%] max-w-lg max-h-[90vh] overflow-auto'
 
-      <main className="admin-main">
+  return (
+    <div className="flex min-h-screen bg-gray-100 font-outfit">
+      <AppSidebar />
+
+      <main className="ml-[280px] flex-1 w-[calc(100%-280px)] p-8 min-h-screen lg:ml-[240px] lg:w-[calc(100%-240px)] lg:p-6 md:ml-0 md:w-full md:p-4 md:pt-15 transition-[margin,width] duration-200">
         <DashboardHeader
-          title="Agent Management"
+          title="User Management"
           subtitle="Manage and approve agents"
           showNotifications={true}
         />
 
         {error && (
-          <div style={{
-            padding: '1rem',
-            margin: '1rem',
-            backgroundColor: '#FEE2E2',
-            border: '1px solid #FCA5A5',
-            borderRadius: '8px',
-            color: '#991B1B'
-          }}>
-            {error}
-            <button onClick={() => setError(null)} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer' }}>
-              <FiX />
+          <div className="mx-4 mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 flex items-center justify-between gap-2">
+            <span>{error}</span>
+            <button
+              onClick={() => setError(null)}
+              className="p-1 rounded hover:bg-red-100 text-red-600 transition-colors"
+              aria-label="Dismiss"
+            >
+              <FiX className="w-5 h-5" />
             </button>
           </div>
         )}
 
         {pendingAgents.length > 0 && filter !== 'pending' && (
-          <div style={{
-            padding: '1rem',
-            margin: '1rem',
-            backgroundColor: '#FEF3C7',
-            border: '1px solid #FCD34D',
-            borderRadius: '8px',
-            color: '#92400E'
-          }}>
-            <strong>Attention:</strong> You have {pendingAgents.length} pending agent approval{pendingAgents.length > 1 ? 's' : ''}.
-            <button 
+          <div className="mx-4 mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 flex flex-wrap items-center gap-2">
+            <strong>Attention:</strong>
+            <span>You have {pendingAgents.length} pending agent approval{pendingAgents.length > 1 ? 's' : ''}.</span>
+            <button
               onClick={() => setFilter('pending')}
-              style={{ 
-                marginLeft: '1rem', 
-                padding: '0.25rem 0.5rem', 
-                backgroundColor: '#F59E0B', 
-                color: 'white', 
-                border: 'none', 
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
+              className="ml-1 px-3 py-1.5 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 transition-colors"
             >
               View Pending
             </button>
           </div>
         )}
 
-        <div className="agents-section">
-          <div className="agents-header">
-            <h2 className="agents-title">Agents</h2>
-            <div className="agents-controls">
-              <div className="filter-options">
-                <label className="filter-option">
-                  <input 
-                    type="radio" 
-                    name="filter" 
-                    value="all" 
-                    checked={filter === 'all'}
-                    onChange={(e) => setFilter(e.target.value)}
-                  />
-                  <span>All ({agents.length})</span>
-                </label>
-                <label className="filter-option">
-                  <input 
-                    type="radio" 
-                    name="filter" 
-                    value="pending" 
-                    checked={filter === 'pending'}
-                    onChange={(e) => setFilter(e.target.value)}
-                  />
-                  <span>Pending ({pendingAgents.length})</span>
-                </label>
-                <label className="filter-option">
-                  <input 
-                    type="radio" 
-                    name="filter" 
-                    value="approved" 
-                    checked={filter === 'approved'}
-                    onChange={(e) => setFilter(e.target.value)}
-                  />
-                  <span>Approved</span>
-                </label>
-                <label className="filter-option">
-                  <input 
-                    type="radio" 
-                    name="filter" 
-                    value="rejected" 
-                    checked={filter === 'rejected'}
-                    onChange={(e) => setFilter(e.target.value)}
-                  />
-                  <span>Rejected</span>
-                </label>
+        <div className="mx-4 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <h2 className="text-xl font-bold text-gray-900">Users</h2>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 p-1 bg-gray-100 rounded-lg">
+                {[
+                  { value: 'all', label: `All (${agents.length})` },
+                  { value: 'pending', label: `Pending (${pendingAgents.length})` },
+                  { value: 'approved', label: 'Approved' },
+                  { value: 'rejected', label: 'Rejected' }
+                ].map(({ value, label }) => (
+                  <label
+                    key={value}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-md cursor-pointer transition-colors has-[:checked]:bg-white has-[:checked]:shadow-sm has-[:checked]:text-gray-900"
+                  >
+                    <input
+                      type="radio"
+                      name="filter"
+                      value={value}
+                      checked={filter === value}
+                      onChange={(e) => setFilter(e.target.value)}
+                      className="sr-only"
+                    />
+                    <span className="text-sm font-medium text-gray-600">{label}</span>
+                  </label>
+                ))}
               </div>
-              <button className="refresh-button" onClick={() => { fetchAgents(); fetchPendingAgents(); }} title="Refresh" disabled={loading}>
-                <FiRefreshCw className={`refresh-icon ${loading ? 'spinning' : ''}`} />
+              <button
+                onClick={() => { fetchAgents(); fetchPendingAgents(); }}
+                title="Refresh"
+                disabled={loading}
+                className="w-10 h-10 rounded-lg bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 transition-all"
+              >
+                <FiRefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
               </button>
             </div>
           </div>
 
-          {loading ? (
-            <div className="agents-table-container">
-              <table className="agents-table">
+          <div className="overflow-x-auto">
+            {loading ? (
+              <table className="w-full min-w-[640px]">
                 <thead>
-                  <tr>
-                    <th><span className="block h-4 w-24 rounded bg-gray-100 animate-pulse mx-auto" /></th>
-                    <th><span className="block h-4 w-16 rounded bg-gray-100 animate-pulse mx-auto" /></th>
-                    <th><span className="block h-4 w-16 rounded bg-gray-100 animate-pulse mx-auto" /></th>
-                    <th><span className="block h-4 w-20 rounded bg-gray-100 animate-pulse mx-auto" /></th>
-                    <th><span className="block h-4 w-16 rounded bg-gray-100 animate-pulse mx-auto" /></th>
-                    <th><span className="block h-4 w-20 rounded bg-gray-100 animate-pulse mx-auto" /></th>
-                    <th><span className="block h-4 w-16 rounded bg-gray-100 animate-pulse mx-auto" /></th>
+                  <tr className="bg-gray-50 border-b border-gray-100">
+                    {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                      <th key={i} className="px-6 py-4 text-left">
+                        <span className="block h-4 w-24 rounded bg-gray-200 animate-pulse" />
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i}>
+                    <tr key={i} className="border-b border-gray-100">
                       {Array.from({ length: 7 }).map((_, j) => (
-                        <td key={j}><span className="block h-4 rounded bg-gray-200 animate-pulse" style={{ width: j === 6 ? 80 : '70%' }} /></td>
+                        <td key={j} className="px-6 py-3">
+                          <span className="block h-4 rounded bg-gray-100 animate-pulse max-w-[80%]" />
+                        </td>
                       ))}
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </div>
-          ) : (
-            <div className="agents-table-container">
-              <table className="agents-table">
+            ) : (
+              <table className="w-full min-w-[640px]">
                 <thead>
-                  <tr>
-                    <th>Agent Name</th>
-                    <th>Email</th>
-                    <th>Agency</th>
-                    <th>PRC License</th>
-                    <th>Status</th>
-                    <th>Date Joined</th>
-                    <th>Actions</th>
+                  <tr className="bg-gray-50 border-b border-gray-100">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Agent Name</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Agency</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">PRC License</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date Joined</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredAgents.length === 0 ? (
                     <tr>
-                      <td colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}>
+                      <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
                         No agents found
                       </td>
                     </tr>
                   ) : (
                     filteredAgents.map((agent) => (
-                      <tr key={agent.id}>
-                        <td className="agent-name" data-label="Agent Name">
+                      <tr key={agent.id} className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
+                        <td className="px-6 py-4 font-medium text-gray-900">
                           {agent.first_name} {agent.last_name}
                         </td>
-                        <td data-label="Email">{agent.email}</td>
-                        <td data-label="Agency">{agent.agency_name || 'N/A'}</td>
-                        <td data-label="PRC License">{agent.prc_license_number || 'N/A'}</td>
-                        <td data-label="Status">
-                          <span className={`status-indicator ${agent.status}`}>
-                            <span className="status-dot"></span>
-                            <span className="status-text">
-                              {agent.status === 'pending' ? 'Pending' : 
-                               agent.status === 'approved' ? 'Approved' :
-                               agent.status === 'rejected' ? 'Rejected' :
-                               agent.status === 'active' ? 'Active' : 
-                               agent.status === 'inactive' ? 'Inactive' : agent.status}
-                            </span>
+                        <td className="px-6 py-4 text-gray-600">{agent.email}</td>
+                        <td className="px-6 py-4 text-gray-600">{agent.agency_name || 'N/A'}</td>
+                        <td className="px-6 py-4 text-gray-600">{agent.prc_license_number || 'N/A'}</td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusStyles(agent.status)}`}>
+                            <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" />
+                            {getStatusLabel(agent.status)}
                           </span>
                         </td>
-                        <td className="date-joined" data-label="Date Joined">
+                        <td className="px-6 py-4 text-gray-600">
                           {new Date(agent.created_at).toLocaleDateString()}
                         </td>
-                        <td data-label="Actions">
-                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
                             <button
                               onClick={() => handleViewDetails(agent.id)}
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563EB' }}
+                              className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
                               title="View Details"
                             >
-                              <FiEye />
+                              <FiEye className="w-4 h-4" />
                             </button>
                             {agent.status === 'pending' && (
                               <>
@@ -336,20 +326,20 @@ export default function AgentsPage() {
                                     setSelectedAgent(agent)
                                     setShowApproveModal(true)
                                   }}
-                                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#10B981' }}
+                                  className="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors"
                                   title="Approve"
                                 >
-                                  <FiCheck />
+                                  <FiCheck className="w-4 h-4" />
                                 </button>
                                 <button
                                   onClick={() => {
                                     setSelectedAgent(agent)
                                     setShowRejectModal(true)
                                   }}
-                                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#DC2626' }}
+                                  className="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
                                   title="Reject"
                                 >
-                                  <FiX />
+                                  <FiX className="w-4 h-4" />
                                 </button>
                               </>
                             )}
@@ -360,85 +350,61 @@ export default function AgentsPage() {
                   )}
                 </tbody>
               </table>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </main>
 
       {/* Details Modal */}
       {showDetailsModal && selectedAgent && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '2rem',
-            borderRadius: '8px',
-            width: '90%',
-            maxWidth: '600px',
-            maxHeight: '90vh',
-            overflow: 'auto'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h2>Agent Details</h2>
-              <button onClick={() => { setShowDetailsModal(false); setSelectedAgent(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                <FiX />
+        <div className={modalBackdrop} onClick={() => { setShowDetailsModal(false); setSelectedAgent(null); }}>
+          <div className={`${modalPanel} p-6`} onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold text-gray-900">Agent Details</h2>
+              <button
+                onClick={() => { setShowDetailsModal(false); setSelectedAgent(null); }}
+                className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"
+              >
+                <FiX className="w-5 h-5" />
               </button>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div><strong>Name:</strong> {selectedAgent.first_name} {selectedAgent.last_name}</div>
-              <div><strong>Email:</strong> {selectedAgent.email}</div>
-              <div><strong>Phone:</strong> {selectedAgent.phone || 'N/A'}</div>
-              <div><strong>Agency:</strong> {selectedAgent.agency_name || 'N/A'}</div>
-              <div><strong>PRC License:</strong> {selectedAgent.prc_license_number || 'N/A'}</div>
-              <div><strong>License Type:</strong> {selectedAgent.license_type || 'N/A'}</div>
-              <div><strong>Status:</strong> {selectedAgent.status}</div>
-              <div><strong>Verified:</strong> {selectedAgent.verified ? 'Yes' : 'No'}</div>
+            <div className="space-y-3 text-sm">
+              <div><span className="font-semibold text-gray-700">Name:</span> {selectedAgent.first_name} {selectedAgent.last_name}</div>
+              <div><span className="font-semibold text-gray-700">Email:</span> {selectedAgent.email}</div>
+              <div><span className="font-semibold text-gray-700">Phone:</span> {selectedAgent.phone || 'N/A'}</div>
+              <div><span className="font-semibold text-gray-700">Agency:</span> {selectedAgent.agency_name || 'N/A'}</div>
+              <div><span className="font-semibold text-gray-700">PRC License:</span> {selectedAgent.prc_license_number || 'N/A'}</div>
+              <div><span className="font-semibold text-gray-700">License Type:</span> {selectedAgent.license_type || 'N/A'}</div>
+              <div><span className="font-semibold text-gray-700">Status:</span> {selectedAgent.status}</div>
+              <div><span className="font-semibold text-gray-700">Verified:</span> {selectedAgent.verified ? 'Yes' : 'No'}</div>
               {selectedAgent.latest_approval && (
-                <div>
-                  <strong>Last Action:</strong> {selectedAgent.latest_approval.action}
+                <div className="pt-2">
+                  <span className="font-semibold text-gray-700">Last Action:</span> {selectedAgent.latest_approval.action}
                   {selectedAgent.latest_approval.notes && (
-                    <div style={{ marginTop: '0.5rem', padding: '0.5rem', backgroundColor: '#F3F4F6', borderRadius: '4px' }}>
-                      <strong>Notes:</strong> {selectedAgent.latest_approval.notes}
+                    <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+                      <span className="font-semibold text-gray-700">Notes:</span> {selectedAgent.latest_approval.notes}
                     </div>
                   )}
                   {selectedAgent.latest_approval.approved_by && (
-                    <div style={{ marginTop: '0.5rem' }}>
-                      <strong>Approved by:</strong> {selectedAgent.latest_approval.approved_by.first_name} {selectedAgent.latest_approval.approved_by.last_name}
+                    <div className="mt-2">
+                      <span className="font-semibold text-gray-700">Approved by:</span> {selectedAgent.latest_approval.approved_by.first_name} {selectedAgent.latest_approval.approved_by.last_name}
                     </div>
                   )}
                 </div>
               )}
               {selectedAgent.status === 'pending' && (
-                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                <div className="flex gap-2 pt-4">
                   <button
-                    onClick={() => {
-                      setShowDetailsModal(false)
-                      setShowApproveModal(true)
-                    }}
-                    style={{ flex: 1, padding: '0.5rem', backgroundColor: '#10B981', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                    onClick={() => { setShowDetailsModal(false); setShowApproveModal(true); }}
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors"
                   >
-                    <FiCheck style={{ marginRight: '0.5rem' }} />
-                    Approve
+                    <FiCheck className="w-4 h-4" /> Approve
                   </button>
                   <button
-                    onClick={() => {
-                      setShowDetailsModal(false)
-                      setShowRejectModal(true)
-                    }}
-                    style={{ flex: 1, padding: '0.5rem', backgroundColor: '#DC2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                    onClick={() => { setShowDetailsModal(false); setShowRejectModal(true); }}
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
                   >
-                    <FiX style={{ marginRight: '0.5rem' }} />
-                    Reject
+                    <FiX className="w-4 h-4" /> Reject
                   </button>
                 </div>
               )}
@@ -449,43 +415,31 @@ export default function AgentsPage() {
 
       {/* Approve Modal */}
       {showApproveModal && selectedAgent && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1001
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '2rem',
-            borderRadius: '8px',
-            width: '90%',
-            maxWidth: '500px'
-          }}>
-            <h2>Approve Agent</h2>
-            <p>Are you sure you want to approve {selectedAgent.first_name} {selectedAgent.last_name}?</p>
-            <div style={{ marginTop: '1rem' }}>
-              <label>Notes (optional)</label>
+        <div className={modalBackdrop} onClick={() => { setShowApproveModal(false); setApprovalNotes(''); }}>
+          <div className={`${modalPanel} p-6`} onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-bold text-gray-900 mb-2">Approve Agent</h2>
+            <p className="text-gray-600 mb-4">Are you sure you want to approve {selectedAgent.first_name} {selectedAgent.last_name}?</p>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Notes (optional)</label>
               <textarea
                 value={approvalNotes}
                 onChange={(e) => setApprovalNotes(e.target.value)}
                 placeholder="Add any notes about this approval..."
-                style={{ width: '100%', padding: '0.5rem', marginTop: '0.25rem', minHeight: '100px' }}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 min-h-[100px] resize-y"
               />
             </div>
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-              <button onClick={() => { setShowApproveModal(false); setApprovalNotes(''); }} style={{ padding: '0.5rem 1rem' }}>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => { setShowApproveModal(false); setApprovalNotes(''); }}
+                className="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+              >
                 Cancel
               </button>
-              <button onClick={handleApprove} style={{ padding: '0.5rem 1rem', backgroundColor: '#10B981', color: 'white', border: 'none', borderRadius: '4px' }}>
-                <FiCheck style={{ marginRight: '0.5rem' }} />
-                Approve
+              <button
+                onClick={handleApprove}
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors"
+              >
+                <FiCheck className="w-4 h-4" /> Approve
               </button>
             </div>
           </div>
@@ -494,44 +448,32 @@ export default function AgentsPage() {
 
       {/* Reject Modal */}
       {showRejectModal && selectedAgent && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1001
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '2rem',
-            borderRadius: '8px',
-            width: '90%',
-            maxWidth: '500px'
-          }}>
-            <h2>Reject Agent</h2>
-            <p>Are you sure you want to reject {selectedAgent.first_name} {selectedAgent.last_name}?</p>
-            <div style={{ marginTop: '1rem' }}>
-              <label>Reason for rejection *</label>
+        <div className={modalBackdrop} onClick={() => { setShowRejectModal(false); setRejectionNotes(''); }}>
+          <div className={`${modalPanel} p-6`} onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-bold text-gray-900 mb-2">Reject Agent</h2>
+            <p className="text-gray-600 mb-4">Are you sure you want to reject {selectedAgent.first_name} {selectedAgent.last_name}?</p>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Reason for rejection *</label>
               <textarea
                 value={rejectionNotes}
                 onChange={(e) => setRejectionNotes(e.target.value)}
                 placeholder="Please provide a reason for rejection..."
                 required
-                style={{ width: '100%', padding: '0.5rem', marginTop: '0.25rem', minHeight: '100px' }}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 min-h-[100px] resize-y"
               />
             </div>
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-              <button onClick={() => { setShowRejectModal(false); setRejectionNotes(''); }} style={{ padding: '0.5rem 1rem' }}>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => { setShowRejectModal(false); setRejectionNotes(''); }}
+                className="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+              >
                 Cancel
               </button>
-              <button onClick={handleReject} style={{ padding: '0.5rem 1rem', backgroundColor: '#DC2626', color: 'white', border: 'none', borderRadius: '4px' }}>
-                <FiX style={{ marginRight: '0.5rem' }} />
-                Reject
+              <button
+                onClick={handleReject}
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+              >
+                <FiX className="w-4 h-4" /> Reject
               </button>
             </div>
           </div>

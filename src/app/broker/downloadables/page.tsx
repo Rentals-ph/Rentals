@@ -1,98 +1,78 @@
 'use client'
 
 import AppSidebar from '../../../components/common/AppSidebar'
-import BrokerHeader from '../../../components/broker/BrokerHeader'
-import {
+import AgentHeader from '../../../components/agent/AgentHeader'
+import { 
   FiDownload,
   FiFileText,
   FiBarChart2,
-  FiImage,
-  FiBell,
-  FiPlus,
+  FiImage
 } from 'react-icons/fi'
 
-export default function BrokerDownloadables() {
+export default function AgentDownloadables() {
   const handleDownload = (type: string) => {
     console.log(`Downloading ${type}`)
   }
 
-  const items = [
-    { id: 'lease-agreements', label: 'Lease Agreements', icon: FiFileText },
-    { id: 'financial-report', label: 'Financial Report', icon: FiBarChart2 },
-    { id: 'property-photos', label: 'Property Photos', icon: FiImage },
-  ]
-
   return (
-    <div className="flex min-h-screen bg-[#F8F9FA] font-outfit">
-      <AppSidebar />
+    <div className="flex min-h-screen bg-gray-100 font-outfit">
+      <AppSidebar/>
 
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4 md:pt-15"> {/* broker-main */}
-        {/* Broker Header */}
-        <header className="broker-header">
-          <div className="broker-header-left">
-            <h1>Downloadables</h1>
-            <p>Download resources and documents.</p>
-          </div>
-          <div className="broker-header-right">
-            <button className="broker-notification-btn">
-              <FiBell />
-            </button>
-            <a href="/broker/create-listing" className="broker-add-listing-btn">
-              <FiPlus />
-              Add Listing
-            </a>
-          </div>
-        </header>
+      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4">
+        <AgentHeader 
+          title="Downloadables" 
+          subtitle="Download resources and documents." 
+        />
 
-        <div className="downloadables-section">
-          <h2 className="downloadables-title">Downloadables</h2>
+        <div className="bg-white rounded-xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.1)] md:p-6">
+          <h2 className="m-0 mb-8 text-2xl font-bold text-gray-900">Downloadables</h2>
           
-          <div className="downloadables-list">
-            <div className="downloadable-card">
-              <div className="downloadable-icon-container">
-                <FiFileText className="downloadable-icon" />
+          <div className="flex flex-col gap-5">
+            <div className="flex items-center gap-5 p-6 bg-gray-50 rounded-xl transition-all hover:bg-gray-100 hover:shadow-[0_2px_4px_rgba(0,0,0,0.05)] md:p-5 md:gap-4">
+              <div className="w-16 h-16 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0 md:w-14 md:h-14">
+                <FiFileText className="text-[32px] text-white md:text-[28px]" />
               </div>
-              <div className="downloadable-content">
-                <h3 className="downloadable-name">Lease Agreements</h3>
+              <div className="flex-1">
+                <h3 className="m-0 text-lg font-semibold text-gray-900">Lease Agreements</h3>
               </div>
               <button 
-                className="download-button"
+                className="w-12 h-12 bg-transparent border-none rounded-lg flex items-center justify-center cursor-pointer transition-all text-blue-500 hover:bg-blue-50 hover:scale-105"
                 onClick={() => handleDownload('lease-agreements')}
                 aria-label="Download Lease Agreements"
               >
-                <FiDownload className="download-icon" />
+                <FiDownload className="text-2xl" />
               </button>
             </div>
 
-            <div className="downloadable-card">
-              <div className="downloadable-icon-container">
-                <FiBarChart2 className="downloadable-icon" />
+            <div className="flex items-center gap-5 p-6 bg-gray-50 rounded-xl transition-all hover:bg-gray-100 hover:shadow-[0_2px_4px_rgba(0,0,0,0.05)] md:p-5 md:gap-4">
+              <div className="w-16 h-16 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0 md:w-14 md:h-14">
+                <FiBarChart2 className="text-[32px] text-white md:text-[28px]" />
               </div>
-              <div className="downloadable-content">
-                <h3 className="downloadable-name">Financial Report</h3>
+              <div className="flex-1">
+                <h3 className="m-0 text-lg font-semibold text-gray-900">Financial Report</h3>
               </div>
               <button 
-                className="download-button"
+                className="w-12 h-12 bg-transparent border-none rounded-lg flex items-center justify-center cursor-pointer transition-all text-blue-500 hover:bg-blue-50 hover:scale-105"
                 onClick={() => handleDownload('financial-report')}
                 aria-label="Download Financial Report"
               >
-                <FiDownload className="download-icon" />
+                <FiDownload className="text-2xl" />
               </button>
             </div>
 
-            <div className="downloadable-card">
-              <div className="downloadable-icon-container">
-                <FiImage className="downloadable-icon" />
+            <div className="flex items-center gap-5 p-6 bg-gray-50 rounded-xl transition-all hover:bg-gray-100 hover:shadow-[0_2px_4px_rgba(0,0,0,0.05)] md:p-5 md:gap-4">
+              <div className="w-16 h-16 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0 md:w-14 md:h-14">
+                <FiImage className="text-[32px] text-white md:text-[28px]" />
               </div>
-              <div className="downloadable-content">
-                <h3 className="downloadable-name">Property Photos</h3>
+              <div className="flex-1">
+                <h3 className="m-0 text-lg font-semibold text-gray-900">Property Photos</h3>
               </div>
               <button 
-                className="download-button"
+                className="w-12 h-12 bg-transparent border-none rounded-lg flex items-center justify-center cursor-pointer transition-all text-blue-500 hover:bg-blue-50 hover:scale-105"
                 onClick={() => handleDownload('property-photos')}
                 aria-label="Download Property Photos"
               >
-                <FiDownload className="download-icon" />
+                <FiDownload className="text-2xl" />
               </button>
             </div>
           </div>

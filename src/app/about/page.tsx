@@ -58,7 +58,7 @@ export default function AboutPage() {
               <img
                 src={ASSETS.ABOUT_OUR_STORY}
                 alt="Our Story"
-                className="w-full h-full object-cover object-center rounded-lg"
+                className="w-full h-full object-cover object-center rounded-2xl"
               />
             </div>
             {/* Text Right */}

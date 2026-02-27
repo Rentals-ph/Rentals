@@ -134,7 +134,16 @@ export default function RentManagersPage() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative mt-16 sm:mt-20 pt-8 sm:pt-16 pb-8 sm:pb-16 px-4 sm:px-6 md:px-10 lg:px-[150px] overflow-x-visible min-h-[400px] sm:min-h-[550px]" style={{ background: 'linear-gradient(to right, #205ED7 0%, #FE8E0A 100%)', overflowY: 'visible' }}>
+      <section
+        className="relative mt-16 sm:mt-20 pt-8 sm:pt-16 pb-8 sm:pb-16 px-4 sm:px-6 md:px-10 lg:px-[150px] overflow-x-visible min-h-[400px] sm:min-h-[550px]"
+        style={{
+          backgroundImage: `url(${ASSETS.BG_RENT_MANAGERS_HERO})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          overflowY: 'visible',
+        }}
+      >
   <div className="mx-auto relative flex items-center max-w-full overflow-visible" style={{ minHeight: '300px', overflow: 'visible' }}>
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch w-full overflow-visible">
 
@@ -341,9 +350,9 @@ export default function RentManagersPage() {
                       {/* Card image - fixed aspect so container has height */}
                       <div className="w-full pt-0 pb-4">
                         <div 
-                          className="relative overflow-hidden flex-shrink-0 w-full aspect-[4/3] rounded-t-2xl"
+                          className="relative overflow-hidden flex-shrink-0 w-full aspect-[4/4] rounded-t-2xl"
                           style={{
-                            backgroundColor: '#2563EB'
+                            backgroundColor: 'rgb(255, 255, 255)'
                           }}
                         >
                           <img 
@@ -591,7 +600,7 @@ export default function RentManagersPage() {
         {/* Background Image */}
         <div className="absolute inset-0 w-full h-full z-0">
           <img 
-            src="/assets/backgrounds/rent-managers-bg.png" 
+            src={ASSETS.BG_RENT_MANAGERS_FOOTER} 
             alt="Buildings" 
             className="w-full h-full object-cover object-center"
             style={{ objectPosition: 'center bottom' }}

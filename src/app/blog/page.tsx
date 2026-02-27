@@ -142,14 +142,14 @@ export default function BlogPage() {
         ) : (
           <>
             {/* Featured and Trending Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-12">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mb-6 sm:mb-8 items-stretch">
               {/* Left Column - Featured Article */}
-              <div className="lg:col-span-1">
+              <div className="lg:col-span-2">
                 {featuredPost && (
                   <Link href={`/blog/${featuredPost.id}`} className="no-underline h-full">
                     <article className="flex flex-col overflow-hidden rounded-lg bg-white shadow-md transition-all hover:-translate-y-1 hover:shadow-lg h-full">
                       {/* Image */}
-                      <div className="h-64 md:h-80 lg:h-96 w-full overflow-hidden flex-shrink-0">
+                      <div className="h-76 md:h-74 lg:h-75 w-full overflow-hidden flex-shrink-0">
                         <img 
                           src={getImageUrl(featuredPost.image)} 
                           alt={featuredPost.title} 
@@ -157,7 +157,7 @@ export default function BlogPage() {
                         />
                       </div>
                       {/* Content */}
-                      <div className="flex flex-col gap-3 p-4 sm:p-6 flex-1">
+                      <div className="flex flex-col gap-3 p-4 sm:p-5">
                         <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-black font-outfit leading-tight">
                           {featuredPost.title}
                         </h2>
@@ -289,8 +289,16 @@ export default function BlogPage() {
       </main>
 
       {/* Newsletter Section */}
-      <div className="mt-2.5 w-full bg-blue-600 px-0 py-8 sm:py-15 text-center">
-        <div className="mx-auto max-w-7xl py-6 sm:py-10 px-4 sm:px-6 md:px-10 lg:px-[150px]">
+      <div
+        className="mt-2.5 w-full px-0 py-8 sm:py-15 text-center"
+        style={{
+          backgroundImage: `url(${ASSETS.BG_CONTACT_HORIZONTAL})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        <div className="mx-auto max-w-7xl py-6 sm:py-10 px-4 sm:px-6 md:px-10 lg:px-[150px] ">
           <h2 className="mb-3 sm:mb-4 font-outfit text-2xl sm:text-3xl md:text-4xl font-bold text-white">
             Subscribe to Our Newsletter
           </h2>
