@@ -138,6 +138,7 @@ function HorizontalPropertyCard({
       onClick={handleCardClick}
       style={{ cursor: id ? 'pointer' : 'default' }}
       className="w-full bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col sm:flex-row items-stretch shadow-sm hover:shadow-md transition-all duration-200 min-h-[350px] max-h-[350px]"
+      style={{ border: '1px solid #E5E7EB' }}
     >
       {/* Left: Property image with hover arrows */}
       <div
@@ -188,7 +189,7 @@ function HorizontalPropertyCard({
       </div>
 
       {/* Right: Content */}
-      <div className="flex flex-col flex-1 p-5 sm:p-6 gap-3 sm:gap-4 min-w-0 overflow-hidden">
+      <div className="flex flex-col flex-1 p-5 sm:p-6 gap-2  min-w-0 overflow-hidden">
         <div className="flex justify-between items-start gap-2">
           <span className="text-blue-600 text-xs font-semibold uppercase tracking-wide">{propertyType}</span>
           <span className="text-gray-400 text-xs flex-shrink-0">{date}</span>

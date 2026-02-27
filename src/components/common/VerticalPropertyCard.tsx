@@ -10,6 +10,8 @@ interface VerticalPropertyCardProps {
   propertyType?: string
   priceType?: string
   price?: string
+  /** Display string for when the property was listed (e.g. "Jan 5, 2026") */
+  dateListed?: string
   title?: string
   image?: string
   images?: string[]
@@ -34,6 +36,7 @@ function VerticalPropertyCard({
   propertyType = 'Commercial Spaces',
   priceType,
   price = '₱1,200',
+  dateListed,
   title = 'Azure Residences - 2BR Corner Suite',
   image = ASSETS.PLACEHOLDER_PROPERTY_MAIN,
   images: imagesProp,
@@ -152,7 +155,7 @@ function VerticalPropertyCard({
     >
       {/* Property image with hover arrows */}
       <div
-        className="relative w-full aspect-[4/3] overflow-hidden rounded-t-xl bg-gray-100"
+        className="relative w-full aspect-[4/2] overflow-hidden rounded-t-xl bg-gray-100"
         onMouseEnter={handleImageAreaMouseEnter}
         onMouseLeave={handleImageAreaMouseLeave}
       >
@@ -202,6 +205,11 @@ function VerticalPropertyCard({
       <div className="flex flex-col flex-1 px-8 py-6 gap-2 overflow-hidden">
         <div className="flex justify-between items-center gap-2">
           <span className="text-blue-600 text-xs font-semibold uppercase tracking-wide">{propertyType}</span>
+          {dateListed && (
+            <span className="text-[11px] text-gray-400 font-medium whitespace-nowrap">
+              {dateListed}
+            </span>
+          )}
         </div>
         <div className="flex items-baseline gap-2">
           <p className="text-blue-600 text-3xl font-bold leading-tight">{price}</p>

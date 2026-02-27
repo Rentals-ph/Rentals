@@ -260,8 +260,8 @@ const Navbar = () => {
           </div>
           {/* User/Profile section */}
           <div className="hidden lg:flex items-center justify-end flex-shrink-0 min-w-0 rounded-full"
-          style={{
-            border: '2px solid #FE8E0A',
+            style={{
+              border: '2px solid #205ED7',
           }}
           >
             {isUserLoggedIn ? (

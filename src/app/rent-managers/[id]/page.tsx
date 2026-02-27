@@ -12,7 +12,7 @@ import { getApiBaseUrl } from '../../../config/api'
 import type { Property } from '../../../types'
 import type { Agent } from '../../../api/endpoints/agents'
 import type { PaginatedResponse } from '../../../api/types'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS, getAsset } from '@/utils/assets'
 import { resolveAgentAvatar } from '@/utils/imageResolver'
 import PageHeader from '../../../components/layout/PageHeader'
 // import './page.css' // Removed - converted to Tailwind
@@ -313,119 +313,185 @@ export default function RentManagerDetailsPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <main className="px-6 md:px-10 lg:px-[150px] py-8">
+      <main className="px-6 md:px-10 lg:px-[150px]">
         <div className="mx-auto">
-          {/* Top Section - Profile and Contact Form */}
+          {/* Top Section - Full-width Profile Hero */}
+          <section
+            className="relative mb-10 -mx-6 md:-mx-10 lg:-mx-[150px]"
+            aria-label="Rent manager profile hero"
+          >
+            <div
+              className="absolute inset-0 bg-no-repeat bg-cover bg-center"
+              style={{ backgroundImage: `url(${getAsset('BG_RENT_MANAGERS' as any) || ASSETS.BG_HERO_LANDING})` }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0A1B4D]/95 via-[#0A1B4D]/90 to-[#1B3A9B]/80" />
+
+            <div className="relative z-10 mx-auto px-6 md:px-10 lg:px-[150px] py-10 lg:py-12 flex flex-col lg:flex-row items-stretch gap-10 text-white">
+  {/* Left column — wider */}
+  <div className="flex flex-1 lg:w-4/5 items-stretch gap-6">
+    <div className="relative shrink-0 h-full">
+      <div
+        className="h-full inline-flex shadow-lg"
+        style={{
+          padding: '3px',
+          borderRadius: '18px',
+          background: 'linear-gradient(to right, #205ED7 0%, #FE8E0A 100%)',
+        }}
+      >
+        <img
+          src={getAgentImageUrl(manager.image)}
+          alt={manager.name}
+          className="h-full w-auto max-h-56 md:max-h-64 bg-white rounded-xl object-cover"
+        onError={(e) => {
+          const target = e.target as HTMLImageElement
+          target.style.display = 'none'
+          const fallback = target.nextElementSibling as HTMLElement
+          if (fallback) fallback.style.display = 'flex'
+          }}
+        />
+      </div>
+      <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-blue-500 flex items-center justify-center text-white text-3xl font-bold shadow-lg hidden">
+        <span>{getInitials(manager.name)}</span>
+      </div>
+    </div>
+
+    <div className="space-y-4 line-clamp-2">
+      <p className="text-xs md:text-sm font-semibold tracking-[0.35em] uppercase text-blue-200 line-clamp-1">
+      {manager.role}
+      </p>
+      <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+        {manager.name}
+      </h1>
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-white text-xs md:text-sm font-medium text-blue-900">
+          {properties.length} Active Listings
+        </span>
+      </div>
+      <div className="relative bottom-0 flex flex-wrap gap-3 pt-2">
+        <a
+          href="#contact-manager"
+          className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-[#FF7A1A] text-sm font-semibold text-white shadow-md hover:bg-[#ff8a35] transition-colors"
+        >
+          Contact Me
+        </a>
+        <a
+          href="#listings"
+          className="inline-flex items-center justify-center px-6 py-2.5 rounded-full border border-white/40 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
+        >
+          View My Page
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {/* Right column — narrower */}
+  <div className="w-full lg:w-1/3 lg:max-w-sm flex flex-col items-end justify-center">
+    <div className="bg-white rounded-2xl p-4 shadow-xl">
+      <div className="aspect-square w-40 md:w-44 lg:w-48 rounded-xl bg-gray-900 flex items-center justify-center">
+        <div className="w-28 h-28 md:w-32 md:h-32 bg-white rounded-md border-4 border-gray-900 relative overflow-hidden">
+          <div className="absolute inset-0 grid grid-cols-4 grid-rows-4 gap-1 p-1">
+            <div className="bg-gray-900" />
+            <div className="bg-gray-900 col-start-4 row-start-1" />
+            <div className="bg-gray-900 col-start-1 row-start-4" />
+            <div className="bg-gray-900 col-start-4 row-start-4" />
+            <div className="bg-gray-900 col-start-2 row-start-2" />
+            <div className="bg-gray-900 col-start-3 row-start-3" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <p className="mt-3 text-xs md:text-sm text-blue-100">
+      Scan to view my profile
+    </p>
+  </div>
+</div>
+          </section>
+
+          {/* About + Contact Section */}
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Profile Card */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              {/* Profile Header */}
-              <div className="flex items-start gap-4 mb-6">
-                <div className="relative">
-                  <img 
-                    src={getAgentImageUrl(manager.image)} 
-                    alt={manager.name}
-                    className="w-24 h-24 rounded-lg object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement
-                      target.style.display = 'none'
-                      const fallback = target.nextElementSibling as HTMLElement
-                      if (fallback) fallback.style.display = 'flex'
-                    }}
-                  />
-                  <div 
-                    className="w-24 h-24 rounded-lg bg-blue-600 flex items-center justify-center text-white text-2xl font-bold hidden"
-                  >
-                    <span>{getInitials(manager.name)}</span>
-                  </div>
-                </div>
-
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-gray-800 mb-2">{manager.name}</h2>
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">{manager.role}</span>
-                    <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">{properties.length} Listings</span>
-                  </div>
-                </div>
-
-                {/* QR Code Placeholder */}
-                <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <div className="w-16 h-16 bg-white border-2 border-gray-300 rounded"></div>
-                </div>
-              </div>
-
-              {/* Awards/Badges */}
-              <div className="flex gap-2 mb-6">
-                <div className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg text-sm font-semibold flex items-center gap-2">
+            <div className="bg-white rounded-xl shadow-md p-6 lg:p-8">
+              <div className="flex flex-wrap gap-2 mb-6">
+                <div className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-2">
                   <span>⭐</span>
-                  <span>CUSTOMER'S CHOICE</span>
+                  <span>CUSTOMER&apos;S CHOICE</span>
                 </div>
-                <div className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg text-sm font-semibold flex items-center gap-2">
+                <div className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-2">
                   <span>⭐</span>
                   <span>5 STAR RENT MANAGER</span>
                 </div>
               </div>
 
-              {/* About Section */}
-              <div>
-                <h3 className="text-xl font-bold mb-4 text-gray-800">ABOUT US</h3>
-                <p className="text-gray-600 leading-relaxed mb-4">
-                  {manager.name} is a {manager.role} with {properties.length} property listings.
-                </p>
-                <ul className="space-y-2">
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-600 mt-1">✓</span>
-                    <span className="text-gray-600">Proven Expertise: Skilled in overseeing rental properties, maintaining smooth operations, and maximizing property value.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-600 mt-1">✓</span>
-                    <span className="text-gray-600">Strong Credentials: Knowledgeable in landlord-tenant laws, financial management, and effective communication strategies.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-600 mt-1">✓</span>
-                    <span className="text-gray-600">Client-Centered Approach: Committed to fostering positive tenant relationships and ensuring seamless property management.</span>
-                  </li>
-                </ul>
-              </div>
+              <h3 className="text-xl font-bold mb-4 text-gray-800">ABOUT US</h3>
+              <p className="text-gray-600 leading-relaxed mb-4">
+                {manager.name} is a {manager.role} with {properties.length} property listings.
+              </p>
+              <ul className="space-y-3 text-sm md:text-base">
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 mt-1">✓</span>
+                  <span className="text-gray-600">
+                    Proven Expertise: Skilled in overseeing rental properties, maintaining smooth operations, and maximizing property value.
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 mt-1">✓</span>
+                  <span className="text-gray-600">
+                    Strong Credentials: Knowledgeable in landlord-tenant laws, financial management, and effective communication strategies.
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 mt-1">✓</span>
+                  <span className="text-gray-600">
+                    Client-Centered Approach: Committed to fostering positive tenant relationships and ensuring seamless property management.
+                  </span>
+                </li>
+              </ul>
             </div>
 
-            {/* Contact Form */}
-            <aside className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-bold mb-4 text-gray-800">Contact {manager.name}</h3>
+            <aside
+              id="contact-manager"
+              className="bg-white rounded-xl shadow-md p-6 lg:p-8"
+            >
+              <h3 className="text-xl font-bold mb-4 text-gray-800">
+                Contact {manager.name}
+              </h3>
               <form className="space-y-4" onSubmit={handleSubmit}>
-                <input
-                  name="firstName"
-                  placeholder="First Name"
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-                <input
-                  name="lastName"
-                  placeholder="Last Name"
-                  value={formData.lastName}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-                <input
-                  name="phone"
-                  placeholder="Phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input
+                    name="firstName"
+                    placeholder="First Name"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                  <input
+                    name="lastName"
+                    placeholder="Last Name"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input
+                    name="phone"
+                    placeholder="Phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
                 <textarea
                   name="message"
                   placeholder="Your message"
@@ -435,13 +501,18 @@ export default function RentManagerDetailsPage() {
                   rows={4}
                   required
                 />
-                <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors" type="submit">Contact</button>
+                <button
+                  className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                  type="submit"
+                >
+                  Contact
+                </button>
               </form>
             </aside>
           </section>
 
           {/* Tabs Section */}
-          <section className="bg-white rounded-lg shadow-md p-6">
+          <section id="listings" className="bg-white rounded-lg shadow-md p-6">
             <div className="flex border-b border-gray-200 mb-6">
               <button
                 className={`px-6 py-3 font-semibold border-b-2 transition-colors ${

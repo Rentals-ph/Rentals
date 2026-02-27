@@ -892,7 +892,7 @@ function PropertiesContent() {
         )}
         
         {/* Desktop Sidebar - Hidden on mobile */}
-        <div className="properties-sidebar w-[280px] flex-shrink-0 hidden lg:block md:hidden">
+        <div className="properties-sidebar w-[250px] flex-shrink-0 hidden lg:block md:hidden lg:order-2">
           <div className="advance-search-section bg-white rounded-xl border border-gray-200 pr-5 mb-6 shadow-sm w-full">
             <h2 className="section-title text-2xl font-semibold text-gray-900 mb-4 font-outfit">Advance Search</h2>
             <div className="filter-group mb-4">
@@ -1035,7 +1035,7 @@ function PropertiesContent() {
           </div>
         </div>
         
-        <div className="properties-main-content flex-1 min-w-0">
+        <div className="properties-main-content flex-1 min-w-0 lg:order-1">
 
           {/* Results Count, Categories, and Active Filters */}
           {!loading && paginatedProperties.length > 0 && (
@@ -1291,10 +1291,15 @@ function PropertiesContent() {
                               property.agent.id.toString()
                             )
                           : undefined
+
+                        // Prefer created_at for "date listed", fallback to published_at
+                        const listedDate = formatDate(property.created_at || property.published_at)
+
                         const cardProps = {
                           id: property.id,
                           propertyType: property.type,
-                          date: formatDate(property.published_at),
+                          date: listedDate,
+                          dateListed: listedDate,
                           priceType: formatPriceType(property.price_type),
                           price: formatPrice(property.price),
                           title: property.title,
