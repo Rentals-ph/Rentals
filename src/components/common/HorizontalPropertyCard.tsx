@@ -138,7 +138,6 @@ function HorizontalPropertyCard({
       onClick={handleCardClick}
       style={{ cursor: id ? 'pointer' : 'default' }}
       className="w-full bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col sm:flex-row items-stretch shadow-sm hover:shadow-md transition-all duration-200 min-h-[350px] max-h-[350px]"
-      style={{ border: '1px solid #E5E7EB' }}
     >
       {/* Left: Property image with hover arrows */}
       <div

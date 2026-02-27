@@ -76,9 +76,12 @@ apiClient.interceptors.response.use(
     }
 
     if (error.response.status === 403) {
-      const serverMessage =
-        (error.response.data && typeof error.response.data === 'object' && (error.response.data as { message?: string }).message) ||
-        error.response.statusText
+      const serverMessage = String(
+        (error.response.data &&
+          typeof error.response.data === 'object' &&
+          (error.response.data as { message?: string }).message) ||
+          error.response.statusText
+      )
       // Augment the original error so callers get the server message; avoid creating a new Error so stack trace stays in axios
       error.message = serverMessage
       if (process.env.NODE_ENV === 'development') {
