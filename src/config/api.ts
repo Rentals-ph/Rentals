@@ -1,11 +1,11 @@
 /**
  * API Configuration
- * 
- * To switch between local and remote backend:
- * - Default: Uses local backend when host is localhost or a private/LAN IP (e.g. 192.168.x.x)
+ *
+ * - localhost:3000 or 192.168.x.x:3000 → API at localhost:8000 (backend usually bound to 127.0.0.1)
+ * - Set NEXT_PUBLIC_API_BASE_URL=http://YOUR_IP:8000/api to use LAN IP for API (e.g. other devices)
+ *   and run your backend on 0.0.0.0:8000 so it accepts connections on that IP
  * - Set USE_LOCAL_API=false to use Railway backend
- * - In production (Vercel / public hostname): Always uses Railway backend
- * - Or override with NEXT_PUBLIC_API_BASE_URL or NEXT_PUBLIC_API_URL
+ * - Production (public hostname): Uses Railway backend
  */
 
 const RAILWAY_API_URL = 'https://rentalsbackend-production.up.railway.app'
@@ -40,29 +40,27 @@ export const getApiBaseUrl = (): string => {
     return process.env.NEXT_PUBLIC_API_URL
   }
   
-  // In browser: treat localhost and private/LAN IPs (e.g. 192.168.1.48) as local
+  // In browser we have window; on server (SSR) we don't, so hostname is empty
   const hostname = typeof window !== 'undefined' ? window.location.hostname : ''
-  const isLocalHost = typeof window !== 'undefined' && isLocalOrPrivateHost(hostname)
-  
-  // Production only when not local and (NODE_ENV production or Vercel)
+  const isInBrowser = typeof window !== 'undefined'
   const isProduction = process.env.NODE_ENV === 'production'
-  const isProductionHost = typeof window !== 'undefined' && !isLocalOrPrivateHost(hostname)
+  // Only treat as "production host" when we're in the browser on a public hostname (not local/LAN)
+  const isProductionHost = isInBrowser && hostname && !isLocalOrPrivateHost(hostname)
   
-  // Use Railway only for real production (public hostname or Vercel)
-  if ((isProduction && !isLocalHost) || (isProductionHost && (isProduction || process.env.VERCEL))) {
+  // Use Railway only when we're in the browser on a production host (e.g. rentals.ph or Vercel)
+  // On the server (SSR) we never use Railway by hostname — so 192.168.1.48:3000 SSR uses local backend
+  if (isProductionHost && (isProduction || process.env.VERCEL)) {
     return `${RAILWAY_API_URL}/api`
   }
   
-  // Use Railway if explicitly set to false, otherwise default to local
+  // Use Railway if explicitly set via env
   if (useRemoteApi) {
     return `${RAILWAY_API_URL}/api`
   }
   
-  // Local: same host as the app when on LAN IP so other devices can reach the backend
-  if (typeof window !== 'undefined' && hostname && isLocalOrPrivateHost(hostname) && hostname !== 'localhost' && hostname !== '127.0.0.1') {
-    return `http://${hostname}:8000/api`
-  }
-  
+  // Local development (localhost or LAN IP like 192.168.1.48:3000): use localhost:8000 so the
+  // backend only needs to listen on 127.0.0.1. For other-device testing, set
+  // NEXT_PUBLIC_API_BASE_URL=http://YOUR_IP:8000/api and run backend on 0.0.0.0:8000.
   return `${LOCAL_API_URL}/api`
 }
 

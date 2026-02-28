@@ -225,3 +225,45 @@ nextjs-portal {
   margin: 0;
   width: 100%;
 }
+
+/* Map popup: compact on mobile */
+@media (max-width: 640px) {
+  .property-map-popup-wrapper {
+    max-width: min(280px, 92vw) !important;
+  }
+  .property-map-popup-wrapper .leaflet-popup-content {
+    max-width: 100%;
+  }
+  .property-map-popup-wrapper .property-map-popup {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    border-radius: 10px;
+  }
+  .property-map-popup-wrapper .property-map-popup-image {
+    height: 100px !important;
+  }
+  .property-map-popup-wrapper .property-map-popup-body {
+    padding: 10px 12px 12px !important;
+  }
+  .property-map-popup-wrapper .property-map-popup-type {
+    font-size: 10px !important;
+    margin-bottom: 4px !important;
+  }
+  .property-map-popup-wrapper .property-map-popup-title {
+    font-size: 13px !important;
+    margin-bottom: 6px !important;
+  }
+  .property-map-popup-wrapper .property-map-popup-location {
+    font-size: 11px !important;
+    margin-bottom: 8px !important;
+  }
+  .property-map-popup-wrapper .property-map-popup-price {
+    font-size: 14px !important;
+    margin-bottom: 10px !important;
+  }
+  .property-map-popup-wrapper .property-map-popup-link {
+    padding: 8px 12px !important;
+    font-size: 11px !important;
+    border-radius: 6px !important;
+  }
+}

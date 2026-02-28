@@ -11,7 +11,7 @@ const staticRoutes: MetadataRoute.Sitemap = [
   { url: `${BASE}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
   { url: `${BASE}/blog`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
   { url: `${BASE}/news`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-  { url: `${BASE}/rent-managers`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+  { url: `${BASE}/agents`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
 ]
 
 async function fetchDynamicIds(

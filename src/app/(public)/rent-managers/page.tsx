@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Footer from '@/components/layout/Footer'
 import PopularRentManagers from '@/components/rent-managers/PopularRentManagers'
 import { RentManagerCardSkeleton } from '@/components/common/RentManagerCardSkeleton'
+import { EmptyState, EmptyStateAction } from '@/components/common'
 import { agentsApi, propertiesApi } from '@/api'
 import { getApiBaseUrl } from '@/config/api'
 import { ASSETS } from '@/utils/assets'
@@ -585,9 +586,12 @@ export default function RentManagersPage() {
               ))}
             </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              <p>No rent managers found matching your criteria.</p>
-            </div>
+            <EmptyState
+              variant="empty"
+              title="No rent managers found"
+              description="No rent managers match your search or filters. Try adjusting your criteria or browse all."
+              action={<EmptyStateAction href="/rent-managers" primary>View all rent managers</EmptyStateAction>}
+            />
           )}
         </section>
       </main>

@@ -41,7 +41,7 @@ export default function NotFound() {
     return (
         <>
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500;600&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
 
                 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -52,7 +52,7 @@ export default function NotFound() {
                     flex-direction: column;
                     align-items: center;
                     justify-content: center;
-                    font-family: 'DM Sans', sans-serif;
+                    font-family: 'Outfit', Inter, sans-serif;
                     position: relative;
                     overflow: hidden;
                     padding: 24px;
@@ -116,28 +116,27 @@ export default function NotFound() {
                     to { opacity: 1; transform: translateY(0); }
                 }
 
-                /* House icon + 404 */
+                /* 404 hero - Rentals.ph brand gradient */
                 .nf-hero {
                     position: relative;
                     margin-bottom: 28px;
                 }
 
                 .nf-404 {
-                    font-family: 'Syne', sans-serif;
+                    font-family: 'Outfit', sans-serif;
                     font-size: 110px;
                     font-weight: 800;
                     line-height: 1;
                     letter-spacing: -6px;
-                    background: linear-gradient(135deg, #f68c1e 0%, #f8aa50 40%, #205ED7 80%, #5B8EEE 100%);
+                    background: linear-gradient(135deg, #FE8E0A 0%, #ffa31a 40%, #205ED7 80%, #4da6ff 100%);
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                     background-clip: text;
                     position: relative;
                 }
 
-                /* Decorative door on the zero */
                 .nf-404-sub {
-                    font-family: 'DM Sans', sans-serif;
+                    font-family: 'Outfit', sans-serif;
                     font-size: 11px;
                     font-weight: 600;
                     letter-spacing: 4px;
@@ -162,7 +161,7 @@ export default function NotFound() {
                 }
 
                 .nf-heading {
-                    font-family: 'Syne', sans-serif;
+                    font-family: 'Outfit', sans-serif;
                     font-size: 22px;
                     font-weight: 700;
                     color: #111827;
@@ -171,6 +170,7 @@ export default function NotFound() {
                 }
 
                 .nf-desc {
+                    font-family: 'Outfit', sans-serif;
                     font-size: 14.5px;
                     color: #6b7280;
                     line-height: 1.75;
@@ -200,7 +200,7 @@ export default function NotFound() {
 
                 .nf-timer-text strong {
                     display: block;
-                    font-family: 'Syne', sans-serif;
+                    font-family: 'Outfit', sans-serif;
                     font-size: 15px;
                     font-weight: 700;
                     color: #111827;
@@ -222,16 +222,16 @@ export default function NotFound() {
                 .btn-primary {
                     width: 100%;
                     padding: 14px 24px;
-                    background: linear-gradient(135deg, #f68c1e 0%, #e07a0a 100%);
+                    background: linear-gradient(135deg, #FE8E0A 0%, #cc6000 100%);
                     color: #fff;
                     border-radius: 12px;
-                    font-family: 'DM Sans', sans-serif;
+                    font-family: 'Outfit', sans-serif;
                     font-size: 14.5px;
                     font-weight: 600;
                     cursor: pointer;
                     border: none;
                     transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
-                    box-shadow: 0 4px 20px rgba(246,140,30,0.35);
+                    box-shadow: 0 4px 20px rgba(254,142,10,0.35);
                     letter-spacing: 0.01em;
                 }
                 .btn-primary:hover {
@@ -250,7 +250,7 @@ export default function NotFound() {
                     background: transparent;
                     color: #205ED7;
                     border-radius: 12px;
-                    font-family: 'DM Sans', sans-serif;
+                    font-family: 'Outfit', sans-serif;
                     font-size: 14.5px;
                     font-weight: 600;
                     cursor: pointer;
@@ -336,10 +336,10 @@ export default function NotFound() {
 
                     <div className="divider-line" />
 
-                    <h1 className="nf-heading">This property doesn't exist</h1>
+                    <h1 className="nf-heading">This page doesn&apos;t exist</h1>
                     <p className="nf-desc">
-                        The page you're looking for may have been moved,<br />
-                        deleted, or never existed. Let's get you home.
+                        The URL may be wrong, or the page was moved or removed.<br />
+                        Use the links below to get back on track.
                     </p>
 
                     {/* Countdown timer */}
@@ -364,7 +364,7 @@ export default function NotFound() {
                                         <stop offset="100%" stopColor="#205ED7" />
                                     </linearGradient>
                                 </defs>
-                                <text x="40" y="40" textAnchor="middle" dominantBaseline="central" fill="#111827" fontSize="22" fontWeight="700" fontFamily="Syne, sans-serif">
+                                <text x="40" y="40" textAnchor="middle" dominantBaseline="central" fill="#111827" fontSize="22" fontWeight="700" fontFamily="Outfit, sans-serif">
                                     {countdown}
                                 </text>
                             </svg>

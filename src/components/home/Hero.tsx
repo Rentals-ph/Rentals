@@ -596,11 +596,11 @@ function Hero() {
         {/* AI Assistant Button - mobile responsive */}
         <button 
           className={`relative font-outfit font-semibold flex items-center justify-center gap-1 transition-all hover:scale-105 active:scale-[0.98] overflow-hidden cursor-pointer rounded-full sm:rounded-[32.5px] shadow-[0_4px_21px_rgba(0,0,0,0.25)] touch-manipulation min-h-[48px] ${
-            isChatMode ? 'mt-2 sm:mt-3 text-xs sm:text-sm h-9 sm:h-11 px-4 sm:px-6' : 'mt-4 sm:mt-6 text-sm sm:text-base md:text-lg h-12 sm:h-[52px] md:h-[55px] px-5 sm:px-8 md:px-10'
+            isChatMode ? 'mt-2 sm:mt-3 text-xs sm:text-sm h-9 sm:h-11 px-4 sm:px-6' : 'mt-4 sm:mt-6 text-sm sm:text-base md:text-lg h-12 sm:h-[52px] md:h-[55px] px-4 sm:px-6 md:px-7'
           }`}
           style={{
             width: 'auto',
-            maxWidth: 'min(100%, 320px)',
+            maxWidth: 'min(100%, 260px)',
             backgroundColor: 'var(--ai-button-bg, white)',
             color: 'var(--ai-button-text, #002978)',
             borderWidth: '2px',

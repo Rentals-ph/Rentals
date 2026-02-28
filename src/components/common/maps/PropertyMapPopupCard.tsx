@@ -25,9 +25,9 @@ export default function PropertyMapPopupCard({
 
   return (
     <article
-      className={`flex h-full w-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_10px_40px_rgba(15,23,42,0.15)] ${className}`}
+      className={`flex h-full w-full max-w-[280px] sm:max-w-none flex-col overflow-hidden rounded-xl sm:rounded-2xl border border-gray-200 bg-white shadow-[0_10px_40px_rgba(15,23,42,0.15)] ${className}`}
     >
-      <div className="relative h-40 w-full overflow-hidden bg-slate-100 sm:h-44">
+      <div className="relative h-28 xs:h-32 sm:h-40 w-full overflow-hidden bg-slate-100 sm:h-44">
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -39,27 +39,27 @@ export default function PropertyMapPopupCard({
         )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-1.5 px-4 pb-4 pt-3">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-blue-600">
+      <div className="flex flex-1 flex-col gap-1 xs:gap-1.5 px-3 pb-3 pt-2 sm:px-4 sm:pb-4 sm:pt-3">
+        <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.08em] text-blue-600">
           {safeType}
         </p>
-        <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-slate-900">
+        <h3 className="line-clamp-2 text-xs sm:text-sm font-semibold leading-snug text-slate-900">
           {safeTitle}
         </h3>
-        <p className="mt-0.5 line-clamp-2 text-xs text-slate-600">
+        <p className="mt-0.5 line-clamp-2 text-[11px] sm:text-xs text-slate-600">
           {safeLocation}
         </p>
         {priceLabel && (
-          <p className="mt-1 text-base font-bold text-slate-900">
+          <p className="mt-1 text-sm sm:text-base font-bold text-slate-900">
             {priceLabel}
           </p>
         )}
 
         {id && (
-          <div className="mt-2">
+          <div className="mt-1.5 sm:mt-2">
             <Link
               href={`/property/${id}`}
-              className="flex w-full items-center justify-center rounded-lg bg-blue-600 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-white shadow-[0_2px_8px_rgba(37,99,235,0.35)] transition hover:bg-blue-700"
+              className="flex w-full items-center justify-center rounded-lg bg-blue-600 px-2.5 py-1.5 sm:px-3 sm:py-2 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-white shadow-[0_2px_8px_rgba(37,99,235,0.35)] transition hover:bg-blue-700"
             >
               View details
             </Link>

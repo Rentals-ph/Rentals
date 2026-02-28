@@ -526,6 +526,26 @@
           "originalName": "contact-person.png"
         }
       },
+      "agents": {
+        "AGENTS_HERO_PERSON": {
+          "id": "AGENTS_HERO_PERSON",
+          "path": "/assets/images/agents/hero-person.png",
+          "category": "images",
+          "subcategory": "agents",
+          "description": "Agents page hero person image",
+          "originalName": "hero-person.png"
+        }
+      },
+      "modal": {
+        "LOGIN_MODAL_GROUP": {
+          "id": "LOGIN_MODAL_GROUP",
+          "path": "/assets/images/modal/login-modal-group.png",
+          "category": "images",
+          "subcategory": "modal",
+          "description": "Login/Register modal logo and social icons group",
+          "originalName": "login-modal-group.png"
+        }
+      },
       "testimonials": {
         "TESTIMONIAL_ELAINE": {
           "id": "TESTIMONIAL_ELAINE",
@@ -735,6 +755,13 @@
           "category": "backgrounds",
           "description": "Login modal background image",
           "originalName": "login-bg.png"
+        },
+        "BG_LOGIN_MODAL_LEFT": {
+          "id": "BG_LOGIN_MODAL_LEFT",
+          "path": "/assets/backgrounds/login-modal-left-bg.png",
+          "category": "backgrounds",
+          "description": "Login/Register modal left column background (gradient with wavy lines)",
+          "originalName": "login-modal-left-bg.png"
         },
       "BG_CONTACT_US": {
         "id": "BG_CONTACT_US",

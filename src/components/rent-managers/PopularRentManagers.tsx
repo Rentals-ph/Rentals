@@ -74,7 +74,7 @@ function buildAgentSearchUrl(params: { location?: string; license?: string }) {
   if (params.location) search.set('location', params.location)
   if (params.license) search.set('license', params.license)
   const q = search.toString()
-  return `/rent-managers${q ? `?${q}` : ''}`
+  return `/agents${q ? `?${q}` : ''}`
 }
 
 export default function PopularRentManagers() {

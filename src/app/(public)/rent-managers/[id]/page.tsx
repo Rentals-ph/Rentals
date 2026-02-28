@@ -15,6 +15,7 @@ import { ASSETS, getAsset } from '@/utils/assets'
 import { resolveAgentAvatar } from '@/utils/imageResolver'
 import PageHeader from '@/components/layout/PageHeader'
 import DigitalProfileCard from '@/components/common/DigitalProfileCard'
+import { EmptyState, EmptyStateAction } from '@/components/common'
 // import './page.css' // Removed - converted to Tailwind
 
 export default function RentManagerDetailsPage() {
@@ -294,12 +295,13 @@ export default function RentManagerDetailsPage() {
           </div>
         </div>
         <main className="px-6 md:px-10 lg:px-[150px] py-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="bg-white rounded-lg shadow-md p-8 text-center">
-              <h2 className="text-2xl font-bold mb-4 text-gray-800">Rent Manager not found</h2>
-              <p className="text-gray-600 mb-6">Please go back and select a valid rent manager.</p>
-              <Link className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" href="/rent-managers">Back to Rent Managers</Link>
-            </div>
+          <div className="max-w-2xl mx-auto">
+            <EmptyState
+              variant="notFound"
+              title="Rent manager not found"
+              description="This rent manager profile may have been removed or the link might be incorrect."
+              action={<EmptyStateAction href="/rent-managers" primary>Back to rent managers</EmptyStateAction>}
+            />
           </div>
         </main>
         <Footer />
@@ -715,9 +717,12 @@ export default function RentManagerDetailsPage() {
                       )
                     })
                   ) : (
-                    <div className="text-center py-12 text-gray-500">
-                      <p>No properties found matching your filters.</p>
-                    </div>
+                    <EmptyState
+                      variant="empty"
+                      title="No properties listed"
+                      description="This rent manager doesn't have any listed properties at the moment."
+                      compact
+                    />
                   )}
                 </div>
               </div>

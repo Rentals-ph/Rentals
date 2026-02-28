@@ -35,6 +35,6 @@ export type { PublicPropertiesMapHandle } from './maps'
 export { DigitalBusinessCard, DigitalProfileCard } from './digital'
 
 // Misc
-export { Pagination, SharePopup, Partners, ImageUploader } from './misc'
-export type { PaginationProps } from './misc'
+export { Pagination, SharePopup, Partners, ImageUploader, EmptyState, EmptyStateAction } from './misc'
+export type { PaginationProps, EmptyStateProps, EmptyStateVariant } from './misc'
 export type { SharePlatform, ShareOption } from './misc'

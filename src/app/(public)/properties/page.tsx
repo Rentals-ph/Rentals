@@ -9,6 +9,7 @@ import HorizontalPropertyCard from '@/components/common/HorizontalPropertyCard'
 import { VerticalPropertyCardSkeleton } from '@/components/common/VerticalPropertyCardSkeleton'
 import { HorizontalPropertyCardSkeleton } from '@/components/common/HorizontalPropertyCardSkeleton'
 import PublicPropertiesMap, { type PublicPropertiesMapHandle } from '@/components/common/PublicPropertiesMap'
+import { EmptyState, EmptyStateAction } from '@/components/common'
 // import './page.css' // Removed - converted to Tailwind
 import PageHeader from '@/components/layout/PageHeader'
 import { propertiesApi } from '@/api/endpoints/properties'
@@ -50,6 +51,7 @@ function PropertiesContent() {
   const [hasMore, setHasMore] = useState(true)
   const itemsPerPage = 9
   const mapRef = useRef<PublicPropertiesMapHandle>(null)
+  const [mapListSheetOpen, setMapListSheetOpen] = useState(false)
 
   // Advance search sidebar width (match Navbar: 240 / 264)
   const ADVANCE_SEARCH_WIDTH = 240
@@ -567,24 +569,25 @@ function PropertiesContent() {
         className="flex flex-col flex-1 min-w-0 transition-transform duration-300 ease-in-out lg:transition-none"
         style={isSidebarOpen ? { transform: `translateX(-${ADVANCE_SEARCH_WIDTH_SM}px)` } : undefined}
       >
-        <div className="top-search-bar-container sticky z-30 bg-white p-3 sm:pt-5 px-4 sm:px-6 md:px-10 lg:px-[150px] top-[4rem] sm:top-[5.5rem] md:top-[6.25rem] shadow-sm">
+        <div className="top-search-bar-container sticky z-30 bg-white p-3 sm:pt-5 px-4 sm:px-6 md:px-10 lg:px-[150px] top-16 sm:top-20 lg:top-0 shadow-sm">
           <div className="top-search-bar flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full border-b border-gray-200 pb-3 sm:pb-5" style={{ borderBottomWidth: '2px', borderBottomStyle: 'solid', borderBottomColor: '#E5E7EB' }}>
-            {/* Search input with filter icon at end (flex-end) */}
-            <div className="search-input-container flex-1 w-full sm:min-w-[200px] flex items-center gap-2 border border-gray-300 rounded-lg bg-white focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent">
+            {/* Search input with filter icon at end (flex-end) - h-12 sets row height for all controls */}
+            <div className="search-input-container h-12 flex-1 w-full sm:min-w-[200px] flex items-center gap-2 border border-gray-300 rounded-lg bg-white focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent"
+            style={{ border: '2px solid #E5E7EB' }}>
               <svg className="search-icon ml-3 sm:ml-4 w-4 h-4 sm:w-5 sm:h-5 text-gray-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
                 <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
               <input
                 type="text"
-                className="main-search-input flex-1 min-w-0 py-2.5 sm:py-3 pr-2 border-0 bg-transparent text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0"
+                className="main-search-input flex-1 min-w-0 h-full py-0 pr-2 border-0 bg-transparent text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0"
                 placeholder="Search here..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
               <button
                 type="button"
-                className="filter-toggle-btn flex items-center justify-center p-2 sm:p-2.5 rounded-md text-gray-500 hover:text-rental-blue-600 hover:bg-rental-blue-50 transition-colors flex-shrink-0 mr-1 sm:mr-2"
+                className="filter-toggle-btn md:hidden flex items-center justify-center self-stretch aspect-square max-h-full rounded-md text-gray-500 hover:text-rental-blue-600 hover:bg-rental-blue-50 transition-colors flex-shrink-0 mr-1 sm:mr-2 min-w-[2.5rem]"
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                 aria-label={isSidebarOpen ? 'Close filters' : 'Open filters'}
                 title="Filters"
@@ -609,9 +612,9 @@ function PropertiesContent() {
                 </span>
               </button>
             </div>
-            <div className="top-search-bar-controls h-full flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <div className="top-search-bar-controls h-12 flex flex-wrap items-stretch gap-2 sm:gap-3 w-full sm:w-auto">
               <select
-                className="sort-dropdown-btn sort-by-relevance px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 border border-gray-300 rounded-lg bg-white text-gray-700 text-xs sm:text-sm font-medium cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent flex-1 sm:flex-none min-w-0 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-10"
+                className="sort-dropdown-btn sort-by-relevance h-full min-h-0 px-3 sm:px-4 md:px-6 border border-gray-300 rounded-lg bg-white text-gray-700 text-xs sm:text-sm font-medium cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent flex-1 sm:flex-none min-w-0 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-10"
                 style={{ paddingRight: '2.5rem', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.75rem center' }}
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
@@ -620,7 +623,7 @@ function PropertiesContent() {
                 <option value="oldest">Oldest First</option>
               </select>
               <select
-                className="sort-dropdown-btn sort-by-price px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg bg-white text-gray-700 text-xs sm:text-sm font-medium cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent flex-1 sm:flex-none min-w-0 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-10"
+                className="sort-dropdown-btn sort-by-price h-full min-h-0 px-3 sm:px-4 border border-gray-300 rounded-lg bg-white text-gray-700 text-xs sm:text-sm font-medium cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent flex-1 sm:flex-none min-w-0 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-10"
                 style={{ paddingRight: '2.5rem', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.75rem center' }}
                 value={sortByPrice}
                 onChange={(e) => setSortByPrice(e.target.value)}
@@ -629,9 +632,10 @@ function PropertiesContent() {
                 <option value="price-low">Price: Low to High</option>
                 <option value="price-high">Price: High to Low</option>
               </select>
-              <div className="rounded-lg border border-gray-200">
+              <div className="h-full flex rounded-lg border border-gray-200 p-1"
+              style={{ border: '2px solid #E5E7EB' }}>
                 <button
-                  className={`hamburger-menu-btn px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex-1 sm:flex-none ${viewMode === 'horizontal' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'}`}
+                  className={`hamburger-menu-btn h-full min-h-0 px-3 sm:px-4 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex-1 sm:flex-none ${viewMode === 'horizontal' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'}`}
                   aria-label="List View"
                   onClick={() => setViewMode('horizontal')}
                 >
@@ -639,7 +643,7 @@ function PropertiesContent() {
                   <span className="sm:hidden">List</span>
                 </button>
                 <button
-                  className={`grid-view-btn px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex-1 sm:flex-none ${viewMode === 'vertical' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'}`}
+                  className={`grid-view-btn h-full min-h-0 px-3 sm:px-4 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex-1 sm:flex-none ${viewMode === 'vertical' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'}`}
                   aria-label="Grid View"
                   onClick={() => setViewMode('vertical')}
                 >
@@ -647,7 +651,7 @@ function PropertiesContent() {
                   <span className="sm:hidden">Grid</span>
                 </button>
                 <button
-                  className={`map-view-btn px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex-1 sm:flex-none ${viewMode === 'map' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'}`}
+                  className={`map-view-btn h-full min-h-0 px-3 sm:px-4 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex-1 sm:flex-none ${viewMode === 'map' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'}`}
                   aria-label="Map View"
                   onClick={() => setViewMode('map')}
                 >
@@ -659,7 +663,7 @@ function PropertiesContent() {
           </div>
         </div>
 
-      <main className="properties-main-layout flex flex-col lg:flex-row gap-4 sm:gap-6 mx-auto px-4 sm:px-6 md:px-10 lg:px-[150px] pb-4 sm:py-2 max-w-[1920px]">
+      <main className="properties-main-layout flex flex-col lg:flex-row gap-4 sm:gap-6 px-4 sm:px-6 md:px-10 lg:px-[150px] pb-4 sm:py-2 max-w-[1920px]">
         
         {/* Desktop Sidebar - Hidden on mobile/tablet, same style as advance search overlay */}
         <div className="properties-sidebar w-[250px] flex-shrink-0 hidden lg:block lg:order-2">
@@ -912,10 +916,16 @@ function PropertiesContent() {
                 )}
               </div>
             ) : error ? (
-              <div className="no-results">
-                <h3 className="no-results-title">Error Loading Properties</h3>
-                <p className="no-results-text">{error}</p>
-              </div>
+              <EmptyState
+                variant="error"
+                title="Error loading properties"
+                description={error}
+                action={
+                  <EmptyStateAction href="/properties" primary>
+                    Try again
+                  </EmptyStateAction>
+                }
+              />
             ) : paginatedProperties.length > 0 ? (
               <>
                 {viewMode === 'map' ? (
@@ -926,9 +936,9 @@ function PropertiesContent() {
                         properties={paginatedProperties}
                       />
                     </div>
-                    {/* Right overlay panel: property cards - responsive width */}
+                    {/* Desktop/tablet: right overlay panel (reduced height: top/bottom inset) */}
                     <div
-                      className="absolute top-2 right-2 bottom-2 sm:top-4 sm:right-4 sm:bottom-4 z-10 w-[calc(100%-1rem)] max-w-[240px] sm:max-w-[280px] flex flex-col rounded-xl overflow-hidden"
+                      className="absolute top-14 right-2 bottom-8 sm:top-16 sm:right-4 sm:bottom-10 z-10 w-[calc(90%-1rem)] max-w-[240px] sm:max-w-[280px] max-h-[calc(100%-6rem)] hidden md:flex flex-col rounded-xl overflow-hidden"
                       style={{ backgroundColor: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)' }}
                     >
                       <div className="flex-shrink-0 px-4 py-3 border-b border-white/20">
@@ -967,6 +977,100 @@ function PropertiesContent() {
                             </button>
                           )
                         })}
+                      </div>
+                    </div>
+                    {/* Mobile: floating button to open list */}
+                    <button
+                      type="button"
+                      onClick={() => setMapListSheetOpen(true)}
+                      className="md:hidden absolute bottom-4 left-4 right-4 z-20 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold text-white bg-black/70 backdrop-blur-md border border-white/20 shadow-lg active:scale-[0.98]"
+                      aria-label={`Show ${paginatedProperties.length} properties list`}
+                    >
+                      <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1" />
+                        <rect x="14" y="3" width="7" height="7" rx="1" />
+                        <rect x="3" y="14" width="7" height="7" rx="1" />
+                        <rect x="14" y="14" width="7" height="7" rx="1" />
+                      </svg>
+                      <span>List ({paginatedProperties.length})</span>
+                    </button>
+                    {/* Mobile: bottom sheet with property cards (full-screen overlay when open) */}
+                    <div
+                      className="md:hidden fixed inset-0 z-30"
+                      style={{ pointerEvents: mapListSheetOpen ? 'auto' : 'none' }}
+                      aria-hidden={!mapListSheetOpen}
+                    >
+                      <button
+                        type="button"
+                        className="absolute inset-0 bg-black/45 transition-opacity duration-300"
+                        style={{ opacity: mapListSheetOpen ? 1 : 0 }}
+                        onClick={() => setMapListSheetOpen(false)}
+                        aria-label="Close list"
+                      />
+                      <div
+                        className="absolute inset-x-0 bottom-0 rounded-t-2xl overflow-hidden shadow-2xl max-h-[70vh] flex flex-col transition-transform duration-300 ease-out"
+                        style={{
+                          transform: mapListSheetOpen ? 'translateY(0)' : 'translateY(100%)',
+                          backgroundColor: 'rgba(15,23,42,0.98)',
+                          backdropFilter: 'blur(12px)',
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-white/20">
+                          <div>
+                            <h3 className="text-sm font-semibold text-white uppercase tracking-wide">
+                              Properties on map
+                            </h3>
+                            <p className="text-xs text-white/70 mt-0.5">
+                              {paginatedProperties.length} listing{paginatedProperties.length !== 1 ? 's' : ''} — tap to locate
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setMapListSheetOpen(false)}
+                            className="p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                            aria-label="Close list"
+                          >
+                            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M18 6L6 18M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto overscroll-contain p-3 space-y-2 pb-6">
+                          {paginatedProperties.map((prop) => {
+                            const mainImg = prop.image_url || prop.image || ASSETS.PLACEHOLDER_PROPERTY_MAIN
+                            return (
+                              <button
+                                key={prop.id}
+                                type="button"
+                                onClick={() => {
+                                  setMapListSheetOpen(false)
+                                  // Fly to property after sheet closes so the map is visible and has correct size (Leaflet needs visible container)
+                                  setTimeout(() => {
+                                    mapRef.current?.flyToProperty(prop)
+                                  }, 350)
+                                }}
+                                className="w-full text-left rounded-xl overflow-hidden flex gap-3 p-3 transition-colors hover:bg-white/15 active:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 bg-white/5"
+                              >
+                                <div
+                                  className="flex-shrink-0 w-[72px] h-[72px] rounded-lg bg-gray-700 bg-cover bg-center"
+                                  style={{ backgroundImage: `url(${mainImg})` }}
+                                />
+                                <div className="min-w-0 flex-1 py-0.5">
+                                  <p className="text-sm font-medium text-white line-clamp-2">
+                                    {prop.title}
+                                  </p>
+                                  <p className="text-xs text-white/70 mt-0.5 truncate">
+                                    {prop.location || prop.city || '—'}
+                                  </p>
+                                  <p className="text-sm font-semibold text-white mt-1">
+                                    {formatPrice(prop.price)}
+                                  </p>
+                                </div>
+                              </button>
+                            )
+                          })}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1041,12 +1145,25 @@ function PropertiesContent() {
                 )}
               </>
             ) : (
-              <div className="no-results">
-                <h3 className="no-results-title">No Properties Found</h3>
-                <p className="no-results-text">
-                  Try adjusting your filters to see more properties
-                </p>
-              </div>
+              <EmptyState
+                variant="empty"
+                title="No properties found"
+                description="Try adjusting your filters, location, or search terms to see more listings."
+                action={
+                  <>
+                    <EmptyStateAction href="/properties" primary={false}>
+                      View all properties
+                    </EmptyStateAction>
+                    <button
+                      type="button"
+                      onClick={() => setIsSidebarOpen(true)}
+                      className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base bg-rental-orange-500 text-white shadow-lg shadow-rental-orange-500/25 hover:bg-rental-orange-600 transition-all active:scale-[0.98]"
+                    >
+                      Adjust filters
+                    </button>
+                  </>
+                }
+              />
             )}
           </div>
         </div>

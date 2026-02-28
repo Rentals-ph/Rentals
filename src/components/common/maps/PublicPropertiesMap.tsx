@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useMemo, forwardRef, useImperativeHandle } from 'react'
+import { createPortal } from 'react-dom'
 import 'leaflet/dist/leaflet.css'
 import type { Map as LeafletMap, Marker, TileLayer } from 'leaflet'
 import type { Property } from '@/types'
@@ -25,12 +26,32 @@ const PublicPropertiesMap = forwardRef<PublicPropertiesMapHandle, PublicProperti
   ref
 ) {
   const mapContainerRef = useRef<HTMLDivElement>(null)
+  const fullViewMapContainerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<LeafletMap | null>(null)
   const tileLayerRef = useRef<TileLayer | null>(null)
   const markersRef = useRef<Marker[]>([])
   const markersByPropertyIdRef = useRef<Map<number, Marker>>(new Map())
   const [leafletLoaded, setLeafletLoaded] = useState(false)
   const initializedRef = useRef(false)
+  const currentMapModeRef = useRef<'normal' | 'full'>(null as unknown as 'normal' | 'full')
+  const [isFullView, setIsFullView] = useState(false)
+
+  const exitFullView = () => setIsFullView(false)
+
+  // Escape key and body scroll lock when full view is open
+  useEffect(() => {
+    if (!isFullView) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') exitFullView()
+    }
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.body.style.overflow = prevOverflow
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [isFullView])
 
   // Memoize filtered properties to prevent unnecessary recalculations
   const propertiesWithCoords = useMemo(() => {
@@ -48,6 +69,8 @@ const PublicPropertiesMap = forwardRef<PublicPropertiesMapHandle, PublicProperti
         ? parseFloat(property.longitude)
         : null
       if (!mapRef.current || lat == null || lng == null) return
+      // Recompute map size (e.g. after mobile bottom sheet closes) so flyTo uses correct dimensions
+      mapRef.current.invalidateSize()
       mapRef.current.flyTo([lat, lng], 15, { duration: 0.6 })
       const marker = markersByPropertyIdRef.current.get(property.id)
       if (marker) {
@@ -109,18 +132,18 @@ const PublicPropertiesMap = forwardRef<PublicPropertiesMapHandle, PublicProperti
     const locationStr = (property.location || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
     const priceStr = formatPrice(property.price ?? 0)
 
-    // Improved popup card: cleaner layout, price, location
+    // Improved popup card: cleaner layout, price, location (sizes tuned for desktop; mobile overrides in index.css)
     const popupContent = `
       <div class="property-map-popup" style="
         background: #fff;
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 10px 40px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.06);
-        min-width: 300px;
+        min-width: 260px;
         max-width: 320px;
         font-family: system-ui, -apple-system, sans-serif;
       ">
-        <div style="
+        <div class="property-map-popup-image" style="
           width: 100%;
           height: 160px;
           background-image: url('${imageUrl}');
@@ -128,13 +151,14 @@ const PublicPropertiesMap = forwardRef<PublicPropertiesMapHandle, PublicProperti
           background-position: center;
           background-color: #f1f5f9;
         "></div>
-        <div style="padding: 14px 16px 16px;">
-          <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #2563eb; text-transform: uppercase; letter-spacing: 0.02em;">${typeStr}</p>
-          <h4 style="margin: 0 0 8px 0; font-size: 15px; font-weight: 600; color: #0f172a; line-height: 1.35;">${title}</h4>
-          <p style="margin: 0 0 10px 0; font-size: 13px; color: #64748b;">${locationStr || 'Location not specified'}</p>
-          <p style="margin: 0 0 12px 0; font-size: 16px; font-weight: 700; color: #0f172a;">${priceStr}</p>
+        <div class="property-map-popup-body" style="padding: 14px 16px 16px;">
+          <p class="property-map-popup-type" style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #2563eb; text-transform: uppercase; letter-spacing: 0.02em;">${typeStr}</p>
+          <h4 class="property-map-popup-title" style="margin: 0 0 8px 0; font-size: 15px; font-weight: 600; color: #0f172a; line-height: 1.35;">${title}</h4>
+          <p class="property-map-popup-location" style="margin: 0 0 10px 0; font-size: 13px; color: #64748b;">${locationStr || 'Location not specified'}</p>
+          <p class="property-map-popup-price" style="margin: 0 0 12px 0; font-size: 16px; font-weight: 700; color: #0f172a;">${priceStr}</p>
           <a 
             href="/property/${property.id}" 
+            class="property-map-popup-link"
             style="
               display: block;
               width: 100%;
@@ -165,6 +189,7 @@ const PublicPropertiesMap = forwardRef<PublicPropertiesMapHandle, PublicProperti
 
     marker.bindPopup(popupContent, {
       maxWidth: 340,
+      minWidth: 260,
       className: 'property-map-popup-wrapper',
     })
 
@@ -199,25 +224,39 @@ const PublicPropertiesMap = forwardRef<PublicPropertiesMapHandle, PublicProperti
     loadLeaflet()
   }, [])
 
-  // Initialize map and markers
+  // Initialize map and markers (re-runs when isFullView toggles to use the active container)
   useEffect(() => {
-    if (!mapContainerRef.current || !leafletLoaded || typeof window === 'undefined') return
+    const container = isFullView ? fullViewMapContainerRef.current : mapContainerRef.current
+    if (!container || !leafletLoaded || typeof window === 'undefined') return
 
     const L = (window as any).L
     if (!L) return
 
-    // Initialize map only once
+    // If we have a map from the other mode, destroy it so we can create in the current container
+    if (mapRef.current && currentMapModeRef.current !== (isFullView ? 'full' : 'normal')) {
+      mapRef.current.remove()
+      mapRef.current = null
+      tileLayerRef.current = null
+      initializedRef.current = false
+      markersRef.current = []
+      markersByPropertyIdRef.current.clear()
+    }
+
+    currentMapModeRef.current = isFullView ? 'full' : 'normal'
+
+    // Initialize map only once per container
     if (!mapRef.current && !initializedRef.current) {
       // Ensure container has dimensions
-      if (mapContainerRef.current.offsetWidth === 0 || mapContainerRef.current.offsetHeight === 0) {
+      if (container.offsetWidth === 0 || container.offsetHeight === 0) {
         // Wait for next frame if container isn't ready
         const timeoutId = setTimeout(() => {
-          if (!mapContainerRef.current || mapRef.current || initializedRef.current) return
+          const target = isFullView ? fullViewMapContainerRef.current : mapContainerRef.current
+          if (!target || mapRef.current || initializedRef.current) return
           
           const defaultLat = 14.5995 // Manila, Philippines
           const defaultLng = 120.9842
 
-          const map = L.map(mapContainerRef.current!, {
+          const map = L.map(target, {
             zoomControl: true,
             scrollWheelZoom: true,
           })
@@ -268,7 +307,7 @@ const PublicPropertiesMap = forwardRef<PublicPropertiesMapHandle, PublicProperti
       const defaultLat = 14.5995 // Manila, Philippines
       const defaultLng = 120.9842
 
-      const map = L.map(mapContainerRef.current, {
+      const map = L.map(container, {
         zoomControl: true,
         scrollWheelZoom: true,
       })
@@ -334,8 +373,14 @@ const PublicPropertiesMap = forwardRef<PublicPropertiesMapHandle, PublicProperti
       }
     }
 
+    // In full view, invalidate size so map fills the new container
+    const invalidateTimer = isFullView && mapRef.current
+      ? setTimeout(() => mapRef.current?.invalidateSize(), 150)
+      : undefined
+
     // Cleanup markers only (not the map)
     return () => {
+      if (invalidateTimer) clearTimeout(invalidateTimer)
       markersRef.current.forEach((marker) => {
         if (mapRef.current) {
           mapRef.current.removeLayer(marker)
@@ -344,7 +389,7 @@ const PublicPropertiesMap = forwardRef<PublicPropertiesMapHandle, PublicProperti
       markersRef.current = []
       markersByPropertyIdRef.current.clear()
     }
-  }, [leafletLoaded, propertiesWithCoords, onPropertyClick])
+  }, [leafletLoaded, propertiesWithCoords, onPropertyClick, isFullView])
 
   // Cleanup map on unmount
   useEffect(() => {
@@ -361,19 +406,70 @@ const PublicPropertiesMap = forwardRef<PublicPropertiesMapHandle, PublicProperti
     }
   }, [])
 
+  const mapContainerStyles = {
+    width: '100%',
+    height: '100%',
+    minHeight: isFullView ? undefined : '600px',
+    borderRadius: isFullView ? 0 : '8px',
+    overflow: 'hidden' as const,
+  }
+
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-      <div
-        ref={mapContainerRef}
-        style={{
-          width: '100%',
-          height: '100%',
-          minHeight: '600px',
-          borderRadius: '8px',
-          overflow: 'hidden',
-        }}
-      />
-    </div>
+    <>
+      {/* Normal view: map + expand button */}
+      {!isFullView && (
+        <div style={{ position: 'relative', width: '100%', height: '100%' }} className="public-properties-map-wrapper">
+          <div ref={mapContainerRef} style={mapContainerStyles} />
+          <button
+            type="button"
+            onClick={() => setIsFullView(true)}
+            className="absolute top-3 right-3 z-[1000] flex items-center gap-2 rounded-lg bg-white/95 px-3 py-2 text-sm font-semibold text-slate-800 shadow-lg ring-1 ring-black/10 transition hover:bg-white hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            aria-label="Expand map to full view"
+            title="Full view"
+          >
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+            </svg>
+            <span className="hidden sm:inline">Full view</span>
+          </button>
+        </div>
+      )}
+
+      {/* Full view: overlay with map and close */}
+      {isFullView &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[9999] flex flex-col bg-slate-900"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Map full view"
+          >
+            <header className="flex-shrink-0 flex items-center justify-between gap-4 px-4 py-3 bg-slate-800/95 border-b border-white/10">
+              <h2 className="text-base sm:text-lg font-semibold text-white truncate">
+                Map view — {propertiesWithCoords.length} propert{propertiesWithCoords.length === 1 ? 'y' : 'ies'}
+              </h2>
+              <button
+                type="button"
+                onClick={exitFullView}
+                className="flex items-center gap-2 rounded-lg bg-white/15 px-3 py-2 text-sm font-medium text-white hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-white/50"
+                aria-label="Exit full view"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                </svg>
+                <span className="hidden sm:inline">Exit full view</span>
+              </button>
+            </header>
+            <div
+              ref={fullViewMapContainerRef}
+              className="flex-1 min-h-0 w-full"
+              style={{ minHeight: '300px' }}
+            />
+          </div>,
+          document.body
+        )}
+    </>
   )
 })
 

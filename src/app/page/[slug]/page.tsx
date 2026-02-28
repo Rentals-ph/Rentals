@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
+import Footer from '@/components/layout/Footer'
+import { EmptyState, EmptyStateAction } from '@/components/common'
 import { pageBuilderApi } from '@/api'
 import type { PageBuilderData } from '@/api'
 import { ASSETS } from '@/utils/assets'
@@ -119,18 +121,23 @@ export default function PublicPageBuilderPage() {
 
   if (error || !pageData) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column',
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        minHeight: '100vh',
-        padding: '20px'
-      }}>
-        <h1 style={{ fontSize: '24px', marginBottom: '12px', color: '#111827' }}>Page Not Found</h1>
-        <p style={{ color: '#6B7280', textAlign: 'center' }}>
-          {error || 'The page you are looking for does not exist or is not published.'}
-        </p>
+      <div className="min-h-screen flex flex-col bg-white">
+        <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-20">
+          <div className="w-full max-w-2xl mx-auto">
+            <EmptyState
+              variant="notFound"
+              title="Page not found"
+              description={error || 'The page you\'re looking for doesn\'t exist or isn\'t published.'}
+              action={
+                <>
+                  <EmptyStateAction href="/" primary>Go to homepage</EmptyStateAction>
+                  <EmptyStateAction href="/properties" primary={false}>Browse properties</EmptyStateAction>
+                </>
+              }
+            />
+          </div>
+        </main>
+        <Footer />
       </div>
     )
   }

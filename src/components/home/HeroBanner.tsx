@@ -33,7 +33,7 @@ const HeroBanner = () => {
       </Link>
 
       {/* Right Section - Orange Panel */}
-      <Link href="/rent-managers" className="flex-1 no-underline block transition-all duration-300 hover:opacity-90 hover:-translate-y-0.5 group h-full flex">
+      <Link href="/agents" className="flex-1 no-underline block transition-all duration-300 hover:opacity-90 hover:-translate-y-0.5 group h-full flex">
         <div className="h-[80px] xs:h-[100px] sm:h-[130px] w-full bg-rental-orange-500/100 flex items-center justify-center px-4 sm:px-6 md:px-8 group-hover:bg-rental-orange-500/85 transition-colors">
           <div className="flex items-center justify-center gap-2 sm:gap-5 w-full max-w-full px-3 sm:px-5 flex-wrap">
             <h3 className="text-white font-outfit text-sm xs:text-base sm:text-2xl md:text-3xl font-bold m-0 text-center leading-tight break-words flex-shrink min-w-0">

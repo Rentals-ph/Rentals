@@ -92,15 +92,15 @@ export default function NewsPage() {
   return (
     <div className="flex min-h-screen flex-col bg-white overflow-x-hidden">
       {/* Red Hero Banner */}
-      <section className="w-full bg-red-600 py-6 sm:py-8 md:py-10">
-        <div className="px-4 sm:px-6 md:px-10 lg:px-[150px] flex flex-col sm:flex-row gap-4 sm:gap-8">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white font-outfit uppercase text-start mb-0 sm:mb-4">
+      <section className="w-full bg-red-600 py-4 sm:py-6 md:py-8 lg:py-10">
+        <div className="px-4 sm:px-6 md:px-10 lg:px-[150px] flex flex-col gap-3 sm:gap-6 md:gap-8">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white font-outfit uppercase text-start">
             NEWS
           </h1>
           
-          {/* Headline Ticker Animation */}
+          {/* Headline Ticker Animation - hidden on very small screens to save space */}
           {headlineNews.length > 0 && (
-            <div className="relative overflow-hidden bg-black/20 py-2 sm:py-3 h-auto sm:h-13 rounded justify-center items-center flex flex-1 min-w-0">
+            <div className="relative overflow-hidden bg-black/20 py-2 sm:py-3 h-10 sm:h-12 md:h-auto rounded justify-center items-center flex flex-1 min-w-0 max-h-12 sm:max-h-none">
               <div 
                 className="flex whitespace-nowrap"
                 style={{
@@ -109,13 +109,13 @@ export default function NewsPage() {
               >
                 {/* Duplicate content for seamless loop */}
                 {[...Array(3)].map((_, loopIndex) => (
-                  <div key={loopIndex} className="flex items-center gap-8 px-4">
+                  <div key={loopIndex} className="flex items-center gap-4 sm:gap-6 md:gap-8 px-2 sm:px-4">
                     {headlineNews.map((article, index) => (
-                      <div key={`${loopIndex}-${index}`} className="flex items-center gap-4">
-                        <span className="text-white font-outfit text-sm md:text-base font-semibold">
+                      <div key={`${loopIndex}-${index}`} className="flex items-center gap-2 sm:gap-4">
+                        <span className="text-white font-outfit text-xs sm:text-sm md:text-base font-semibold line-clamp-1 sm:line-clamp-none">
                           {article.title}
                         </span>
-                        <span className="text-white/60 text-lg">•</span>
+                        <span className="text-white/60 text-sm sm:text-lg hidden sm:inline">•</span>
                       </div>
                     ))}
                   </div>
@@ -174,29 +174,29 @@ export default function NewsPage() {
             </>
           ) : (
             <>
-              {/* Header Section - Two Columns Layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-12 items-stretch">
+              {/* Header Section - Two Columns Layout (stack on mobile) */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 mb-6 sm:mb-10 lg:mb-12 items-stretch">
                 {/* Left Column - Big News Box */}
-                <div className="lg:col-span-1 flex">
+                <div className="lg:col-span-1 flex order-1">
                   {bigNewsBox && (
                     <Link href={`/news/${bigNewsBox.id}`} className="no-underline w-full">
                       <article className="relative overflow-hidden rounded-lg h-full w-full">
-                        <div className="relative h-[600px] w-full overflow-hidden">
+                        <div className="relative h-[260px] xs:h-[300px] sm:h-[380px] md:h-[480px] lg:h-[600px] w-full overflow-hidden">
                           <img 
                             src={getImageUrl(bigNewsBox.image)} 
                             alt={bigNewsBox.title} 
                             className="h-full w-full object-cover" 
                           />
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-6">
-                            <div className="mb-3">
-                              <span className="bg-black/80 px-3 py-1 rounded text-white font-outfit text-sm font-semibold uppercase">
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-4 sm:p-5 md:p-6">
+                            <div className="mb-2 sm:mb-3">
+                              <span className="bg-black/80 px-2 sm:px-3 py-0.5 sm:py-1 rounded text-white font-outfit text-xs sm:text-sm font-semibold uppercase">
                                 {bigNewsBox.category}
                               </span>
                             </div>
-                            <h2 className="text-2xl md:text-3xl font-bold text-white font-outfit mb-3 leading-tight">
+                            <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white font-outfit mb-2 sm:mb-3 leading-tight line-clamp-2 sm:line-clamp-3">
                               {bigNewsBox.title}
                             </h2>
-                            <div className="text-white font-outfit text-sm">
+                            <div className="text-white font-outfit text-xs sm:text-sm">
                               Lorem ipsum • {formatDate(bigNewsBox.published_at)}
                             </div>
                           </div>
@@ -207,27 +207,27 @@ export default function NewsPage() {
                 </div>
 
                 {/* Right Column - Top Block and Bottom Two Blocks */}
-                <div className="lg:col-span-1 flex flex-col gap-4 h-[600px] max-h-[600px] min-h-0">
+                <div className="lg:col-span-1 flex flex-col gap-3 sm:gap-4 min-h-0 lg:h-[600px] lg:max-h-[600px] order-2">
                   {/* Top Block */}
                   {topRightBlock && (
                     <Link href={`/news/${topRightBlock.id}`} className="no-underline flex-1 min-h-0">
-                      <article className="relative overflow-hidden rounded-lg h-full">
-                        <div className="relative h-full w-full overflow-hidden">
+                      <article className="relative overflow-hidden rounded-lg h-full min-h-[200px] sm:min-h-[220px] lg:min-h-0">
+                        <div className="relative h-full min-h-[200px] sm:min-h-[220px] lg:min-h-0 w-full overflow-hidden">
                           <img 
                             src={getImageUrl(topRightBlock.image)} 
                             alt={topRightBlock.title} 
                             className="h-full w-full object-cover" 
                           />
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-4">
-                            <div className="mb-2">
-                              <span className="bg-black/80 px-2 py-1 rounded text-white font-outfit text-xs font-semibold uppercase">
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-3 sm:p-4">
+                            <div className="mb-1 sm:mb-2">
+                              <span className="bg-black/80 px-2 py-0.5 sm:py-1 rounded text-white font-outfit text-[10px] sm:text-xs font-semibold uppercase">
                                 {topRightBlock.category}
                               </span>
                             </div>
-                            <h3 className="text-base md:text-lg font-bold text-white font-outfit mb-2 leading-tight line-clamp-2">
+                            <h3 className="text-sm sm:text-base md:text-lg font-bold text-white font-outfit mb-1 sm:mb-2 leading-tight line-clamp-2">
                               {topRightBlock.title}
                             </h3>
-                            <div className="text-white font-outfit text-xs">
+                            <div className="text-white font-outfit text-[10px] sm:text-xs">
                               Lorem ipsum • {formatDateShort(topRightBlock.published_at)}
                             </div>
                           </div>
@@ -236,27 +236,27 @@ export default function NewsPage() {
                     </Link>
                   )}
 
-                  {/* Bottom Two Blocks - Side by Side */}
-                  <div className="grid grid-cols-2 gap-4 flex-1 min-h-0">
+                  {/* Bottom Two Blocks - Stack on mobile, side by side from sm */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 flex-1 min-h-0">
                     {bottomRightBlocks.map((article) => (
                       <Link key={article.id} href={`/news/${article.id}`} className="no-underline h-full min-h-0">
-                        <article className="relative overflow-hidden rounded-lg h-full">
-                          <div className="relative h-full w-full overflow-hidden">
+                        <article className="relative overflow-hidden rounded-lg h-full min-h-[140px] sm:min-h-0">
+                          <div className="relative h-full min-h-[140px] sm:min-h-0 w-full overflow-hidden">
                             <img 
                               src={getImageUrl(article.image)} 
                               alt={article.title} 
                               className="h-full w-full object-cover" 
                             />
-                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-4">
-                              <div className="mb-2">
-                                <span className="bg-black/80 px-2 py-1 rounded text-white font-outfit text-xs font-semibold uppercase">
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-3 sm:p-4">
+                              <div className="mb-1 sm:mb-2">
+                                <span className="bg-black/80 px-2 py-0.5 rounded text-white font-outfit text-[10px] sm:text-xs font-semibold uppercase">
                                   {article.category}
                                 </span>
                               </div>
-                              <h3 className="text-sm md:text-base font-bold text-white font-outfit mb-2 leading-tight line-clamp-2">
+                              <h3 className="text-xs sm:text-sm md:text-base font-bold text-white font-outfit mb-1 sm:mb-2 leading-tight line-clamp-2">
                                 {article.title}
                               </h3>
-                              <div className="text-white font-outfit text-xs">
+                              <div className="text-white font-outfit text-[10px] sm:text-xs">
                                 Lorem ipsum • {formatDateShort(article.published_at)}
                               </div>
                             </div>
@@ -269,18 +269,18 @@ export default function NewsPage() {
               </div>
 
               {/* Bottom Content Section */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-12">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mb-6 sm:mb-10 lg:mb-12">
                 {/* Left Column - Latest News */}
-                <div className="lg:col-span-2">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 font-outfit mb-4 sm:mb-6 uppercase">
+                <div className="lg:col-span-2 order-1">
+                  <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 font-outfit mb-3 sm:mb-6 uppercase">
                     LATEST NEWS
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 h-[400px] sm:h-[600px] overflow-y-auto">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 max-h-[500px] md:max-h-[600px] overflow-y-auto pr-1 -mr-1">
                     {latestNews.map((article) => (
                       <Link key={article.id} href={`/news/${article.id}`} className="no-underline">
-                        <article className="flex gap-4 pb-6 border-b border-gray-200 hover:opacity-80 transition-opacity">
+                        <article className="flex gap-3 sm:gap-4 pb-4 sm:pb-6 border-b border-gray-200 hover:opacity-80 transition-opacity">
                           {/* Image */}
-                          <div className="w-36 h-36 flex-shrink-0 overflow-hidden rounded-lg">
+                          <div className="w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 flex-shrink-0 overflow-hidden rounded-lg">
                             <img 
                               src={getImageUrl(article.image)} 
                               alt={article.title} 
@@ -288,16 +288,16 @@ export default function NewsPage() {
                             />
                           </div>
                           {/* Content */}
-                          <div className="flex flex-col flex-1 gap-2">
-                            <h3 className="text-base font-bold text-gray-900 font-outfit leading-tight line-clamp-2">
+                          <div className="flex flex-col flex-1 min-w-0 gap-1 sm:gap-2">
+                            <h3 className="text-sm sm:text-base font-bold text-gray-900 font-outfit leading-tight line-clamp-2">
                               {article.title}
                             </h3>
-                            <div className="text-sm text-gray-600 font-outfit">
+                            <div className="text-xs sm:text-sm text-gray-600 font-outfit">
                               Lorem Ipsum • {formatDateShort(article.published_at)}
                             </div>
-                            <div className="mt-1">
+                            <div className="mt-0.5 sm:mt-1">
                               <span 
-                                className="text-xs font-semibold font-outfit px-2 py-1 rounded"
+                                className="text-[10px] sm:text-xs font-semibold font-outfit px-1.5 sm:px-2 py-0.5 sm:py-1 rounded"
                                 style={{ 
                                   color: getCategoryColor(article.category),
                                   backgroundColor: `${getCategoryColor(article.category)}20`
@@ -314,11 +314,11 @@ export default function NewsPage() {
                 </div>
 
                 {/* Right Column - Recent Posts Sidebar */}
-                <div className="lg:col-span-1">
-                  <h3 className="text-lg font-bold text-gray-900 font-outfit mb-4 uppercase">
+                <div className="lg:col-span-1 order-2">
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 font-outfit mb-3 sm:mb-4 uppercase">
                     RECENT POSTS
                   </h3>
-                  <div className="relative h-[600px] overflow-hidden">
+                  <div className="relative h-[280px] sm:h-[360px] md:h-[450px] lg:h-[600px] overflow-hidden">
                     <div 
                       className="flex flex-col gap-3"
                       style={{

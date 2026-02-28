@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { FiUser, FiLogOut, FiChevronDown, FiHome, FiMenu, FiX } from 'react-icons/fi'
+import { FiUser, FiLogOut, FiChevronDown, FiHome, FiMenu, FiX, FiInfo, FiLayers, FiUsers, FiBook, FiRss, FiMail } from 'react-icons/fi'
 import { ASSETS } from '@/utils/assets'
 import { agentsApi } from '@/api'
 import { resolveAgentAvatar } from '@/utils/imageResolver'
@@ -267,8 +267,8 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
               <Link href="/properties" className={`text-rental-blue-600 font-outfit text-sm lg:text-sm md:px-1 xl:px-0.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/properties' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
                 PROPERTIES
               </Link>
-              <Link href="/rent-managers" className={`text-rental-blue-600 font-outfit text-sm lg:text-sm md:px-1 xl:px-0.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/rent-managers' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
-                BROKERS/AGENTS
+              <Link href="/agents" className={`text-rental-blue-600 font-outfit text-sm lg:text-sm md:px-1 xl:px-0.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/agents' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
+                AGENTS
               </Link>
               <Link href="/blog" className={`text-rental-blue-600 font-outfit text-sm lg:text-sm md:px-1 xl:px-0.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/blog' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
                 BLOG  
@@ -419,8 +419,8 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
                 </svg>
               </div>
 
-              {/* Content wrapper (relative for stacking) */}
-              <div className="relative flex flex-col flex-1 min-h-0">
+              {/* Content wrapper (relative for stacking) - explicit text color so sidebar doesn't inherit body's text-white */}
+              <div className="relative flex flex-col flex-1 min-h-0 text-gray-900">
                 {/* Sidebar Header */}
                 <div className="flex items-center justify-between p-4 sm:p-5 border-b border-rental-blue-200/50">
                   <Link href="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
@@ -432,14 +432,14 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
                 {/* Navigation Links */}
                 <div className="flex flex-col flex-1 py-2 px-3 sm:px-4">
                   {[
-                    { href: '/', label: 'HOME' },
-                    { href: '/about', label: 'ABOUT US' },
-                    { href: '/properties', label: 'PROPERTIES' },
-                    { href: '/rent-managers', label: 'BROKERS/AGENTS' },
-                    { href: '/blog', label: 'BLOG' },
-                    { href: '/news', label: 'NEWS' },
-                    { href: '/contact', label: 'CONTACT US' },
-                  ].map(({ href, label }) => {
+                    { href: '/', label: 'HOME', icon: FiHome },
+                    { href: '/about', label: 'ABOUT US', icon: FiInfo },
+                    { href: '/properties', label: 'PROPERTIES', icon: FiLayers },
+                    { href: '/agents', label: 'AGENTS', icon: FiUsers },
+                    { href: '/blog', label: 'BLOG', icon: FiBook },
+                    { href: '/news', label: 'NEWS', icon: FiRss },
+                    { href: '/contact', label: 'CONTACT US', icon: FiMail },
+                  ].map(({ href, label, icon: Icon }) => {
                     const isActive = pathname === href
                     return (
                       <Link
@@ -452,7 +452,7 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
                             : 'text-rental-blue-700 font-medium hover:bg-white/80 hover:text-rental-orange-500 hover:shadow-sm'
                         }`}
                       >
-                        <span className={`w-1 h-6 rounded-full flex-shrink-0 ${isActive ? 'bg-white' : 'bg-rental-orange-500/60'}`} aria-hidden />
+                        <Icon className={`flex-shrink-0 text-lg ${isActive ? 'text-white' : 'text-rental-orange-500/80'}`} aria-hidden />
                         {label}
                       </Link>
                     )
@@ -460,7 +460,7 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
                 </div>
 
                 {/* User Section */}
-                <div className="relative border-t border-rental-blue-200/50 p-4 sm:p-5 bg-white/50 backdrop-blur-sm">
+                <div className="relative border-t border-rental-blue-200/50 p-4 sm:p-5 bg-white/50 backdrop-blur-sm text-gray-900">
                   {isUserLoggedIn ? (
                     <div className="flex flex-col gap-3">
                       <div className="flex items-center gap-3 p-3 rounded-xl bg-white/80 shadow-sm border border-rental-blue-100/50">
@@ -522,7 +522,7 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
                   ) : (
                     <div className="pt-1">
                       <button
-                        className="w-full rounded-xl py-3.5 font-outfit text-sm font-semibold cursor-pointer inline-flex items-center justify-center bg-gradient-to-r from-rental-blue-600 to-rental-blue-500 text-white shadow-lg shadow-rental-blue-600/30 hover:shadow-xl hover:from-rental-blue-500 hover:to-rental-blue-600 active:scale-[0.98] transition-all duration-200"
+                        className="w-full rounded-xl py-3.5 font-outfit text-sm font-semibold cursor-pointer inline-flex items-center justify-center bg-gradient-to-r from-rental-blue-600 to-rental-blue-500 text-gray-900 shadow-lg shadow-rental-blue-600/30 hover:shadow-xl hover:from-rental-blue-500 hover:to-rental-blue-600 active:scale-[0.98] transition-all duration-200"
                         onClick={() => {
                           handleLoginClick()
                           setMobileMenuOpen(false)

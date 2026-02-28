@@ -26,6 +26,12 @@ const nextConfig = {
     ],
     unoptimized: true,
   },
+  async redirects() {
+    return [
+      { source: '/rent-managers', destination: '/agents', permanent: true },
+      { source: '/rent-managers/:path*', destination: '/agents/:path*', permanent: true },
+    ]
+  },
   async rewrites() {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 
       (process.env.VERCEL ? 'https://rentalsbackend-production.up.railway.app' : 'http://127.0.0.1:8000')
