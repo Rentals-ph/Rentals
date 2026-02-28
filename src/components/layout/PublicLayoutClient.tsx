@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Navbar, { SIDEBAR_WIDTH, SIDEBAR_WIDTH_SM } from './Navbar'
+import { PublicSidebarProvider, type OpenSidebar } from '@/contexts/PublicSidebarContext'
 
 function useMobileLayout() {
   const [isMobile, setIsMobile] = useState(false)
@@ -28,11 +29,12 @@ export default function PublicLayoutClient({
 }: {
   children: React.ReactNode
 }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [openSidebar, setOpenSidebar] = useState<OpenSidebar>(null)
   const { isMobile, sidebarOffset } = useMobileLayout()
 
+  const leftOpen = openSidebar === 'left'
   const pushStyle =
-    isMobile && mobileMenuOpen
+    isMobile && leftOpen
       ? {
           transform: `translateX(${sidebarOffset}px)`,
           transition: 'transform 300ms ease-in-out',
@@ -42,19 +44,21 @@ export default function PublicLayoutClient({
         : undefined
 
   return (
-    <div
-      className="min-h-screen min-h-[100dvh] flex flex-col"
-      style={pushStyle}
-    >
-      <header className="flex-shrink-0">
-        <Navbar
-          mobileMenuOpen={mobileMenuOpen}
-          onMobileMenuToggle={setMobileMenuOpen}
-        />
-      </header>
-      <main className="flex-1 min-h-0 flex flex-col w-full">
-        {children}
-      </main>
-    </div>
+    <PublicSidebarProvider value={{ openSidebar, setOpenSidebar }}>
+      <div
+        className="min-h-screen min-h-[100dvh] flex flex-col"
+        style={pushStyle}
+      >
+        <header className="flex-shrink-0 sticky top-0 z-[60] lg:static bg-white">
+          <Navbar
+            mobileMenuOpen={leftOpen}
+            onMobileMenuToggle={(open) => setOpenSidebar(open ? 'left' : null)}
+          />
+        </header>
+        <main className="flex-1 min-h-0 flex flex-col w-full">
+          {children}
+        </main>
+      </div>
+    </PublicSidebarProvider>
   )
 }

@@ -7,7 +7,7 @@ const Partners = () => {
       {/* SVG Background Layer */}
       <div className="absolute inset-0 z-0 pointer-events-none w-full h-full">
         <svg
-          className="w-full h-full object-fill sm:object-cover origin-top"
+          className="w-full max-h-[400px] min-h-[300px] object-fill sm:object-cover origin-top"
           preserveAspectRatio="none"
           viewBox="0 0 1440 600"
           fill="none"
@@ -35,7 +35,7 @@ const Partners = () => {
       </div>
 
       {/* Content Layer */}
-      <div className="relative z-10 w-full lg:px-[150px] mx-auto px-4 text-center mt-32 sm:mt-48 pb-10">
+      <div className="relative bg-white z-10 w-full lg:px-[150px] mx-auto px-4 text-center mt-32 sm:mt-48 pb-10">
         <h2 className="font-outfit font-extrabold text-4xl sm:text-5xl tracking-tight leading-tight mb-2">
           <span className="text-[#2563eb]">OUR</span> <span className="text-[#f97316]">PARTNERS</span>
         </h2>

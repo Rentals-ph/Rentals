@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 const HeroBanner = () => {
   return (
-    <div className="flex flex-col sm:flex-row w-full absolute bottom-0 left-0 z-[100] overflow-hidden shadow-md max-w-full items-stretch">
+    <div className="flex flex-col sm:flex-row w-full absolute bottom-0 left-0 z-40 overflow-hidden shadow-md max-w-full items-stretch">
       {/* Left Section - Blue Panel */}
       <Link href="/properties" className="flex-1 no-underline block transition-all duration-300 hover:opacity-90 hover:-translate-y-0.5 group h-full flex">
         <div className="h-[80px] xs:h-[100px] sm:h-[130px] w-full bg-rental-blue-600/100 flex items-center justify-center px-4 sm:px-6 md:px-8 group-hover:bg-rental-blue-600/95 transition-colors">
