@@ -1,20 +1,40 @@
-export { default as VerticalPropertyCard } from './VerticalPropertyCard'
-export { default as HorizontalPropertyCard } from './HorizontalPropertyCard'
-export { VerticalPropertyCardSkeleton } from './VerticalPropertyCardSkeleton'
-export { HorizontalPropertyCardSkeleton } from './HorizontalPropertyCardSkeleton'
-export { default as TestimonialCard } from './TestimonialCard'
-export { TestimonialCardSkeleton } from './TestimonialCardSkeleton'
-export { default as BlogCard } from './BlogCard'
-export { BlogCardSkeleton } from './BlogCardSkeleton'
-export { RentManagerCardSkeleton } from './RentManagerCardSkeleton'
-export { NewsArticleSkeleton } from './NewsArticleSkeleton'
-export { default as LoginModal } from './LoginModal'
-export { default as RegisterModal } from './RegisterModal'
-export { default as DashboardHeader } from './DashboardHeader'
-export { default as ProtectedRoute } from './ProtectedRoute'
-export { default as Pagination } from './Pagination'
-export type { PaginationProps } from './Pagination'
-export { default as SharePopup } from './SharePopup'
-export type { SharePlatform, ShareOption } from './SharePopup'
-export { default as AccountSettings } from './AccountSettings'
-export type { ProfileData, EditFormData, PasswordFormData, AccountSettingsProps } from './AccountSettings'
+// Cards
+export {
+  VerticalPropertyCard,
+  HorizontalPropertyCard,
+  VerticalPropertyCardSkeleton,
+  HorizontalPropertyCardSkeleton,
+  TestimonialCard,
+  TestimonialCardSkeleton,
+  BlogCard,
+  BlogCardSkeleton,
+  RentManagerCardSkeleton,
+  NewsArticleSkeleton,
+  SimplePropertyCard,
+  SimplePropertyCardSkeleton,
+  ModernPropertyCard,
+} from './cards'
+
+// Dashboard (sidebar, header, account, protected route)
+export {
+  AppSidebar,
+  DashboardHeader,
+  AccountSettings,
+  ProtectedRoute,
+} from './dashboard'
+export type { ProfileData, EditFormData, PasswordFormData, AccountSettingsProps } from './dashboard'
+
+// Modals
+export { LoginModal, RegisterModal } from './modals'
+
+// Maps
+export { PropertyLocationMap, PropertyMapPopupCard, PublicPropertiesMap } from './maps'
+export type { PublicPropertiesMapHandle } from './maps'
+
+// Digital cards
+export { DigitalBusinessCard, DigitalProfileCard } from './digital'
+
+// Misc
+export { Pagination, SharePopup, Partners, ImageUploader } from './misc'
+export type { PaginationProps } from './misc'
+export type { SharePlatform, ShareOption } from './misc'

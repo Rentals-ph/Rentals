@@ -1,2 +1,5 @@
 export { default as AgentHeader } from './AgentHeader'
 export { default as AgentLayout } from './AgentLayout'
+export { default as EditPropertyModal } from './EditPropertyModal'
+export { default as LocationMap } from './LocationMap'
+export { default as PropertiesMap } from './PropertiesMap'
