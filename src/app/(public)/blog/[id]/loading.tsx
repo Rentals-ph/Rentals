@@ -1,5 +1,5 @@
-import { PublicPageLoading } from '@/components/ui/PublicPageLoading'
+import { PublicLayoutLoading } from '@/components/ui/PublicPageLoading'
 
 export default function BlogPostLoading() {
-  return <PublicPageLoading message="Loading post..." />
+  return <PublicLayoutLoading message="Loading post..." />
 }

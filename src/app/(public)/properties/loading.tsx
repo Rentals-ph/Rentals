@@ -1,5 +1,5 @@
-import { PublicPageLoading } from '@/components/ui/PublicPageLoading'
+import { PublicLayoutLoading } from '@/components/ui/PublicPageLoading'
 
 export default function PropertiesLoading() {
-  return <PublicPageLoading message="Loading properties..." />
+  return <PublicLayoutLoading message="Loading properties..." />
 }

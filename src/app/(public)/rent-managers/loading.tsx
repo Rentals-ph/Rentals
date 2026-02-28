@@ -1,5 +1,5 @@
-import { PublicPageLoading } from '@/components/ui/PublicPageLoading'
+import { PublicLayoutLoading } from '@/components/ui/PublicPageLoading'
 
 export default function RentManagersLoading() {
-  return <PublicPageLoading message="Loading rent managers..." />
+  return <PublicLayoutLoading message="Loading rent managers..." />
 }

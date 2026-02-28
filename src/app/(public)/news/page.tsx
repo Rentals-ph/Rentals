@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import { newsApi } from '@/api'
 import type { News } from '@/api/endpoints/news'
@@ -92,8 +91,6 @@ export default function NewsPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white overflow-x-hidden">
-      <Navbar />
-
       {/* Red Hero Banner */}
       <section className="w-full bg-red-600 py-6 sm:py-8 md:py-10">
         <div className="px-4 sm:px-6 md:px-10 lg:px-[150px] flex flex-col sm:flex-row gap-4 sm:gap-8">

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import VerticalPropertyCard from '@/components/common/VerticalPropertyCard'
 import SharePopup, { type SharePlatform, type ShareOption } from '@/components/common/SharePopup'
@@ -402,8 +401,6 @@ export default function PropertyDetailsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navbar />
-
       {loading ? (
         <main className="px-4 sm:px-6 md:px-10 lg:px-[150px] py-8 mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-3 mb-6 rounded-xl overflow-hidden h-[240px] sm:h-[280px] md:h-[400px]">

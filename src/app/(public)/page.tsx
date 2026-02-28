@@ -1,7 +1,6 @@
 'use client'
 
 import { Suspense } from 'react'
-import Navbar from '@/components/layout/Navbar'
 import Hero from '@/components/home/Hero'
 import FeaturedProperties from '@/components/home/FeaturedProperties'
 import Testimonials from '@/components/home/Testimonials'
@@ -31,9 +30,9 @@ function FeaturedPropertiesFallback() {
             ))}
           </div>
         </div>
-        <div className="flex gap-5 overflow-hidden mt-6 pb-2">
+        <div className="flex gap-3 sm:gap-5 overflow-hidden mt-6 pb-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex-shrink-0 w-[420px] min-w-[420px] mx-1">
+            <div key={i} className="flex-shrink-0 w-[280px] min-w-[280px] sm:w-[360px] sm:min-w-[360px] md:w-[420px] md:min-w-[420px] mx-1">
               <VerticalPropertyCardSkeleton />
             </div>
           ))}
@@ -103,7 +102,6 @@ function TestimonialsFallback() {
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white flex flex-col overflow-x-hidden">
-      <Navbar />
       <Suspense fallback={<HeroSkeleton />}>
         <Hero />
       </Suspense>

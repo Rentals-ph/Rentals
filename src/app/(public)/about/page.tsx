@@ -1,6 +1,5 @@
 'use client'
 
-import Navbar from '@/components/layout/Navbar'
 import Testimonials from '@/components/home/Testimonials'
 import Footer from '@/components/layout/Footer'
 import Partners from '@/components/common/Partners'
@@ -9,7 +8,6 @@ import { ASSETS } from '@/utils/assets'
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col flex-1 w-full font-outfit">
-      <Navbar />
 
       {/* --- HERO SECTION --- */}
       <section className="w-full relative min-h-[400px] sm:min-h-[500px] flex flex-col overflow-hidden">

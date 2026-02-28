@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import { blogsApi } from '@/api'
 import type { Blog } from '@/types'
@@ -78,8 +77,6 @@ export default function BlogPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white overflow-x-hidden">
-      <Navbar />
-      
       {/* Hero Section - blog hero background with paper & laptop illustrations */}
       <section className="w-full relative min-h-[500px] flex flex-col overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full z-[1]">

@@ -3,7 +3,6 @@
 import { useMemo, useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import HorizontalPropertyCard from '@/components/common/HorizontalPropertyCard'
 import VerticalPropertyCard from '@/components/common/VerticalPropertyCard'
@@ -271,7 +270,6 @@ export default function RentManagerDetailsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
         <PageHeader title="MY LISTING" />
         <div className="text-center py-10 px-6 md:px-10 lg:px-[150px]">
           <p>Loading rent manager details...</p>
@@ -284,7 +282,6 @@ export default function RentManagerDetailsPage() {
   if (!manager) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
         <PageHeader title="MY LISTING" />
 
         <div className="px-6 md:px-10 lg:px-[150px] py-4 bg-white">
@@ -312,8 +309,6 @@ export default function RentManagerDetailsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
       <main className="px-6 md:px-10 lg:px-[150px]">
         <div className="mx-auto">
           {/* Top Section - Full-width Profile Hero */}

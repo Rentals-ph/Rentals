@@ -92,37 +92,34 @@ const Blogs = () => {
   const [leftBlog, centerBlog, rightBlog] = getThreeBlogs(currentIndex)
 
   return (
-    <section id="blog" className="bg-white px-4 sm:px-6 md:px-10 lg:px-[150px] w-full mt-0 min-h-[70vh] flex flex-col justify-center py-6 sm:py-8">
+    <section id="blog" className="bg-white px-4 sm:px-6 md:px-10 lg:px-[150px] w-full mt-0 min-h-[50vh] sm:min-h-[70vh] flex flex-col justify-center py-6 sm:py-8">
       <div className="w-full mx-auto overflow-visible py-4 sm:py-5">
-        <div className="relative flex justify-center items-start mb-4 sm:mb-6">
-          <div className="text-center">
-            
-            <h2 className="text-gray-900 font-outfit text-2xl sm:text-5xl font-bold leading-tight tracking-tight m-0 mb-2 sm:mb-2.5">
+        {/* Header: stack on mobile, row on larger screens */}
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-between sm:items-end gap-4 mb-4 sm:mb-6">
+          <div className="text-center sm:text-left">
+            <h2 className="text-gray-900 font-outfit text-2xl sm:text-4xl md:text-4xl font-bold leading-tight tracking-tight m-0 mb-2 sm:mb-2.5">
               Blogs
             </h2>
-            <Link
+            <p className="text-gray-600 font-outfit text-sm sm:text-base md:text-lg font-light leading-snug tracking-tight m-0">
+              Find the latest news and insights from the rentals.ph team.
+            </p>
+          </div>
+          <Link
             href="/blog"
-            className="absolute right-0 bottom-0 text-rental-blue-500 bg-white font-outfit text-base font-medium no-underline flex items-center gap-2 hover:bg-blue-200 transition-colors border-2 border-rental-blue-500 rounded-2xl px-5 py-2"
+            className="w-full sm:w-auto flex items-center justify-center sm:justify-end gap-2 text-rental-blue-500 bg-white font-outfit text-sm sm:text-base font-medium no-underline hover:bg-blue-200 transition-colors border-2 border-rental-blue-500 rounded-2xl px-4 py-2.5 sm:px-5 sm:py-2 flex-shrink-0"
             style={{ border: '2px solid #205ED7' }}
           >
             Visit Blogs
           </Link>
-            <p className="text-gray-600 font-outfit text-lg font-light leading-snug tracking-tight m-0">
-              Find the latest news and insights from the rentals.ph team.
-            </p>
-            
-          </div>
-
-          
         </div>
         
         {loading ? (
           <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-10 items-stretch w-full overflow-visible relative">
-            <div className="flex-1 min-w-0 lg:max-w-[28%] flex">
+            <div className="flex-1 min-w-0 lg:max-w-[28%] flex order-2 lg:order-none">
               <BlogCardSkeleton size="small" className="w-full" />
             </div>
-            <div className="flex-[2] min-w-0 flex">
-              <article className="relative rounded-xl sm:rounded-2xl overflow-hidden w-full h-[360px] sm:h-[450px] lg:h-[520px] bg-gray-200 animate-pulse">
+            <div className="flex-[2] min-w-0 flex order-1">
+              <article className="relative rounded-xl sm:rounded-2xl overflow-hidden w-full h-[280px] xs:h-[320px] sm:h-[400px] md:h-[450px] lg:h-[520px] bg-gray-200 animate-pulse">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex flex-col justify-end p-4 sm:p-5 md:p-5 z-10">
                   <div className="flex justify-between mb-2">
                     <span className="h-4 w-20 rounded bg-white/30 animate-pulse" />
@@ -137,17 +134,17 @@ const Blogs = () => {
                 </div>
               </article>
             </div>
-            <div className="flex-1 min-w-0 lg:max-w-[28%] flex">
+            <div className="flex-1 min-w-0 lg:max-w-[28%] flex order-3">
               <BlogCardSkeleton size="small" className="w-full" />
             </div>
-            
           </div>
         ) : (
           <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-10 items-stretch w-full overflow-visible relative">
-            {/* Left Small Blog Card */}
-            <div className="flex-1 min-w-0 lg:max-w-[28%] flex relative transition-all duration-600">
-              <Link href={leftBlog.id === 'placeholder' ? '#' : `/blog/${leftBlog.id}`} className="no-underline w-full h-full">
-              <article className="bg-white rounded-xl sm:rounded-2xl overflow-hidden flex flex-col h-full group shadow-[0_0_14px_rgba(0,0,0,0.08)] hover:shadow-[0_0_14px_rgba(0,0,0,0.12)] transition-shadow">                  <div className="w-full h-[140px] sm:h-[190px] overflow-hidden flex-shrink-0">
+            {/* Left Small Blog Card - on mobile appears after center */}
+            <div className="flex-1 min-w-0 lg:max-w-[28%] flex relative transition-all duration-600 order-2 lg:order-none">
+              <Link href={leftBlog.id === 'placeholder' ? '#' : `/blog/${leftBlog.id}`} className="no-underline w-full h-full min-w-0">
+              <article className="bg-white rounded-xl sm:rounded-2xl overflow-hidden flex flex-col h-full group shadow-[0_0_14px_rgba(0,0,0,0.08)] hover:shadow-[0_0_14px_rgba(0,0,0,0.12)] transition-shadow">
+                  <div className="w-full h-[120px] xs:h-[140px] sm:h-[190px] overflow-hidden flex-shrink-0">
                     <img
                       src={getImageUrl(leftBlog.image)}
                       alt={leftBlog.title}
@@ -185,10 +182,10 @@ const Blogs = () => {
               </Link>
             </div>
 
-            {/* Center Large Blog Card */}
-            <div className="flex-[2] min-w-0 flex relative transition-all duration-600 order-2 lg:order-none">
-              <Link href={centerBlog.id === 'placeholder' ? '#' : `/blog/${centerBlog.id}`} className="no-underline w-full h-full">
-                <article className="relative rounded-xl sm:rounded-2xl overflow-hidden group h-[360px] sm:h-[450px] lg:h-[520px] shadow-[0_0_14px_rgba(0,0,0,0.08)]">
+            {/* Center Large Blog Card - show first on mobile */}
+            <div className="flex-[2] min-w-0 flex relative transition-all duration-600 order-1">
+              <Link href={centerBlog.id === 'placeholder' ? '#' : `/blog/${centerBlog.id}`} className="no-underline w-full h-full min-w-0">
+                <article className="relative rounded-xl sm:rounded-2xl overflow-hidden group h-[260px] xs:h-[300px] sm:h-[400px] md:h-[450px] lg:h-[520px] shadow-[0_0_14px_rgba(0,0,0,0.08)]">
                   <div className="absolute inset-0 w-full h-full">
                     <img
                       src={getImageUrl(centerBlog.image)}
@@ -196,14 +193,14 @@ const Blogs = () => {
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div className="absolute inset-0 bg-black/30 z-10"></div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-4 sm:p-5 md:p-5 z-20">
-                    <div className="flex justify-between items-center mb-2 sm:mb-3">
-                      <span className="text-white font-outfit text-xs sm:text-sm md:text-base font-semibold uppercase tracking-wider">{centerBlog.category}</span>
-                      <span className="text-white/90 font-outfit text-xs sm:text-sm md:text-base">{formatReadTime(centerBlog.read_time)}</span>
+                  <div className="absolute inset-0 bg-black/30 z-10" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-3 sm:p-5 md:p-5 z-20">
+                    <div className="flex justify-between items-center mb-1.5 sm:mb-3">
+                      <span className="text-white font-outfit text-[10px] sm:text-sm md:text-base font-semibold uppercase tracking-wider">{centerBlog.category}</span>
+                      <span className="text-white/90 font-outfit text-[10px] sm:text-sm md:text-base">{formatReadTime(centerBlog.read_time)}</span>
                     </div>
-                    <h3 className="text-white font-outfit text-xl sm:text-2xl md:text-3xl font-bold leading-tight mb-2 sm:mb-3">{centerBlog.title}</h3>
-                    <p className="text-white/95 font-outfit text-sm sm:text-base md:text-lg leading-relaxed mb-3 sm:mb-4 line-clamp-3">{centerBlog.excerpt}</p>
+                    <h3 className="text-white font-outfit text-base sm:text-xl md:text-2xl lg:text-3xl font-bold leading-tight mb-1.5 sm:mb-3 line-clamp-2 sm:line-clamp-none">{centerBlog.title}</h3>
+                    <p className="text-white/95 font-outfit text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed mb-2 sm:mb-4 line-clamp-2 sm:line-clamp-3">{centerBlog.excerpt}</p>
                     <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 mb-3 sm:mb-4">
                       <div className="flex items-center gap-1.5 sm:gap-2 text-white">
                         <svg width="20" height="20" className="sm:w-6 sm:h-6 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -230,9 +227,9 @@ const Blogs = () => {
 
             {/* Right Small Blog Card */}
             <div className="flex-1 min-w-0 lg:max-w-[28%] flex relative transition-all duration-600 order-3">
-              <Link href={rightBlog.id === 'placeholder' ? '#' : `/blog/${rightBlog.id}`} className="no-underline w-full h-full">
+              <Link href={rightBlog.id === 'placeholder' ? '#' : `/blog/${rightBlog.id}`} className="no-underline w-full h-full min-w-0">
               <article className="bg-white rounded-xl sm:rounded-2xl overflow-hidden flex flex-col h-full group shadow-[0_0_14px_rgba(0,0,0,0.08)] hover:shadow-[0_0_14px_rgba(0,0,0,0.12)] transition-shadow">
-                  <div className="w-full h-[140px] sm:h-[190px] overflow-hidden flex-shrink-0">
+                  <div className="w-full h-[120px] xs:h-[140px] sm:h-[190px] overflow-hidden flex-shrink-0">
                     <img
                       src={getImageUrl(rightBlog.image)}
                       alt={rightBlog.title}
@@ -274,7 +271,7 @@ const Blogs = () => {
 
         {/* Pagination */}
         {totalPages > 1 && blogs.length > 1 && (
-          <div className="flex justify-center mt-12">
+          <div className="flex justify-center mt-8 sm:mt-12 overflow-x-auto px-2">
             <Pagination
               currentPage={currentIndex + 1}
               totalPages={totalPages}

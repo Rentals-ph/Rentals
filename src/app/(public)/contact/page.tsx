@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import { ASSETS } from '@/utils/assets'
 
@@ -29,7 +28,6 @@ export default function ContactUsPage() {
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden bg-rental-blue-900">
-      <Navbar />
 
       {/* First Row - Contact Us and Form */}
       <section className="w-full pb-8 sm:pb-12 md:pb-5 text-center">

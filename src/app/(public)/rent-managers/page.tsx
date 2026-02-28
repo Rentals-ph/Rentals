@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import PopularRentManagers from '@/components/rent-managers/PopularRentManagers'
 import { RentManagerCardSkeleton } from '@/components/common/RentManagerCardSkeleton'
@@ -131,8 +130,6 @@ export default function RentManagersPage() {
 
   return (
     <div className="min-h-screen overflow-x-hidden overflow-y-visible" style={{ backgroundColor: '#F9FAFB' }}>
-      <Navbar />
-
       {/* Hero Section */}
       <section
         className="relative mt-16 sm:mt-20 pt-8 sm:pt-16 pb-8 sm:pb-16 px-4 sm:px-6 md:px-10 lg:px-[150px] overflow-x-visible min-h-[400px] sm:min-h-[550px]"

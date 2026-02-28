@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import PageHeader from '@/components/layout/PageHeader'
 import { blogsApi } from '@/api'
@@ -100,7 +99,6 @@ export default function BlogDetailsPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col flex-1"> {/* blog-details-page */}
-      <Navbar />
       <main className="w-full px-4 sm:px-6 md:px-10 lg:px-[150px] py-8 sm:py-12"> {/* blog-details-main-content */}
         {loading ? (
           <div className="text-center p-10">

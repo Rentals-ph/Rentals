@@ -551,15 +551,15 @@ function Hero() {
     <section 
       ref={heroSectionRef}
       id="home" 
-      className={`relative overflow-hidden pb-[200px]  mt-0 transition-all duration-500 ease-in-out flex flex-col justify-center items-center ${
+      className={`relative overflow-hidden mt-0 transition-all duration-500 ease-in-out flex flex-col justify-center items-center ${
         isChatMode 
-          ? 'max-h-[1200px] min-h-[900px] pb-[200px]' 
-          : 'max-h-[670px] min-h-[670px]'
+          ? 'min-h-[85dvh] sm:min-h-[900px] max-h-none sm:max-h-[1200px] pb-[140px] sm:pb-[200px]' 
+          : 'min-h-[500px] sm:min-h-[600px] md:min-h-[670px] max-h-none sm:max-h-[670px] pb-[200px]'
       }`}
     >
       {/* Background images with smooth transitions */}
       <div className={`absolute top-0 left-0 w-full h-full z-0 overflow-hidden transition-all duration-300 ${
-        isChatMode ? 'min-h-[900px] h-full' : 'min-h-[700px]'
+        isChatMode ? 'min-h-[85dvh] sm:min-h-[900px] h-full' : 'min-h-[500px] sm:min-h-[600px] md:min-h-[700px] h-full'
       }`}>
         {backgroundImages.map((imageSrc, index) => (
           <img
@@ -567,7 +567,7 @@ function Hero() {
             src={imageSrc}
             alt={`Hero background ${index + 1}`}
             className={`w-full h-full object-cover object-center absolute top-0 left-0 transition-all duration-[2000ms] ease-in-out animate-[heroBackgroundAnimation_20s_ease-in-out_infinite] ${
-              isChatMode ? 'min-h-[900px]' : 'min-h-[700px]'
+              isChatMode ? 'min-h-[900px]' : 'min-h-[500px] sm:min-h-[600px] md:min-h-[700px]'
             } ${
               index === currentImageIndex ? 'opacity-100 z-[1]' : 'opacity-0'
             }`}
@@ -575,94 +575,97 @@ function Hero() {
         ))}
       </div>
 
-      {/* Hero content */}
-      <div className="flex mobile:mt-16 sm:mt-10  flex-col items-center justify-center w-full h-full min-h-[600px] text-center relative z-10 px-4">
-        <h2 className="font-outfit text-2xl mt-20 mobile:text-4xl md:text-5xl lg:text-6xl font-bold text-[#205ED7] mb-0 tracking-tight leading-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] ">
+      {/* Hero content - padding-top so "Find your home" is never clipped below navbar; when chat mode use less padding on mobile so chat has room */}
+      <div className={`flex flex-col items-center justify-center w-full text-center relative z-10 px-4 ${
+        isChatMode
+          ? 'min-h-0 pt-3 pb-3 sm:pt-6 sm:pb-4 md:pt-0 md:pb-0 md:min-h-0 flex-1'
+          : 'min-h-[400px] sm:min-h-[500px] pb-8 sm:pt-10 sm:pb-10 md:pt-0 md:pb-0 md:min-h-[600px] md:h-full'
+      }`}>
+        <h2 className={`font-outfit font-bold text-[#205ED7] mb-0 mt-0 tracking-tight leading-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] ${
+          isChatMode ? 'text-lg sm:text-xl md:text-2xl' : 'text-xl xs:text-2xl mobile:text-3xl mt-20 sm:text-4xl md:text-5xl lg:text-6xl'
+        }`}>
           FIND YOUR HOME IN THE PHILIPPINES
         </h2>
-        <p className="mt-3 max-w-3xl font-outfit text-base md:text-lg drop-shadow-[0_1px_4px_rgba(255,255,255,0.8)]">
+        <p className={`max-w-3xl font-outfit drop-shadow-[0_1px_4px_rgba(255,255,255,0.8)] px-1 ${
+          isChatMode ? 'mt-1 text-xs sm:text-sm md:text-base hidden sm:block' : 'mt-3 text-sm xs:text-base md:text-lg'
+        }`}>
           <span className="text-[#FE8E0A]">Trusted Rentals, simplified. Start your journey with </span>
           <span className="font-bold text-[#205ED7]">Rentals.ph.</span>
         </p>
 
-        {/* AI Assistant Button */}
+        {/* AI Assistant Button - mobile responsive */}
         <button 
-          className="mt-6 relative font-outfit text-sm font-semibold flex items-center justify-center gap-1 transition-all hover:scale-105 overflow-hidden cursor-pointer rounded-[32.5px] shadow-[0_4px_21px_rgba(0,0,0,0.25)]"
+          className={`relative font-outfit font-semibold flex items-center justify-center gap-1 transition-all hover:scale-105 active:scale-[0.98] overflow-hidden cursor-pointer rounded-full sm:rounded-[32.5px] shadow-[0_4px_21px_rgba(0,0,0,0.25)] touch-manipulation min-h-[48px] ${
+            isChatMode ? 'mt-2 sm:mt-3 text-xs sm:text-sm h-9 sm:h-11 px-4 sm:px-6' : 'mt-4 sm:mt-6 text-sm sm:text-base md:text-lg h-12 sm:h-[52px] md:h-[55px] px-5 sm:px-8 md:px-10'
+          }`}
           style={{
             width: 'auto',
-            height: '55px',
-            backgroundColor: 'var(--ai-button-bg, white)', // Customizable via CSS variable
-            color: 'var(--ai-button-text, #002978)', // Customizable via CSS variable
+            maxWidth: 'min(100%, 320px)',
+            backgroundColor: 'var(--ai-button-bg, white)',
+            color: 'var(--ai-button-text, #002978)',
             borderWidth: '2px',
             borderStyle: 'solid',
             borderColor: '#205ED7',
           }}
           onClick={() => setIsChatMode(!isChatMode)}
+          aria-label={isChatMode ? 'Close Rental Assist' : 'Open Rental Assist'}
         >
-          {/* Orange decorative vector in bottom right */}
+          {/* Orange decorative vector - smaller on mobile so it doesn't overflow */}
           <svg 
-            className="absolute -bottom-5 -right-1 z-0 pointer-events-none"
-            width="68" 
-            height="67" 
+            className="absolute -bottom-4 -right-0.5 sm:-bottom-5 sm:-right-1 z-0 pointer-events-none w-12 h-12 sm:w-14 sm:h-14 md:w-[68px] md:h-[67px]"
             viewBox="154 10 68 67" 
             fill="none" 
             xmlns="http://www.w3.org/2000/svg"
             preserveAspectRatio="xMidYMid slice"
-            style={{ 
-              width: '68px',
-              height: '67px',
-            }}
           >
-            {/* Orange fill */}
             <path 
               d="M191.543 40.9593L194.39 38.7754C198.284 35.7874 201.337 31.8399 203.251 27.3204L205.356 22.3506C207.905 16.3331 218.4 12.0101 222.422 10.5451V48.1866C222.422 64.0998 209.522 77 193.609 77H154.263C147.43 77 143.439 69.2957 147.379 63.7138C147.959 62.8912 148.683 62.1793 149.515 61.6119L157.059 56.466C162.195 52.9628 167.918 50.4094 173.955 48.9269L175.99 48.4272C181.636 47.041 186.932 44.4981 191.543 40.9593Z" 
-              fill="var(--ai-button-accent, #FE8E0A)" // Customizable via CSS variable
+              fill="var(--ai-button-accent, #FE8E0A)"
             />
-            {/* Rental blue border */}
             <path 
               d="M222.422 10V48.1866C222.422 64.0998 209.522 77 193.609 77H154.263C147.43 77 143.439 69.2957 147.379 63.7138C147.959 62.8912 148.683 62.1793 149.515 61.6119L157.059 56.466C162.195 52.9628 167.918 50.4094 173.955 48.9269L175.99 48.4272C181.636 47.041 186.932 44.4981 191.543 40.9593L194.39 38.7754C198.284 35.7874 201.337 31.8399 203.251 27.3204C203.98 25.6005 204.669 23.9734 205.356 22.3506C208.527 14.8637 224 10 224 10" 
-              stroke="var(--ai-button-border, #002978)" // Rental blue border
+              stroke="var(--ai-button-border, #002978)"
               strokeWidth="2"
               fill="none"
             />
           </svg>
           
-          {/* Content */}
-          <div className="relative z-10 w-full flex items-center">
+          {/* Content: logo at start, text centered in remaining space */}
+          <div className="relative z-10 w-full flex items-center justify-start min-w-0 gap-2">
             <img 
               src={getAsset('LOGO_AI')} 
-              alt="AI Logo" 
-              className="absolute left-4 w-9 h-9 flex-shrink-0"
+              alt=""
+              className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9"
             />
-            <span className="w-full text-center font-bold text-lg leading-tight px-14">
+            <span className="flex-1 text-center font-bold text-sm sm:text-base md:text-lg leading-tight pr-6 sm:pr-8 md:pr-10 truncate">
               Rental Assist
             </span>
           </div>
         </button>
 
         {/* Search bar and filters or Chat container */}
-        <div className={`mt-8 w-full max-w-6xl mx-auto transition-all duration-500 ${
-          isChatMode ? 'max-h-[750px]' : 'max-h-[400px]'
+        <div className={`mt-4 sm:mt-6 md:mt-8 w-full max-w-6xl mx-auto transition-all duration-500 px-0 sm:px-2 ${
+          isChatMode ? 'flex-1 min-h-0 max-h-[80vh] sm:max-h-[750px] flex flex-col' : 'max-h-[400px]'
         }`}>
           {isChatMode ? (
-            <div className="flex flex-col md:flex-row gap-4 w-full h-[600px] max-h-[600px]">
+            <div className="flex flex-col md:flex-row gap-3 sm:gap-4 w-full flex-1 min-h-[300px] sm:min-h-0 h-[60vh] sm:h-[550px] md:h-[600px] max-h-[76vh] md:max-h-[600px]">
               {/* Chat Interface - Left side */}
-              <div className="flex-1 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden flex flex-col min-w-0 h-full">
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-rental-blue-50 to-white flex-shrink-0">
-                  <div className="flex items-center gap-3">
+              <div className="flex-1 min-h-0 min-w-0 bg-white/95 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col flex-basis-0">
+                <div className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-200 bg-gradient-to-r from-rental-blue-50 to-white flex-shrink-0">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                     <img 
                       src={getAsset('LOGO_AI')} 
                       alt="AI Logo" 
-                      className=" w-9 h-9 flex-shrink-0"
+                      className="w-7 h-7 sm:w-9 sm:h-9 flex-shrink-0"
                     />
-                    <div>
-                      <h3 className="font-outfit text-lg font-semibold text-gray-900">Rental Assist</h3>
+                    <div className="min-w-0">
+                      <h3 className="font-outfit text-base sm:text-lg font-semibold text-gray-900 truncate">Rental Assist</h3>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                     <div className="chat-menu-container relative">
                       <button 
-                        className="p-2 hover:bg-white border-none rounded-lg transition-colors text-gray-600 hover:text-gray-900"
+                        className="p-2.5 sm:p-2 hover:bg-white border-none rounded-lg transition-colors text-gray-600 hover:text-gray-900 touch-manipulation"
                         onClick={() => setShowMenu(!showMenu)}
                         aria-label="More options"
                         title="More options"
@@ -674,7 +677,7 @@ function Hero() {
                         </svg>
                       </button>
                       {showMenu && (
-                        <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
+                        <div className="absolute top-full right-0 mt-2 w-[min(16rem,calc(100vw-2rem))] max-w-[224px] bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
                           <button 
                             className="w-full flex items-center gap-3 px-4 py-2 text-left text-gray-700 hover:bg-gray-50 transition-colors font-outfit text-sm"
                             onClick={() => {
@@ -714,7 +717,7 @@ function Hero() {
                       )}
                     </div>
                     <button 
-                      className="p-2 hover:bg-white border-none rounded-lg transition-colors text-gray-600 hover:text-gray-900"
+                      className="p-2.5 sm:p-2 hover:bg-white border-none rounded-lg transition-colors text-gray-600 hover:text-gray-900 touch-manipulation"
                       onClick={() => setIsChatMode(false)}
                       aria-label="Close chat"
                     >
@@ -724,7 +727,7 @@ function Hero() {
                     </button>
                   </div>
                 </div>
-                <div ref={chatMessagesContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4 min-h-0 relative" style={{
+                <div ref={chatMessagesContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-6 space-y-3 sm:space-y-4 min-h-0 relative" style={{
                   background: 'linear-gradient(to bottom, #f9fafb 0%, #f3f4f6 100%)',
                 }}>
                   {/* Subtle decorative elements */}
@@ -735,14 +738,14 @@ function Hero() {
                   </div>
                   
                   {isLoadingHistory ? (
-                    <div className="flex items-start gap-2 max-w-[75%] mb-4">
+                    <div className="flex items-start gap-2 max-w-[90%] sm:max-w-[75%] mb-4">
                       <img 
                         src={getAsset('LOGO_AI')} 
                         alt="AI Logo" 
-                        className="w-12 h-12 flex-shrink-0"
+                        className="w-8 h-8 sm:w-12 sm:h-12 flex-shrink-0"
                       />
                       <div 
-                        className="relative overflow-hidden p-3 px-4 bg-white !border-2 !border-[#002978] rounded-xl rounded-tl-sm shadow-lg font-outfit text-sm leading-relaxed break-words text-left"
+                        className="relative overflow-hidden p-2.5 sm:p-3 px-3 sm:px-4 bg-white !border-2 !border-[#002978] rounded-xl rounded-tl-sm shadow-lg font-outfit text-xs sm:text-sm leading-relaxed break-words text-left"
                         style={{
                           borderWidth: '2px',
                           borderStyle: 'solid',
@@ -758,16 +761,16 @@ function Hero() {
                       {chatMessages.map((msg, index) => (
                         <div key={index} className={`flex flex-col w-full ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
                           {msg.role === 'assistant' ? (
-                            <div className="flex items-start gap-2 max-w-[75%]">
+                            <div className="flex items-start gap-1.5 sm:gap-2 max-w-[90%] sm:max-w-[75%]">
                               <img 
                                 src={getAsset('LOGO_AI')} 
                                 alt="AI Logo" 
-                                className="w-12 h-12 flex-shrink-0"
+                                className="w-8 h-8 sm:w-12 sm:h-12 flex-shrink-0"
                               />
-                              <div className="relative">
+                              <div className="relative min-w-0">
                                 {/* Speech bubble pointer pointing to the logo - top left */}
                                 <div 
-                                  className="relative overflow-hidden p-3 px-4 bg-white !border-2 !border-[#002978] rounded-xl rounded-tl-sm shadow-lg font-outfit text-sm leading-relaxed break-words text-left"                                style={{
+                                  className="relative overflow-hidden p-2.5 sm:p-3 px-3 sm:px-4 bg-white !border-2 !border-[#002978] rounded-xl rounded-tl-sm shadow-lg font-outfit text-xs sm:text-sm leading-relaxed break-words text-left"                                style={{
                                     borderWidth: '2px',
                                     borderStyle: 'solid',
                                     borderColor: '#002978',
@@ -785,7 +788,7 @@ function Hero() {
                             </div>
                           ) : (
                             <div 
-                              className="max-w-[75%] !border-2 !border-[#002978] p-3 px-4 rounded-xl font-outfit text-sm leading-relaxed break-words text-left bg-[#205ED7] text-white rounded-br-sm shadow-sm"
+                              className="max-w-[90%] sm:max-w-[75%] !border-2 !border-[#002978] p-2.5 sm:p-3 px-3 sm:px-4 rounded-xl font-outfit text-xs sm:text-sm leading-relaxed break-words text-left bg-[#205ED7] text-white rounded-br-sm shadow-sm"
                               style={{
                                 borderWidth: '2px',
                                 borderStyle: 'solid',
@@ -799,14 +802,14 @@ function Hero() {
                         </div>
                       ))}
                       {isLoading && (
-                        <div className="flex items-start gap-2 max-w-[75%] mb-4">
+                        <div className="flex items-start gap-2 max-w-[90%] sm:max-w-[75%] mb-4">
                           <img 
                             src={getAsset('LOGO_AI')} 
                             alt="AI Logo" 
-                            className="w-12 h-12 flex-shrink-0"
+                            className="w-8 h-8 sm:w-12 sm:h-12 flex-shrink-0"
                           />
                           <div 
-                            className="relative overflow-hidden p-3 px-4 bg-white !border-2 !border-[#002978] rounded-xl rounded-tl-sm shadow-lg font-outfit"
+                            className="relative overflow-hidden p-2.5 sm:p-3 px-3 sm:px-4 bg-white !border-2 !border-[#002978] rounded-xl rounded-tl-sm shadow-lg font-outfit"
                             style={{
                               borderWidth: '2px',
                               borderStyle: 'solid',
@@ -827,16 +830,16 @@ function Hero() {
                     </>
                   )}
                 </div>
-                <form className="flex items-center gap-2 p-4 px-5 border-t border-gray-200/50 bg-white flex-shrink-0" onSubmit={handleChatSubmit}>
+                <form className="flex items-center gap-2 p-3 sm:p-4 px-3 sm:px-5 border-t border-gray-200/50 bg-white flex-shrink-0" onSubmit={handleChatSubmit}>
                   <input
                     type="text"
-                    className="flex-1 p-3 px-4 border border-gray-300/65 rounded-lg font-outfit text-sm outline-none transition-colors focus:border-[#205ED7]"
+                    className="flex-1 min-w-0 p-3 px-3 sm:px-4 border border-gray-300/65 rounded-lg font-outfit text-sm outline-none transition-colors focus:border-[#205ED7] min-h-[44px]"
                     placeholder={isLoading ? "Searching..." : "Type your message..."}
                     value={chatMessage}
                     onChange={(e) => setChatMessage(e.target.value)}
                     disabled={isLoading}
                   />
-                  <button type="submit" className="w-11 h-11 bg-[#205ED7] border-none rounded-lg text-white cursor-pointer flex items-center justify-center transition-all flex-shrink-0 hover:bg-[#1a4bb8] hover:scale-105 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100">
+                  <button type="submit" className="w-11 h-11 min-h-[44px] min-w-[44px] bg-[#205ED7] border-none rounded-lg text-white cursor-pointer flex items-center justify-center transition-all flex-shrink-0 hover:bg-[#1a4bb8] hover:scale-105 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 touch-manipulation" aria-label="Send message">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -847,14 +850,14 @@ function Hero() {
               {((latestProperties && latestProperties.properties.length > 0) || (isChatMode && isLoading)) && (
                 <div
                   key={latestProperties ? `properties-${latestProperties.messageIndex}-${latestProperties.properties.length}-${latestProperties.timestamp ?? Date.now()}` : 'properties-loading'}
-                  className="w-full md:w-[340px] md:max-w-[340px] bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden flex flex-col flex-shrink-0 h-full"
+                  className="w-full md:w-[340px] md:max-w-[340px] bg-white/95 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col flex-shrink-0 min-h-0 md:h-full h-[min(36vh,280px)] min-h-[160px]"
                 >
-                  <div className="p-4 px-5 border-b border-gray-200 bg-gradient-to-r from-rental-blue-50 to-white flex-shrink-0">
-                    <h3 className="font-outfit text-base font-semibold text-gray-900 m-0">
+                  <div className="p-3 sm:p-4 px-3 sm:px-5 border-b border-gray-200 bg-gradient-to-r from-rental-blue-50 to-white flex-shrink-0">
+                    <h3 className="font-outfit text-sm sm:text-base font-semibold text-gray-900 m-0 truncate">
                       {latestProperties?.title ?? (isLoading ? 'Searching...' : 'Properties')}
                     </h3>
                   </div>
-                  <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
+                  <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 space-y-2 sm:space-y-3 min-h-0 [scrollbar-width:thin]">
                     {isLoading && (!latestProperties || latestProperties.properties.length === 0) ? (
                       <>
                         {[1, 2, 3].map((i) => (
@@ -890,8 +893,8 @@ function Hero() {
           ) : (
             <>
               {/* Light search bar container */}
-              <div className="bg-white/30 backdrop-blur-sm rounded-2xl p-6 w-full shadow-lg">
-                <div className="bg-gray-50/90 rounded-2xl w-full flex items-center overflow-hidden shadow-md md:flex-row flex-col md:h-auto border-2 border-gray-200" 
+              <div className="bg-white/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 w-full shadow-lg">
+                <div className="bg-gray-50/90 rounded-xl sm:rounded-2xl w-full flex flex-col md:flex-row items-stretch md:items-center overflow-hidden shadow-md md:h-auto border-2 border-gray-200" 
                 style={{
                  borderWidth: '2px',
                  borderStyle: 'solid',
@@ -899,7 +902,7 @@ function Hero() {
                 }}>
                     <input 
                       type="text" 
-                      className="flex-1 border-none outline-none bg-transparent text-gray-900 font-outfit text-base font-normal px-8 min-w-[250px] md:h-[57px] h-auto py-4 md:py-0 w-full md:w-auto md:border-b-0 border-b border-gray-200" 
+                      className="flex-1 border-none outline-none bg-transparent text-gray-900 font-outfit text-sm sm:text-base font-normal px-4 sm:px-8 min-w-0 md:min-w-[250px] md:h-[57px] h-12 sm:h-auto py-3 sm:py-4 md:py-0 w-full md:w-auto md:border-b-0 border-b border-gray-200" 
                       placeholder="What are you looking for?"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
@@ -955,7 +958,7 @@ function Hero() {
                     </button>
 
                     <button 
-                      className="bg-[#FE8E0A] md:rounded-r-xl rounded-xl w-full md:w-[135px] md:h-[67px] h-[50px] border-none cursor-pointer flex items-center justify-center transition-all hover:bg-[#ff7700] hover:shadow-lg active:scale-[0.98] flex-shrink-0 relative overflow-hidden group font-outfit font-semibold text-white text-base"
+                      className="bg-[#FE8E0A] md:rounded-r-xl rounded-xl w-full md:w-[135px] md:h-[67px] h-12 sm:h-[50px] border-none cursor-pointer flex items-center justify-center transition-all hover:bg-[#ff7700] hover:shadow-lg active:scale-[0.98] flex-shrink-0 relative overflow-hidden group font-outfit font-semibold text-white text-sm sm:text-base"
                       onClick={handleSearch}
                     >
                       Search
@@ -965,7 +968,7 @@ function Hero() {
                   {/* Advanced Options - Inside search container, toggled by filter button */}
                   {showAdvancedOptions && (
                     <div className="pt-1 w-full border-t border-gray-300/20 mt-3">
-                      <div className="grid grid-cols-3 gap-5 -mb-2.5">
+                      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-5 -mb-2.5">
                         <div className="flex flex-col gap-1">
                           <label className="font-outfit text-xs font-medium text-gray-700">Min. Bedrooms</label>
                           <select 
@@ -1025,12 +1028,12 @@ function Hero() {
         </div>
 
         {/* Recommended Searches - Outside search container */}
-        <div className="relative z-10 mt-3.5 w-full max-w-4xl px-5 ">
-          <div className="flex flex-wrap gap-2 justify-center">
+        <div className="relative z-10 mt-3 sm:mt-3.5 w-full max-w-4xl px-2 sm:px-5">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center">
             {recommendedSearches.map((search, index) => (
               <button
                 key={index}
-                className="py-2 px-4 bg-white/95 border border-white/30 rounded-[20px] text-gray-700 font-outfit text-[13px] font-normal cursor-pointer transition-all hover:bg-[#205ED7] hover:text-white hover:border-[#205ED7] hover:-translate-y-px hover:shadow-md whitespace-normal break-words max-w-full"
+                className="py-1.5 sm:py-2 px-3 sm:px-4 bg-white/95 border border-white/30 rounded-[20px] text-gray-700 font-outfit text-xs sm:text-[13px] font-normal cursor-pointer transition-all hover:bg-[#205ED7] hover:text-white hover:border-[#205ED7] hover:-translate-y-px hover:shadow-md whitespace-normal break-words max-w-full"
                 onClick={() => handleRecommendedSearch(search)}
               >
                 {search}
@@ -1046,7 +1049,7 @@ function Hero() {
           type="button"
           onClick={scrollToContent}
           aria-label="Scroll to content below"
-          className={`absolute bottom-[40px] left-0 right-0 mx-auto w-fit z-[110] flex flex-col items-center gap-1 transition-all duration-300 ease-out ${
+          className={`absolute bottom-6 sm:bottom-10 left-0 right-0 mx-auto w-fit z-[110] flex flex-col items-center gap-1 transition-all duration-300 ease-out ${
             showScrollArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
         >

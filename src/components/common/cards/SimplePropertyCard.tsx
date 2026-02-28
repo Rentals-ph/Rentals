@@ -29,34 +29,33 @@ function SimplePropertyCard({
 
   return (
     <div 
-      className="min-h-[200px] w-full flex-shrink-0 cursor-pointer overflow-hidden rounded-lg bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md md:min-h-[180px]" 
+      className="min-h-[160px] xs:min-h-[180px] w-full flex-shrink-0 cursor-pointer overflow-hidden rounded-lg bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md touch-manipulation" 
       onClick={handleCardClick}
     >
-      <div className="relative h-[220px] w-full overflow-hidden bg-gray-100 md:h-[180px]">
+      <div className="relative h-[180px] xs:h-[200px] sm:h-[200px] md:h-[180px] w-full overflow-hidden bg-gray-100">
         <img 
           src={image} 
           alt={title}
           className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
           onError={(e) => {
-            // Fallback to default image if the provided image fails to load
             e.currentTarget.src = ASSETS.PLACEHOLDER_PROPERTY_MAIN
           }}
         />
-        <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-1 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 md:p-3">
-          <div className="flex flex-col gap-1 rounded-md bg-black/40 px-2 md:px-1.5 md:py-1">
-            <h3 className=" font-outfit text-lg font-semibold leading-snug text-white line-clamp-2 [text-shadow:0_1px_2px_rgba(0,0,0,0.3)] md:text-lg">
+        <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-0.5 sm:gap-1 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 sm:p-4 md:p-3">
+          <div className="flex flex-col gap-0.5 sm:gap-1 rounded-md bg-black/40 px-2 py-1.5 sm:py-2 md:px-1.5 md:py-1">
+            <h3 className="font-outfit text-sm sm:text-base md:text-lg font-semibold leading-snug text-white line-clamp-2 [text-shadow:0_1px_2px_rgba(0,0,0,0.3)] min-w-0">
               {title}
             </h3>
             {location && (
               <p
-                className="flex items-center gap-1.5 font-outfit text-lg font-normal text-white/90 line-clamp-1 [text-shadow:0_1px_2px_rgba(0,0,0,0.3)] md:text-lg min-w-0"
+                className="flex items-center gap-1 font-outfit text-xs sm:text-sm md:text-lg font-normal text-white/90 line-clamp-1 [text-shadow:0_1px_2px_rgba(0,0,0,0.3)] min-w-0"
                 title={location}
               >
-                <FiMapPin className="flex-shrink-0 w-3.5 h-3.5 text-white/80 md:w-3 md:h-3" aria-hidden />
+                <FiMapPin className="flex-shrink-0 w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-3 md:h-3 text-white/80" aria-hidden />
                 <span className="truncate">{location}</span>
               </p>
             )}
-            <p className="m-0 mt-1 font-outfit text-xl font-bold leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.4)] md:text-xl">
+            <p className="m-0 mt-0.5 sm:mt-1 font-outfit text-base sm:text-lg md:text-xl font-bold leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.4)]">
               {price}
             </p>
           </div>

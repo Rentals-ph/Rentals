@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import { newsApi } from '@/api'
 import type { News } from '@/api/endpoints/news'
@@ -109,7 +108,6 @@ export default function NewsDetailsPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen flex-col bg-white">
-        <Navbar />
         <main className="flex-1 flex items-center justify-center px-4 sm:px-6 md:px-10 lg:px-[150px] py-20">
           <p className="text-gray-600">Loading article...</p>
         </main>
@@ -121,7 +119,6 @@ export default function NewsDetailsPage() {
   if (!news) {
     return (
       <div className="flex min-h-screen flex-col bg-white">
-        <Navbar />
         <main className="flex-1 flex items-center justify-center px-4 sm:px-6 md:px-10 lg:px-[150px] py-20">
           <div className="text-center">
             <p className="text-gray-600 mb-4">Article not found</p>
@@ -140,8 +137,6 @@ export default function NewsDetailsPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white overflow-x-hidden">
-      <Navbar />
-
       {/* Header Section with NEWS and Category */}
       <section className="w-full bg-white py-6 sm:py-8">
         <div className="px-4 sm:px-6 md:px-10 lg:px-[150px]">

@@ -28,10 +28,10 @@ function BlogCard({
   return (
     <Link href={link} style={{ textDecoration: 'none', display: 'block' }}>
       <article 
-        className={`relative flex h-[200px] min-h-[200px] max-h-[200px] w-full flex-col overflow-hidden rounded-lg bg-white shadow-[0px_4px_21px_0px_rgba(0,0,0,0.25)] transition-all hover:-translate-y-1 hover:shadow-[0px_6px_25px_0px_rgba(0,0,0,0.3)] md:h-auto md:min-h-[260px] xs:min-h-[180px] xs:rounded-lg ${
+        className={`relative flex w-full flex-col overflow-hidden rounded-lg bg-white shadow-[0px_4px_21px_0px_rgba(0,0,0,0.25)] transition-all hover:-translate-y-1 hover:shadow-[0px_6px_25px_0px_rgba(0,0,0,0.3)] touch-manipulation ${
           size === 'small' 
-            ? 'min-w-[220px] max-w-[300px] flex-[0_1_260px]' 
-            : 'min-w-[340px] max-w-[520px] flex-[0_1_420px] p-0'
+            ? 'min-h-[180px] xs:min-h-[200px] md:min-h-[260px] min-w-0 max-w-full xs:min-w-[200px] md:min-w-[220px] md:max-w-[300px] flex-[0_1_260px]' 
+            : 'min-h-[200px] xs:min-h-[220px] md:h-auto md:min-h-[260px] min-w-0 max-w-full sm:min-w-[300px] md:min-w-[340px] md:max-w-[520px] flex-[0_1_420px] p-0'
         }`}
       >
         {size === 'large' ? (

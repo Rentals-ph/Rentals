@@ -149,13 +149,13 @@ function VerticalPropertyCard({
 
   return (
     <article
-      className="group bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col w-full max-w-[550px] h-full shadow-sm hover:shadow-md transition-all duration-200"
+      className="group bg-white rounded-lg sm:rounded-xl border border-gray-200 overflow-hidden flex flex-col w-full max-w-[550px] h-full shadow-sm hover:shadow-md transition-all duration-200"
       onClick={handleCardClick}
       style={{ cursor: id ? 'pointer' : 'default', borderWidth: '1px', borderStyle: 'solid', borderColor: 'rgb(229, 231, 235)' }}
     >
       {/* Property image with hover arrows */}
       <div
-        className="relative w-full aspect-[4/2] overflow-hidden rounded-t-xl bg-gray-100"
+        className="relative w-full aspect-[4/2] min-h-[140px] sm:min-h-0 overflow-hidden rounded-t-lg sm:rounded-t-xl bg-gray-100"
         onMouseEnter={handleImageAreaMouseEnter}
         onMouseLeave={handleImageAreaMouseLeave}
       >
@@ -184,7 +184,7 @@ function VerticalPropertyCard({
             <button
               type="button"
               onClick={goPrev}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center text-gray-700 transition-all z-10"
+              className="absolute left-1.5 sm:left-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-9 sm:h-9 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center text-gray-700 transition-all z-10 touch-manipulation"
               aria-label="Previous image"
             >
               <FiChevronLeft className="w-5 h-5" />
@@ -192,7 +192,7 @@ function VerticalPropertyCard({
             <button
               type="button"
               onClick={goNext}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center text-gray-700 transition-all z-10"
+              className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-9 sm:h-9 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center text-gray-700 transition-all z-10 touch-manipulation"
               aria-label="Next image"
             >
               <FiChevronRight className="w-5 h-5" />
@@ -202,23 +202,23 @@ function VerticalPropertyCard({
       </div>
 
       {/* Content */}
-      <div className="flex flex-col flex-1 px-8 py-6 gap-2 overflow-hidden">
+      <div className="flex flex-col flex-1 px-4 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 gap-1.5 sm:gap-2 overflow-hidden">
         <div className="flex justify-between items-center gap-2">
-          <span className="text-blue-600 text-xs font-semibold uppercase tracking-wide">{propertyType}</span>
+          <span className="text-blue-600 text-[10px] sm:text-xs font-semibold uppercase tracking-wide truncate">{propertyType}</span>
           {dateListed && (
-            <span className="text-[11px] text-gray-400 font-medium whitespace-nowrap">
+            <span className="text-[10px] sm:text-[11px] text-gray-400 font-medium whitespace-nowrap flex-shrink-0">
               {dateListed}
             </span>
           )}
         </div>
-        <div className="flex items-baseline gap-2">
-          <p className="text-blue-600 text-3xl font-bold leading-tight">{price}</p>
+        <div className="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
+          <p className="text-blue-600 text-xl sm:text-2xl md:text-3xl font-bold leading-tight">{price}</p>
           {priceType && (
-            <span className="text-gray-500 text-sm font-medium">{priceType}</span>
+            <span className="text-gray-500 text-xs sm:text-sm font-medium">{priceType}</span>
           )}
         </div>
         <div className="min-w-0">
-          <h3 className="text-gray-900 text-lg font-semibold leading-snug line-clamp-2">
+          <h3 className="text-gray-900 text-base sm:text-lg font-semibold leading-snug line-clamp-2">
             {title}
           </h3>
           {locationLine ? (
@@ -233,29 +233,29 @@ function VerticalPropertyCard({
         </div>
 
         {/* Bed, bath, size */}
-        <div className="flex items-center gap-4 text-gray-600 text-sm">
-          <span className="flex items-center gap-1.5">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 flex-shrink-0">
+        <div className="flex items-center gap-2 sm:gap-4 text-gray-600 text-xs sm:text-sm flex-wrap">
+          <span className="flex items-center gap-1 sm:gap-1.5">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0">
               <rect x="3" y="10" width="18" height="7" rx="2" />
               <rect x="7" y="7" width="4" height="3" rx="1" />
               <rect x="13" y="7" width="4" height="3" rx="1" />
               <path d="M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2" />
             </svg>
             {bedrooms}
-            <span className="text-gray-500 font-normal">Bedrooms</span>
+            <span className="text-gray-500 font-normal">Bed</span>
           </span>
-          <span className="flex items-center gap-1.5">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 flex-shrink-0">
+          <span className="flex items-center gap-1 sm:gap-1.5">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0">
               <rect x="3" y="10" width="18" height="8" rx="2" />
               <rect x="5" y="18" width="2" height="2" rx="1" />
               <rect x="17" y="18" width="2" height="2" rx="1" />
               <path d="M3 18h18" />
             </svg>
             {bathrooms}
-            <span className="text-gray-500 font-normal">Bathrooms</span>
+            <span className="text-gray-500 font-normal">Bath</span>
           </span>
-          <span className="flex items-center gap-1.5">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 flex-shrink-0">
+          <span className="flex items-center gap-1 sm:gap-1.5">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0">
               <rect x="2" y="17" width="20" height="4" rx="1" />
               <rect x="2" y="3" width="20" height="4" rx="1" />
               <rect x="2" y="10" width="20" height="4" rx="1" />
@@ -266,18 +266,18 @@ function VerticalPropertyCard({
         </div>
 
         {/* Agent strip */}
-        <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-gray-50 !border !border-gray-200" style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: '#E5E7EB' }}>
+        <div className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-gray-50 !border !border-gray-200" style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: '#E5E7EB' }}>
           <img
             src={rentManagerImage || ASSETS.PLACEHOLDER_PROFILE}
             alt={rentManagerName}
-            className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover flex-shrink-0 border border-gray-200"
             onError={(e) => {
               e.currentTarget.src = ASSETS.PLACEHOLDER_PROFILE
             }}
           />
           <div className="flex-1 min-w-0 flex flex-col justify-center">
-            <h3 className="text-blue-600 text-sm font-semibold m-0">{rentManagerName}</h3>
-            <p className="text-gray-500 text-xs uppercase tracking-wide m-0">{rentManagerRole}</p>
+            <h3 className="text-blue-600 text-xs sm:text-sm font-semibold m-0 truncate">{rentManagerName}</h3>
+            <p className="text-gray-500 text-[10px] sm:text-xs uppercase tracking-wide m-0 truncate">{rentManagerRole}</p>
           </div>
           <div className="flex items-center gap-1.5 flex-shrink-0">
             {/* Small width: icon-only buttons */}
@@ -379,21 +379,21 @@ function VerticalPropertyCard({
         </div>
 
         {/* Action buttons: Details, Heart, Share */}
-        <div className="flex items-center gap-2 mt-auto pt-1">
+        <div className="flex items-center gap-1.5 sm:gap-2 mt-auto pt-1">
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation()
               if (id) router.push(`/property/${id}`)
             }}
-            className="flex-1 py-2.5 px-4 rounded-lg bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors"
+            className="flex-1 min-h-[44px] py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg bg-blue-600 text-white font-semibold text-xs sm:text-sm hover:bg-blue-700 transition-colors touch-manipulation"
           >
             Details
           </button>
           <button
             type="button"
             onClick={(e) => e.stopPropagation()}
-            className="w-10 h-10 rounded-lg border border-gray-200 bg-white flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors"
+            className="w-10 h-10 min-h-[44px] min-w-[44px] rounded-lg border border-gray-200 bg-white flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors touch-manipulation"
             style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: '#E5E7EB' }}
             aria-label="Add to favorites"
           >
@@ -407,7 +407,7 @@ function VerticalPropertyCard({
                 e.stopPropagation()
                 setShowSharePopup(!showSharePopup)
               }}
-              className="w-10 h-10 rounded-lg border border-gray-200 bg-white flex items-center justify-center text-gray-700 hover:bg-gray-50 transition-colors"
+              className="w-10 h-10 min-h-[44px] min-w-[44px] rounded-lg border border-gray-200 bg-white flex items-center justify-center text-gray-700 hover:bg-gray-50 transition-colors touch-manipulation"
               style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: '#E5E7EB' }}
               aria-label="Share"
             >

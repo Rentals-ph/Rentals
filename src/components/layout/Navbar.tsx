@@ -8,14 +8,29 @@ import { FiUser, FiLogOut, FiChevronDown, FiHome, FiMenu, FiX } from 'react-icon
 import { ASSETS } from '@/utils/assets'
 import { agentsApi } from '@/api'
 import { resolveAgentAvatar } from '@/utils/imageResolver'
-import LoginModal from '../common/LoginModal'
-import RegisterModal from '../common/RegisterModal'
+import LoginModal from '@/components/common/LoginModal'
+import RegisterModal from '@/components/common/RegisterModal'
 
-const Navbar = () => {
+export const SIDEBAR_WIDTH = 240
+export const SIDEBAR_WIDTH_SM = 264
+
+type NavbarProps = {
+  /** When provided, mobile menu is controlled by the parent (e.g. for content push). */
+  mobileMenuOpen?: boolean
+  onMobileMenuToggle?: (open: boolean) => void
+}
+
+const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
+  const [isMounted, setIsMounted] = useState(false)
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [isRegisterOpen, setIsRegisterOpen] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [internalMobileOpen, setInternalMobileOpen] = useState(false)
+  const isMobileMenuOpen = mobileMenuOpen !== undefined ? mobileMenuOpen : internalMobileOpen
+  const setMobileMenuOpen = (open: boolean) => {
+    if (onMobileMenuToggle) onMobileMenuToggle(open)
+    else setInternalMobileOpen(open)
+  }
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false)
   const [userName, setUserName] = useState('User')
   const [userRole, setUserRole] = useState<'agent' | 'admin' | 'broker'>('agent')
@@ -148,8 +163,13 @@ const Navbar = () => {
 
   // Close mobile menu when route changes
   useEffect(() => {
-    setIsMobileMenuOpen(false)
+    setMobileMenuOpen(false)
   }, [pathname])
+
+  // Render mobile overlay/sidebar portal only after mount to avoid hydration mismatch
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // Prevent body scroll when sidebar is open
   useEffect(() => {
@@ -218,12 +238,15 @@ const Navbar = () => {
           <div className="flex items-center gap-2 flex-shrink-0">
             <button 
               className="lg:hidden flex items-center justify-center bg-transparent border-none cursor-pointer text-rental-blue-600 p-2 flex-shrink-0"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle menu"
             >
               {isMobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
             </button>
-            <Link href="/" className="flex items-center flex-shrink-0">
+            <Link
+              href="/"
+              className={`flex items-center flex-shrink-0 ${isMobileMenuOpen ? 'hidden lg:flex' : ''}`}
+            >
               <img
                 src={ASSETS.LOGO_HERO_MAIN}
                 alt="Rentals.ph logo"
@@ -358,164 +381,163 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Sidebar Overlay */}
-        {isMobileMenuOpen && (
-          <div 
-            className="lg:hidden fixed inset-0 bg-black/50 z-[60] transition-opacity duration-300"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-        )}
+        {/* Mobile sidebar portaled to body after mount (avoids hydration mismatch) */}
+        {isMounted && createPortal(
+          <>
+            <nav
+              ref={mobileMenuRef}
+              className={`lg:hidden fixed top-0 left-0 h-screen h-[100dvh] w-[240px] sm:w-[264px] shadow-2xl z-[70] overflow-y-auto transition-transform duration-300 ease-in-out flex flex-col ${
+                !isMobileMenuOpen ? 'pointer-events-none' : ''
+              }`}
+              style={{ transform: isMobileMenuOpen ? 'translateX(0)' : 'translateX(-100%)' }}
+              onClick={(e) => e.stopPropagation()}
+              aria-hidden={!isMobileMenuOpen}
+            >
+              {/* Sidebar background: gradient + subtle pattern */}
+              <div className="absolute inset-0 bg-gradient-to-br from-rental-blue-50 via-white to-rental-orange-50/30" aria-hidden />
+              {/* Decorative shapes */}
+              <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
+                <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-rental-blue-500/10 blur-2xl" />
+                <div className="absolute top-1/3 -left-8 w-24 h-24 rounded-full bg-rental-orange-500/15 blur-xl" />
+                <div className="absolute bottom-20 -right-6 w-32 h-32 rounded-full bg-rental-blue-400/10 blur-2xl" />
+                {/* Soft diagonal stripe */}
+                <div
+                  className="absolute inset-0 opacity-[0.03]"
+                  style={{
+                    backgroundImage: `repeating-linear-gradient(
+                      -45deg,
+                      transparent,
+                      transparent 20px,
+                      #205ED7 20px,
+                      #205ED7 21px
+                    )`,
+                  }}
+                />
+                {/* Bottom wave accent */}
+                <svg className="absolute bottom-0 left-0 w-full h-24 text-rental-blue-500/20" viewBox="0 0 320 96" fill="currentColor" preserveAspectRatio="none">
+                  <path d="M0 96V48c40 24 80 24 120 24s80 0 120-24 80-24 120-24 80 24 120 24v48H0z" />
+                </svg>
+              </div>
 
-        {/* Mobile Sidebar - Left Positioned */}
-        <nav 
-          ref={mobileMenuRef}
-          className={`lg:hidden fixed top-0 left-0 h-full w-[280px] sm:w-[320px] bg-white shadow-2xl z-[70] overflow-y-auto ${
-            isMobileMenuOpen ? '' : 'hidden'
-          }`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Sidebar Header */}
-          <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
-            <h2 className="text-lg font-bold text-rental-blue-600 font-outfit">Menu</h2>
-            <button 
-              type="button"
-              className="p-2 text-gray-600 hover:text-gray-900 transition-colors cursor-pointer relative z-10"
-              onClick={(e) => {
-                e.stopPropagation()
-                setIsMobileMenuOpen(false)
-              }}
-              aria-label="Close menu"
-            >
-              <FiX size={24} />
-            </button>
-          </div>
-
-          {/* Navigation Links */}
-          <div className="flex flex-col">
-            <Link 
-              href="/" 
-              className={`text-rental-blue-600 font-outfit text-[15px] px-6 py-4 border-b border-gray-100 block transition-colors hover:text-rental-orange-500 hover:bg-gray-50 ${pathname === '/' ? 'font-extrabold tracking-[0.15em] bg-gray-50' : 'font-normal'}`} 
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              HOME
-            </Link>
-            <Link 
-              href="/about" 
-              className={`text-rental-blue-600 font-outfit text-[15px] px-6 py-4 border-b border-gray-100 block transition-colors hover:text-rental-orange-500 hover:bg-gray-50 ${pathname === '/about' ? 'font-extrabold tracking-[0.15em] bg-gray-50' : 'font-normal'}`} 
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              ABOUT US
-            </Link>
-            <Link 
-              href="/properties" 
-              className={`text-rental-blue-600 font-outfit text-[15px] px-6 py-4 border-b border-gray-100 block transition-colors hover:text-rental-orange-500 hover:bg-gray-50 ${pathname === '/properties' ? 'font-extrabold tracking-[0.15em] bg-gray-50' : 'font-normal'}`} 
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              PROPERTIES
-            </Link>
-            <Link 
-              href="/rent-managers" 
-              className={`text-rental-blue-600 font-outfit text-[15px] px-6 py-4 border-b border-gray-100 block transition-colors hover:text-rental-orange-500 hover:bg-gray-50 ${pathname === '/rent-managers' ? 'font-extrabold tracking-[0.15em] bg-gray-50' : 'font-normal'}`} 
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              RENT MANAGERS
-            </Link>
-            <Link 
-              href="/blog" 
-              className={`text-rental-blue-600 font-outfit text-[15px] px-6 py-4 border-b border-gray-100 block transition-colors hover:text-rental-orange-500 hover:bg-gray-50 ${pathname === '/blog' ? 'font-extrabold tracking-[0.15em] bg-gray-50' : 'font-normal'}`} 
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              BLOG
-            </Link>
-            <Link 
-              href="/news" 
-              className={`text-rental-blue-600 font-outfit text-[15px] px-6 py-4 border-b border-gray-100 block transition-colors hover:text-rental-orange-500 hover:bg-gray-50 ${pathname === '/news' ? 'font-extrabold tracking-[0.15em] bg-gray-50' : 'font-normal'}`} 
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              NEWS
-            </Link>
-            <Link 
-              href="/contact" 
-              className={`text-rental-blue-600 font-outfit text-[15px] px-6 py-4 border-b border-gray-100 block transition-colors hover:text-rental-orange-500 hover:bg-gray-50 ${pathname === '/contact' ? 'font-extrabold tracking-[0.15em] bg-gray-50' : 'font-normal'}`} 
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              CONTACT US
-            </Link>
-          </div>
-
-          {/* User Section */}
-          {isUserLoggedIn ? (
-            <div className="px-6 py-5 border-t border-gray-200 flex flex-col gap-3 mt-auto">
-              <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
-                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
-                  <img 
-                    src={userImage || ASSETS.PLACEHOLDER_PROFILE} 
-                    alt={userName}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement
-                      target.style.display = 'none'
-                      target.nextElementSibling?.classList.remove('hidden')
-                    }} 
-                  />
-                  <div className="hidden w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-[15px]">
-                    {getInitials(userName)}
-                  </div>
+              {/* Content wrapper (relative for stacking) */}
+              <div className="relative flex flex-col flex-1 min-h-0">
+                {/* Sidebar Header */}
+                <div className="flex items-center justify-between p-4 sm:p-5 border-b border-rental-blue-200/50">
+                  <Link href="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
+                    <img src={ASSETS.LOGO_HERO_MAIN} alt="Rentals.ph" className="h-9 sm:h-10 w-auto" />
+                  </Link>
+                  <span className="text-xs font-outfit font-semibold uppercase tracking-widest text-rental-blue-600/80">Menu</span>
                 </div>
-                <div className="flex flex-col gap-0.5 min-w-0">
-                  <span className="text-[13px] sm:text-[15px] font-semibold text-gray-900 font-outfit truncate">{userName}</span>
-                  <span className="text-[11px] sm:text-[15px] text-gray-500 font-outfit">
-                    {userRole === 'admin' ? 'Admin' : userRole === 'broker' ? 'Broker' : 'Agent'}
-                  </span>
+
+                {/* Navigation Links */}
+                <div className="flex flex-col flex-1 py-2 px-3 sm:px-4">
+                  {[
+                    { href: '/', label: 'HOME' },
+                    { href: '/about', label: 'ABOUT US' },
+                    { href: '/properties', label: 'PROPERTIES' },
+                    { href: '/rent-managers', label: 'BROKERS/AGENTS' },
+                    { href: '/blog', label: 'BLOG' },
+                    { href: '/news', label: 'NEWS' },
+                    { href: '/contact', label: 'CONTACT US' },
+                  ].map(({ href, label }) => {
+                    const isActive = pathname === href
+                    return (
+                      <Link
+                        key={href}
+                        href={href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`font-outfit text-[14px] sm:text-[15px] px-4 py-3.5 rounded-xl flex items-center gap-3 transition-all duration-200 ${
+                          isActive
+                            ? 'bg-rental-blue-600 text-white font-bold shadow-md shadow-rental-blue-600/25'
+                            : 'text-rental-blue-700 font-medium hover:bg-white/80 hover:text-rental-orange-500 hover:shadow-sm'
+                        }`}
+                      >
+                        <span className={`w-1 h-6 rounded-full flex-shrink-0 ${isActive ? 'bg-white' : 'bg-rental-orange-500/60'}`} aria-hidden />
+                        {label}
+                      </Link>
+                    )
+                  })}
+                </div>
+
+                {/* User Section */}
+                <div className="relative border-t border-rental-blue-200/50 p-4 sm:p-5 bg-white/50 backdrop-blur-sm">
+                  {isUserLoggedIn ? (
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center gap-3 p-3 rounded-xl bg-white/80 shadow-sm border border-rental-blue-100/50">
+                        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-rental-blue-500 to-rental-blue-700 flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-white shadow-md">
+                          <img
+                            src={userImage || ASSETS.PLACEHOLDER_PROFILE}
+                            alt=""
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement
+                              target.style.display = 'none'
+                              target.nextElementSibling?.classList.remove('hidden')
+                            }}
+                          />
+                          <div className="hidden w-full h-full flex items-center justify-center text-white font-semibold text-sm">
+                            {getInitials(userName)}
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-0.5 min-w-0">
+                          <span className="text-sm font-semibold text-gray-900 font-outfit truncate">{userName}</span>
+                          <span className="text-xs text-rental-blue-600 font-outfit">
+                            {userRole === 'admin' ? 'Admin' : userRole === 'broker' ? 'Broker' : 'Agent'}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        className="flex items-center gap-3 py-3 px-4 rounded-xl text-sm text-gray-800 font-outfit transition-all hover:bg-rental-blue-600 hover:text-white hover:shadow-md"
+                        onClick={() => {
+                          router.push(userRole === 'admin' ? '/admin' : userRole === 'broker' ? '/broker' : '/agent')
+                          setMobileMenuOpen(false)
+                        }}
+                      >
+                        <FiHome className="text-lg flex-shrink-0" />
+                        <span>Dashboard</span>
+                      </button>
+                      {userRole === 'agent' && (
+                        <button
+                          className="flex items-center gap-3 py-3 px-4 rounded-xl text-sm text-gray-800 font-outfit transition-all hover:bg-rental-blue-600 hover:text-white hover:shadow-md"
+                          onClick={() => {
+                            router.push('/agent/account')
+                            setMobileMenuOpen(false)
+                          }}
+                        >
+                          <FiUser className="text-lg flex-shrink-0" />
+                          <span>Account</span>
+                        </button>
+                      )}
+                      <button
+                        className="flex items-center gap-3 py-3 px-4 rounded-xl text-sm text-red-600 font-outfit transition-all hover:bg-red-500 hover:text-white hover:shadow-md"
+                        onClick={() => {
+                          handleLogout()
+                          setMobileMenuOpen(false)
+                        }}
+                      >
+                        <FiLogOut className="text-lg flex-shrink-0" />
+                        <span>Logout</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="pt-1">
+                      <button
+                        className="w-full rounded-xl py-3.5 font-outfit text-sm font-semibold cursor-pointer inline-flex items-center justify-center bg-gradient-to-r from-rental-blue-600 to-rental-blue-500 text-white shadow-lg shadow-rental-blue-600/30 hover:shadow-xl hover:from-rental-blue-500 hover:to-rental-blue-600 active:scale-[0.98] transition-all duration-200"
+                        onClick={() => {
+                          handleLoginClick()
+                          setMobileMenuOpen(false)
+                        }}
+                      >
+                        Login / Register
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
-              <button 
-                className="flex items-center gap-3 py-3 bg-transparent border-none text-left cursor-pointer text-[13px] sm:text-[15px] text-gray-900 font-outfit transition-colors hover:text-rental-blue-600 hover:bg-gray-50 rounded-lg px-2" 
-                onClick={() => {
-                  router.push(userRole === 'admin' ? '/admin' : userRole === 'broker' ? '/broker' : '/agent')
-                  setIsMobileMenuOpen(false)
-                }}
-              >
-                <FiHome className="text-lg flex-shrink-0" />
-                <span>Dashboard</span>
-              </button>
-              {userRole === 'agent' && (
-                <button 
-                  className="flex items-center gap-3 py-3 bg-transparent border-none text-left cursor-pointer text-[13px] sm:text-[15px] text-gray-900 font-outfit transition-colors hover:text-rental-blue-600 hover:bg-gray-50 rounded-lg px-2" 
-                  onClick={() => {
-                    router.push('/agent/account')
-                    setIsMobileMenuOpen(false)
-                  }}
-                >
-                  <FiUser className="text-lg flex-shrink-0" />
-                  <span>Account</span>
-                </button>
-              )}
-              <button 
-                className="flex items-center gap-3 py-3 bg-transparent border-none text-left cursor-pointer text-[13px] sm:text-[15px] text-red-600 font-outfit transition-colors hover:text-red-700 hover:bg-red-50 rounded-lg px-2" 
-                onClick={() => {
-                  handleLogout()
-                  setIsMobileMenuOpen(false)
-                }}
-              >
-                <FiLogOut className="text-lg flex-shrink-0" />
-                <span>Logout</span>
-              </button>
-            </div>
-          ) : (
-            <div className="px-6 py-5 border-t border-gray-200 mt-auto">
-              <button 
-                className="w-full rounded-full !border-2 !border-rental-orange-500 bg-transparent text-rental-orange-500 px-5 h-12 font-outfit text-[13px] sm:text-[15px] font-medium cursor-pointer inline-flex items-center justify-center hover:bg-rental-orange-500 hover:text-white active:scale-95 transition-all duration-200" 
-                onClick={() => {
-                  handleLoginClick()
-                  setIsMobileMenuOpen(false)
-                }}
-              >
-                Login/Register
-              </button>
-            </div>
-          )}
-        </nav>
+            </nav>
+          </>,
+          document.body
+        )}
       </header>
 
       <LoginModal

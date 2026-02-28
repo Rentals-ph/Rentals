@@ -3,7 +3,6 @@
 import { useState, useEffect, Suspense, useMemo, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import VerticalPropertyCard from '@/components/common/VerticalPropertyCard'
 import HorizontalPropertyCard from '@/components/common/HorizontalPropertyCard'
@@ -470,8 +469,6 @@ function PropertiesContent() {
 
   return (
     <div className="properties-for-rent-page">
-      <Navbar />
-      
         <div className="top-search-bar-container sticky top-0 z-30 bg-white p-3 sm:pt-5 px-4 sm:px-6 md:px-10 lg:px-[150px]">
              <div className="top-search-bar flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full border-b border-gray-200 pb-3 sm:pb-5"
              style={{ borderBottomWidth: '2px', borderBottomStyle: 'solid', borderBottomColor: '#E5E7EB'}}
@@ -1366,7 +1363,6 @@ export default function PropertiesForRentPage() {
   return (
     <Suspense fallback={
       <div className="properties-for-rent-page">
-        <Navbar />
         <PageHeader title="Properties for Rent" />
         <div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>
         <Footer />
