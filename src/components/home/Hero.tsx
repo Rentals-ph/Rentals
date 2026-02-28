@@ -1027,8 +1027,8 @@ function Hero() {
           )}
         </div>
 
-        {/* Recommended Searches - Outside search container */}
-        <div className="relative z-10 mt-3 sm:mt-3.5 w-full max-w-4xl px-2 sm:px-5">
+        {/* Recommended Searches - Outside search container; extra bottom space in chat mode on mobile so they don't sit behind the hero banner */}
+        <div className={`relative z-10 mt-3 sm:mt-3.5 w-full max-w-4xl px-2 sm:px-5 ${isChatMode ? 'mb-24 sm:mb-28 md:mb-32' : ''}`}>
           <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center">
             {recommendedSearches.map((search, index) => (
               <button
