@@ -157,7 +157,122 @@ img {
   display: block;
 }
 
-/* AI Message Formatting in Chat */
+/* AI Message Formatting in Chat - Rentals.ph theme */
+.ai-message-content p.ai-message-p {
+  margin: 0 0 0.875rem 0;
+  line-height: 1.6;
+  color: #374151;
+}
+.ai-message-content p.ai-message-p:last-child {
+  margin-bottom: 0;
+}
+.ai-message-content strong {
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Styled enumeration container for * bullet lists */
+.ai-message-content .ai-message-enum-list {
+  margin: 0.75rem 0 0 0;
+  padding: 0.75rem 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #e6f2ff 0%, #f8fafc 100%);
+  border: 1px solid rgba(32, 94, 215, 0.2);
+}
+.ai-message-content .ai-message-enum-item {
+  margin: 0;
+  padding: 0.625rem 1rem 0.625rem 2.5rem;
+  position: relative;
+  line-height: 1.55;
+  color: #374151;
+  border-bottom: 1px solid rgba(32, 94, 215, 0.08);
+}
+.ai-message-content .ai-message-enum-item:last-child {
+  border-bottom: none;
+}
+.ai-message-content .ai-message-enum-item::before {
+  content: '';
+  position: absolute;
+  left: 1rem;
+  top: 0.875rem;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #205ED7;
+  box-shadow: 0 0 0 2px rgba(32, 94, 215, 0.2);
+}
+.ai-message-content .ai-message-enum-list + p.ai-message-p {
+  margin-top: 0.875rem;
+}
+
+/* Compact property-specific details (single property) */
+.ai-message-content .ai-message-property-details {
+  margin: 0.75rem 0 0 0;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #e6f2ff 0%, #f8fafc 100%);
+  border: 1px solid rgba(32, 94, 215, 0.2);
+}
+.ai-message-content .ai-property-title {
+  font-weight: 600;
+  color: #111827;
+  font-size: 0.9375rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.35;
+}
+.ai-message-content .ai-property-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.ai-message-content .ai-property-detail-row {
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: #374151;
+}
+.ai-message-content .ai-property-label {
+  font-weight: 600;
+  color: #374151;
+}
+.ai-message-content .ai-property-value {
+  font-weight: 400;
+  color: #4b5563;
+}
+
+/* Numbered list in AI messages */
+.ai-message-content ul.ai-message-list {
+  margin: 0.75rem 0 0 0;
+  padding: 0 0 0 1.5rem;
+  list-style: none;
+  counter-reset: ai-list;
+}
+.ai-message-content ul.ai-message-list li {
+  margin: 0 0 0.5rem 0;
+  padding-left: 0.5rem;
+  position: relative;
+  line-height: 1.55;
+  color: #374151;
+  counter-increment: ai-list;
+}
+.ai-message-content ul.ai-message-list li::before {
+  content: counter(ai-list) '.';
+  position: absolute;
+  left: -1.5rem;
+  font-weight: 600;
+  color: #205ED7;
+}
+.ai-message-content ul.ai-message-list li:last-child {
+  margin-bottom: 0;
+}
+
+/* AI message paragraph before list */
+.ai-message-content p.ai-message-p + .ai-message-enum-list,
+.ai-message-content p.ai-message-p + .ai-message-property-details,
+.ai-message-content p.ai-message-p + ul.ai-message-list {
+  margin-top: 0.5rem;
+}
+
+/* User message (bg-gray-100) formatting */
 .bg-gray-100 p {
   margin: 0 0 12px 0;
   line-height: 1.6;

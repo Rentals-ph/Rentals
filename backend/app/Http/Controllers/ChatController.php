@@ -19,9 +19,9 @@ class GroqChatController extends Controller
      */
     #[OA\Post(
         path: "/groq/chat",
-        summary: "General AI chat using Groq",
-        description: "Send any prompt to Groq AI and receive an AI-generated response. Useful for general conversations, questions, or custom AI tasks.",
-        tags: ["Groq AI"],
+        summary: "General AI chat",
+        description: "Send any prompt to the AI and receive an AI-generated response. Useful for general conversations, questions, or custom AI tasks.",
+        tags: ["AI"],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\MediaType(
@@ -72,7 +72,7 @@ class GroqChatController extends Controller
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: "response", type: "string", description: "AI-generated text response"),
-                        new OA\Property(property: "model", type: "string", description: "The Groq model used"),
+                        new OA\Property(property: "model", type: "string", description: "The AI model used"),
                     ]
                 )
             ),

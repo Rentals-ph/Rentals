@@ -1,1 +1,1 @@
-export { RentManagerCardSkeleton } from './cards/RentManagerCardSkeleton'
+export { RentManagerCardSkeleton } from './cards/AgentCardSkeleton'

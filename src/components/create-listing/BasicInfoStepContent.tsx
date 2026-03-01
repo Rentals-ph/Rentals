@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import LocationMap from '../agent/LocationMap'
 import { useCreateListing } from '../../contexts/CreateListingContext'
 import { FiChevronDown, FiArrowRight } from 'react-icons/fi'
-import { generatePropertyDescription, getFallbackDescription } from '../../utils/aiDescription'
+import { api } from '../../lib/api'
+import { getFallbackDescription } from '../../utils/aiDescription'
 
 export interface BasicInfoStepContentProps {
   /** Path to navigate to on Next (e.g. /agent/create-listing/visuals-features or /broker/create-listing/visuals-features) */
@@ -63,8 +64,12 @@ export function BasicInfoStepContent({ nextStepPath, showZoom = false }: BasicIn
     if (!category || !title) return
     setIsGenerating(true)
     try {
-      const result = await generatePropertyDescription(category, title)
-      setDescription(result)
+      const response = await api.generatePropertyDescription(category, title)
+      if (response.success && response.data) {
+        setDescription(response.data)
+      } else {
+        setDescription(getFallbackDescription(category, title))
+      }
     } catch {
       setDescription(getFallbackDescription(category, title))
     } finally {

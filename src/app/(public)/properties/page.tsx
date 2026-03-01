@@ -18,6 +18,7 @@ import { ASSETS } from '@/utils/assets'
 import { resolveAgentAvatar } from '@/utils/imageResolver'
 import PopularSearches from '@/components/home/PopularSearches'
 import { usePublicSidebar } from '@/contexts/PublicSidebarContext'
+import { FloatingPropertyChat } from '@/components/properties/FloatingPropertyChat'
 
 function PropertiesContent() {
   const searchParams = useSearchParams()
@@ -52,6 +53,7 @@ function PropertiesContent() {
   const itemsPerPage = 9
   const mapRef = useRef<PublicPropertiesMapHandle>(null)
   const [mapListSheetOpen, setMapListSheetOpen] = useState(false)
+  const [chatResults, setChatResults] = useState<Property[] | null>(null)
 
   // Advance search sidebar width (match Navbar: 240 / 264)
   const ADVANCE_SEARCH_WIDTH = 240
@@ -342,8 +344,11 @@ function PropertiesContent() {
     return true
   })
 
+  // When showing AI chat results, use them as the source; otherwise use filtered list
+  const listSource = chatResults !== null ? chatResults : subCategoryFiltered
+
   // Client-side sorting
-  const sortedProperties = [...subCategoryFiltered].sort((a, b) => {
+  const sortedProperties = [...listSource].sort((a, b) => {
     // Price sorting takes priority if selected
     if (sortByPrice === 'price-low') {
       return a.price - b.price
@@ -367,11 +372,12 @@ function PropertiesContent() {
   // Properties ready for display (infinite scroll loads more as user scrolls)
   const paginatedProperties = sortedProperties
 
-  // Reset to page 1 when filters change (that trigger API calls)
+  // Reset to page 1 when filters change (that trigger API calls); clear chat results so list reflects filters
   useEffect(() => {
     setCurrentPage(1)
     setHasMore(true)
     setProperties([])
+    setChatResults(null)
   }, [selectedLocation, selectedType, searchQuery])
 
   // Reset when switching view modes (to start infinite scroll from beginning)
@@ -438,7 +444,7 @@ function PropertiesContent() {
     return count
   }, [selectedLocation, selectedType, minBaths, minBeds, priceMin, priceMax])
 
-  // Clear all filters
+  // Clear all filters and return to normal list (clears chat results if showing)
   const clearAllFilters = () => {
     setSelectedLocation('')
     setSelectedType('All Types')
@@ -449,6 +455,11 @@ function PropertiesContent() {
     setSearchQuery('')
     setAppliedFilters(false)
     setCurrentPage(1)
+    setChatResults(null)
+  }
+
+  const clearChatResults = () => {
+    setChatResults(null)
   }
 
   // Apply filters (for desktop sidebar)
@@ -737,12 +748,29 @@ function PropertiesContent() {
         
         <div className="properties-main-content flex-1 min-w-0 lg:order-1">
 
+          {/* Banner when showing AI chat results */}
+          {chatResults !== null && (
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rental-blue-200 bg-gradient-to-r from-rental-blue-50 to-white px-4 py-3">
+              <p className="font-outfit text-sm text-gray-700">
+                <span className="font-semibold text-rental-blue-700">Showing results from Rentals Assist</span>
+                {' '}({chatResults.length} propert{chatResults.length === 1 ? 'y' : 'ies'})
+              </p>
+              <button
+                type="button"
+                onClick={clearChatResults}
+                className="font-outfit text-sm font-medium text-rental-blue-600 hover:text-rental-blue-700 underline focus:outline-none focus:ring-2 focus:ring-rental-blue-500 rounded px-1"
+              >
+                Show all properties
+              </button>
+            </div>
+          )}
+
           {/* Results Count, Categories, and Active Filters */}
           {!loading && paginatedProperties.length > 0 && (
             <div className="results-header mb-4 sm:mb-6">
               <div className="results-header-top flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
                 <div className="results-count text-sm sm:text-base text-gray-700 font-outfit">
-                  <strong className="font-semibold text-gray-900">{totalProperties}</strong> properties available
+                  <strong className="font-semibold text-gray-900">{chatResults !== null ? chatResults.length : totalProperties}</strong> properties available
                 </div>
                 <div className="subcategory-row flex items-center gap-2 flex-wrap rounded-lg border border-gray-200" role="group" aria-label="Filter by category">
                   <button
@@ -1170,6 +1198,8 @@ function PropertiesContent() {
       </main>
       <PopularSearches />
       <Footer />
+
+      <FloatingPropertyChat onPropertiesResult={setChatResults} />
       </div>
     </div>
   )

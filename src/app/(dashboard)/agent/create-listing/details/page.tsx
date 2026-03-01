@@ -11,7 +11,8 @@ import {
   FiArrowRight,
   FiCheck
 } from 'react-icons/fi'
-import { generatePropertyDescription, getFallbackDescription } from '@/utils/aiDescription'
+import { api } from '@/lib/api'
+import { getFallbackDescription } from '@/utils/aiDescription'
 // import '../AgentCreateListingCategory.css' // Converted to Tailwind
 
 function ProgressRing({ percent }: { percent: number }) {
@@ -91,8 +92,12 @@ export default function AgentCreateListingDetails() {
     if (!data.category || !title) return
     setIsGenerating(true)
     try {
-      const result = await generatePropertyDescription(data.category, title)
-      setDescription(result)
+      const response = await api.generatePropertyDescription(data.category, title)
+      if (response.success && response.data) {
+        setDescription(response.data)
+      } else {
+        setDescription(getFallbackDescription(data.category, title))
+      }
     } catch {
       setDescription(getFallbackDescription(data.category, title))
     } finally {

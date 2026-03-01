@@ -50,11 +50,11 @@ class GroqService
                 ->make();
 
             $this->model = $this->provider === 'groq'
-                ? env('GROQ_MODEL')
-                : env('OPENAI_MODEL');
+                ? env('GROQ_MODEL', 'llama-3.3-70b-versatile')
+                : env('OPENAI_MODEL', 'gpt-4o-mini');
         } else {
             // Gemini configuration
-            $this->model = env('GEMINI_MODEL');
+            $this->model = env('GEMINI_MODEL', 'gemini-2.0-flash');
             $this->baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
         }
     }
@@ -191,7 +191,7 @@ class GroqService
                     [
                         'role'    => 'system',
                         'content' => <<<PROMPT
-You are RentalsGroq, a real estate search assistant for the Philippines.
+You are Rentals Assist, a real estate search assistant for the Philippines.
 Your job is to extract ALL search criteria from a user's natural language query that relates to ANY property field.
 
 Return ONLY a valid JSON object with the following fields (extract ANYTHING mentioned in the query):
@@ -278,7 +278,7 @@ PROMPT
                     [
                         'role'    => 'system',
                         'content' => <<<PROMPT
-You are RentalsGroq, a professional real estate assistant in the Philippines.
+You are Rentals Assist, a professional real estate assistant in the Philippines.
 You will be given a user's search query and a list of available properties in JSON format.
 
 Your responsibilities:
@@ -343,7 +343,7 @@ PROMPT
                                ($generalPropertyData && !empty($generalPropertyData['sample_properties']));
             
             $systemPrompt = <<<PROMPT
-You are RentalsGroq, a professional, friendly, and intelligent real estate assistant in the Philippines.
+You are Rentals Assist, a professional, friendly, and intelligent real estate assistant in the Philippines.
 You engage in natural, conversational interactions with users about property searches.
 
 Your capabilities:
@@ -561,7 +561,7 @@ PROMPT
             } else {
                 $messages[] = [
                     'role'    => 'system',
-                    'content' => 'You are RentalsGroq, a friendly and helpful AI assistant. You can help with real estate questions about properties in the Philippines, but you should respond naturally to general conversation and greetings without forcing property recommendations. Only suggest or recommend properties when the user explicitly asks about properties, searches for properties, or expresses interest in finding a property. For simple greetings like "hello" or "hi", respond warmly and ask how you can help, but do not automatically recommend properties. Do NOT add explanatory notes or meta-commentary about context or why you\'re responding a certain way. Just respond naturally as if you\'re having a normal conversation.',
+                    'content' => 'You are Rentals Assist, a friendly and helpful AI assistant. You can help with real estate questions about properties in the Philippines, but you should respond naturally to general conversation and greetings without forcing property recommendations. Only suggest or recommend properties when the user explicitly asks about properties, searches for properties, or expresses interest in finding a property. For simple greetings like "hello" or "hi", respond warmly and ask how you can help, but do not automatically recommend properties. Do NOT add explanatory notes or meta-commentary about context or why you\'re responding a certain way. Just respond naturally as if you\'re having a normal conversation.',
                 ];
             }
 
@@ -579,6 +579,105 @@ PROMPT
             Log::error('Groq chat failed: ' . $e->getMessage());
             return 'I was unable to process your request at this time. Please try again.';
         }
+    }
+
+    /**
+     * Generate 3 suggested search prompts for the chat UI.
+     * Uses the same AI provider as chat (Gemini/Groq/OpenAI). Returns a JSON array of 3 strings.
+     *
+     * @return array<int, string>
+     */
+    public function generateSuggestedPrompts(): array
+    {
+        $providerKey = $this->provider === 'gemini' ? env('GEMINI_API_KEY') : ($this->provider === 'groq' ? env('GROQ_API_KEY') : env('OPENAI_API_KEY'));
+        if (empty($providerKey)) {
+            $keyName = $this->provider === 'gemini' ? 'GEMINI_API_KEY' : ($this->provider === 'groq' ? 'GROQ_API_KEY' : 'OPENAI_API_KEY');
+            Log::warning('[suggestedPrompts] AI provider has no API key', ['provider' => $this->provider, 'env_key' => $keyName]);
+            throw new Exception("AI suggested prompts require {$keyName} to be set in .env");
+        }
+
+        $systemPrompt = 'You are a rental property search assistant. Generate exactly 3 short, natural suggested questions a user might ask when searching for rental properties. Each should be concise (under 8 words). Return ONLY a valid JSON array of 3 strings, no explanation, no markdown. Example: ["Show me 1-bedroom apartments", "Find properties under ₱20k", "Latest listings in Cebu City"]';
+
+        $messages = [
+            ['role' => 'system', 'content' => $systemPrompt],
+            ['role' => 'user', 'content' => 'Generate the 3 suggested questions now.'],
+        ];
+
+        $response = $this->makeChatRequest($messages, 0.6, 200, 'json_object');
+
+        $content = trim($response['choices'][0]['message']['content'] ?? '');
+        if ($content === '') {
+            Log::warning('[suggestedPrompts] AI returned empty content');
+            throw new Exception('AI returned an empty response for suggested prompts');
+        }
+
+        Log::debug('[suggestedPrompts] Raw AI content', ['content' => strlen($content) > 500 ? substr($content, 0, 500) . '...' : $content]);
+
+        // Strip markdown code fences if present
+        $content = preg_replace('/^```\w*\n?|\n?```$/u', '', $content);
+        $content = trim($content);
+
+        $decoded = json_decode($content, true);
+        if (!is_array($decoded)) {
+            Log::warning('[suggestedPrompts] Decoded is not array', ['json_error' => json_last_error_msg(), 'content_preview' => substr($content, 0, 200)]);
+            throw new Exception('Expected JSON from AI for suggested prompts');
+        }
+
+        // Accept raw JSON array ["a","b","c"] or object like {"prompts": ["a","b","c"]} (common with json_object mode)
+        $list = null;
+        if ($this->isZeroIndexedArray($decoded) && count($decoded) >= 3) {
+            $list = $decoded;
+        } else {
+            foreach ($decoded as $v) {
+                if (is_array($v) && $this->isZeroIndexedArray($v) && count($v) >= 3) {
+                    $list = $v;
+                    break;
+                }
+            }
+        }
+        if ($list === null) {
+            Log::warning('[suggestedPrompts] No array of 3+ items found in decoded', ['decoded_keys' => array_keys($decoded)]);
+            throw new Exception('Expected JSON array of at least 3 strings from AI');
+        }
+
+        $prompts = array_values(array_filter(array_slice($list, 0, 3), function ($v) {
+            return is_string($v) && $v !== '';
+        }));
+
+        if (count($prompts) < 3) {
+            Log::warning('[suggestedPrompts] Fewer than 3 string items after filter', ['list' => $list, 'prompts_count' => count($prompts)]);
+            throw new Exception('Expected at least 3 non-empty strings from AI');
+        }
+
+        return $prompts;
+    }
+
+    /**
+     * Generate a short property description from category and title (for listing form).
+     * Uses backend AI provider only; no API keys exposed to client.
+     *
+     * @param string $category e.g. "Apartment / Condo"
+     * @param string $title    e.g. "2BR Condo in BGC"
+     * @return string Plain text description, 3-4 sentences
+     */
+    public function generatePropertyDescription(string $category, string $title): string
+    {
+        $systemPrompt = 'You are a professional real estate copywriter for Rentals.ph, a Philippine rental property platform. Write compelling, concise property descriptions for rental listings. Keep it to 3-4 sentences. Be specific and professional. Do not use markdown formatting. Write in plain text only.';
+        $userPrompt = "Write a rental property listing description for:\nCategory: {$category}\nTitle: {$title}\n\nThe description should highlight the property's appeal, mention potential amenities typical for this category, and encourage prospective tenants to schedule a viewing.";
+
+        $messages = [
+            ['role' => 'system', 'content' => $systemPrompt],
+            ['role' => 'user', 'content' => $userPrompt],
+        ];
+
+        $response = $this->makeChatRequest($messages, 0.7, 300, null);
+        $content = trim($response['choices'][0]['message']['content'] ?? '');
+
+        if ($content === '') {
+            throw new Exception('AI returned an empty property description');
+        }
+
+        return $content;
     }
 
     /**
@@ -637,6 +736,21 @@ PROMPT
         }
 
         return implode("\n", $formatted);
+    }
+
+    /**
+     * Check if array is a zero-indexed list (0, 1, 2, ...).
+     * Accepts both PHP arrays [0=>,1=>,2=>] and JSON objects with string keys {"0":,"1":,"2":}.
+     */
+    protected function isZeroIndexedArray(array $arr): bool
+    {
+        $n = count($arr);
+        if ($n === 0) {
+            return true;
+        }
+        $keys = array_map('intval', array_keys($arr));
+        sort($keys);
+        return $keys === range(0, $n - 1);
     }
 
     /**

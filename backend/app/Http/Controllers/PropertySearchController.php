@@ -27,7 +27,7 @@ class PropertySearchController extends Controller
         path: "/property/search",
         summary: "AI-powered property search using natural language",
         description: "Search for properties using natural language queries. The AI will parse your query, search the database, and generate personalized recommendations.",
-        tags: ["Groq AI", "Properties"],
+        tags: ["AI", "Properties"],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\MediaType(
@@ -613,13 +613,81 @@ class PropertySearchController extends Controller
     }
 
     /**
+     * Get AI-generated suggested prompts for the chat UI (e.g. "Show me 1-bedroom apartments").
+     * No auth required. Uses backend AI provider (Gemini/Groq/OpenAI).
+     */
+    public function suggestedPrompts(): JsonResponse
+    {
+        \Illuminate\Support\Facades\Log::debug('[suggestedPrompts] Request received');
+        $fallback = [
+            'Show me 1-bedroom apartments',
+            'Find properties under ₱20k',
+            'Latest listings in Cebu City',
+        ];
+        try {
+            $prompts = $this->groqService->generateSuggestedPrompts();
+            \Illuminate\Support\Facades\Log::debug('[suggestedPrompts] AI success', ['count' => count($prompts), 'prompts' => $prompts]);
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'prompts' => $prompts,
+                    'fromAI' => true,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('[suggestedPrompts] Generation failed', [
+                'message' => $e->getMessage(),
+                'exception' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'prompts' => $fallback,
+                    'fromAI' => false,
+                ],
+            ]);
+        }
+    }
+
+    /**
+     * Generate a short property description from category and title (for create-listing form).
+     * No auth required. Uses backend AI only; API keys stay in .env.
+     */
+    public function generatePropertyDescription(Request $request): JsonResponse
+    {
+        $request->validate([
+            'category' => 'required|string|max:200',
+            'title' => 'required|string|max:500',
+        ]);
+
+        try {
+            $description = $this->groqService->generatePropertyDescription(
+                $request->input('category'),
+                $request->input('title')
+            );
+            return response()->json([
+                'success' => true,
+                'data' => $description,
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Property description generation failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Could not generate description. Please write one manually.',
+            ], 422);
+        }
+    }
+
+    /**
      * List all conversations for the current user
      */
     #[OA\Get(
         path: "/property/search/conversations",
         summary: "List all conversations",
         description: "Get a list of all conversations for the current user (or anonymous conversations if not authenticated)",
-        tags: ["Groq AI", "Properties"],
+        tags: ["AI", "Properties"],
         responses: [
             new OA\Response(
                 response: 200,
@@ -646,7 +714,7 @@ class PropertySearchController extends Controller
         path: "/property/search/conversation/{conversationId}",
         summary: "Get conversation details",
         description: "Get a specific conversation with all messages and context",
-        tags: ["Groq AI", "Properties"],
+        tags: ["AI", "Properties"],
         parameters: [
             new OA\Parameter(
                 name: "conversationId",
@@ -709,7 +777,7 @@ class PropertySearchController extends Controller
         path: "/property/search/conversation/{conversationId}/context",
         summary: "Clear conversation context",
         description: "Clear the stored context (preferences, facts) for a conversation while keeping message history",
-        tags: ["Groq AI", "Properties"],
+        tags: ["AI", "Properties"],
         parameters: [
             new OA\Parameter(
                 name: "conversationId",
@@ -763,7 +831,7 @@ class PropertySearchController extends Controller
         path: "/property/search/conversation/{conversationId}",
         summary: "Delete conversation",
         description: "Permanently delete a conversation and all its messages and context",
-        tags: ["Groq AI", "Properties"],
+        tags: ["AI", "Properties"],
         parameters: [
             new OA\Parameter(
                 name: "conversationId",

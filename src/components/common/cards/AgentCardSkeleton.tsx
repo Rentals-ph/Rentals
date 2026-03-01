@@ -29,6 +29,7 @@ export function RentManagerCardSkeleton({
           <div className="border-t border-gray-200 my-2" />
           <span className="h-3 w-full max-w-[200px] rounded bg-gray-100 animate-pulse" />
           <span className="h-3 w-40 rounded bg-gray-100 animate-pulse" />
+          <span className="h-3 w-20 rounded bg-gray-100 animate-pulse" />
           <span className="h-10 w-32 rounded-lg bg-gray-200 animate-pulse mt-2" />
         </div>
       </div>
@@ -54,6 +55,7 @@ export function RentManagerCardSkeleton({
         <div className="flex flex-col gap-2 mb-3 sm:mb-4">
           <span className="h-3 w-full max-w-[180px] rounded bg-gray-100 animate-pulse" />
           <span className="h-3 w-32 rounded bg-gray-100 animate-pulse" />
+          <span className="h-3 w-20 rounded bg-gray-100 animate-pulse" />
         </div>
         <span className="block h-10 w-full rounded-lg bg-gray-200 animate-pulse" />
       </div>

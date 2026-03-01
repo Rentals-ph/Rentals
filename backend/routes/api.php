@@ -20,6 +20,8 @@ Route::get('/properties/{id}', [PropertyController::class, 'show']);
 Route::post('/property/search', [PropertySearchController::class, 'search']);
 
 // Conversation management endpoints
+Route::get('/property/search/suggested-prompts', [PropertySearchController::class, 'suggestedPrompts']);
+Route::post('/property/search/generate-property-description', [PropertySearchController::class, 'generatePropertyDescription']);
 Route::get('/property/search/conversations', [PropertySearchController::class, 'listConversations']);
 Route::get('/property/search/conversation/{conversationId}', [PropertySearchController::class, 'getConversation']);
 Route::delete('/property/search/conversation/{conversationId}/context', [PropertySearchController::class, 'clearConversationContext']);

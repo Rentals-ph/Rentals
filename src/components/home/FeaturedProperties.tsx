@@ -223,7 +223,15 @@ const FeaturedProperties = () => {
             Handpicked properties from our verified agents
           </p>
         </div>
+        <Link
+          href="/properties"
+          className="order-first sm:order-none sm:absolute sm:right-4 md:right-10 lg:right-0 mb-4 text-rental-blue-500 bg-white font-outfit text-sm sm:text-base font-medium no-underline flex items-center justify-center gap-2 hover:bg-blue-200 transition-colors border-2 border-rental-blue-500 rounded-2xl px-4 py-2 sm:px-5 sm:py-2"
+          style={{ border: '2px solid #205ED7' }}
+        >
+          View More Properties
+        </Link>
       </div>
+      
       </div>
 
       {/* Location filter row + View More - stack on mobile */}
@@ -244,13 +252,7 @@ const FeaturedProperties = () => {
             </button>
           ))}
         </div>
-        <Link
-          href="/properties"
-          className="order-first sm:order-none sm:absolute sm:right-4 md:right-10 lg:right-[150px] text-rental-blue-500 bg-white font-outfit text-sm sm:text-base font-medium no-underline flex items-center justify-center gap-2 hover:bg-blue-200 transition-colors border-2 border-rental-blue-500 rounded-2xl px-4 py-2 sm:px-5 sm:py-2"
-          style={{ border: '2px solid #205ED7' }}
-        >
-          View More Properties
-        </Link>
+        
       </div>
 
       <div className="relative w-full mt-4 sm:mt-6 overflow-hidden -mx-4 sm:mx-0 px-2 sm:px-0">

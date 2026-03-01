@@ -224,7 +224,7 @@ function RegisterModal({ isOpen, onClose, onLoginClick }: RegisterModalProps) {
                 />
               </div>
               <div className="w-full bg-gradient-to-t from-black/75 via-black/20 to-transparent py-4 text-left md:py-5">
-                <h3 className="font-outfit text-base font-bold text-white md:text-lg">Rental Assist</h3>
+                <h3 className="font-outfit text-base font-bold text-white md:text-lg">Rentals Assist</h3>
                 <p className="mt-1 font-outfit text-xs leading-relaxed text-white md:text-sm">
                   Manage listings with AI-driven precision connecting property owners to the right tenants through smarter technology.
                 </p>

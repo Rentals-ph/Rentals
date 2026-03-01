@@ -34,7 +34,7 @@ use OpenApi\Attributes as OA;
     tags: [
         new OA\Tag(name: 'Authentication', description: 'Authentication endpoints'),
         new OA\Tag(name: 'Properties', description: 'Property management endpoints'),
-        new OA\Tag(name: 'Groq AI', description: 'Groq AI chat and prompt endpoints'),
+        new OA\Tag(name: 'AI', description: 'AI chat and prompt endpoints'),
         new OA\Tag(name: 'Agents', description: 'Agent management endpoints'),
         new OA\Tag(name: 'Admin', description: 'Admin management endpoints'),
         new OA\Tag(name: 'Broker', description: 'Broker management endpoints'),

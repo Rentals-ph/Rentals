@@ -203,6 +203,16 @@ export const api = {
   clearConversationContext: async (conversationId: string): Promise<ApiResponse<{ success: boolean; message: string }>> => {
     return api.delete<{ success: boolean; message: string }>(`/property/search/conversation/${conversationId}/context`)
   },
+
+  /** AI-generated suggested prompts for the chat UI. data.prompts = strings, data.fromAI = true when from AI. */
+  getSuggestedPrompts: async (): Promise<ApiResponse<{ prompts: string[]; fromAI: boolean }>> => {
+    return api.get<{ prompts: string[]; fromAI: boolean }>('/property/search/suggested-prompts')
+  },
+
+  /** Generate property description from category + title (backend only; no API keys in client). */
+  generatePropertyDescription: async (category: string, title: string): Promise<ApiResponse<string>> => {
+    return api.post<string>('/property/search/generate-property-description', { category, title })
+  },
 }
 
 export default api
