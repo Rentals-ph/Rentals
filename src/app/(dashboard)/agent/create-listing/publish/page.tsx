@@ -343,7 +343,7 @@ export default function AgentCreateListingPublish() {
           <div className="mt-8 flex justify-between gap-3 md:flex-col md:items-stretch"> {/* acpu-footer-actions */}
             <button
               className="acld-prev-btn"
-              onClick={() => router.push('/agent/create-listing/owner-info')}
+              onClick={() => router.push('/agent/create-listing/manual#section-review')}
               type="button"
             >
               <FiArrowLeft />

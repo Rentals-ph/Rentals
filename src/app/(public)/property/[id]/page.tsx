@@ -629,7 +629,7 @@ export default function PropertyDetailsPage() {
             {/* 4. Property Overview */}
             <div className="mb-6 sm:mb-8">
               <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">Property Overview</h2>
-              <p className="text-gray-600 text-base sm:text-xl leading-relaxed m-0">
+              <p className="text-gray-600 text-base sm:text-xl leading-relaxed m-0 whitespace-pre-wrap">
                 {showFullDescription ? property.description : property.description.substring(0, 400)}
                 {!showFullDescription && property.description.length > 400 && (
                   <>

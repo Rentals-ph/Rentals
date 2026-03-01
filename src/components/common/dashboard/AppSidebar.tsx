@@ -15,6 +15,7 @@ import {
   FiBarChart2,
   FiFileText,
   FiBookOpen,
+  FiPlus,
   FiChevronRight, 
   FiChevronLeft,
   FiLayout,
@@ -294,11 +295,13 @@ function AppSidebar() {
   const renderAgentSidebar = () => (
     <>
       <NavLink href="/agent" icon={FiHome} label="Dashboard" active={isActive('/agent') && !pathname?.includes('/agent/')} />
+      <NavLink href="/agent/create-listing" icon={FiPlus} label="Create Listing" active={isActive('/agent/create-listing')} />
+      <NavLink href="/agent/listings" icon={FiList} label="My Listings" active={isActive('/agent/listings')} />
       <NavLink href="/agent/inbox" icon={FiMail} label="Inbox" active={isActive('/agent/inbox')} badge />
       <NavLink href="/agent/downloadables" icon={FiDownload} label="Downloadables" active={isActive('/agent/downloadables')} />
       <NavLink href="/agent/digital-card" icon={FiCreditCard} label="Digital Business Card" active={isActive('/agent/digital-card')} />
       <NavLink href="/agent/page-builder" icon={FiSettings} label="Page Builder" active={isActive('/agent/page-builder')} />
-      <NavLink href="/agent/listings" icon={FiList} label="My Listings" active={isActive('/agent/listings')} />
+      
     </>
   )
 
@@ -306,13 +309,15 @@ function AppSidebar() {
   const renderBrokerSidebar = () => (
     <>
       <NavLink href="/broker" icon={FiGrid} label="Dashboard" active={isActive('/broker') && !pathname?.includes('/broker/')} />
+      <NavLink href="/broker/create-listing" icon={FiPlus} label="Create Listing" active={isActive('/broker/create-listing')} />
+      <NavLink href="/broker/listings" icon={FiHome} label="Listings" active={isActive('/broker/listings')} />
+      <NavLink href="/broker/inbox" icon={FiMail} label="Inbox" active={isActive('/broker/inbox')} badge />
       <NavLink href="/broker/company-profile" icon={FiLayout} label="Company Profile" active={isActive('/broker/company-profile')} />
       <NavLink href="/broker/team" icon={FiUsers} label="Team Management" active={isActive('/broker/team')} />
-      <NavLink href="/broker/listings" icon={FiHome} label="Listings" active={isActive('/broker/listings')} />
-      <NavLink href="/broker/approvals" icon={FiCheckSquare} label="Agent Approvals" active={isActive('/broker/approvals')} />
+      <NavLink href="/broker/agents/create" icon={FiUser} label="Create Agent" active={isActive('/broker/agents/create')} />
       <NavLink href="/broker/page-builder" icon={FiFileText} label="Page Builder" active={isActive('/broker/page-builder')} />
       <NavLink href="/broker/reports" icon={FiBarChart2} label="Reports" active={isActive('/broker/reports')} />
-      <NavLink href="/broker/inbox" icon={FiMail} label="Inbox" active={isActive('/broker/inbox')} badge />
+      
       <NavLink href="/broker/downloadables" icon={FiDownload} label="Downloadables" active={isActive('/broker/downloadables')} />
       <NavLink href="/broker/digital-card" icon={FiCreditCard} label="Digital Business Card" active={isActive('/broker/digital-card')} />
     </>

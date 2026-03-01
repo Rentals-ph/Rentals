@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import AppSidebar from '@/components/common/AppSidebar'
 import BrokerHeader from '@/components/broker/BrokerHeader'
 import { agentsApi, propertiesApi } from '@/api'
@@ -86,7 +85,6 @@ export default function BrokerDashboard() {
   const [totalTeams, setTotalTeams] = useState(0)
   const [activeListings, setActiveListings] = useState(0)
   const [totalListings, setTotalListings] = useState(0)
-  const [recentProperties, setRecentProperties] = useState<Property[]>([])
   const [topPerformers, setTopPerformers] = useState<Array<{ name: string; deals: number; amount: string; color: string }>>(topPerformersMock)
 
   useEffect(() => {
@@ -117,16 +115,6 @@ export default function BrokerDashboard() {
         setTotalListings(total)
         const active = Array.isArray(properties) ? properties.filter((p: Property) => p.published_at).length : 0
         setActiveListings(active)
-        const recent = Array.isArray(properties)
-          ? [...properties]
-              .sort((a: Property, b: Property) => {
-                const dateA = a.created_at ? new Date(a.created_at).getTime() : 0
-                const dateB = b.created_at ? new Date(b.created_at).getTime() : 0
-                return dateB - dateA
-              })
-              .slice(0, 4)
-          : []
-        setRecentProperties(recent)
         if (Array.isArray(properties) && agentsList.length > 0) {
           const agentPropertyCounts: Record<number, { agent: Agent; count: number }> = {}
           properties.forEach((p: Property) => {
@@ -295,64 +283,6 @@ export default function BrokerDashboard() {
             
           </div>
 
-          {/* Recent Listings - full width */}
-          <div className="bg-white rounded-xl border border-gray-200/80 p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-base font-bold text-gray-900 m-0">Recent Listings</h3>
-              <Link href="/broker/listings" className="text-sm font-medium text-blue-600 no-underline hover:text-blue-700">
-                View All
-              </Link>
-            </div>
-            {loading ? (
-              <div className="grid grid-cols-4 gap-5 xl:grid-cols-4 lg:grid-cols-2 md:grid-cols-1">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="rounded-xl overflow-hidden border border-gray-200">
-                    <div className="h-44 bg-gray-200 animate-pulse" />
-                    <div className="p-4 space-y-2">
-                      <span className="block h-5 w-24 rounded bg-gray-200 animate-pulse" />
-                      <span className="block h-4 w-full rounded bg-gray-100 animate-pulse" />
-                      <span className="block h-4 w-2/3 rounded bg-gray-100 animate-pulse" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : recentProperties.length > 0 ? (
-              <div className="grid grid-cols-4 gap-5 xl:grid-cols-4 lg:grid-cols-2 md:grid-cols-1">
-                {recentProperties.map((property) => {
-                  const agent = topPerformers[0]
-                  const agentColor = agent?.color || '#3B82F6'
-                  const agentName = property.agent_id ? `Agent ${property.agent_id}` : 'Unknown'
-                  return (
-                    <div className="rounded-xl overflow-hidden border border-gray-200 hover:shadow-md transition-all" key={property.id}>
-                      <div className="relative h-44 overflow-hidden">
-                        <img
-                          src={property.image_url || property.image || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=300&fit=crop'}
-                          alt={property.title || 'Listing'}
-                          className="w-full h-full object-cover"
-                        />
-                        <span className="absolute top-3 left-3 py-1 px-2.5 rounded-md text-xs font-semibold bg-emerald-600 text-white">
-                          For Rent
-                        </span>
-                      </div>
-                      <div className="p-4 flex flex-col gap-2">
-                        <div className="text-lg font-bold text-gray-900">₱{property.price != null ? property.price.toLocaleString('en-US') : 'N/A'}/{property.price_type || 'mo'}</div>
-                        <div className="text-xs text-gray-500">{property.bedrooms ?? 0} bd | {property.bathrooms ?? 0} ba</div>
-                        <div className="text-sm text-gray-700 line-clamp-2">{property.location || property.street_address || 'Address not available'}</div>
-                        <div className="flex items-center gap-2 pt-2 mt-auto border-t border-gray-100">
-                          <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0" style={{ background: agentColor }}>
-                            {getInitials(agentName)}
-                          </div>
-                          <span className="text-xs font-medium text-gray-700 truncate">{agentName}</span>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500">No recent listings</div>
-            )}
-          </div>
         </div>
       </main>
     </div>

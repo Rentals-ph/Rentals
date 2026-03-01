@@ -14,7 +14,7 @@ export interface CreateListingPageProps {
   header?: ReactNode
 }
 
-const AGENT_MANUAL_HREF = '/agent/create-listing/basic-info'
+const AGENT_MANUAL_HREF = '/agent/create-listing/manual'
 const AGENT_AI_HREF = '/agent/listing-assistant'
 const BROKER_MANUAL_HREF = '/broker/create-listing/basic-info'
 const BROKER_AI_HREF = '/broker/listing-assistant'

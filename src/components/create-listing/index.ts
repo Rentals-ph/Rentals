@@ -22,3 +22,5 @@ export type { PricingStepContentProps } from './PricingStepContent'
 
 export { OwnerReviewStepContent } from './OwnerReviewStepContent'
 export type { OwnerReviewStepContentProps } from './OwnerReviewStepContent'
+
+export { ManualListingForm } from './ManualListingForm'

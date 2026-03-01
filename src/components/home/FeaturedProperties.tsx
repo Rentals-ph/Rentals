@@ -13,7 +13,11 @@ import { resolveAgentAvatar } from '@/utils/imageResolver'
 const FeaturedProperties = () => {
   const [selectedLocation, setSelectedLocation] = useState('All Locations')
   const propertyCarouselRef = useRef<HTMLDivElement>(null)
+  const isPausedRef = useRef(false)
   const [isPaused, setIsPaused] = useState(false)
+  useEffect(() => {
+    isPausedRef.current = isPaused
+  }, [isPaused])
   const [featuredProperties, setFeaturedProperties] = useState<Property[]>([])
   const [browseProperties, setBrowseProperties] = useState<Property[]>([])
   const [citiesFromAllProperties, setCitiesFromAllProperties] = useState<string[]>([])
@@ -154,10 +158,15 @@ const FeaturedProperties = () => {
   const carouselProperties =
     selectedLocation === 'All Locations' ? featuredProperties : browseProperties
 
-  // Auto-scroll property-carousel with seamless infinite loop (4 sets of 6 cards; reset after 6 so loop is seamless)
+  // Infinite loop: 1 property = show once (no duplicate). 2–5 = 2 sets. 6+ = 4 sets. Auto-scroll when 2+.
+  const setsForLoop = carouselProperties.length >= 6 ? 4 : carouselProperties.length >= 2 ? 2 : 1
+  const cardsPerSet = Math.min(6, carouselProperties.length)
+  const shouldAutoScroll = carouselProperties.length >= 2
+
+  // Infinite slide to the left: auto-scroll when not hovered; reset scroll to 0 after one set width for seamless loop
   useEffect(() => {
     const carousel = propertyCarouselRef.current
-    if (!carousel || loading || carouselProperties.length === 0) return
+    if (!carousel || loading || carouselProperties.length === 0 || !shouldAutoScroll) return
 
     const scrollSpeed = 0.8 // pixels per frame (smooth slow scroll)
     let scrollAccumulator = 0
@@ -166,16 +175,15 @@ const FeaturedProperties = () => {
 
     const scroll = () => {
       if (!isRunning || !carousel) return
-
-      if (!isPaused) {
+      // Only scroll when carousel is not hovered (read current value from ref so we don't restart effect on hover)
+      if (!isPausedRef.current) {
         const firstSlot = carousel.querySelector('.featured-property-card-slot') as HTMLElement
         if (firstSlot) {
           const cardWidth = firstSlot.offsetWidth
           const computed = window.getComputedStyle(carousel)
           const gapPx = parseFloat(computed.gap) || parseFloat(computed.columnGap) || 20
           const itemWidth = cardWidth + gapPx
-          const itemsPerSet = 6 // we render 4 sets of 6 cards; reset after one set for seamless loop
-          const resetPoint = itemWidth * itemsPerSet
+          const resetPoint = itemWidth * cardsPerSet
 
           scrollAccumulator += scrollSpeed
           const step = Math.floor(scrollAccumulator)
@@ -183,7 +191,7 @@ const FeaturedProperties = () => {
           if (step > 0) {
             carousel.scrollLeft += step
           }
-
+          // Seamless infinite loop: jump back to start once we've scrolled one full set
           if (carousel.scrollLeft >= resetPoint) {
             carousel.scrollLeft = 0
           }
@@ -198,14 +206,14 @@ const FeaturedProperties = () => {
         carousel.offsetHeight
         animationFrameId = requestAnimationFrame(scroll)
       }
-    }, 500)
+    }, 300)
 
     return () => {
       isRunning = false
       clearTimeout(timeoutId)
       if (animationFrameId) cancelAnimationFrame(animationFrameId)
     }
-  }, [isPaused, loading, carouselProperties.length])
+  }, [loading, carouselProperties.length, shouldAutoScroll, cardsPerSet])
 
   return (
     <section
@@ -273,8 +281,8 @@ const FeaturedProperties = () => {
               </div>
             ))
           ) : carouselProperties.length > 0 ? (
-            // Render items multiple times for seamless infinite loop; each card in a fixed-width slot so they display properly
-            Array.from({ length: 4 }).map((_, setIndex) => (
+            // When 6+ properties: render 4 sets for seamless infinite loop; otherwise show each property once (no duplication)
+            Array.from({ length: setsForLoop }).map((_, setIndex) => (
               carouselProperties.slice(0, 6).map((property) => {
                 const propertySize = property.area 
                   ? `${property.area} sqft` 

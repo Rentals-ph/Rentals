@@ -9,7 +9,8 @@ interface RegisterModalProps {
 }
 
 function RegisterModal({ isOpen, onClose, onLoginClick }: RegisterModalProps) {
-  const [role, setRole] = useState<'user' | 'agent' | 'broker'>('agent')
+  // Only brokers can self-register; agents are created by brokers
+  const role = 'broker' as const
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -162,14 +163,11 @@ function RegisterModal({ isOpen, onClose, onLoginClick }: RegisterModalProps) {
         return
       }
 
-      // Map 'user' role to 'agent' for backend compatibility
-      const backendRole = role === 'user' ? 'agent' : role
-
       const response = await authApi.register({
         email: email.trim(),
         password,
         name: name.trim(),
-        role: backendRole,
+        role: 'broker',
       })
 
       if (response.success) {
@@ -265,30 +263,7 @@ function RegisterModal({ isOpen, onClose, onLoginClick }: RegisterModalProps) {
               Register
             </h2>
 
-            {/* Role Selection Tabs */}
-            <div className="my-2 flex rounded-md border border-gray-200 bg-gray-50 p-0.5">
-              <button
-                type="button"
-                onClick={() => setRole('user')}
-                className={`flex-1 rounded px-2 py-2 sm:py-1.5 text-xs font-medium transition-colors touch-manipulation ${role === 'user' ? 'bg-rental-orange-500 text-white shadow-sm' : 'bg-transparent text-gray-700'}`}
-              >
-                User
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole('agent')}
-                className={`flex-1 rounded px-2 py-2 sm:py-1.5 text-xs font-medium transition-colors touch-manipulation ${role === 'agent' ? 'bg-rental-orange-500 text-white shadow-sm' : 'bg-transparent text-gray-700'}`}
-              >
-                Agent
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole('broker')}
-                className={`flex-1 rounded px-2 py-2 sm:py-1.5 text-xs font-medium transition-colors touch-manipulation ${role === 'broker' ? 'bg-rental-orange-500 text-white shadow-sm' : 'bg-transparent text-gray-700'}`}
-              >
-                Broker
-              </button>
-            </div>
+            <p className="my-2 text-center text-xs text-gray-600">Register as a broker to manage your team and listings.</p>
 
             {/* Success Message */}
             {submitSuccess && (

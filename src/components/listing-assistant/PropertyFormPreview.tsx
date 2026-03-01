@@ -3,7 +3,7 @@
  * Live-updating form showing extracted property data
  */
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FieldStatusBadge } from './FieldStatusBadge'
 import { LocationPicker } from './LocationPicker'
 import type {
@@ -138,6 +138,14 @@ export function PropertyFormPreview({
   const [showTemplateDropdown, setShowTemplateDropdown] = useState(false)
   const [agentContext, setAgentContext] = useState('')
 
+  // Sync selected template when data has an existing description (e.g. from assistant)
+  useEffect(() => {
+    const template = data.description_template
+    if (template && template in DESCRIPTION_TEMPLATES) {
+      setSelectedTemplate(template as DescriptionTemplate)
+    }
+  }, [data.description_template])
+
   // Calculate completion stats
   const filledRequired = REQUIRED_FIELDS.filter(f => {
     const status = getFieldStatus(f, data, skippedFields, warnings)
@@ -225,9 +233,9 @@ export function PropertyFormPreview({
           </div>
         </div>
 
-        {/* Description Section */}
+        {/* Description Section - description first, then template switcher below */}
         {data.description && (
-          <div className="mt-6">
+          <div className="mt-6 space-y-3">
             <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
               Property Description
             </h4>
@@ -235,6 +243,66 @@ export function PropertyFormPreview({
               <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
                 {data.description}
               </p>
+            </div>
+            {/* Template switcher below description so user doesn't have to scroll up */}
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-gray-500">Switch template</p>
+              <div className="relative">
+                <button
+                  onClick={() => setShowTemplateDropdown(!showTemplateDropdown)}
+                  disabled={!canGenerateDescription || isGeneratingDescription}
+                  className={`
+                    w-full py-2 px-3 rounded-lg text-sm
+                    flex items-center justify-between
+                    border transition-all
+                    ${canGenerateDescription && !isGeneratingDescription
+                      ? 'border-gray-300 hover:border-purple-400 bg-white cursor-pointer'
+                      : 'border-gray-200 bg-gray-50 cursor-not-allowed'
+                    }
+                  `}
+                >
+                  <span className="font-medium text-gray-700">
+                    {DESCRIPTION_TEMPLATES[selectedTemplate].label}
+                  </span>
+                  <svg
+                    className={`w-4 h-4 text-gray-400 transition-transform ${showTemplateDropdown ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {showTemplateDropdown && (
+                  <div className="absolute z-50 top-full mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 py-1 max-h-80 overflow-y-auto">
+                    {(Object.keys(DESCRIPTION_TEMPLATES) as DescriptionTemplate[]).map((template) => (
+                      <button
+                        key={template}
+                        onClick={() => {
+                          setSelectedTemplate(template)
+                          setShowTemplateDropdown(false)
+                          onGenerateDescription?.(template, agentContext)
+                        }}
+                        className={`
+                          w-full text-left px-3 py-2 hover:bg-purple-50 transition-colors
+                          ${selectedTemplate === template ? 'bg-purple-50' : ''}
+                        `}
+                      >
+                        <span className="font-medium text-sm text-gray-800">
+                          {DESCRIPTION_TEMPLATES[template].label}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => onGenerateDescription?.(selectedTemplate, agentContext)}
+                disabled={!canGenerateDescription || isGeneratingDescription}
+                className="w-full py-2 px-3 rounded-lg text-sm font-medium border border-purple-300 text-purple-700 bg-purple-50 hover:bg-purple-100 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {isGeneratingDescription ? 'Regenerating...' : 'Regenerate with selected template'}
+              </button>
             </div>
           </div>
         )}

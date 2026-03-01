@@ -615,13 +615,13 @@ class ListingAssistantController extends Controller
         if (!$request->hasFile('images')) {
             return response()->json([
                 'success' => false,
-                'error' => 'No images received. File may exceed PHP upload limits (max 2MB per file).',
+                'error' => 'No images received. File may exceed PHP upload limits (increase post_max_size and upload_max_filesize in php.ini).',
             ], 422);
         }
 
         $request->validate([
-            'images' => 'required|array|min:1|max:10',
-            'images.*' => 'required|file|mimetypes:image/jpeg,image/png,image/gif,image/webp|max:2048', // 2MB to match PHP upload_max_filesize
+            'images' => 'required|array|min:1|max:30',
+            'images.*' => 'required|file|mimetypes:image/jpeg,image/png,image/gif,image/webp|max:10240', // 10MB per image
         ]);
 
         $uploadedImages = [];

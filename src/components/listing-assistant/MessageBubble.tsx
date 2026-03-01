@@ -32,43 +32,32 @@ export function MessageBubble({ message, isLatest = false, buttons }: MessageBub
     : ''
 
   return (
-    <div 
-      className={`flex flex-col w-full ${isUser ? 'items-end' : 'items-start'} mb-4`}
+    <div
+      className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} mb-1`}
     >
       {isUser ? (
-        <div className="max-w-[75%] !border-2 !border-[#002978] p-3 px-4 rounded-xl font-outfit text-sm leading-relaxed break-words text-left bg-[#205ED7] text-white rounded-br-sm shadow-sm"
-          style={{
-            borderWidth: '2px',
-            borderStyle: 'solid',
-            borderColor: '#002978',
-          }}
-        >
+        <div className="max-w-[90%] sm:max-w-[85%] p-3 px-4 bg-gray-100 rounded-2xl rounded-br-sm font-outfit text-sm leading-relaxed break-words text-left text-gray-900">
           <div className="whitespace-pre-wrap">{message.content}</div>
           {formattedTime && (
-            <div className="text-xs mt-1.5 text-blue-200">
+            <div className="text-xs mt-1.5 text-gray-500">
               {formattedTime}
             </div>
           )}
         </div>
       ) : (
-        <div className="flex items-start gap-2 max-w-[75%]">
-          <img 
-            src={getAsset('LOGO_AI')} 
-            alt="AI Logo" 
-            className="w-12 h-12 flex-shrink-0"
-          />
-          <div className="relative">
-            {/* Speech bubble pointer pointing to the logo - top left */}
-            <div 
-              className="relative overflow-hidden p-3 px-4 bg-white !border-2 !border-[#002978] rounded-xl rounded-tl-sm shadow-lg font-outfit text-sm leading-relaxed break-words text-left"
-              style={{
-                borderWidth: '2px',
-                borderStyle: 'solid',
-                borderColor: '#002978',
-                boxShadow: '0 4px 12px rgba(0, 41, 120, 0.15), 0 2px 4px rgba(0, 41, 120, 0.1)',
-              }}
+        <div className="flex flex-col items-start max-w-[90%] sm:max-w-[85%]">
+          {/* AI response: avatar + bubble */}
+          <div className="flex items-start gap-2">
+            <img
+              src={getAsset('LOGO_AI')}
+              alt=""
+              className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 rounded-full object-cover"
+            />
+            <div
+              className="p-3 px-4 bg-white rounded-2xl rounded-tl-sm font-outfit text-sm leading-relaxed break-words text-left border-[3px] border-[#0A369D]"
+              style={{ border: '3px solid #0A369D' }}
             >
-              <div className="relative z-10 whitespace-pre-wrap text-gray-800">
+              <div className="whitespace-pre-wrap text-gray-800">
                 {message.content}
               </div>
               {formattedTime && (
@@ -78,39 +67,36 @@ export function MessageBubble({ message, isLatest = false, buttons }: MessageBub
               )}
             </div>
           </div>
-        </div>
-      )}
-      
-      {/* Buttons below AI messages */}
-      {!isUser && buttons && buttons.length > 0 && (
-        <div className="mt-2 ml-14 flex flex-wrap gap-2">
-          {buttons.map((button, idx) => {
-            let buttonClass = 'px-4 py-2 rounded-lg transition-colors text-sm font-medium shadow-sm'
-            
-            switch (button.variant) {
-              case 'selected':
-                buttonClass += ' bg-blue-700 text-white hover:bg-blue-800'
-                break
-              case 'primary':
-                buttonClass += ' bg-blue-600 text-white hover:bg-blue-700'
-                break
-              case 'success':
-                buttonClass += ' bg-green-600 text-white hover:bg-green-700'
-                break
-              default:
-                buttonClass += ' bg-blue-600 text-white hover:bg-blue-700'
-            }
-            
-            return (
-              <button
-                key={idx}
-                onClick={button.onClick}
-                className={buttonClass}
-              >
-                {button.label}
-              </button>
-            )
-          })}
+          {/* Options/buttons below the AI response */}
+          {buttons && buttons.length > 0 && (
+            <div className="mt-2 ml-12 sm:ml-14 flex flex-wrap gap-2">
+              {buttons.map((button, idx) => {
+                let buttonClass = 'font-outfit text-sm font-medium py-2 px-4 rounded-full transition-colors touch-manipulation'
+                switch (button.variant) {
+                  case 'selected':
+                    buttonClass += ' bg-rental-blue-700 text-white hover:bg-rental-blue-800'
+                    break
+                  case 'primary':
+                    buttonClass += ' bg-rental-blue-600 text-white hover:bg-rental-blue-700'
+                    break
+                  case 'success':
+                    buttonClass += ' bg-green-600 text-white hover:bg-green-700'
+                    break
+                  default:
+                    buttonClass += ' bg-rental-blue-600 text-white hover:bg-rental-blue-700'
+                }
+                return (
+                  <button
+                    key={idx}
+                    onClick={button.onClick}
+                    className={buttonClass}
+                  >
+                    {button.label}
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -123,27 +109,17 @@ export function MessageBubble({ message, isLatest = false, buttons }: MessageBub
  */
 export function TypingIndicator() {
   return (
-    <div className="flex items-start gap-2 mb-4">
-      <img 
-        src={getAsset('LOGO_AI')} 
-        alt="AI Logo" 
-        className="w-12 h-12 flex-shrink-0"
+    <div className="flex items-start gap-2 max-w-[90%] sm:max-w-[85%]">
+      <img
+        src={getAsset('LOGO_AI')}
+        alt=""
+        className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 rounded-full object-cover"
       />
-      <div className="relative">
-        <div 
-          className="relative overflow-hidden p-3 px-4 bg-white !border-2 !border-[#002978] rounded-xl rounded-tl-sm shadow-lg font-outfit"
-          style={{
-            borderWidth: '2px',
-            borderStyle: 'solid',
-            borderColor: '#002978',
-            boxShadow: '0 4px 12px rgba(0, 41, 120, 0.15), 0 2px 4px rgba(0, 41, 120, 0.1)',
-          }}
-        >
-          <div className="flex items-center gap-1">
-            <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-          </div>
+      <div className="p-3 px-4 bg-white border border-gray-200 rounded-2xl rounded-tl-sm font-outfit">
+        <div className="flex items-center gap-1">
+          <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+          <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+          <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
         </div>
       </div>
     </div>

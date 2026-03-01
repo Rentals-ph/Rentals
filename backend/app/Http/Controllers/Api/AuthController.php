@@ -77,7 +77,7 @@ class AuthController extends Controller
                 'email' => 'required|string|email|max:255|unique:users,email',
                 'password' => 'required|string|min:8',
                 'name' => 'nullable|string|max:255',
-                'role' => 'nullable|string|in:agent,broker',
+                'role' => 'nullable|string|in:broker', // Agents are created by brokers; no self-registration
             ]);
 
             if ($validator->fails()) {
@@ -135,12 +135,10 @@ class AuthController extends Controller
                 $firstName = $emailParts[0];
             }
 
-            // Get role from request or default to 'agent'
-            $role = $request->role ?? 'agent';
-            
-            // Validate role is one of the allowed values
-            if (!in_array($role, ['agent', 'broker'])) {
-                $role = 'agent';
+            // Only brokers can self-register; agents are created by brokers
+            $role = $request->role ?? 'broker';
+            if ($role !== 'broker') {
+                $role = 'broker';
             }
 
             // Create the user with provided fields (use normalized email)

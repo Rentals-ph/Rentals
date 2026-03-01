@@ -22,6 +22,8 @@ class User extends Authenticatable
         'email',
         'password',
         'phone',
+        'company_id',
+        'created_by_broker_id',
         'whatsapp',
         'facebook',
         'date_of_birth',
@@ -102,9 +104,9 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if admin can approve agents.
+     * Check if user can manage agents (brokers create agents; no approval flow).
      */
-    public function canApproveAgents(): bool
+    public function canManageAgents(): bool
     {
         return in_array($this->role, ['super_admin', 'admin', 'broker']);
     }
@@ -118,27 +120,27 @@ class User extends Authenticatable
     }
 
     /**
-     * Get all approvals/rejections for this user (if agent).
+     * Get the company this user is associated with (broker or agent).
      */
-    public function approvals()
+    public function company()
     {
-        return $this->hasMany(AgentApproval::class, 'user_id');
+        return $this->belongsTo(Company::class);
     }
 
     /**
-     * Get the latest approval/rejection for this user (if agent).
+     * Get the broker who created this agent (if created by broker).
      */
-    public function latestApproval()
+    public function createdByBroker()
     {
-        return $this->hasOne(AgentApproval::class, 'user_id')->latestOfMany();
+        return $this->belongsTo(User::class, 'created_by_broker_id');
     }
 
     /**
-     * Get all agent approvals made by this user (if admin).
+     * Get agents created by this broker.
      */
-    public function agentApprovals()
+    public function createdAgents()
     {
-        return $this->hasMany(AgentApproval::class, 'approved_by_user_id');
+        return $this->hasMany(User::class, 'created_by_broker_id')->where('role', 'agent');
     }
 
     /**
@@ -211,15 +213,19 @@ class User extends Authenticatable
     }
 
     /**
-     * Get all agents managed by this broker (through teams).
+     * Get all agents managed by this broker (through teams or created by broker).
      */
     public function managedAgents()
     {
-        return User::whereHas('teamMemberships', function($query) {
-            $query->whereHas('team', function($q) {
-                $q->where('broker_id', $this->id);
+        return User::where('role', 'agent')
+            ->where(function ($query) {
+                $query->where('created_by_broker_id', $this->id)
+                    ->orWhereHas('teamMemberships', function ($q) {
+                        $q->whereHas('team', function ($t) {
+                            $t->where('broker_id', $this->id);
+                        });
+                    });
             });
-        })->where('role', 'agent');
     }
 
     /**

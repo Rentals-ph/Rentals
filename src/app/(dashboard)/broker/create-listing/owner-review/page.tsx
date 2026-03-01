@@ -11,7 +11,7 @@ const STEP_LABELS = [
   'Basic Information',
   'Visuals & Features',
   'Pricing',
-  'Owner Info & Review',
+  'Review & Publish',
 ]
 
 const EDIT_STEP_MAP: Record<string, string> = {
@@ -42,13 +42,13 @@ export default function BrokerCreateListingOwnerReview() {
       header={
         <BrokerHeader
           title="Create Listing"
-          subtitle="Add owner information and review your listing."
+          subtitle="Review your listing and publish."
           showAddListing
         />
       }
       stepLabels={STEP_LABELS}
       currentStepIndex={3}
-      breadcrumbStepName="Owner Info & Review"
+      breadcrumbStepName="Review & Publish"
       createListingPath="/broker/create-listing"
     >
       <OwnerReviewStepContent

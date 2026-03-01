@@ -71,35 +71,5 @@ class Agent extends Authenticatable
         return "{$this->first_name} {$this->last_name}";
     }
 
-    /**
-     * Get all approvals/rejections for this agent.
-     */
-    public function approvals()
-    {
-        return $this->hasMany(AgentApproval::class);
-    }
-
-    /**
-     * Get the latest approval/rejection for this agent.
-     */
-    public function latestApproval()
-    {
-        return $this->hasOne(AgentApproval::class)->latestOfMany();
-    }
-
-    /**
-     * Get the admin who approved/rejected this agent (if any).
-     */
-    public function approvedBy()
-    {
-        return $this->hasOneThrough(
-            Admin::class,
-            AgentApproval::class,
-            'agent_id', // Foreign key on agent_approvals table
-            'id', // Foreign key on admins table
-            'id', // Local key on agents table
-            'admin_id' // Local key on agent_approvals table
-        )->where('agent_approvals.action', 'approved');
-    }
 }
 

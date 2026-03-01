@@ -36,17 +36,6 @@ export interface CreateListingData {
   // Attributes
   amenities: string[]
   furnishing?: string
-  
-  // Owner Info
-  ownerFirstname: string
-  ownerLastname: string
-  ownerPhone: string
-  ownerEmail: string
-  ownerCountry: string
-  ownerState: string
-  ownerCity: string
-  ownerStreetAddress: string
-  rapaFile: File | null
 }
 
 interface CreateListingContextType {
@@ -78,15 +67,6 @@ const defaultData: CreateListingData = {
   priceType: 'Monthly',
   amenities: [],
   furnishing: undefined,
-  ownerFirstname: '',
-  ownerLastname: '',
-  ownerPhone: '',
-  ownerEmail: '',
-  ownerCountry: 'Philippines',
-  ownerState: '',
-  ownerCity: '',
-  ownerStreetAddress: '',
-  rapaFile: null,
 }
 
 const CreateListingContext = createContext<CreateListingContextType | undefined>(undefined)

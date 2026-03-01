@@ -173,7 +173,7 @@ export default function AgentCreateListingAttributes() {
               className="aclc-next-btn md:w-full md:justify-center"
               onClick={() => {
                 updateData({ amenities })
-                router.push('/agent/create-listing/owner-info')
+                router.push('/agent/create-listing/manual#section-review')
               }}
               type="button"
             >

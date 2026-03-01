@@ -268,22 +268,26 @@ export function ListingAssistantChat({
     const files = e.target.files
     if (!files || files.length === 0 || !conversationId) return
 
-    // Validate files
+    // Validate files (10MB per file, allow many images per property)
     const validFiles: File[] = []
-    const maxSize = 2 * 1024 * 1024 // 2MB (matches PHP upload_max_filesize)
+    const maxSizePerFile = 10 * 1024 * 1024 // 10MB per image
+    const maxFilesPerBatch = 30
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp']
 
-    for (let i = 0; i < files.length; i++) {
+    for (let i = 0; i < Math.min(files.length, maxFilesPerBatch); i++) {
       const file = files[i]
       if (!allowedTypes.includes(file.type)) {
         setError(`${file.name}: Invalid file type. Only JPEG, PNG, GIF, WebP allowed.`)
         continue
       }
-      if (file.size > maxSize) {
-        setError(`${file.name}: File too large. Maximum size is 2MB.`)
+      if (file.size > maxSizePerFile) {
+        setError(`${file.name}: File too large. Maximum size is 10MB per image.`)
         continue
       }
       validFiles.push(file)
+    }
+    if (files.length > maxFilesPerBatch) {
+      setError(`Only the first ${maxFilesPerBatch} images were added. You can add more in another batch.`)
     }
 
     if (validFiles.length === 0) return

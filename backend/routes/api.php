@@ -94,12 +94,9 @@ Route::get('/agents/{id}', [AgentController::class, 'getById']);
 
 // Admin routes (protected by authentication)
 Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
-    // Agent management
+    // Agent/user management (no approval flow - agents are created by brokers)
     Route::get('/agents', [AdminController::class, 'getAllAgents']);
-    Route::get('/agents/pending', [AdminController::class, 'getPendingAgents']);
     Route::get('/agents/{id}', [AdminController::class, 'getAgentDetails']);
-    Route::post('/agents/{id}/approve', [AdminController::class, 'approveAgent']);
-    Route::post('/agents/{id}/reject', [AdminController::class, 'rejectAgent']);
     
     // User CRUD
     Route::get('/users', [AdminController::class, 'getAllUsers']);
@@ -124,10 +121,9 @@ Route::middleware('auth:sanctum')->prefix('broker')->group(function () {
     Route::post('/teams/{teamId}/agents/{agentId}', [BrokerController::class, 'assignAgentToTeam']);
     Route::delete('/teams/{teamId}/agents/{agentId}', [BrokerController::class, 'removeAgentFromTeam']);
     
-    // Agent management
+    // Agent management (brokers create agents directly; no approval flow)
     Route::get('/agents', [BrokerController::class, 'getAgents']);
-    Route::post('/agents/{id}/approve', [BrokerController::class, 'approveAgent']);
-    Route::post('/agents/{id}/disapprove', [BrokerController::class, 'disapproveAgent']);
+    Route::post('/agents', [BrokerController::class, 'createAgent']);
     
     // Property management
     Route::get('/properties', [BrokerController::class, 'getProperties']);

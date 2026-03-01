@@ -11,7 +11,6 @@ import {
   FiArrowLeft,
   FiArrowRight,
   FiEdit,
-  FiUpload,
   FiDollarSign,
   FiChevronDown,
 } from 'react-icons/fi'
@@ -45,18 +44,6 @@ export function OwnerReviewStepContent({
   const router = useRouter()
   const { data, updateData, resetData } = useCreateListing()
 
-  const [formData, setFormData] = useState({
-    firstname: data.ownerFirstname,
-    lastname: data.ownerLastname,
-    phone: data.ownerPhone,
-    email: data.ownerEmail,
-    country: data.ownerCountry,
-    state: data.ownerState,
-    city: data.ownerCity,
-    streetAddress: data.ownerStreetAddress,
-  })
-  const [countryCode, setCountryCode] = useState('+63')
-  const [rapaFile, setRapaFile] = useState<File | null>(data.rapaFile)
   const [price, setPrice] = useState(data.price)
   const [priceType, setPriceType] = useState<
     'Monthly' | 'Weekly' | 'Daily' | 'Yearly'
@@ -69,17 +56,6 @@ export function OwnerReviewStepContent({
   const [uploadProgress, setUploadProgress] = useState(0)
 
   useEffect(() => {
-    setFormData({
-      firstname: data.ownerFirstname,
-      lastname: data.ownerLastname,
-      phone: data.ownerPhone,
-      email: data.ownerEmail,
-      country: data.ownerCountry,
-      state: data.ownerState,
-      city: data.ownerCity,
-      streetAddress: data.ownerStreetAddress,
-    })
-    setRapaFile(data.rapaFile)
     setPrice(data.price)
     setPriceType(data.priceType)
 
@@ -98,14 +74,6 @@ export function OwnerReviewStepContent({
     registrationStatusKey,
     statusKey,
   ])
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) setRapaFile(e.target.files[0])
-  }
 
   const displayPrice = showPricingFields ? price : data.price
   const displayPriceType = showPricingFields ? priceType : data.priceType
@@ -140,18 +108,9 @@ export function OwnerReviewStepContent({
       const finalPrice = showPricingFields ? price : data.price
       const finalPriceType = showPricingFields ? priceType : data.priceType
 
-      updateData({
-        ownerFirstname: formData.firstname,
-        ownerLastname: formData.lastname,
-        ownerPhone: formData.phone,
-        ownerEmail: formData.email,
-        ownerCountry: formData.country,
-        ownerState: formData.state,
-        ownerCity: formData.city,
-        ownerStreetAddress: formData.streetAddress,
-        rapaFile,
-        ...(showPricingFields && { price: finalPrice, priceType: finalPriceType }),
-      })
+      if (showPricingFields) {
+        updateData({ price: finalPrice, priceType: finalPriceType })
+      }
 
       let compressedImage: File | null = null
       if (data.images.length > 0) {
@@ -252,10 +211,10 @@ export function OwnerReviewStepContent({
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
         <h2 className="text-2xl font-bold text-gray-900">
-          Owner Information & Review
+          Review & Publish
         </h2>
         <p className="text-sm text-gray-600 mt-1">
-          Complete owner details and review your listing before publishing
+          Review your listing and publish. Listed by Agent — contact is through you as the listing agent.
         </p>
       </div>
 
@@ -322,187 +281,6 @@ export function OwnerReviewStepContent({
       <div className="p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Property Owner Information
-            </h3>
-
-            <div className="bg-gray-50 rounded-lg p-5 border border-gray-200">
-              <h4 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b border-gray-200">
-                RAPA Upload
-              </h4>
-              <input
-                type="file"
-                id="rapa-upload"
-                className="hidden"
-                onChange={handleFileChange}
-                accept=".pdf,.doc,.docx"
-              />
-              <label
-                htmlFor="rapa-upload"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-50 transition-colors"
-              >
-                <FiUpload className="w-4 h-4" />
-                <span>Choose File</span>
-              </label>
-              <div className="text-sm text-gray-600 mt-2">
-                {rapaFile ? (
-                  <span className="font-medium text-gray-900">{rapaFile.name}</span>
-                ) : (
-                  <span className="text-gray-500">No file chosen</span>
-                )}
-              </div>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-5 border border-gray-200">
-              <h4 className="text-sm font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                Lessor/Property Owner Info
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="firstname" className={labelClass}>
-                    Firstname
-                  </label>
-                  <input
-                    id="firstname"
-                    type="text"
-                    className={inputClass}
-                    placeholder="Enter First Name"
-                    value={formData.firstname}
-                    onChange={(e) =>
-                      handleInputChange('firstname', e.target.value)
-                    }
-                  />
-                </div>
-                <div>
-                  <label htmlFor="lastname" className={labelClass}>
-                    Lastname
-                  </label>
-                  <input
-                    id="lastname"
-                    type="text"
-                    className={inputClass}
-                    placeholder="Enter Last Name"
-                    value={formData.lastname}
-                    onChange={(e) =>
-                      handleInputChange('lastname', e.target.value)
-                    }
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <label htmlFor="phone" className={labelClass}>
-                    Phone
-                  </label>
-                  <div className="flex gap-2">
-                    <div className="relative w-40 flex-shrink-0">
-                      <select
-                        className={selectClass}
-                        value={countryCode}
-                        onChange={(e) => setCountryCode(e.target.value)}
-                      >
-                        <option value="+63">(+63) Philippines</option>
-                        <option value="+1">(+1) United States</option>
-                        <option value="+44">(+44) United Kingdom</option>
-                      </select>
-                      <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
-                    </div>
-                    <input
-                      id="phone"
-                      type="tel"
-                      className={`flex-1 ${inputClass}`}
-                      placeholder="Enter Phone Number"
-                      value={formData.phone}
-                      onChange={(e) =>
-                        handleInputChange('phone', e.target.value)
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="sm:col-span-2">
-                  <label htmlFor="email" className={labelClass}>
-                    Email
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    className={inputClass}
-                    placeholder="Enter Email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      handleInputChange('email', e.target.value)
-                    }
-                  />
-                </div>
-                <div>
-                  <label htmlFor="ownerCountry" className={labelClass}>
-                    Country
-                  </label>
-                  <select
-                    id="ownerCountry"
-                    className={selectClass}
-                    value={formData.country}
-                    onChange={(e) =>
-                      handleInputChange('country', e.target.value)
-                    }
-                  >
-                    <option value="Philippines">Philippines</option>
-                    <option value="United States">United States</option>
-                    <option value="United Kingdom">United Kingdom</option>
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="ownerState" className={labelClass}>
-                    State/Province
-                  </label>
-                  <select
-                    id="ownerState"
-                    className={selectClass}
-                    value={formData.state}
-                    onChange={(e) =>
-                      handleInputChange('state', e.target.value)
-                    }
-                  >
-                    <option value="">--Select State/Province--</option>
-                    <option value="Metro Manila">Metro Manila</option>
-                    <option value="Calabarzon">Calabarzon</option>
-                    <option value="Central Luzon">Central Luzon</option>
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="ownerCity" className={labelClass}>
-                    City
-                  </label>
-                  <select
-                    id="ownerCity"
-                    className={selectClass}
-                    value={formData.city}
-                    onChange={(e) =>
-                      handleInputChange('city', e.target.value)
-                    }
-                  >
-                    <option value="">--Select City--</option>
-                    <option value="Manila">Manila</option>
-                    <option value="Makati">Makati</option>
-                    <option value="Quezon City">Quezon City</option>
-                  </select>
-                </div>
-                <div className="sm:col-span-2">
-                  <label htmlFor="streetAddress" className={labelClass}>
-                    Street Address
-                  </label>
-                  <input
-                    id="streetAddress"
-                    type="text"
-                    className={inputClass}
-                    placeholder="Enter Street Address"
-                    value={formData.streetAddress}
-                    onChange={(e) =>
-                      handleInputChange('streetAddress', e.target.value)
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
             {showPricingFields && (
               <div className="bg-gray-50 rounded-lg p-5 border border-gray-200">
                 <h4 className="text-sm font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">

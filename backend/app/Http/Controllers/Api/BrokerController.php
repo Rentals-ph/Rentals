@@ -14,6 +14,7 @@ use App\Models\BrokerSubscription;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use OpenApi\Attributes as OA;
@@ -180,18 +181,14 @@ class BrokerController extends Controller
     /**
      * Assign an agent to a team.
      */
-    public function assignAgentToTeam(Request $request): JsonResponse
+    public function assignAgentToTeam(Request $request, $teamId, $agentId): JsonResponse
     {
         $broker = $this->ensureBroker($request);
 
-        $validated = $request->validate([
-            'team_id' => 'required|exists:teams,id',
-            'agent_id' => 'required|exists:users,id',
-            'role' => 'nullable|string|max:50',
-        ]);
+        $role = $request->input('role', 'member');
 
         // Verify team belongs to broker
-        $team = Team::where('id', $validated['team_id'])
+        $team = Team::where('id', $teamId)
             ->where('broker_id', $broker->id)
             ->first();
         
@@ -202,25 +199,14 @@ class BrokerController extends Controller
             ], 404);
         }
 
-        // Verify agent is actually an agent
-        $agent = User::where('id', $validated['agent_id'])
-            ->where('role', 'agent')
-            ->first();
+        // Verify agent is managed by broker (created by broker or in broker's teams)
+        $agent = $broker->managedAgents()->where('id', $agentId)->first();
         
         if (!$agent) {
             return response()->json([
                 'success' => false,
-                'message' => 'Agent not found.',
+                'message' => 'Agent not found or access denied.',
             ], 404);
-        }
-
-        // Check subscription limits
-        $subscription = $broker->activeSubscription;
-        if (!$subscription || !$subscription->canAddAgent()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Agent limit reached. Please upgrade your plan.',
-            ], 403);
         }
 
         // Check if agent is already in the team
@@ -240,11 +226,10 @@ class BrokerController extends Controller
             TeamMember::create([
                 'team_id' => $team->id,
                 'agent_id' => $agent->id,
-                'role' => $validated['role'] ?? 'member',
+                'role' => $role,
             ]);
 
-            // Update subscription usage
-            $subscription->increment('agents_used');
+            // Note: agents_used is incremented when creating agents, not when assigning to team
 
             DB::commit();
 
@@ -298,11 +283,7 @@ class BrokerController extends Controller
         try {
             $member->delete();
 
-            // Update subscription usage
-            $subscription = $broker->activeSubscription;
-            if ($subscription) {
-                $subscription->decrement('agents_used');
-            }
+            // Note: agents_used is not decremented - agent still exists and is managed by broker
 
             DB::commit();
 
@@ -323,86 +304,97 @@ class BrokerController extends Controller
     }
 
     /**
-     * Get all agents (for broker to manage).
+     * Create a new agent account (brokers create agents directly; no self-registration).
+     */
+    public function createAgent(Request $request): JsonResponse
+    {
+        $broker = $this->ensureBroker($request);
+
+        // Check subscription limits
+        $subscription = $broker->activeSubscription;
+        if (!$subscription || !$subscription->canAddAgent()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Agent limit reached. Please upgrade your plan.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+            'phone' => 'nullable|string|max:20',
+            'company_id' => 'nullable|exists:companies,id',
+        ]);
+
+        // Verify company belongs to broker if provided
+        $companyId = null;
+        if (!empty($validated['company_id'])) {
+            $company = Company::where('id', $validated['company_id'])
+                ->where('broker_id', $broker->id)
+                ->first();
+            if (!$company) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Company not found or access denied.',
+                ], 404);
+            }
+            $companyId = $company->id;
+        }
+
+        DB::beginTransaction();
+        try {
+            $agent = User::create([
+                'first_name' => $validated['first_name'],
+                'last_name' => $validated['last_name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'phone' => $validated['phone'] ?? null,
+                'role' => 'agent',
+                'company_id' => $companyId,
+                'created_by_broker_id' => $broker->id,
+                'status' => 'approved',
+                'verified' => true,
+                'is_active' => true,
+            ]);
+
+            $subscription->increment('agents_used');
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Agent account created successfully',
+                'data' => $agent->load('company'),
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error creating agent: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create agent account',
+                'error' => config('app.debug') ? $e->getMessage() : 'An error occurred',
+            ], 500);
+        }
+    }
+
+    /**
+     * Get all agents managed by this broker (created by broker or in broker's teams).
      */
     public function getAgents(Request $request): JsonResponse
     {
         $broker = $this->ensureBroker($request);
 
-        // Get all agents that are in broker's teams
-        $agentIds = TeamMember::whereHas('team', function($query) use ($broker) {
-            $query->where('broker_id', $broker->id);
-        })->pluck('agent_id');
-
-        $agents = User::whereIn('id', $agentIds)
-            ->where('role', 'agent')
-            ->with(['teamMemberships.team'])
+        $agents = $broker->managedAgents()
+            ->with(['teamMemberships.team', 'company'])
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return response()->json([
             'success' => true,
             'data' => $agents,
-        ]);
-    }
-
-    /**
-     * Approve an agent.
-     */
-    public function approveAgent(Request $request, $agentId): JsonResponse
-    {
-        $broker = $this->ensureBroker($request);
-
-        // Verify agent is in broker's teams
-        $isManagedAgent = TeamMember::whereHas('team', function($query) use ($broker) {
-            $query->where('broker_id', $broker->id);
-        })->where('agent_id', $agentId)->exists();
-
-        if (!$isManagedAgent) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Agent not found or access denied.',
-            ], 404);
-        }
-
-        $agent = User::findOrFail($agentId);
-        $agent->status = 'approved';
-        $agent->verified = true;
-        $agent->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Agent approved successfully',
-            'data' => $agent,
-        ]);
-    }
-
-    /**
-     * Disapprove/reject an agent.
-     */
-    public function disapproveAgent(Request $request, $agentId): JsonResponse
-    {
-        $broker = $this->ensureBroker($request);
-
-        // Verify agent is in broker's teams
-        $isManagedAgent = TeamMember::whereHas('team', function($query) use ($broker) {
-            $query->where('broker_id', $broker->id);
-        })->where('agent_id', $agentId)->exists();
-
-        if (!$isManagedAgent) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Agent not found or access denied.',
-            ], 404);
-        }
-
-        $agent = User::findOrFail($agentId);
-        $agent->status = 'rejected';
-        $agent->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Agent disapproved successfully',
-            'data' => $agent,
         ]);
     }
 

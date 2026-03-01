@@ -175,6 +175,22 @@ export const brokerApi = {
   },
 
   /**
+   * Create a new agent account (brokers create agents directly)
+   */
+  createAgent: async (agentData: {
+    first_name: string
+    last_name: string
+    email: string
+    password: string
+    password_confirmation: string
+    phone?: string
+    company_id?: number
+  }): Promise<{ success: boolean; message: string; data: any }> => {
+    const response = await apiClient.post<{ success: boolean; message: string; data: any }>('/broker/agents', agentData)
+    return response.data
+  },
+
+  /**
    * Get all properties for the broker (broker's own + team agents' properties)
    */
   getProperties: async (): Promise<Property[] | PaginatedResponse<Property>> => {

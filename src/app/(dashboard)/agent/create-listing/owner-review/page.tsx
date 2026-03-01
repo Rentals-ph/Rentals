@@ -9,7 +9,7 @@ import {
 const STEP_LABELS = [
   'Basic Information',
   'Visuals & Features',
-  'Owner Info & Review',
+  'Review & Publish',
 ]
 
 const EDIT_STEP_MAP: Record<string, string> = {
@@ -30,12 +30,12 @@ export default function AgentCreateListingOwnerReview() {
       header={
         <AgentHeader
           title="Create Listing"
-          subtitle="Add owner information and review your listing."
+          subtitle="Review your listing and publish."
         />
       }
       stepLabels={STEP_LABELS}
       currentStepIndex={2}
-      breadcrumbStepName="Owner Info & Review"
+      breadcrumbStepName="Review & Publish"
       createListingPath="/agent/create-listing"
     >
       <OwnerReviewStepContent

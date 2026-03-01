@@ -3,8 +3,11 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import AppSidebar from '@/components/common/AppSidebar'
 import BrokerHeader from '@/components/broker/BrokerHeader'
+import { SimplePropertyCard } from '@/components/common/cards'
 import { brokerApi } from '@/api'
 import type { Team, TeamMember } from '@/api/endpoints/broker'
+import type { Property } from '@/types'
+import { resolvePropertyImage } from '@/utils/imageResolver'
 import {
   DndContext,
   DragOverlay,
@@ -32,6 +35,7 @@ import {
   FiArrowUp,
   FiArrowDown,
   FiFilter,
+  FiLayers,
 } from 'react-icons/fi'
 
 interface TeamMemberDisplay {
@@ -151,8 +155,10 @@ function DroppableTeam({ team, children }: { team: Team; children: React.ReactNo
   return (
     <div
       ref={setNodeRef}
-      className={`transition-all duration-200 ${
-        isOver ? 'ring-2 ring-blue-500 ring-offset-2 bg-blue-50' : ''
+      className={`transition-all duration-300 ease-out ${
+        isOver
+          ? 'ring-4 ring-blue-500 ring-offset-2 bg-blue-50 scale-[1.02] shadow-lg shadow-blue-200/50 animate-pulse'
+          : ''
       }`}
     >
       {children}
@@ -167,6 +173,8 @@ export default function TeamManagementPage() {
   const [teamMembers, setTeamMembers] = useState<TeamMemberDisplay[]>([])
   const [teams, setTeams] = useState<Team[]>([])
   const [agents, setAgents] = useState<any[]>([])
+  const [properties, setProperties] = useState<Property[]>([])
+  const [loadingListings, setLoadingListings] = useState(true)
   const [loading, setLoading] = useState(true)
   const [showCreateTeamForm, setShowCreateTeamForm] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -191,6 +199,12 @@ export default function TeamManagementPage() {
     })
   )
 
+  const [brokerId, setBrokerId] = useState(0)
+  useEffect(() => {
+    const id = parseInt(localStorage.getItem('user_id') || localStorage.getItem('agent_id') || '0', 10)
+    setBrokerId(id)
+  }, [])
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -203,26 +217,23 @@ export default function TeamManagementPage() {
         setTeams(teamsData)
         setAgents(agentsData)
         
-        // Transform agents to TeamMemberDisplay format
+        // Transform agents to TeamMemberDisplay format (listings count updated after properties load)
         const members: TeamMemberDisplay[] = agentsData.map((agent: any) => {
-          // Find which team this agent belongs to
           const teamMembership = teamsData
             .flatMap(team => team.members || [])
             .find((member: TeamMember) => member.agent_id === agent.id)
-          
           return {
             id: agent.id,
             name: `${agent.first_name || ''} ${agent.last_name || ''}`.trim() || 'Unknown',
             role: teamMembership?.role === 'Unit Manager' ? 'Unit Manager' : 'Agent',
-            reportsTo: null, // Would need to determine from team structure
-            listings: 0, // Would need to fetch from properties
-            inquiryChannels: ['WhatsApp', 'Email'], // Default
+            reportsTo: null,
+            listings: 0,
+            inquiryChannels: ['WhatsApp', 'Email'],
             status: agent.status === 'approved' ? 'Active' : 'Pending',
             joinDate: teamMembership?.joined_at ? new Date(teamMembership.joined_at).toLocaleDateString() : 'N/A',
             joinDateRaw: teamMembership?.joined_at || agent.created_at || new Date().toISOString(),
           }
         })
-        
         setTeamMembers(members)
       } catch (error: any) {
         console.error('Error fetching team data:', error)
@@ -234,6 +245,37 @@ export default function TeamManagementPage() {
     fetchData()
   }, [])
 
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        setLoadingListings(true)
+        const res = await brokerApi.getProperties()
+        const list = Array.isArray(res) ? res : (res as any)?.data ?? []
+        setProperties(list)
+      } catch (e) {
+        console.error('Error fetching properties:', e)
+      } finally {
+        setLoadingListings(false)
+      }
+    }
+    fetchProperties()
+  }, [])
+
+  const listingCountByAgentId = useMemo(() => {
+    const map: Record<number, number> = {}
+    properties.forEach((p: Property) => {
+      const id = p.agent_id ?? 0
+      map[id] = (map[id] || 0) + 1
+    })
+    return map
+  }, [properties])
+
+  const brokerListingCount = brokerId ? (listingCountByAgentId[brokerId] ?? 0) : 0
+  const agentListingCount = Object.entries(listingCountByAgentId).reduce(
+    (sum, [id, count]) => (id !== String(brokerId) ? sum + count : sum),
+    0
+  )
+
   // Get assigned agent IDs
   const assignedAgentIds = useMemo(() => {
     return new Set(
@@ -241,7 +283,7 @@ export default function TeamManagementPage() {
     )
   }, [teams])
 
-  // Filter available agents (not assigned to any team)
+  // Filter available agents (not assigned to any team) with listing counts
   const availableAgents = useMemo(() => {
     return agents
       .filter((agent: any) => !assignedAgentIds.has(agent.id))
@@ -253,9 +295,9 @@ export default function TeamManagementPage() {
         joinDate: agent.created_at ? new Date(agent.created_at).toLocaleDateString() : 'N/A',
         joinDateRaw: agent.created_at || new Date().toISOString(),
         email: agent.email,
-        listings: 0,
+        listings: listingCountByAgentId[agent.id] ?? 0,
       }))
-  }, [agents, assignedAgentIds])
+  }, [agents, assignedAgentIds, listingCountByAgentId])
 
   // Sort available agents
   const sortedAvailableAgents = useMemo(() => {
@@ -475,6 +517,79 @@ export default function TeamManagementPage() {
           title="Team Management" 
           subtitle="Manage your team members and their account permissions here." 
         />
+
+        {/* Listings summary + property cards - white container above team grid */}
+        <div className="bg-white rounded-[14px] p-6 shadow-sm border border-gray-100 mb-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <FiLayers className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 m-0">Listings Overview</h3>
+              <p className="text-xs text-gray-500 m-0 mt-0.5">All listings created by you and your agents</p>
+            </div>
+          </div>
+          {loadingListings ? (
+            <div className="flex items-center gap-4 py-4 text-gray-500">
+              <span className="inline-block w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+              Loading listings...
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-wrap items-center gap-4 mb-5 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <span className="text-sm font-medium text-gray-700">
+                  <strong className="text-gray-900">{properties.length}</strong> total listings
+                </span>
+                <span className="text-gray-300">|</span>
+                <span className="text-sm font-medium text-gray-700">
+                  <strong className="text-blue-600">{brokerListingCount}</strong> your listings
+                </span>
+                <span className="text-gray-300">|</span>
+                <span className="text-sm font-medium text-gray-700">
+                  <strong className="text-emerald-600">{agentListingCount}</strong> by agents
+                </span>
+              </div>
+              <div className="overflow-x-auto pb-2">
+                <p className="text-sm font-medium text-gray-700 mb-3">Recent listings</p>
+                {properties.length === 0 ? (
+                  <p className="text-gray-500 text-sm py-4">No listings yet.</p>
+                ) : (
+                  <div className="flex gap-4 overflow-x-auto pb-2 min-h-[200px]" style={{ scrollbarWidth: 'thin' }}>
+                    {properties
+                      .slice()
+                      .sort((a, b) => {
+                        const ta = a.created_at ? new Date(a.created_at).getTime() : 0
+                        const tb = b.created_at ? new Date(b.created_at).getTime() : 0
+                        return tb - ta
+                      })
+                      .slice(0, 8)
+                      .map((p) => {
+                        const imageUrl = p.image_url || resolvePropertyImage(p.image_path || p.image, p.id)
+                        const priceStr = p.price != null
+                          ? `₱${Number(p.price).toLocaleString('en-US')}/${(p.price_type || 'mo').toLowerCase()}`
+                          : '₱0/mo'
+                        const location = [p.street_address, p.city, p.state_province].filter(Boolean).join(', ') || p.location || ''
+                        return (
+                          <div key={p.id} className="flex-shrink-0 w-[260px]">
+                            <SimplePropertyCard
+                              id={p.id}
+                              title={p.title || 'Untitled'}
+                              location={location}
+                              price={priceStr}
+                              image={imageUrl || undefined}
+                              bedrooms={p.bedrooms}
+                              bathrooms={p.bathrooms}
+                              area={p.area ?? undefined}
+                            />
+                          </div>
+                        )
+                      })}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
 
         {/* Main Content Grid */}
         <DndContext
@@ -740,28 +855,106 @@ export default function TeamManagementPage() {
                           <div className="w-11 h-11 bg-blue-600 rounded-full flex items-center justify-center font-bold text-lg text-white">
                             {teamLead.agent.first_name?.[0] || 'L'}
                           </div>
-                          <div>
+                          <div className="flex-1 min-w-0">
                             <div className="font-bold text-sm text-gray-900">
                               {teamLead.agent.first_name} {teamLead.agent.last_name}
                             </div>
                             <div className="text-xs text-gray-600">Unit Manager</div>
                           </div>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (confirm(`Remove ${teamLead.agent?.first_name} ${teamLead.agent?.last_name} from this team?`)) {
+                                try {
+                                  await brokerApi.removeAgentFromTeam(team.id, teamLead.agent_id)
+                                  const [teamsData, agentsData] = await Promise.all([
+                                    brokerApi.getTeams(),
+                                    brokerApi.getAgents(),
+                                  ])
+                                  setTeams(teamsData)
+                                  setAgents(agentsData)
+                                  const members: TeamMemberDisplay[] = agentsData.map((agent: any) => {
+                                    const teamMembership = teamsData
+                                      .flatMap((t: Team) => t.members || [])
+                                      .find((m: TeamMember) => m.agent_id === agent.id)
+                                    return {
+                                      id: agent.id,
+                                      name: `${agent.first_name || ''} ${agent.last_name || ''}`.trim() || 'Unknown',
+                                      role: teamMembership?.role === 'Unit Manager' ? 'Unit Manager' : 'Agent',
+                                      reportsTo: null,
+                                      listings: 0,
+                                      inquiryChannels: ['WhatsApp', 'Email'],
+                                      status: agent.status === 'approved' ? 'Active' : 'Pending',
+                                      joinDate: teamMembership?.joined_at ? new Date(teamMembership.joined_at).toLocaleDateString() : 'N/A',
+                                      joinDateRaw: teamMembership?.joined_at || agent.created_at || new Date().toISOString(),
+                                    }
+                                  })
+                                  setTeamMembers(members)
+                                } catch (err: any) {
+                                  alert(err?.response?.data?.message || 'Failed to remove agent from team')
+                                }
+                              }
+                            }}
+                            className="p-1.5 rounded text-red-600 hover:bg-red-50 transition-colors"
+                            title="Remove from team"
+                          >
+                            <FiX className="w-4 h-4" />
+                          </button>
                         </div>
                       )}
                       
                       {regularMembers.length > 0 && (
                         <div className="space-y-2">
-                          {regularMembers.slice(0, 2).map((member: TeamMember) => (
+                          {regularMembers.map((member: TeamMember) => (
                             <div key={member.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
                               <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-xs font-semibold text-white">
                                 {member.agent?.first_name?.[0] || 'A'}
                               </div>
-                              <div className="flex-1">
-                                <div className="text-sm font-semibold text-gray-900">
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-semibold text-gray-900 truncate">
                                   {member.agent?.first_name} {member.agent?.last_name}
                                 </div>
                                 <div className="text-xs text-gray-600">Sales Agent</div>
                               </div>
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  if (confirm(`Remove ${member.agent?.first_name} ${member.agent?.last_name} from this team?`)) {
+                                    try {
+                                      await brokerApi.removeAgentFromTeam(team.id, member.agent_id)
+                                      const [teamsData, agentsData] = await Promise.all([
+                                        brokerApi.getTeams(),
+                                        brokerApi.getAgents(),
+                                      ])
+                                      setTeams(teamsData)
+                                      setAgents(agentsData)
+                                      const members: TeamMemberDisplay[] = agentsData.map((agent: any) => {
+                                        const teamMembership = teamsData
+                                          .flatMap((t: Team) => t.members || [])
+                                          .find((m: TeamMember) => m.agent_id === agent.id)
+                                        return {
+                                          id: agent.id,
+                                          name: `${agent.first_name || ''} ${agent.last_name || ''}`.trim() || 'Unknown',
+                                          role: teamMembership?.role === 'Unit Manager' ? 'Unit Manager' : 'Agent',
+                                          reportsTo: null,
+                                          listings: 0,
+                                          inquiryChannels: ['WhatsApp', 'Email'],
+                                          status: agent.status === 'approved' ? 'Active' : 'Pending',
+                                          joinDate: teamMembership?.joined_at ? new Date(teamMembership.joined_at).toLocaleDateString() : 'N/A',
+                                          joinDateRaw: teamMembership?.joined_at || agent.created_at || new Date().toISOString(),
+                                        }
+                                      })
+                                      setTeamMembers(members)
+                                    } catch (err: any) {
+                                      alert(err?.response?.data?.message || 'Failed to remove agent from team')
+                                    }
+                                  }
+                                }}
+                                className="p-1.5 rounded text-red-600 hover:bg-red-50 transition-colors"
+                                title="Remove from team"
+                              >
+                                <FiX className="w-4 h-4" />
+                              </button>
                             </div>
                           ))}
                         </div>
@@ -774,7 +967,9 @@ export default function TeamManagementPage() {
                         <div className="text-xs text-gray-600">Members</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-xl font-bold text-gray-900">0</div>
+                        <div className="text-xl font-bold text-gray-900">
+                          {teamMembersList.reduce((sum: number, m: TeamMember) => sum + (listingCountByAgentId[m.agent_id] ?? 0), 0)}
+                        </div>
                         <div className="text-xs text-gray-600">Listings</div>
                       </div>
                       <div className="text-center">

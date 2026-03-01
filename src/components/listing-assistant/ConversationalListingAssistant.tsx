@@ -5,6 +5,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, Fragment } from 'react'
 import 'leaflet/dist/leaflet.css'
+import { getAsset } from '@/utils/assets'
 import { MessageBubble, TypingIndicator } from './MessageBubble'
 import { LocationPicker } from './LocationPicker'
 import { InlineLocationMap } from './InlineLocationMap'
@@ -35,7 +36,23 @@ interface ConversationalListingAssistantProps {
   onDataChange?: (data: ExtractedPropertyData) => void
 }
 
-type Step = 'property_name' | 'property_type' | 'location' | 'price' | 'price_type' | 'bedrooms' | 'bathrooms' | 'optional_fields' | 'images' | 'description' | 'review'
+type Step = 'property_name' | 'property_type' | 'location' | 'price' | 'price_type' | 'bedrooms' | 'bathrooms' | 'area_sqm' | 'optional_fields' | 'images' | 'description' | 'review'
+
+/** Reverse geocode lat/lng to a display address (Nominatim) */
+async function reverseGeocode(lat: number, lon: number): Promise<string> {
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+    {
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'Rentals-ListingAssistant/1.0',
+      },
+    }
+  )
+  if (!res.ok) throw new Error('Could not get address for location')
+  const data = await res.json()
+  return data.display_name || `${lat.toFixed(4)}, ${lon.toFixed(4)}`
+}
 
 export function ConversationalListingAssistant({
   onListingSubmitted,
@@ -66,11 +83,14 @@ export function ConversationalListingAssistant({
   const [showOptionalFields, setShowOptionalFields] = useState(false)
   const [currentOptionalFieldIndex, setCurrentOptionalFieldIndex] = useState<number>(-1)
   const [showCustomInput, setShowCustomInput] = useState<string | null>(null) // Track which field is showing custom input
+  const [showSubmitSuccessPopup, setShowSubmitSuccessPopup] = useState(false)
+  const [submittedPropertyId, setSubmittedPropertyId] = useState<number | null>(null)
+  const [submittedPropertyName, setSubmittedPropertyName] = useState<string>('')
   
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLTextAreaElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Scroll to bottom
@@ -226,6 +246,8 @@ export function ConversationalListingAssistant({
       if (currentIndex >= 0 && currentIndex < stepOrder.length - 1) {
         nextStep = stepOrder[currentIndex + 1]
       } else if (currentStep === 'bathrooms') {
+        nextStep = 'area_sqm'
+      } else if (currentStep === 'area_sqm') {
         nextStep = 'optional_fields'
       }
 
@@ -289,9 +311,11 @@ export function ConversationalListingAssistant({
       case 'bathrooms':
         message = "How many bathrooms?"
         break
+      case 'area_sqm':
+        message = "What is the size of the property in square meters? (Optional – you can skip)"
+        break
       case 'optional_fields':
         message = "Great! All required fields are complete. Would you like to add more details to attract more buyers?"
-        setShowOptionalFields(true)
         break
       case 'images':
         message = "Let's add some photos! Upload property images to showcase your listing."
@@ -310,6 +334,70 @@ export function ConversationalListingAssistant({
       setMessages(prev => [...prev, aiMessage])
     }
   }
+
+  // Use current position for location step (called by button below the map)
+  const handleUseCurrentPosition = useCallback(async () => {
+    if (!conversationId) return
+    setIsLoading(true)
+    setError(null)
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject(new Error('Geolocation is not supported by your browser'))
+          return
+        }
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 60000,
+        })
+      })
+      const { latitude, longitude } = position.coords
+      const address = await reverseGeocode(latitude, longitude)
+      await listingAssistantApi.saveMapCoordinates(conversationId, latitude, longitude)
+      const userMessage: ListingAssistantMessage = {
+        role: 'user',
+        content: 'Use current position',
+        timestamp: new Date().toISOString(),
+      }
+      setMessages(prev => [...prev, userMessage])
+      const response = await listingAssistantApi.setField(conversationId, 'location', address, 'price')
+      setExtractedData({
+        ...response.extracted_data,
+        location: address,
+        address: address,
+        latitude: Number(latitude),
+        longitude: Number(longitude),
+      })
+      setMissingFields(response.missing_fields)
+      setFormReady(response.form_ready)
+      setCurrentStep((response.current_step as Step) || 'price')
+      const aiMessage: ListingAssistantMessage = {
+        role: 'assistant',
+        content: response.ai_response || `✓ Location set to your current position: ${address}`,
+        timestamp: new Date().toISOString(),
+      }
+      setMessages(prev => [...prev, aiMessage])
+      setTimeout(() => {
+        setCurrentStep('price')
+        handleNextStep('price')
+      }, 500)
+    } catch (err: any) {
+      const msg =
+        err?.code === 1
+          ? 'Location access was denied. You can type the address or pick on the map instead.'
+          : err?.message || 'Could not get your position. Try typing the city or area.'
+      setError(msg)
+      const aiMessage: ListingAssistantMessage = {
+        role: 'assistant',
+        content: `❌ ${msg}`,
+        timestamp: new Date().toISOString(),
+      }
+      setMessages(prev => [...prev, aiMessage])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [conversationId])
 
   // Handle custom input submission (for custom amenities, title types, etc.)
   const handleCustomInputSubmit = async () => {
@@ -394,6 +482,29 @@ export function ConversationalListingAssistant({
     setError(null)
 
     try {
+      // Area (sqm) step: always asked after bathrooms, optional to answer
+      if (currentStep === 'area_sqm') {
+        const trimmed = submittedValue.trim()
+        const numValue = parseFloat(trimmed)
+        if (trimmed !== '' && !isNaN(numValue) && numValue > 0) {
+          const response = await listingAssistantApi.setField(conversationId, 'area_sqm', numValue, 'optional_fields')
+          setExtractedData(response.extracted_data)
+          setMissingFields(response.missing_fields)
+          setFormReady(response.form_ready)
+          setCurrentStep('optional_fields')
+          const aiMessage: ListingAssistantMessage = {
+            role: 'assistant',
+            content: response.ai_response || `✓ Floor area set: ${numValue} sqm. Would you like to add more details to attract more buyers?`,
+            timestamp: new Date().toISOString(),
+          }
+          setMessages(prev => [...prev, aiMessage])
+        } else {
+          setError('Please enter a number (e.g. 75) or click Skip.')
+        }
+        setIsLoading(false)
+        return
+      }
+
       // If we're in optional fields flow, use setField/updateData instead of processMessage
       // This prevents the AI from asking about already-filled required fields
       if (currentOptionalFieldIndex >= 0 && selectedOptionalFields.length > 0) {
@@ -751,9 +862,8 @@ export function ConversationalListingAssistant({
       })
     }
 
-    // Step 3: Location - no buttons (map will be shown instead)
+    // Step 3: Location - no pill buttons; "Use current position" is shown below the map with a different style
     else if (stepToUse === 'location') {
-      // No buttons - map will be rendered separately
       return []
     }
 
@@ -807,6 +917,26 @@ export function ConversationalListingAssistant({
           value: option.value,
           onClick: () => handleFieldSelection('bathrooms', option.value),
         })
+      })
+    }
+
+    // Step 8: Area (sqm) – always asked, optional; Skip goes to optional_fields
+    else if (stepToUse === 'area_sqm') {
+      buttons.push({
+        label: 'Skip',
+        value: 'skip',
+        variant: 'default',
+        onClick: async () => {
+          if (!conversationId) return
+          const userMessage: ListingAssistantMessage = {
+            role: 'user',
+            content: 'Skip',
+            timestamp: new Date().toISOString(),
+          }
+          setMessages(prev => [...prev, userMessage])
+          setCurrentStep('optional_fields')
+          handleNextStep('optional_fields')
+        },
       })
     }
 
@@ -1023,41 +1153,49 @@ export function ConversationalListingAssistant({
   }
 
   return (
-    <div className="h-full flex flex-col relative">
-      {/* Property Summary Card - Collapsible */}
+    <div className="h-full flex flex-col">
+      {/* Hero chat-mode header */}
+      <header className="flex items-center justify-between px-4 py-3 sm:py-4 border-b border-gray-200 bg-white flex-shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <img src={getAsset('LOGO_AI')} alt="" className="w-8 h-8 sm:w-9 sm:h-9 flex-shrink-0 rounded-full object-cover" />
+          <h3 className="font-outfit text-base sm:text-lg font-bold text-gray-900 truncate">Listing Assistant</h3>
+        </div>
+        {showPropertyCard ? (
+          <button
+            type="button"
+            onClick={() => setShowPropertyCard(false)}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
+            aria-label="Hide summary"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowPropertyCard(true)}
+            className="text-xs font-outfit font-medium text-gray-500 hover:text-gray-700"
+          >
+            Show progress
+          </button>
+        )}
+      </header>
+
+      {/* Progress bar (Hero-style minimal) - only when showPropertyCard */}
       {showPropertyCard && (
-        <div className="bg-white border-b border-gray-200 p-4 sticky top-0 z-10 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-semibold text-gray-800">Property Summary</h3>
-            <button
-              onClick={() => setShowPropertyCard(false)}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-          </div>
-          <div className="w-full h-2 bg-gray-100 rounded-full mb-2">
+        <div className="px-4 py-2 border-b border-gray-100 bg-white flex-shrink-0">
+          <div className="w-full h-1.5 bg-gray-100 rounded-full">
             <div
-              className="h-full bg-blue-500 rounded-full transition-all"
+              className="h-full bg-rental-blue-600 rounded-full transition-all duration-300"
               style={{ width: `${calculateProgress()}%` }}
             />
           </div>
         </div>
       )}
 
-      {!showPropertyCard && (
-        <button
-          onClick={() => setShowPropertyCard(true)}
-          className="absolute top-4 right-4 z-10 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm shadow-sm hover:bg-gray-50"
-        >
-          Show Summary
-        </button>
-      )}
-
-      {/* Messages Area */}
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 bg-gray-50">
+      {/* Messages Area - Hero chat-mode */}
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-3 min-h-0 bg-white">
         {messages.map((msg, idx) => {
           const isLatestMessage = idx === messages.length - 1
           const isLatestAssistantMessage = isLatestMessage && msg.role === 'assistant' && !isLoading
@@ -1085,64 +1223,68 @@ export function ConversationalListingAssistant({
                 buttons={buttons}
               />
               
-              {/* Inline Location Map for Step 3 */}
+              {/* Inline Location Map for Step 3 + Use current position below */}
               {showLocationMap && (
-                <InlineLocationMap
-                  onLocationConfirm={async (address, latitude, longitude) => {
-                    if (!conversationId) return
-                    
-                    setIsLoading(true)
-                    setError(null)
-                    
-                    try {
-                      // Save coordinates first
-                      await listingAssistantApi.saveMapCoordinates(conversationId, latitude, longitude)
+                <div className="flex flex-col gap-3 mt-2">
+                  <InlineLocationMap
+                    onLocationConfirm={async (address, latitude, longitude) => {
+                      if (!conversationId) return
                       
-                      // Add user message with address
-                      const userMessage: ListingAssistantMessage = {
-                        role: 'user',
-                        content: address,
-                        timestamp: new Date().toISOString(),
+                      setIsLoading(true)
+                      setError(null)
+                      
+                      try {
+                        await listingAssistantApi.saveMapCoordinates(conversationId, latitude, longitude)
+                        const userMessage: ListingAssistantMessage = {
+                          role: 'user',
+                          content: address,
+                          timestamp: new Date().toISOString(),
+                        }
+                        setMessages(prev => [...prev, userMessage])
+                        const response = await listingAssistantApi.setField(conversationId, 'location', address, 'price')
+                        setExtractedData({
+                          ...response.extracted_data,
+                          location: address,
+                          address: address,
+                          latitude: Number(latitude),
+                          longitude: Number(longitude),
+                        })
+                        setMissingFields(response.missing_fields)
+                        setFormReady(response.form_ready)
+                        setCurrentStep((response.current_step as Step) || 'price')
+                        const aiMessage: ListingAssistantMessage = {
+                          role: 'assistant',
+                          content: response.ai_response || `✓ Location set: ${address}`,
+                          timestamp: new Date().toISOString(),
+                        }
+                        setMessages(prev => [...prev, aiMessage])
+                        setTimeout(() => {
+                          setCurrentStep('price')
+                          handleNextStep('price')
+                        }, 500)
+                      } catch (err: any) {
+                        setError(err.message || 'Failed to save location')
+                      } finally {
+                        setIsLoading(false)
                       }
-                      setMessages(prev => [...prev, userMessage])
-                      
-                      // Update location field and move to next step
-                      const response = await listingAssistantApi.setField(conversationId, 'location', address, 'price')
-                      
-                      // Update extracted data with both address and coordinates
-                      setExtractedData({
-                        ...response.extracted_data,
-                        location: address,
-                        address: address,
-                        latitude: Number(latitude),
-                        longitude: Number(longitude),
-                      })
-                      setMissingFields(response.missing_fields)
-                      setFormReady(response.form_ready)
-                      setCurrentStep((response.current_step as Step) || 'price')
-                      
-                      // Add AI response
-                      const aiMessage: ListingAssistantMessage = {
-                        role: 'assistant',
-                        content: response.ai_response || `✓ Location set: ${address}`,
-                        timestamp: new Date().toISOString(),
-                      }
-                      setMessages(prev => [...prev, aiMessage])
-                      
-                      // Move to next step
-                      setTimeout(() => {
-                        setCurrentStep('price')
-                        handleNextStep('price')
-                      }, 500)
-                    } catch (err: any) {
-                      setError(err.message || 'Failed to save location')
-                    } finally {
-                      setIsLoading(false)
-                    }
-                  }}
-                  initialLatitude={extractedData.latitude ? parseFloat(String(extractedData.latitude)) : null}
-                  initialLongitude={extractedData.longitude ? parseFloat(String(extractedData.longitude)) : null}
-                />
+                    }}
+                    initialLatitude={extractedData.latitude ? parseFloat(String(extractedData.latitude)) : null}
+                    initialLongitude={extractedData.longitude ? parseFloat(String(extractedData.longitude)) : null}
+                  />
+                  {/* Use current position - distinct style (outline, below map) */}
+                  <button
+                    type="button"
+                    onClick={handleUseCurrentPosition}
+                    disabled={isLoading}
+                    className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 border-gray-300 bg-white text-gray-700 font-outfit text-sm font-medium hover:border-rental-blue-500 hover:bg-rental-blue-50/50 hover:text-rental-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    <svg className="w-5 h-5 text-gray-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    {isLoading ? 'Getting location...' : 'Use current position'}
+                  </button>
+                </div>
               )}
             </Fragment>
           )
@@ -1158,14 +1300,38 @@ export function ConversationalListingAssistant({
               type="file"
               ref={fileInputRef}
               onChange={async (e) => {
-                const files = Array.from(e.target.files || [])
-                if (files.length === 0 || !conversationId) return
+                const rawFiles = Array.from(e.target.files || [])
+                if (rawFiles.length === 0 || !conversationId) return
+
+                const maxSizePerFile = 10 * 1024 * 1024 // 10MB per image
+                const maxFilesPerBatch = 30
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp']
+                const files: File[] = []
+                for (let i = 0; i < Math.min(rawFiles.length, maxFilesPerBatch); i++) {
+                  const file = rawFiles[i]
+                  if (!allowedTypes.includes(file.type)) {
+                    setError(`${file.name}: Only JPEG, PNG, GIF, WebP allowed.`)
+                    continue
+                  }
+                  if (file.size > maxSizePerFile) {
+                    setError(`${file.name}: Maximum size is 10MB per image.`)
+                    continue
+                  }
+                  files.push(file)
+                }
+                if (rawFiles.length > maxFilesPerBatch) {
+                  setError(`Only the first ${maxFilesPerBatch} images per batch. You can add more after.`)
+                }
+                if (files.length === 0) {
+                  if (fileInputRef.current) fileInputRef.current.value = ''
+                  return
+                }
 
                 setIsUploadingImages(true)
+                setError(null)
                 try {
                   const response = await listingAssistantApi.uploadImages(conversationId, files)
                   setExtractedData(prev => ({ ...prev, images: response.images }))
-                  
                   const aiMessage: ListingAssistantMessage = {
                     role: 'assistant',
                     content: `✓ Uploaded ${files.length} image(s). ${response.images.length} total images.`,
@@ -1176,6 +1342,7 @@ export function ConversationalListingAssistant({
                   setError(err.message || 'Failed to upload images')
                 } finally {
                   setIsUploadingImages(false)
+                  if (fileInputRef.current) fileInputRef.current.value = ''
                 }
               }}
               accept="image/*"
@@ -1233,13 +1400,76 @@ export function ConversationalListingAssistant({
               className="w-full p-3 border border-gray-300 rounded-lg text-sm"
             />
             {extractedData.description && (
-              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <p className="text-sm font-medium text-gray-700 mb-2">Generated Description:</p>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">{extractedData.description}</p>
-                <p className="text-xs text-gray-500 mt-2">
-                  Template: {DESCRIPTION_TEMPLATES[extractedData.description_template as DescriptionTemplate]?.label || 'Narrative'}
-                </p>
-              </div>
+              <>
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Generated Description:</p>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{extractedData.description}</p>
+                </div>
+                {/* Template buttons below description so user doesn't have to scroll up */}
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-gray-500">Switch template:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {(Object.keys(DESCRIPTION_TEMPLATES) as DescriptionTemplate[]).map((template) => {
+                      const currentTemplate = extractedData.description_template || 'narrative'
+                      const isSelected = template === currentTemplate
+                      return (
+                        <button
+                          key={template}
+                          type="button"
+                          disabled={isGeneratingDescription}
+                          onClick={async () => {
+                            if (!conversationId) return
+                            setIsGeneratingDescription(true)
+                            setError(null)
+                            try {
+                              const agentContext = inputValue.trim() || ''
+                              const response = await listingAssistantApi.generateDescription(
+                                conversationId,
+                                template,
+                                agentContext
+                              )
+                              if (!response.success || !response.description) {
+                                throw new Error(response.error || 'Failed to generate description')
+                              }
+                              setExtractedData(prev => ({
+                                ...prev,
+                                description: response.description,
+                                description_template: response.template,
+                                ai_generated_description: response.ai_generated_description || response.description,
+                              }))
+                              setMessages(prev => [...prev, {
+                                role: 'assistant',
+                                content: `✓ Switched to ${DESCRIPTION_TEMPLATES[template as DescriptionTemplate].label} template.\n\n${response.description}`,
+                                timestamp: new Date().toISOString(),
+                              }])
+                            } catch (err: any) {
+                              setError(err?.message || 'Failed to generate description')
+                            } finally {
+                              setIsGeneratingDescription(false)
+                            }
+                          }}
+                          className={`
+                            px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors
+                            ${isSelected
+                              ? 'bg-purple-600 text-white border-purple-600'
+                              : 'bg-white border-gray-300 text-gray-700 hover:border-purple-400 hover:bg-purple-50'}
+                            disabled:opacity-60 disabled:cursor-not-allowed
+                          `}
+                        >
+                          {isSelected ? '✓ ' : ''}{DESCRIPTION_TEMPLATES[template].label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep('review')}
+                    className="mt-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                  >
+                    Continue to Review
+                  </button>
+                </div>
+              </>
             )}
           </div>
         )}
@@ -1252,19 +1482,13 @@ export function ConversationalListingAssistant({
                 if (!conversationId) return
                 
                 setIsSubmitting(true)
+                setError(null)
                 try {
                   const response = await listingAssistantApi.submitListing(conversationId)
-                  
-                  const aiMessage: ListingAssistantMessage = {
-                    role: 'assistant',
-                    content: `✓ Listing submitted successfully! Property ID: ${response.property_id}`,
-                    timestamp: new Date().toISOString(),
-                  }
-                  setMessages(prev => [...prev, aiMessage])
-                  
-                  if (onListingSubmitted && response.property_id !== undefined) {
-                    onListingSubmitted(response.property_id)
-                  }
+                  const propertyName = (extractedData.property_name as string) || 'Your property'
+                  setSubmittedPropertyId(response.property_id ?? null)
+                  setSubmittedPropertyName(propertyName)
+                  setShowSubmitSuccessPopup(true)
                 } catch (err: any) {
                   setError(err.message || 'Failed to submit listing')
                 } finally {
@@ -1333,45 +1557,47 @@ export function ConversationalListingAssistant({
         </div>
       )}
 
-      {/* Input Area - Hidden during location step (map is shown instead) */}
+      {/* Input Area - Hero chat-mode: rounded-xl input, round send button */}
       {currentStep !== 'location' && !showCustomInput && (
-        <div className="bg-white border-t border-gray-200 p-4">
+        <div className="border-t border-gray-200 bg-white flex-shrink-0">
           {error && (
-            <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+            <div className="mx-4 mt-2 p-2 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-outfit">
               {error}
             </div>
           )}
-
-          <div className="flex items-center gap-2">
-            <div className="flex-1">
-              <textarea
-                ref={inputRef}
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    handleTextSubmit()
-                  }
-                }}
-                placeholder={
-                  currentStep === 'property_name' ? 'Enter property name...' :
-                  currentStep === 'price' ? 'Enter price...' :
-                  currentOptionalFieldIndex >= 0 && selectedOptionalFields.length > 0 ? 
-                    `Enter ${FIELD_LABELS[selectedOptionalFields[currentOptionalFieldIndex] as keyof typeof FIELD_LABELS] || selectedOptionalFields[currentOptionalFieldIndex]}...` :
-                  'Type your message...'
+          <div className="flex items-center gap-2 p-4">
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  handleTextSubmit()
                 }
-                rows={1}
-                className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[42px]"
-                disabled={isLoading}
-              />
-            </div>
+              }}
+              placeholder={
+                currentStep === 'property_name' ? 'Enter property name...' :
+                currentStep === 'price' ? 'Enter price...' :
+                currentStep === 'area_sqm' ? 'Enter area in sqm (e.g. 75)...' :
+                currentOptionalFieldIndex >= 0 && selectedOptionalFields.length > 0
+                  ? `Enter ${FIELD_LABELS[selectedOptionalFields[currentOptionalFieldIndex] as keyof typeof FIELD_LABELS] || selectedOptionalFields[currentOptionalFieldIndex]}...`
+                  : 'Type your message...'
+              }
+              className="flex-1 min-w-0 p-3 px-4 border border-gray-300 rounded-xl font-outfit text-sm outline-none transition-colors focus:border-rental-blue-500 focus:ring-2 focus:ring-rental-blue-500/20 min-h-[44px]"
+              disabled={isLoading}
+            />
             <button
+              type="button"
               onClick={handleTextSubmit}
               disabled={!inputValue.trim() || isLoading}
-              className="px-4 py-3 h-[42px] bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center whitespace-nowrap"
+              className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-full bg-rental-blue-600 text-white flex items-center justify-center flex-shrink-0 hover:bg-rental-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed touch-manipulation"
+              aria-label="Send message"
             >
-              Send
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </button>
           </div>
         </div>
@@ -1432,6 +1658,59 @@ export function ConversationalListingAssistant({
                   Cancel
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Submit success popup: property name + Create another / Go to listings */}
+      {showSubmitSuccessPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowSubmitSuccessPopup(false)}>
+          <div
+            className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 font-outfit"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center mb-6">
+              <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-1">Listing submitted successfully</h3>
+              <p className="text-gray-600 text-sm">
+                Your property <span className="font-semibold text-gray-900">&quot;{submittedPropertyName}&quot;</span> has been submitted.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                onClick={async () => {
+                  setShowSubmitSuccessPopup(false)
+                  setSubmittedPropertyId(null)
+                  setSubmittedPropertyName('')
+                  setShowOptionalFields(false)
+                  setCurrentOptionalFieldIndex(-1)
+                  setShowCustomInput(null)
+                  await startNewConversation()
+                }}
+                className="flex-1 py-3 px-4 rounded-xl border-2 border-rental-blue-500 bg-white text-rental-blue-600 font-medium hover:bg-rental-blue-50 transition-colors"
+              >
+                Create another listing
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSubmitSuccessPopup(false)
+                  if (submittedPropertyId != null && onListingSubmitted) {
+                    onListingSubmitted(submittedPropertyId)
+                  }
+                  setSubmittedPropertyId(null)
+                  setSubmittedPropertyName('')
+                }}
+                className="flex-1 py-3 px-4 rounded-xl bg-rental-blue-600 text-white font-medium hover:bg-rental-blue-700 transition-colors"
+              >
+                Go to listings
+              </button>
             </div>
           </div>
         </div>

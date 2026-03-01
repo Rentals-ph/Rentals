@@ -504,16 +504,16 @@ export default function AgentsPage() {
         <div className="absolute inset-0 w-full h-full z-[1] bg-black/55" />
         <div className="relative z-10 max-w-4xl mx-auto text-center flex flex-col items-center justify-center min-h-[260px] sm:min-h-[300px] px-4">
           <h2 className="text-white text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-3 sm:mb-4 md:mb-5 leading-tight">
-            Become an Agent
+            Work with Our Agents
           </h2>
           <p className="text-white text-sm sm:text-base md:text-lg lg:text-xl mb-4 sm:mb-6 md:mb-8 max-w-2xl">
-            Join our network of trusted agents to help people find their perfect home.
+            Connect with our network of trusted agents to find your perfect home.
           </p>
           <Link
-            href="/register"
+            href="/properties"
             className="inline-flex items-center gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-[rgba(32,94,215,0.9)] text-white font-outfit text-sm sm:text-base font-semibold rounded-full transition-all hover:opacity-90 min-h-[44px] items-center justify-center touch-manipulation"
           >
-            <span>Join now</span>
+            <span>Browse properties</span>
             <svg width="20" height="20" className="flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>

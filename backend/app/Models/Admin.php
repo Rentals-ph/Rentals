@@ -59,14 +59,6 @@ class Admin extends Authenticatable
     }
 
     /**
-     * Get all agent approvals made by this admin.
-     */
-    public function agentApprovals()
-    {
-        return $this->hasMany(AgentApproval::class);
-    }
-
-    /**
      * Check if admin is a super admin.
      */
     public function isSuperAdmin(): bool
@@ -74,12 +66,5 @@ class Admin extends Authenticatable
         return $this->role === 'super_admin';
     }
 
-    /**
-     * Check if admin can approve agents.
-     */
-    public function canApproveAgents(): bool
-    {
-        return in_array($this->role, ['super_admin', 'admin']);
-    }
 }
 

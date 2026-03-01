@@ -40,4 +40,12 @@ class Company extends Model
     {
         return $this->hasMany(Team::class);
     }
+
+    /**
+     * Get all users (brokers/agents) associated with this company.
+     */
+    public function users()
+    {
+        return $this->hasMany(User::class, 'company_id');
+    }
 }
