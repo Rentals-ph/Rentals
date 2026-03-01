@@ -108,6 +108,7 @@ function Hero() {
   }, [latestProperties, chatModeSearchQuery, chatModeSortBy])
 
   const [showHistory, setShowHistory] = useState(false)
+  const [showResultsOverlay, setShowResultsOverlay] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const [conversations, setConversations] = useState<any[]>([])
   const [isLoadingConversations, setIsLoadingConversations] = useState(false)
@@ -579,6 +580,15 @@ function Hero() {
     }
   }, [showMenu])
 
+  // Lock body scroll when results overlay is open (mobile)
+  useEffect(() => {
+    if (showResultsOverlay) {
+      const prev = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => { document.body.style.overflow = prev }
+    }
+  }, [showResultsOverlay])
+
   // Hide scroll-down arrow when user scrolls past the hero
   useEffect(() => {
     const handleScroll = () => {
@@ -601,10 +611,10 @@ function Hero() {
     <section 
       ref={heroSectionRef}
       id="home" 
-      className={`relative overflow-hidden mt-0 transition-all duration-500 ease-in-out flex flex-col justify-center items-center ${
+      className={`relative mt-0 transition-all duration-500 ease-in-out flex flex-col justify-center items-center ${
         isChatMode 
-          ? 'min-h-0 flex-1 max-h-[120vh]'
-          : 'min-h-[500px] sm:min-h-[600px] md:min-h-[670px] max-h-none sm:max-h-[670px] pb-[200px]'
+          ? 'flex-none h-[100dvh] max-h-[100dvh] sm:h-[90vh] sm:max-h-[120vh] overflow-visible'
+          : 'min-h-[500px] sm:min-h-[600px] md:min-h-[670px] max-h-none sm:max-h-[670px] pb-[200px] overflow-hidden'
       }`}
     >
       {/* Background images with smooth transitions */}
@@ -617,7 +627,7 @@ function Hero() {
             src={imageSrc}
             alt={`Hero background ${index + 1}`}
             className={`w-full h-full object-cover object-center absolute top-0 left-0 transition-all duration-[2000ms] ease-in-out animate-[heroBackgroundAnimation_20s_ease-in-out_infinite] ${
-              isChatMode ? 'min-h-[900px]' : 'min-h-[500px] sm:min-h-[600px] md:min-h-[700px]'
+              isChatMode ? 'min-h-[100dvh] sm:min-h-[900px]' : 'min-h-[500px] sm:min-h-[600px] md:min-h-[700px]'
             } ${
               index === currentImageIndex ? 'opacity-100 z-[1]' : 'opacity-0'
             }`}
@@ -626,13 +636,13 @@ function Hero() {
       </div>
 
       {/* Hero content - padding-top so "Find your home" is never clipped below navbar; when chat mode fill remaining space below header */}
-      <div className={`flex flex-col items-center justify-center w-full text-center relative z-10 px-4 ${
+      <div className={`flex flex-col items-center justify-center w-full text-center relative z-10 ${
         isChatMode
-          ? 'min-h-0 pt-3 pb-3 sm:pt-6 sm:pb-4 md:pt-0 md:pb-0 flex-1'
-          : 'min-h-[400px] sm:min-h-[500px] pb-8 sm:pt-10 sm:pb-10 md:pt-0 md:pb-0 md:min-h-[600px] md:h-full'
+          ? 'min-h-0 pt-2 pb-2 px-3 sm:pt-6 sm:pb-4 sm:px-4 md:pt-0 md:pb-0 flex-1'
+          : 'min-h-[400px] sm:min-h-[500px] pb-8 sm:pt-10 sm:pb-10 md:pt-0 md:pb-0 md:min-h-[600px] md:h-full px-4'
       }`}>
         <h2 className={`font-outfit font-bold text-[#205ED7] mb-0 mt-0 tracking-tight leading-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] ${
-          isChatMode ? 'text-lg sm:text-xl md:text-2xl' : 'text-xl xs:text-2xl mobile:text-3xl mt-20 sm:text-4xl md:text-5xl lg:text-6xl'
+          isChatMode ? 'text-base xs:text-lg sm:text-xl md:text-2xl' : 'text-xl xs:text-2xl mobile:text-3xl mt-20 sm:text-4xl md:text-5xl lg:text-6xl'
         }`}>
           FIND YOUR HOME IN THE PHILIPPINES
         </h2>
@@ -694,39 +704,39 @@ function Hero() {
         )}
 
         {/* Search bar and filters or Chat container - constrained to same max-width as page; no horizontal overflow */}
-        <div className={`mt-4 sm:mt-6 md:mt-8 w-full max-w-7xl  mx-auto transition-all duration-500 px-0 sm:px-2 ${
-          isChatMode ? 'flex-1 min-h-0 flex flex-col' : 'max-h-[400px]'
+        <div className={`mt-2 sm:mt-6 md:mt-8 w-full max-w-7xl mx-auto transition-all duration-500 px-0 sm:px-2 ${
+          isChatMode ? 'flex-1 min-h-0 flex flex-col w-full' : 'max-h-[400px]'
         }`}>
           {isChatMode ? (
             <>
-              {/* Single rounded container for Chat Mode: header + two-column content (match reference) */}
-              <div className="flex flex-col flex-1  w-full bg-white/50 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] overflow-hidden">
-                {/* Inner header: logo, search, notifications, avatar */}
-                <header className="flex items-center gap-3 sm:gap-4 px-4 py-3 sm:py-3.5 border-b border-gray-200 bg-white flex-shrink-0">
-                  <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
-                    <img src={getAsset('LOGO_AI')} alt="" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover flex-shrink-0" />
-                    <span className="font-outfit font-bold text-gray-900 text-sm sm:text-base truncate">Rentals Assist</span>
+              {/* Single rounded container for Chat Mode: header + two-column content; on mobile overflow-visible so inner chat can scroll */}
+              <div className="flex flex-col flex-1 min-h-0 w-full bg-white/50 rounded-xl sm:rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] min-h-[55vh] sm:min-h-0 overflow-visible md:overflow-hidden">
+                {/* Inner header: logo, search, notifications, avatar - compact on mobile */}
+                <header className="flex items-center gap-2 sm:gap-4 px-3 py-2.5 sm:px-4 sm:py-3.5 border-b border-gray-200 bg-white flex-shrink-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-shrink-0">
+                    <img src={getAsset('LOGO_AI')} alt="" className="w-7 h-7 sm:w-9 sm:h-9 rounded-full object-cover flex-shrink-0" />
+                    <span className="font-outfit font-bold text-gray-900 text-xs sm:text-base truncate">Rentals Assist</span>
                   </div>
-                  <div className="flex-1 min-w-0 flex justify-left mx-auto">
-                    <div className="relative w-full">
-                      <svg className="absolute left-3 top-3 w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <div className="flex-1 min-w-0 flex justify-left mx-auto max-w-[180px] xs:max-w-none">
+                    <div className="relative w-full min-w-0">
+                      <svg className="absolute left-2.5 sm:left-3 top-3 w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                       <input
                         type="text"
-                        placeholder="Search location, title, price..."
-                        className="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-200 bg-gray-50 font-outfit text-sm placeholder-gray-500 outline-none transition-colors focus:border-rental-blue-500 focus:bg-white focus:ring-2 focus:ring-rental-blue-500/20"
+                        placeholder="Search..."
+                        className="w-full pl-8 sm:pl-9 pr-2 sm:pr-3 py-2 rounded-lg sm:rounded-xl border border-gray-200 bg-gray-50 font-outfit text-xs sm:text-sm placeholder-gray-500 outline-none transition-colors focus:border-rental-blue-500 focus:bg-white focus:ring-2 focus:ring-rental-blue-500/20"
                         value={chatModeSearchQuery}
                         onChange={(e) => setChatModeSearchQuery(e.target.value)}
                         aria-label="Filter properties"
                       />
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
                     <div className="chat-menu-container relative">
                       <button
                         type="button"
-                        className="p-2 hover:bg-white/80 rounded-lg transition-colors text-gray-600 hover:text-gray-900 touch-manipulation"
+                        className="p-2 min-h-[44px] min-w-[44px] hover:bg-white/80 rounded-lg transition-colors text-gray-600 hover:text-gray-900 touch-manipulation flex items-center justify-center"
                         onClick={() => setShowMenu(!showMenu)}
                         aria-label="More options"
                         title="More options"
@@ -756,17 +766,17 @@ function Hero() {
                         </div>
                       )}
                     </div>
-                    <button type="button" className="p-2 hover:bg-white/80 rounded-lg transition-colors text-gray-600 hover:text-gray-900 touch-manipulation" onClick={() => setIsChatMode(false)} aria-label="Close chat">
+                    <button type="button" className="p-2 min-h-[44px] min-w-[44px] hover:bg-white/80 rounded-lg transition-colors text-gray-600 hover:text-gray-900 touch-manipulation flex items-center justify-center" onClick={() => setIsChatMode(false)} aria-label="Close chat">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
                     </button>
                   </div>
                 </header>
-                {/* Two-column content below header */}
-                <div className="flex flex-col md:flex-row gap-3 sm:gap-4 flex-1 min-h-0 min-w-0 p-3 sm:p-4 bg-gray-100/50">
-              {/* Left column (~70%): Property results area (match reference) */}
-              <div className="flex flex-col flex-[3] min-w-0 min-h-0 bg-white rounded-xl sm:rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.06)] overflow-hidden order-1">
-                <div className="flex items-center justify-between gap-3 p-4 border-b border-gray-200 bg-white flex-shrink-0">
-                  <h3 className="font-outfit text-base sm:text-lg font-bold text-gray-900 m-0 truncate">
+                {/* Two-column content: on mobile only chat is shown; results open in overlay. On md+ both columns side by side. No overflow-hidden so chat messages can scroll on mobile. */}
+                <div className="flex flex-col md:flex-row gap-2 sm:gap-4 flex-1 min-h-0 min-w-0 p-2 sm:p-4 bg-gray-100/50 md:overflow-hidden overflow-visible">
+              {/* Left column: Property results - hidden on mobile (shown in overlay instead) */}
+              <div className="hidden md:flex flex-col flex-[3] min-w-0 min-h-0 bg-white rounded-xl sm:rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.06)] overflow-hidden order-1">
+                <div className="flex items-center justify-between gap-2 sm:gap-3 p-3 sm:p-4 border-b border-gray-200 bg-white flex-shrink-0">
+                  <h3 className="font-outfit text-sm sm:text-lg font-bold text-gray-900 m-0 truncate">
                     {filteredAndSortedProperties
                       ? `Found ${filteredAndSortedProperties.properties.length} propert${filteredAndSortedProperties.properties.length === 1 ? 'y' : 'ies'}${filteredAndSortedProperties.properties[0]?.city ? ` in ${filteredAndSortedProperties.properties[0].city}` : ''}`
                       : isLoading
@@ -775,7 +785,7 @@ function Hero() {
                   </h3>
                   <div className="flex-shrink-0">
                     <select
-                      className="font-outfit text-sm text-gray-700 bg-white border border-gray-300 rounded-lg py-2 pl-3 pr-8 appearance-none cursor-pointer hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-rental-blue-500/20 focus:border-rental-blue-500 bg-no-repeat bg-[length:10px_6px] bg-[right_0.5rem_center]"
+                      className="font-outfit text-xs sm:text-sm text-gray-700 bg-white border border-gray-300 rounded-lg py-2 pl-2 pr-7 sm:pl-3 sm:pr-8 appearance-none cursor-pointer hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-rental-blue-500/20 focus:border-rental-blue-500 bg-no-repeat bg-[length:10px_6px] bg-[right_0.5rem_center]"
                       style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")" }}
                       aria-label="Sort by"
                       value={chatModeSortBy}
@@ -791,7 +801,7 @@ function Hero() {
                     </select>
                   </div>
                 </div>
-                <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 min-h-0 [scrollbar-width:thin]">
+                <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 min-h-0 [scrollbar-width:thin]">
                   {isLoading && (!latestProperties || latestProperties.properties.length === 0) ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                       {[1, 2, 3, 4].map((i) => (
@@ -833,16 +843,37 @@ function Hero() {
                 </div>
               </div>
 
-              {/* Right column (~30%): AI Chat Panel - sticky, rounded, shadow, white (match reference) */}
-              <div className="flex flex-col flex-[3] min-w-0 min-h-0 md:max-w-[28rem] bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] overflow-hidden order-2 flex-shrink-0">
-                <div className="flex items-center justify-between px-4 py-3 sm:py-4 border-b border-gray-200 bg-white flex-shrink-0">
+              {/* Mobile only: "View results" button when there are results */}
+              {filteredAndSortedProperties && filteredAndSortedProperties.properties.length > 0 && (
+                <div className="md:hidden flex-shrink-0 px-2 pb-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowResultsOverlay(true)}
+                    className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-rental-blue-600 text-white font-outfit font-semibold text-sm shadow-md hover:bg-rental-blue-700 active:scale-[0.98] transition-colors touch-manipulation"
+                    aria-label={`View ${filteredAndSortedProperties.properties.length} results`}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                      <path d="M4 6h16M4 10h16M4 14h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                    View {filteredAndSortedProperties.properties.length} propert{filteredAndSortedProperties.properties.length === 1 ? 'y' : 'ies'}
+                  </button>
+                </div>
+              )}
+
+              {/* Chat column: full width on mobile, constrained on md+ */}
+              <div className="flex flex-col flex-[3] min-w-0 min-h-0 md:max-w-[28rem] bg-white rounded-xl sm:rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] overflow-hidden order-2 flex-shrink-0 flex-1 min-h-0">
+                <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-4 border-b border-gray-200 bg-white flex-shrink-0">
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                    <img src={getAsset('LOGO_AI')} alt="" className="w-8 h-8 sm:w-9 sm:h-9 flex-shrink-0 rounded-full object-cover" />
-                    <h3 className="font-outfit text-base sm:text-lg font-bold text-gray-900 truncate">Rentals Assist</h3>
+                    <img src={getAsset('LOGO_AI')} alt="" className="w-7 h-7 sm:w-9 sm:h-9 flex-shrink-0 rounded-full object-cover" />
+                    <h3 className="font-outfit text-sm sm:text-lg font-bold text-gray-900 truncate">Rentals Assist</h3>
                   </div>
                   
                 </div>
-                <div ref={chatMessagesContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-3 min-h-0 bg-white">
+                <div
+                  ref={chatMessagesContainerRef}
+                  className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 space-y-3 min-h-0 bg-white [scrollbar-width:thin] touch-pan-y"
+                  style={{ WebkitOverflowScrolling: 'touch' }}
+                >
                   {isLoadingHistory ? (
                     <div className="flex items-start gap-2 max-w-[90%] sm:max-w-[85%]">
                       <img src={getAsset('LOGO_AI')} alt="" className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 rounded-full object-cover" />
@@ -900,16 +931,16 @@ function Hero() {
                   )}
                 </div>
                 <div className="border-t border-gray-200 bg-white flex-shrink-0">
-                  <form className="flex items-center gap-2 p-4" onSubmit={handleChatSubmit}>
+                  <form className="flex items-center gap-2 p-3 sm:p-4" onSubmit={handleChatSubmit}>
                     <input
                       type="text"
-                      className="flex-1 min-w-0 p-3 px-4 border border-gray-300 rounded-xl font-outfit text-sm outline-none transition-colors focus:border-rental-blue-500 focus:ring-2 focus:ring-rental-blue-500/20 min-h-[44px]"
+                      className="flex-1 min-w-0 p-2.5 sm:p-3 px-3 sm:px-4 border border-gray-300 rounded-lg sm:rounded-xl font-outfit text-sm outline-none transition-colors focus:border-rental-blue-500 focus:ring-2 focus:ring-rental-blue-500/20 min-h-[44px]"
                       placeholder={isLoading ? 'Searching...' : 'Type your message...'}
                       value={chatMessage}
                       onChange={(e) => setChatMessage(e.target.value)}
                       disabled={isLoading}
                     />
-                    <button type="submit" className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-full bg-rental-blue-600 text-white flex items-center justify-center flex-shrink-0 hover:bg-rental-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed touch-manipulation" aria-label="Send message">
+                    <button type="submit" className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-full bg-rental-blue-600 text-white flex items-center justify-center flex-shrink-0 hover:bg-rental-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed touch-manipulation active:scale-95" aria-label="Send message">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </button>
                   </form>
@@ -917,6 +948,81 @@ function Hero() {
               </div>
                 </div>
               </div>
+
+              {/* Mobile: Results overlay - slide-up sheet when "View results" is tapped */}
+              {showResultsOverlay && (
+                <div
+                  className="fixed inset-0 z-[1001] md:hidden flex flex-col"
+                  aria-modal="true"
+                  aria-label="Property results"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setShowResultsOverlay(false)}
+                    className="absolute inset-0 bg-black/50 transition-opacity"
+                    aria-label="Close results"
+                  />
+                  <div
+                    className="relative flex flex-col flex-1 mt-auto bg-white rounded-t-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.12)] max-h-[88vh] animate-slideInFromBottom"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-center justify-between gap-2 p-4 border-b border-gray-200 flex-shrink-0">
+                      <h3 className="font-outfit text-base font-bold text-gray-900 m-0 truncate">
+                        {filteredAndSortedProperties
+                          ? `Found ${filteredAndSortedProperties.properties.length} propert${filteredAndSortedProperties.properties.length === 1 ? 'y' : 'ies'}${filteredAndSortedProperties.properties[0]?.city ? ` in ${filteredAndSortedProperties.properties[0].city}` : ''}`
+                          : 'Results'}
+                      </h3>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <select
+                          className="font-outfit text-sm text-gray-700 bg-white border border-gray-300 rounded-lg py-2 pl-3 pr-8 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-rental-blue-500/20 focus:border-rental-blue-500 bg-no-repeat bg-[length:10px_6px] bg-[right_0.5rem_center]"
+                          style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")" }}
+                          aria-label="Sort by"
+                          value={chatModeSortBy}
+                          onChange={(e) => setChatModeSortBy(e.target.value)}
+                        >
+                          <option value="recommended">Sort by: Recommended</option>
+                          <option value="price-low">Price: Low to High</option>
+                          <option value="price-high">Price: High to Low</option>
+                          <option value="newest">Newest First</option>
+                          <option value="bedrooms">Most Bedrooms</option>
+                          <option value="bathrooms">Most Bathrooms</option>
+                          <option value="area">Largest Area</option>
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => setShowResultsOverlay(false)}
+                          className="p-2 min-h-[44px] min-w-[44px] rounded-lg hover:bg-gray-100 text-gray-600 flex items-center justify-center touch-manipulation"
+                          aria-label="Close results"
+                        >
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 min-h-0 [scrollbar-width:thin]">
+                      {filteredAndSortedProperties && filteredAndSortedProperties.properties.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-3 pb-6">
+                          <Suspense fallback={null}>
+                            {filteredAndSortedProperties.properties.map((property, index) => (
+                              <SimplePropertyCard
+                                key={`${property.id}-${index}-overlay-${filteredAndSortedProperties.messageIndex ?? index}`}
+                                id={property.id}
+                                title={property.title}
+                                location={property.location || property.city || property.street_address || undefined}
+                                price={`₱${property.price.toLocaleString('en-US')}${property.price_type ? `/${property.price_type}` : ''}`}
+                                image={property.image_url || (property.image ? getImageUrl(property.image) : ASSETS.PLACEHOLDER_PROPERTY_MAIN)}
+                                variant="chat"
+                                bedrooms={property.bedrooms}
+                                bathrooms={property.bathrooms}
+                                area={property.area}
+                              />
+                            ))}
+                          </Suspense>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              )}
             </>
           ) : (
             <>
@@ -1055,13 +1161,13 @@ function Hero() {
           )}
         </div>
 
-        {/* Recommended Searches - Outside search container; extra bottom space in chat mode on mobile so they don't sit behind the hero banner */}
-        <div className={`relative z-10 mt-3 sm:mt-3.5 w-full max-w-4xl px-2 sm:px-5 ${isChatMode ? 'mb-24 sm:mb-28 md:mb-32' : ''}`}>
-          <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center">
+        {/* Recommended Searches - Outside search container; in chat mode on mobile: compact single-line scroll so chat has more room */}
+        <div className={`relative z-10 w-full max-w-4xl px-2 sm:px-5 ${isChatMode ? 'mt-2 sm:mt-3.5 mb-20 sm:mb-28 md:mb-32' : 'mt-3 sm:mt-3.5'}`}>
+          <div className={`flex gap-1.5 sm:gap-2 justify-center ${isChatMode ? 'flex-nowrap overflow-x-auto overflow-y-hidden py-1 -mx-2 px-2 [scrollbar-width:none] sm:flex-wrap sm:overflow-visible' : 'flex-wrap'}`}>
             {recommendedSearches.map((search, index) => (
               <button
                 key={index}
-                className="py-1.5 sm:py-2 px-3 sm:px-4 bg-white/95 border border-white/30 rounded-[20px] text-gray-700 font-outfit text-xs sm:text-[13px] font-normal cursor-pointer transition-all hover:bg-[#205ED7] hover:text-white hover:border-[#205ED7] hover:-translate-y-px hover:shadow-md whitespace-normal break-words max-w-full"
+                className={`py-1.5 sm:py-2 px-3 sm:px-4 bg-white/95 border border-white/30 rounded-[20px] text-gray-700 font-outfit text-xs sm:text-[13px] font-normal cursor-pointer transition-all hover:bg-[#205ED7] hover:text-white hover:border-[#205ED7] hover:-translate-y-px hover:shadow-md touch-manipulation ${isChatMode ? 'flex-shrink-0 whitespace-nowrap sm:whitespace-normal sm:break-words' : 'whitespace-normal break-words max-w-full'}`}
                 onClick={() => handleRecommendedSearch(search)}
               >
                 {search}
@@ -1098,8 +1204,10 @@ function Hero() {
         </button>
       )}
 
-      {/* Hero Banner - Positioned absolutely at bottom (hidden in chat mode) */}
-      {<HeroBanner />}
+      {/* Hero Banner - hidden on mobile only when in chat mode so chat isn't covered; visible on desktop and when not in chat mode */}
+      <div className={isChatMode ? 'max-md:hidden' : ''}>
+        <HeroBanner />
+      </div>
 
       {/* Conversation History Sidebar */}
       {showHistory && (

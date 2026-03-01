@@ -218,38 +218,43 @@ const FeaturedProperties = () => {
   return (
     <section
       id="properties"
-      className="border-t-0 relative min-h-[50vh] sm:min-h-[60vh] flex px-4 sm:px-6 md:px-10 lg:px-[150px] flex-col justify-center py-8 sm:py-12 pb-4 before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-gray-200 before:to-transparent after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-gray-200 after:to-transparent"
+      className="border-t-0 relative min-h-[50vh] sm:min-h-[60vh] flex px-3 xs:px-4 sm:px-6 md:px-10 lg:px-[150px] flex-col justify-center py-6 sm:py-12 pb-4 before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-gray-200 before:to-transparent after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-gray-200 after:to-transparent"
     >
       <div className="w-full">
-      <div className="relative flex justify-left items-end mb-4"
-      style={{ borderBottom: '2px solid #E5E7EB' }}>
-        <div className="text-left px-2">
-          <h2 className="font-outfit text-2xl sm:text-4xl md:text-4xl font-bold text-gray-900 m-0 leading-tight tracking-tight">
-            Featured Properties
-          </h2>
-          <p className="text-gray-600 font-outfit text-sm sm:text-base md:text-lg font-light mb-4 sm:mb-5 mt-2">
-            Handpicked properties from our verified agents
-          </p>
-        </div>
-        <Link
-          href="/properties"
-          className="order-first sm:order-none sm:absolute sm:right-4 md:right-10 lg:right-0 mb-4 text-rental-blue-500 bg-white font-outfit text-sm sm:text-base font-medium no-underline flex items-center justify-center gap-2 hover:bg-blue-200 transition-colors border-2 border-rental-blue-500 rounded-2xl px-4 py-2 sm:px-5 sm:py-2"
-          style={{ border: '2px solid #205ED7' }}
+        {/* Header: title + subtitle; on mobile stack with View More below, on sm+ link aligned right */}
+        <div
+          className="relative flex flex-col xs:flex-row flex-wrap items-start sm:items-end gap-3 sm:gap-0 mb-4 pb-4"
+          style={{ borderBottom: '2px solid #E5E7EB' }}
         >
-          View More Properties
-        </Link>
-      </div>
-      
+          <div className="text-left px-0 xs:px-2 min-w-0 flex-1">
+            <h2 className="font-outfit text-xl xs:text-2xl sm:text-4xl font-bold text-gray-900 m-0 leading-tight tracking-tight">
+              Featured Properties
+            </h2>
+            <p className="text-gray-600 font-outfit text-xs xs:text-sm sm:text-base md:text-lg font-light mt-1 sm:mt-2 mb-0">
+              Handpicked properties from our verified agents
+            </p>
+          </div>
+          <Link
+            href="/properties"
+            className="w-full xs:w-auto order-2 xs:order-none sm:absolute sm:right-4 md:right-10 lg:right-0 text-rental-blue-500 bg-white font-outfit text-sm font-medium no-underline flex items-center justify-center gap-2 hover:bg-blue-200 transition-colors border-2 border-rental-blue-500 rounded-xl sm:rounded-2xl px-4 py-2.5 sm:px-5 sm:py-2 touch-manipulation"
+            style={{ border: '2px solid #205ED7' }}
+          >
+            View More Properties
+          </Link>
+        </div>
       </div>
 
-      {/* Location filter row + View More - stack on mobile */}
+      {/* Location chips: horizontal scroll on mobile when many, wrap on larger screens */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center sm:items-center gap-3 sm:gap-2 mb-2 relative">
-        <div className="subcategory-row flex items-center gap-0 flex-wrap justify-center p-1 rounded-lg w-full sm:w-auto" style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: '#E5E7EB' }}>
+        <div
+          className="subcategory-row flex items-center gap-1.5 sm:gap-2 overflow-x-auto overflow-y-hidden flex-nowrap sm:flex-wrap justify-start sm:justify-center p-1.5 rounded-lg w-full sm:w-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: '#E5E7EB' }}
+        >
           {locations.map((loc) => (
             <button
               key={loc}
               type="button"
-              className={`subcategory-chip px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
+              className={`subcategory-chip flex-shrink-0 px-3 sm:px-4 py-2 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 touch-manipulation min-h-[40px] ${
                 selectedLocation === loc
                   ? 'bg-blue-600 text-white hover:bg-blue-700'
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
@@ -260,22 +265,22 @@ const FeaturedProperties = () => {
             </button>
           ))}
         </div>
-        
       </div>
 
-      <div className="relative w-full mt-4 sm:mt-6 overflow-hidden -mx-4 sm:mx-0 px-2 sm:px-0">
-        <div 
-          className="flex gap-3 sm:gap-5 overflow-x-auto overflow-y-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-2 snap-x snap-mandatory"
+      {/* Carousel: responsive card widths; touch-friendly scroll on mobile */}
+      <div className="relative w-full mt-4 sm:mt-6 overflow-hidden -mx-3 xs:-mx-4 sm:mx-0 px-2 sm:px-0">
+        <div
+          className="flex gap-2 sm:gap-5 overflow-x-auto overflow-y-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-2 sm:pb-3 snap-x snap-mandatory touch-pan-x"
           ref={propertyCarouselRef}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
-          style={{ scrollBehavior: 'auto' }}
+          style={{ scrollBehavior: 'auto', WebkitOverflowScrolling: 'touch' }}
         >
           {loading || (selectedLocation !== 'All Locations' && browseLoading) ? (
             Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={`skeleton-${i}`}
-                className="featured-property-card-slot flex-shrink-0 w-[280px] min-w-[280px] sm:w-[360px] sm:min-w-[360px] md:w-[420px] md:min-w-[420px] mx-1 snap-start"
+                className="featured-property-card-slot flex-shrink-0 w-[260px] min-w-[260px] xs:w-[280px] xs:min-w-[280px] sm:w-[360px] sm:min-w-[360px] md:w-[420px] md:min-w-[420px] mx-0.5 sm:mx-1 snap-start"
               >
                 <VerticalPropertyCardSkeleton />
               </div>
@@ -301,7 +306,7 @@ const FeaturedProperties = () => {
                 return (
                   <div
                     key={`property-${setIndex}-${property.id}`}
-                    className="featured-property-card-slot flex-shrink-0 w-[280px] min-w-[280px] sm:w-[360px] sm:min-w-[360px] md:w-[420px] md:min-w-[420px] mx-1 snap-start"
+                    className="featured-property-card-slot flex-shrink-0 w-[260px] min-w-[260px] xs:w-[280px] xs:min-w-[280px] sm:w-[360px] sm:min-w-[360px] md:w-[420px] md:min-w-[420px] mx-0.5 sm:mx-1 snap-start"
                   >
                     <VerticalPropertyCard 
                       id={property.id}

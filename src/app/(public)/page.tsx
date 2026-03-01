@@ -15,7 +15,7 @@ import { TestimonialCardSkeleton } from '@/components/common/TestimonialCardSkel
 /** Featured Properties section skeleton (title + chips + carousel of cards) */
 function FeaturedPropertiesFallback() {
   return (
-    <section className="border-t-0 relative min-h-[60vh] flex px-6 md:px-10 lg:px-[150px] flex-col justify-center py-12 pb-4">
+    <section className="border-t-0 relative min-h-[60vh] flex px-3 xs:px-4 sm:px-6 md:px-10 lg:px-[150px] flex-col justify-center py-6 sm:py-12 pb-4">
       <div className="w-full">
         <div className="relative flex justify-center items-end mb-4">
           <div className="text-center">
@@ -30,9 +30,9 @@ function FeaturedPropertiesFallback() {
             ))}
           </div>
         </div>
-        <div className="flex gap-3 sm:gap-5 overflow-hidden mt-6 pb-2">
+        <div className="flex gap-2 sm:gap-5 overflow-hidden mt-6 pb-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex-shrink-0 w-[280px] min-w-[280px] sm:w-[360px] sm:min-w-[360px] md:w-[420px] md:min-w-[420px] mx-1">
+            <div key={i} className="flex-shrink-0 w-[260px] min-w-[260px] xs:w-[280px] xs:min-w-[280px] sm:w-[360px] sm:min-w-[360px] md:w-[420px] md:min-w-[420px] mx-0.5 sm:mx-1">
               <VerticalPropertyCardSkeleton />
             </div>
           ))}
