@@ -33,6 +33,19 @@ export default function PublicLayoutClient({
   const { isMobile, sidebarOffset } = useMobileLayout()
 
   const leftOpen = openSidebar === 'left'
+
+  // Restrict page scroll when any public sidebar (left or right) is open; sidebar content still scrolls
+  useEffect(() => {
+    if (openSidebar) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [openSidebar])
+
   const pushStyle =
     isMobile && leftOpen
       ? {
