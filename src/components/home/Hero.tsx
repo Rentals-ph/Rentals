@@ -613,7 +613,7 @@ function Hero() {
       id="home" 
       className={`relative mt-0 transition-all duration-500 ease-in-out flex flex-col justify-center items-center ${
         isChatMode 
-          ? 'flex-none h-[100dvh] max-h-[100dvh] sm:h-[90vh] sm:max-h-[120vh] overflow-visible'
+          ? 'min-h-[50vh] sm:min-h-[55vh] pb-[20px] overflow-visible'
           : 'min-h-[500px] sm:min-h-[600px] md:min-h-[670px] max-h-none sm:max-h-[670px] pb-[200px] overflow-hidden'
       }`}
     >
@@ -705,12 +705,12 @@ function Hero() {
 
         {/* Search bar and filters or Chat container - constrained to same max-width as page; no horizontal overflow */}
         <div className={`mt-2 sm:mt-6 md:mt-8 w-full max-w-7xl mx-auto transition-all duration-500 px-0 sm:px-2 ${
-          isChatMode ? 'flex-1 min-h-0 flex flex-col w-full' : 'max-h-[400px]'
+          isChatMode ? 'flex flex-col w-full' : 'max-h-[400px]'
         }`}>
           {isChatMode ? (
             <>
               {/* Single rounded container for Chat Mode: header + two-column content; on mobile overflow-visible so inner chat can scroll */}
-              <div className="flex flex-col flex-1 min-h-0 w-full bg-white/50 rounded-xl sm:rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] min-h-[55vh] sm:min-h-0 overflow-visible md:overflow-hidden">
+              <div className="flex flex-col w-full bg-white/50 rounded-xl sm:rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] min-h-[45vh] sm:min-h-[50vh] overflow-visible md:overflow-hidden">
                 {/* Inner header: logo, search, notifications, avatar - compact on mobile */}
                 <header className="flex items-center gap-2 sm:gap-4 px-3 py-2.5 sm:px-4 sm:py-3.5 border-b border-gray-200 bg-white flex-shrink-0">
                   <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-shrink-0">
@@ -774,7 +774,7 @@ function Hero() {
                 {/* Two-column content: on mobile only chat is shown; results open in overlay. On md+ both columns side by side. No overflow-hidden so chat messages can scroll on mobile. */}
                 <div className="flex flex-col md:flex-row gap-2 sm:gap-4 flex-1 min-h-0 min-w-0 p-2 sm:p-4 bg-gray-100/50 md:overflow-hidden overflow-visible">
               {/* Left column: Property results - hidden on mobile (shown in overlay instead) */}
-              <div className="hidden md:flex flex-col flex-[3] min-w-0 min-h-0 bg-white rounded-xl sm:rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.06)] overflow-hidden order-1">
+              <div className="hidden md:flex flex-col flex-[3] min-w-0 min-h-0 max-h-[70vh] bg-white rounded-xl sm:rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.06)] overflow-hidden order-1">
                 <div className="flex items-center justify-between gap-2 sm:gap-3 p-3 sm:p-4 border-b border-gray-200 bg-white flex-shrink-0">
                   <h3 className="font-outfit text-sm sm:text-lg font-bold text-gray-900 m-0 truncate">
                     {filteredAndSortedProperties
@@ -861,7 +861,7 @@ function Hero() {
               )}
 
               {/* Chat column: full width on mobile, constrained on md+ */}
-              <div className="flex flex-col flex-[3] min-w-0 min-h-0 md:max-w-[28rem] bg-white rounded-xl sm:rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] overflow-hidden order-2 flex-shrink-0 flex-1 min-h-0">
+              <div className="flex flex-col flex-[3] min-w-0 min-h-0 max-h-[70vh] md:max-w-[28rem] bg-white rounded-xl sm:rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] overflow-hidden order-2 flex-shrink-0">
                 <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-4 border-b border-gray-200 bg-white flex-shrink-0">
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                     <img src={getAsset('LOGO_AI')} alt="" className="w-7 h-7 sm:w-9 sm:h-9 flex-shrink-0 rounded-full object-cover" />
