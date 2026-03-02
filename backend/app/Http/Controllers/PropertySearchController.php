@@ -144,10 +144,20 @@ class PropertySearchController extends Controller
         // Otherwise use the AI intent detection
         $isSearch = !$isGeneralAvailabilityQuestion && $intent['is_search'] && $intent['confidence'] > 0.5;
 
+        // Force search for explicit "latest/new/recent listings in [place]" type questions
+        // so the AI always recognizes them even if intent or API misclassifies
+        if ($this->isExplicitListingSearch($userQuery)) {
+            $isSearch = true;
+        }
+
         // ── Step 4: Handle based on intent ──
         if ($isSearch) {
             // This is a search query - perform property search
             $criteria = $this->groqService->parseUserQuery($userQuery);
+            // When user asked for "latest/new listings in [place]" but AI returned empty criteria, fill from query
+            if ($this->isExplicitListingSearch($userQuery)) {
+                $criteria = $this->ensureListingSearchCriteria($userQuery, $criteria);
+            }
             $properties = $this->queryProperties($criteria);
             
             // Generate recommendation response with context
@@ -390,6 +400,62 @@ class PropertySearchController extends Controller
 
 
     /**
+     * Check if query is an explicit "latest/new/recent listings in [city]" style search.
+     * These should always be treated as property search, not conversational.
+     *
+     * @param string $query
+     * @return bool
+     */
+    protected function isExplicitListingSearch(string $query): bool
+    {
+        $q = strtolower(trim($query));
+        // "latest listings in Cebu City", "new listings in Manila", "recent listings in Makati"
+        $listingPatterns = [
+            '/\b(latest|newest|new|recent|fresh)\s+(listings?|properties|rentals?)\s+(in|at|for)\s+/i',
+            '/\b(listings?|properties|rentals?)\s+(in|at)\s+.+\s+(latest|newest|new|recent)\b/i',
+            '/\b(latest|newest|new|recent)\s+(listings?|properties|rentals?)\s*$/i',
+            '/\b(latest|newest|new|recent)\s+(in|at)\s+.+/i',
+        ];
+        foreach ($listingPatterns as $pattern) {
+            if (preg_match($pattern, $q)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * When query is "latest listings in Cebu City" style, ensure criteria has location and sort_by.
+     * Fills in from the raw query if AI returned empty or partial criteria.
+     *
+     * @param string $userQuery
+     * @param array $criteria
+     * @return array
+     */
+    protected function ensureListingSearchCriteria(string $userQuery, array $criteria): array
+    {
+        $criteria = array_merge(['sort_by' => 'newest'], $criteria);
+        if (!empty($criteria['location']) || !empty($criteria['city'])) {
+            return $criteria;
+        }
+        // Extract place from "latest listings in Cebu City", "new listings in Manila", etc.
+        if (preg_match('/\b(?:latest|newest|new|recent|fresh)\s+(?:listings?|properties|rentals?)\s+(?:in|at|for)\s+(.+?)(?:\s*$|,|\.)/i', $userQuery, $m)) {
+            $place = trim($m[1]);
+            if ($place !== '') {
+                $criteria['location'] = $place;
+                $criteria['city'] = $place;
+            }
+        } elseif (preg_match('/\b(?:in|at)\s+([A-Za-z\s]+?)(?:\s*$|,|\.)/i', $userQuery, $m)) {
+            $place = trim($m[1]);
+            if (strlen($place) > 1) {
+                $criteria['location'] = $place;
+                $criteria['city'] = $place;
+            }
+        }
+        return $criteria;
+    }
+
+    /**
      * Check if query is a general availability question
      * 
      * @param string $query
@@ -454,10 +520,11 @@ class PropertySearchController extends Controller
     {
         $specificCriteria = [
             'bedroom', 'bathroom', 'garage', 'parking',
-            'in ', 'at ', 'near ', 'quezon', 'makati', 'bgc', 'manila',
+            'in ', 'at ', 'near ', 'quezon', 'makati', 'bgc', 'manila', 'cebu', 'davao',
             'condo', 'house', 'apartment', 'townhouse',
             'under', 'below', 'above', 'over', 'million', 'thousand',
             '₱', 'peso', 'price', 'cost',
+            'listing', 'listings', 'latest', 'newest', 'recent', 'rentals',
         ];
         
         foreach ($specificCriteria as $criterion) {
@@ -1068,9 +1135,14 @@ class PropertySearchController extends Controller
         // In relaxed mode, we skip price, bedrooms, bathrooms, amenities, etc.
         // to allow more flexible matching based on location or property type
 
-        return $query
-            ->orderBy('price', 'asc')
-            ->limit(10);
+        // Order by newest first when user asked for "latest/new/recent" listings
+        if (!empty($criteria['sort_by']) && $criteria['sort_by'] === 'newest') {
+            $query->orderByDesc('published_at')->orderByDesc('created_at');
+        } else {
+            $query->orderBy('price', 'asc');
+        }
+
+        return $query->limit(10);
     }
 
     /**

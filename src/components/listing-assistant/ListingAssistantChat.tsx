@@ -107,12 +107,14 @@ export function ListingAssistantChat({
     }
   }
 
-  // Handle sending a message
-  const handleSendMessage = async () => {
-    const message = inputValue.trim()
+  // Core send logic so we can reuse for quick-reply buttons
+  const sendMessage = async (raw: string) => {
+    const message = raw.trim()
     if (!message || isLoading) return
 
-    setInputValue('')
+    if (raw === inputValue) {
+      setInputValue('')
+    }
     setIsLoading(true)
     setError(null)
 
@@ -155,6 +157,11 @@ export function ListingAssistantChat({
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Handle sending from textarea / Enter key
+  const handleSendMessage = async () => {
+    await sendMessage(inputValue)
   }
 
   // Handle key press
@@ -447,13 +454,37 @@ export function ListingAssistantChat({
         <div className="flex-1 overflow-y-auto p-4">
           {messages.length === 0 && !isLoading && <WelcomeMessage />}
           
-          {messages.map((msg, idx) => (
-            <MessageBubble 
-              key={idx} 
-              message={msg} 
-              isLatest={idx === messages.length - 1}
-            />
-          ))}
+          {messages.map((msg, idx) => {
+            const isLatest = idx === messages.length - 1
+            let buttons: { label: string; value: string | number; onClick: () => void; variant?: 'default' | 'selected' | 'primary' | 'success' }[] | undefined
+
+            // When assistant asks about price type, show quick-select buttons
+            if (
+              msg.role === 'assistant' &&
+              isLatest &&
+              /price (type|is this price monthly|monthly, weekly, daily, or yearly)/i.test(msg.content)
+            ) {
+              const options = ['Monthly', 'Weekly', 'Daily', 'Yearly']
+              buttons = options.map((label) => ({
+                label,
+                value: label,
+                variant: label === 'Monthly' ? 'primary' : 'default',
+                onClick: () => {
+                  // Send the choice immediately as a message
+                  sendMessage(label)
+                },
+              }))
+            }
+
+            return (
+              <MessageBubble
+                key={idx}
+                message={msg}
+                isLatest={isLatest}
+                buttons={buttons}
+              />
+            )
+          })}
           
           {isLoading && <TypingIndicator />}
           

@@ -257,7 +257,24 @@ export function FloatingPropertyChat({ onPropertiesResult }: FloatingPropertyCha
               </div>
             ) : (
               <>
-                <h4 className="font-outfit font-semibold text-gray-900 text-sm mb-2">Chat with Rentals Assist</h4>
+                   <h4 className="font-outfit font-semibold text-gray-900 text-sm mb-2">Chat with Rentals Assist</h4>
+                {chatMessages.map((msg, index) => (
+                  <div key={index} className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    {msg.role === 'assistant' ? (
+                      <div className="flex items-start gap-2 max-w-[90%]">
+                        <img src={getAsset('LOGO_AI')} alt="" className="h-8 w-8 flex-shrink-0 rounded-full object-cover" />
+                        <div
+                          className="ai-message-content p-3 bg-white rounded-2xl rounded-tl-sm font-outfit text-sm leading-relaxed break-words text-left"
+                          style={{ border: '3px solid #0A369D' }}
+                          dangerouslySetInnerHTML={{ __html: formatAIMessage(msg.message) }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="max-w-[90%] p-3 px-4 bg-gray-100 rounded-2xl rounded-br-sm font-outfit text-sm leading-relaxed break-words text-left text-gray-900" dangerouslySetInnerHTML={{ __html: msg.message.replace(/\n/g, '<br />') }} />
+                    )}
+                  </div>
+                ))}
+             
                 {chatMessages.length <= 1 && (
                   <div className="flex flex-col gap-2 mb-3">
                     {suggestedPromptsLoading
@@ -276,22 +293,6 @@ export function FloatingPropertyChat({ onPropertiesResult }: FloatingPropertyCha
                         ))}
                   </div>
                 )}
-                {chatMessages.map((msg, index) => (
-                  <div key={index} className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    {msg.role === 'assistant' ? (
-                      <div className="flex items-start gap-2 max-w-[90%]">
-                        <img src={getAsset('LOGO_AI')} alt="" className="h-8 w-8 flex-shrink-0 rounded-full object-cover" />
-                        <div
-                          className="ai-message-content p-3 bg-white rounded-2xl rounded-tl-sm font-outfit text-sm leading-relaxed break-words text-left"
-                          style={{ border: '3px solid #0A369D' }}
-                          dangerouslySetInnerHTML={{ __html: formatAIMessage(msg.message) }}
-                        />
-                      </div>
-                    ) : (
-                      <div className="max-w-[90%] p-3 px-4 bg-gray-100 rounded-2xl rounded-br-sm font-outfit text-sm leading-relaxed break-words text-left text-gray-900" dangerouslySetInnerHTML={{ __html: msg.message.replace(/\n/g, '<br />') }} />
-                    )}
-                  </div>
-                ))}
                 {isLoading && (
                   <div className="flex items-start gap-2">
                     <img src={getAsset('LOGO_AI')} alt="" className="h-8 w-8 flex-shrink-0 rounded-full object-cover" />

@@ -215,6 +215,7 @@ Return ONLY a valid JSON object with the following fields (extract ANYTHING ment
 - street_address    (string or null)  — street address or landmark
 - is_featured       (boolean or null) — true if user wants featured properties, false if not, null if not mentioned
 - search_text       (string or null)  — any general text to search in title or description (property names, keywords, etc.)
+- sort_by           (string or null)  — "newest" when user says latest/newest/new/recent/fresh listings or properties (order by newest first); otherwise null
 
 Rules:
 - Return null for any field not mentioned or unclear
@@ -226,6 +227,8 @@ Rules:
 - Normalize property types to match database values (e.g. "condo" → "Condominium", "house" → "House")
 - Normalize amenities to common terms (e.g. "pool" → "Swimming Pool", "parking" → "Parking")
 - If user mentions a property name or building name, include it in both "location" and "search_text"
+- For "Latest listings in Cebu City", "New listings in Manila", etc.: set location and/or city to the place (e.g. "Cebu City", "Manila") and set sort_by to "newest"
+- When user says "latest", "newest", "new", "recent", or "fresh" in relation to listings/properties/rentals, set sort_by to "newest"
 - Do not include any explanation or text outside the JSON object
 PROMPT
                     ],
@@ -484,6 +487,12 @@ Examples of SEARCH queries (user wants to find specific properties):
 - "find me a house" (user is requesting to search for houses)
 - "I need a 2BR condo" (user is requesting to search)
 - "looking for apartments" (user is requesting to search)
+- "Latest listings in Cebu City" = SEARCH (user wants to see newest properties in that city)
+- "New listings in Manila" = SEARCH
+- "Recent listings in Makati" = SEARCH
+- "Newest properties in Davao" = SEARCH
+- "Show me the latest rentals in Quezon City" = SEARCH
+- Any phrase like "latest/new/newest/recent listings (in|at) [city/place]" or "newest properties in [place]" = SEARCH
 - Any request that asks to "find", "search", "show", "get", "need", "looking for" a property type or specific criteria = SEARCH
 
 Examples of CONVERSATIONAL/GENERAL queries (NOT searches):
@@ -499,6 +508,7 @@ Examples of CONVERSATIONAL/GENERAL queries (NOT searches):
 - General questions about availability, existence, or asking for information without search intent
 
 IMPORTANT RULES:
+- "Latest listings in [city]", "New listings in [city]", "Recent listings in [city]", "newest properties in [city]" are ALWAYS SEARCH (confidence 1.0)
 - Requests to "find", "search", "show", "get", "need", "looking for" a property type = SEARCH
 - Questions about general availability (e.g., "is there", "are there", "do you have") WITHOUT search intent are CONVERSATIONAL
 - Questions asking "what properties" without specific criteria are CONVERSATIONAL
