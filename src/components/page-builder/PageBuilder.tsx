@@ -53,7 +53,8 @@ import {
   FiRotateCcw,
   FiRotateCw,
   FiHelpCircle,
-  FiSave
+  FiSave,
+  FiHome
 } from 'react-icons/fi'
 
 interface PageBuilderProps {
@@ -94,6 +95,7 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
   // Featured listings edit state
   const [showFeaturedListingsModal, setShowFeaturedListingsModal] = useState(false)
   const [editingListingIndex, setEditingListingIndex] = useState<number | null>(null)
+  const [showPropertyImportModal, setShowPropertyImportModal] = useState(false)
   
   // Testimonials edit state
   const [showTestimonialsModal, setShowTestimonialsModal] = useState(false)
@@ -1073,6 +1075,56 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
     setShowFeaturedListingsModal(false)
     setEditingListingIndex(null)
   }
+
+  const handleImportPropertyToPage = (property: Property) => {
+    const mainImage =
+      property.image_url ||
+      property.image ||
+      (property.images_url && property.images_url.length > 0 ? property.images_url[0] : undefined) ||
+      (property.images && property.images.length > 0 ? property.images[0] : undefined) ||
+      ''
+
+    setHeroImage(mainImage || '')
+    setMainHeading(property.title || '')
+
+    const locationParts = [
+      property.location,
+      property.city,
+      property.state_province,
+      property.country,
+    ].filter(Boolean) as string[]
+    if (locationParts.length > 0) {
+      setTagline(locationParts.join(' • '))
+    }
+
+    const priceLabel = property.price
+      ? `₱${property.price.toLocaleString('en-US')}${
+          property.price_type ? `/${property.price_type}` : '/mo'
+        }`
+      : ''
+    if (priceLabel) {
+      setPropertyPrice(priceLabel)
+    }
+
+    if (property.description) {
+      setPropertyDescription(property.description)
+    }
+
+    const galleryImages =
+      (property.images_url && property.images_url.length > 0
+        ? property.images_url
+        : property.images && property.images.length > 0
+        ? property.images
+        : mainImage
+        ? [mainImage]
+        : []) || []
+
+    setPropertyImages(galleryImages)
+
+    setHasUnsavedChanges(true)
+    addToHistory()
+    setShowPropertyImportModal(false)
+  }
   
   const handleRemoveFeaturedListing = (index: number) => {
     setFeaturedListings(prev => prev.filter((_, i) => i !== index))
@@ -1735,6 +1787,14 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
                         >
                           <FiUpload className="w-4 h-4" />
                           Upload Custom Photo
+                        </button>
+                        <button
+                          type="button"
+                          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50"
+                          onClick={() => setShowPropertyImportModal(true)}
+                        >
+                          <FiHome className="w-4 h-4" />
+                          Use Existing Listing
                         </button>
                       </div>
                       <div className="grid grid-cols-2 gap-4 mb-4">
@@ -2768,6 +2828,95 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
                 onSave={handleSaveExperienceStat}
                 onCancel={() => setShowExperienceModal(false)}
               />
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Property Import Modal */}
+      {showPropertyImportModal && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowPropertyImportModal(false)}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[80vh] overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white">
+              <h3 className="text-lg font-semibold text-gray-900">Use Existing Listing</h3>
+              <button
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                onClick={() => setShowPropertyImportModal(false)}
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              {loadingProperties ? (
+                <p className="text-gray-500 text-center py-5">Loading properties...</p>
+              ) : availableProperties.length === 0 ? (
+                <p className="text-gray-500 text-center py-5">
+                  No properties available. Please create properties first.
+                </p>
+              ) : (
+                <>
+                  <p className="text-gray-600 mb-4">
+                    Choose one of your existing listings to pre-fill this property page.
+                    You can always tweak the content afterwards.
+                  </p>
+                  <div className="grid gap-3 max-h-[400px] overflow-y-auto">
+                    {availableProperties.map((property) => {
+                      const imageSrc =
+                        property.image_url ||
+                        property.image ||
+                        (property.images_url && property.images_url.length > 0
+                          ? property.images_url[0]
+                          : ASSETS.PLACEHOLDER_PROPERTY)
+                      const locationLabel =
+                        property.location ||
+                        property.city ||
+                        property.state_province ||
+                        property.country ||
+                        ''
+                      const priceLabel = property.price
+                        ? `₱${property.price.toLocaleString('en-US')}${
+                            property.price_type ? `/${property.price_type}` : '/mo'
+                          }`
+                        : ''
+
+                      return (
+                        <div
+                          key={property.id}
+                          className="flex gap-3 items-center border border-gray-200 rounded-lg p-3 hover:border-blue-500 hover:bg-gray-50 transition-colors"
+                        >
+                          <img
+                            src={imageSrc}
+                            alt={property.title}
+                            className="w-20 h-20 rounded-md object-cover flex-shrink-0"
+                          />
+                          <div className="flex-1">
+                            <div className="font-semibold text-sm mb-1">{property.title}</div>
+                            {locationLabel && (
+                              <div className="text-xs text-gray-500">{locationLabel}</div>
+                            )}
+                            {priceLabel && (
+                              <div className="text-xs text-blue-600 mt-1">{priceLabel}</div>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            className="px-3 py-1.5 text-xs font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700"
+                            onClick={() => handleImportPropertyToPage(property)}
+                          >
+                            Use this listing
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
