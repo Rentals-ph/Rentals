@@ -1,16 +1,17 @@
-'use client'
+"use client"
 
-import { useState, useEffect, useMemo, useRef, Suspense, lazy } from 'react'
+import { useState, useEffect, useMemo, useRef, Suspense, lazy } from "react"
 import { useRouter } from 'next/navigation'
-import { ASSETS, getAsset } from '@/utils/assets'
-import { api, type PropertySearchResponse, type ConversationMessage } from '@/lib/api'
-import { Property } from '@/types'
-import { getImageUrl } from '@/utils/storage'
-import { formatAIMessage } from '@/utils/formatAIMessage'
-import { SimplePropertyCardSkeleton } from '@/components/common/SimplePropertyCardSkeleton'
-import HeroBanner from './HeroBanner'
+import { ASSETS, getAsset } from "@/utils/assets"
+import { api, type PropertySearchResponse, type ConversationMessage } from "@/lib/api"
+import { Property } from "@/types"
+import { getImageUrl } from "@/utils/storage"
+import { formatAIMessage } from "@/utils/formatAIMessage"
+import { SimplePropertyCardSkeleton } from "@/components/common/SimplePropertyCardSkeleton"
+import FadeInOnView from "@/components/common/FadeInOnView"
+import HeroBanner from "./HeroBanner"
 
-const SimplePropertyCard = lazy(() => import('@/components/common/SimplePropertyCard'))
+const SimplePropertyCard = lazy(() => import("@/components/common/SimplePropertyCard"))
 
 const CONVERSATION_ID_KEY = 'rentals_ph_conversation_id'
 
@@ -117,6 +118,9 @@ function Hero() {
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null)
   const heroSectionRef = useRef<HTMLElement>(null)
   const [showScrollArrow, setShowScrollArrow] = useState(true)
+  const [showHeroOverlay, setShowHeroOverlay] = useState(false)
+
+  const HERO_TITLE = 'FIND YOUR HOME IN THE PHILIPPINES'
 
   const [suggestedPrompts, setSuggestedPrompts] = useState<string[]>([])
   const [suggestedPromptsLoading, setSuggestedPromptsLoading] = useState(false)
@@ -410,6 +414,8 @@ function Hero() {
     if (storedConversationId) {
       setConversationId(storedConversationId)
     }
+    // trigger hero overlay fade-in once on initial mount
+    setShowHeroOverlay(true)
   }, [])
 
   // Save conversation ID to localStorage when it changes
@@ -635,26 +641,62 @@ function Hero() {
         ))}
       </div>
 
+      {/* Dark overlay over hero background with subtle fade-in (vanilla CSS gradient) */}
+      <div
+        className={`absolute inset-0 z-[1] pointer-events-none transition-opacity duration-700 ease-out ${
+          showHeroOverlay ? 'opacity-80' : 'opacity-0'
+        }`}
+        style={{
+          // Extra soft blue overlay: very light, still slightly darker at bottom
+          background:
+            'linear-gradient(to top, rgba(32, 94, 215, 0.35) 0%, rgba(32, 94, 215, 0.22) 35%, rgba(32, 94, 215, 0.12) 70%, rgba(32, 94, 215, 0.03) 100%)',
+        }}
+      />
+
       {/* Hero content - padding-top so "Find your home" is never clipped below navbar; when chat mode fill remaining space below header */}
       <div className={`flex flex-col items-center justify-center w-full text-center relative z-10 ${
         isChatMode
           ? 'min-h-0 pt-2 pb-2 px-3 sm:pt-6 sm:pb-4 sm:px-4 md:pt-0 md:pb-0 flex-1'
           : 'min-h-[400px] sm:min-h-[500px] pb-8 sm:pt-10 sm:pb-10 md:pt-0 md:pb-0 md:min-h-[600px] md:h-full px-4'
       }`}>
-        <h2 className={`font-outfit font-bold text-[#205ED7] mb-0 mt-0 tracking-tight leading-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] ${
-          isChatMode ? 'text-base xs:text-lg sm:text-xl md:text-2xl' : 'text-xl xs:text-2xl mobile:text-3xl mt-20 sm:text-4xl md:text-5xl lg:text-6xl'
-        }`}>
-          FIND YOUR HOME IN THE PHILIPPINES
-        </h2>
-        <p className={`max-w-3xl font-outfit drop-shadow-[0_1px_4px_rgba(255,255,255,0.8)] px-1 ${
-          isChatMode ? 'mt-1 text-xs sm:text-sm md:text-base hidden sm:block' : 'mt-3 text-sm xs:text-base md:text-lg'
-        }`}>
-          <span className="text-[#FE8E0A]">Trusted Rentals, simplified. Start your journey with </span>
-          <span className="font-bold text-[#205ED7]">Rentals.ph.</span>
-        </p>
+        <FadeInOnView>
+          <h2
+            className={`font-outfit font-bold text-[#205ED7] mb-0 mt-0 tracking-tight leading-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] ${
+              isChatMode
+                ? 'text-base xs:text-lg sm:text-xl md:text-2xl'
+                : 'text-xl xs:text-2xl mobile:text-3xl mt-20 sm:text-4xl md:text-5xl lg:text-6xl'
+            }`}
+          >
+            {HERO_TITLE.split('').map((char, index) => (
+              <span
+                key={index}
+                className="inline-block"
+                style={{
+                  opacity: showHeroOverlay ? 1 : 0,
+                  transform: showHeroOverlay ? 'translateY(0)' : 'translateY(8px)',
+                  transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
+                  transitionDelay: `${index * 25}ms`,
+                }}
+              >
+                {char === ' ' ? '\u00A0' : char}
+              </span>
+            ))}
+          </h2>
+        </FadeInOnView>
+        <FadeInOnView delayMs={120}>
+          <p
+            className={`max-w-3xl font-outfit drop-shadow-[0_1px_4px_rgba(255,255,255,0.8)] px-1 ${
+              isChatMode ? "mt-1 text-xs sm:text-sm md:text-lg hidden sm:block" : "mt-3 text-sm xs:text-base md:text-xl"
+            }`}
+          >
+            <span className="text-[#FE8E0A]">Trusted Rentals, simplified. Start your journey with </span>
+            <span className="font-bold text-[#205ED7]">Rentals.ph.</span>
+          </p>
+        </FadeInOnView>
 
         {/* AI Assistant Button - hidden in chat mode (close is in chat header) */}
         {!isChatMode && (
+          <FadeInOnView delayMs={240}>
           <button 
             className="relative font-outfit font-semibold flex items-center justify-center gap-1 transition-all hover:scale-105 active:scale-[0.98] overflow-hidden cursor-pointer rounded-full sm:rounded-[32.5px] shadow-[0_4px_21px_rgba(0,0,0,0.25)] touch-manipulation min-h-[48px] mt-4 sm:mt-6 text-sm sm:text-base md:text-lg h-12 sm:h-[52px] md:h-[55px] px-4 sm:px-6 md:px-7"
             style={{
@@ -701,6 +743,7 @@ function Hero() {
               </span>
             </div>
           </button>
+          </FadeInOnView>
         )}
 
         {/* Search bar and filters or Chat container - constrained to same max-width as page; no horizontal overflow */}
@@ -883,25 +926,7 @@ function Hero() {
                     </div>
                   ) : (
                     <>
-                      <h4 className="font-outfit font-semibold text-gray-900 text-base mb-3">Chat with Rentals Assist</h4>
-                      {chatMessages.length <= 1 && (
-                        <div className="flex flex-col gap-2 mb-4">
-                          {suggestedPromptsLoading
-                            ? [1, 2, 3].map((i) => (
-                                <div key={i} className="h-11 rounded-full bg-gray-200 animate-pulse w-full" aria-hidden />
-                              ))
-                            : (suggestedPrompts.length > 0 ? suggestedPrompts : FALLBACK_SUGGESTED_PROMPTS).map((label) => (
-                                <button
-                                  key={label}
-                                  type="button"
-                                  className="font-outfit text-sm font-medium py-2.5 px-5 rounded-full bg-rental-blue-600 text-white hover:bg-rental-blue-700 transition-colors touch-manipulation w-full text-left"
-                                  onClick={() => handleSendMessage(label)}
-                                >
-                                  {label}
-                                </button>
-                              ))}
-                        </div>
-                      )}
+                       <h4 className="font-outfit font-semibold text-gray-900 text-base mb-3">Chat with Rentals Assist</h4>
                       {chatMessages.map((msg, index) => (
                         <div key={index} className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                           {msg.role === 'assistant' ? (
@@ -914,6 +939,25 @@ function Hero() {
                           )}
                         </div>
                       ))}
+                     
+                      {chatMessages.length <= 1 && (
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {suggestedPromptsLoading
+                            ? [1, 2, 3].map((i) => (
+                                <div key={i} className="h-11 rounded-full bg-gray-200 animate-pulse w-full" aria-hidden />
+                              ))
+                            : (suggestedPrompts.length > 0 ? suggestedPrompts : FALLBACK_SUGGESTED_PROMPTS).map((label) => (
+                                <button
+                                  key={label}
+                                  type="button"
+                                  className="font-outfit text-xs font-medium py-2.5 px-5 rounded-full bg-rental-blue-600 text-white hover:bg-rental-blue-700 transition-colors touch-manipulation text-left"
+                                  onClick={() => handleSendMessage(label)}
+                                >
+                                  {label}
+                                </button>
+                              ))}
+                        </div>
+                      )}
                       {isLoading && (
                         <div className="flex items-start gap-2 max-w-[90%] sm:max-w-[85%]">
                           <img src={getAsset('LOGO_AI')} alt="" className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 rounded-full object-cover" />

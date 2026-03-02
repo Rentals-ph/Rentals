@@ -5,7 +5,8 @@ import Hero from '@/components/home/Hero'
 import FeaturedProperties from '@/components/home/FeaturedProperties'
 import Testimonials from '@/components/home/Testimonials'
 import Blogs from '@/components/home/Blogs'
-import PopularSearches from '@/components/home/PopularSearches'
+import AgentsShowcase from '@/components/home/AgentsShowcase'
+import PopularExplore from '@/components/home/PopularExplore'
 import Footer from '@/components/layout/Footer'
 import { HeroSkeleton } from '@/components/home/HeroSkeleton'
 import { VerticalPropertyCardSkeleton } from '@/components/common/VerticalPropertyCardSkeleton'
@@ -75,6 +76,40 @@ function BlogsFallback() {
   )
 }
 
+/** Agents section skeleton (title + 4 cards) */
+function AgentsShowcaseFallback() {
+  return (
+    <section className="bg-[#F9FAFB] px-4 sm:px-6 md:px-10 lg:px-[150px] w-full py-8 sm:py-10 md:py-14">
+      <div className="w-full mx-auto max-w-7xl">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 sm:mb-8">
+          <div className="text-center sm:text-left max-w-xl mx-auto sm:mx-0">
+            <span className="block h-7 w-48 rounded bg-gray-200 animate-pulse mb-2" />
+            <span className="block h-4 w-72 rounded bg-gray-100 animate-pulse" />
+          </div>
+          <div className="hidden sm:flex justify-end">
+            <span className="h-10 w-32 rounded-full border-2 border-gray-200 bg-gray-50 animate-pulse" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <article
+              key={i}
+              className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col animate-pulse"
+            >
+              <div className="w-full aspect-[4/3] bg-gray-200" />
+              <div className="px-4 sm:px-5 py-4 sm:py-5 space-y-2">
+                <span className="block h-4 w-32 rounded bg-gray-200" />
+                <span className="block h-3 w-24 rounded bg-gray-100" />
+                <span className="block h-3 w-28 rounded bg-gray-100" />
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 /** Testimonials section skeleton (title block + 3 cards) */
 function TestimonialsFallback() {
   return (
@@ -111,10 +146,13 @@ export default function HomePage() {
       <Suspense fallback={<BlogsFallback />}>
         <Blogs />
       </Suspense>
+      <Suspense fallback={<AgentsShowcaseFallback />}>
+        <AgentsShowcase />
+      </Suspense>
       <Suspense fallback={<TestimonialsFallback />}>
         <Testimonials />
       </Suspense>
-      <PopularSearches />
+      <PopularExplore />
       <Footer />
     </div>
   )

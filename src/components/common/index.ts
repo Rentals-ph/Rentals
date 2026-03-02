@@ -13,6 +13,7 @@ export {
   SimplePropertyCard,
   SimplePropertyCardSkeleton,
   ModernPropertyCard,
+  SimpleVerticalPropertyCard,
 } from './cards'
 
 // Dashboard (sidebar, header, account, protected route)

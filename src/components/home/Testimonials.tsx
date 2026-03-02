@@ -1,12 +1,13 @@
-'use client'
+"use client"
 
-import { useState, useEffect, useRef } from 'react'
-import Link from 'next/link'
-import TestimonialCard from '../common/TestimonialCard'
-import { TestimonialCardSkeleton } from '../common/TestimonialCardSkeleton'
-import { testimonialsApi } from '../../api'
-import type { Testimonial } from '../../types'
-import { ASSETS } from '@/utils/assets'
+import { useState, useEffect, useRef } from "react"
+import Link from "next/link"
+import TestimonialCard from "../common/TestimonialCard"
+import { TestimonialCardSkeleton } from "../common/TestimonialCardSkeleton"
+import { testimonialsApi } from "../../api"
+import type { Testimonial } from "../../types"
+import { ASSETS } from "@/utils/assets"
+import FadeInOnView from "@/components/common/FadeInOnView"
 
 const Testimonials = () => {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([])
@@ -41,7 +42,7 @@ const Testimonials = () => {
   }
 
   return (
-    <section className="relative min-h-[70vh] sm:min-h-[80vh] flex items-center justify-center overflow-x-visible overflow-y-hidden mb-0 px-4 sm:px-6 md:px-10 lg:px-[150px] lg:pl-[150px] py-8 sm:py-12" id="testimonials">
+    <section className="relative min-h-[55vh] sm:min-h-[60vh] flex items-center justify-center overflow-x-visible overflow-y-hidden mb-0 px-4 sm:px-6 md:px-10 lg:px-[150px] lg:pl-[150px] py-6 sm:py-10" id="testimonials">
       {/* Background image - non-interactive */}
       <div 
         className="absolute inset-0 z-[1] bg-cover bg-center bg-no-repeat pointer-events-none"
@@ -66,7 +67,7 @@ const Testimonials = () => {
       <div className="relative z-[3] w-full mx-auto min-w-0">
         <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-8 lg:gap-[50px] items-start w-full">
           {/* Left Section - Promotional Block */}
-          <div className="flex flex-col gap-0 relative pt-0 w-full">
+          <FadeInOnView className="flex flex-col gap-0 relative pt-0 w-full" as="div">
             <div className="relative w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] -mt-2 sm:-mt-5 mb-4 sm:mb-5 ml-0 self-start">
               <div className="w-full h-full rounded-full flex items-center justify-center shadow-lg" style={{ background: 'rgba(32, 94, 215, 0.9)' }}>
                 <svg className="w-[40px] h-[40px] sm:w-[60px] sm:h-[60px] text-white" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -93,7 +94,7 @@ const Testimonials = () => {
                 </span>
               </Link>
             </div>
-          </div>
+          </FadeInOnView>
 
           {/* Right Section - Testimonials Cards (Horizontal Scroll) */}
           <div className="w-full min-w-0 overflow-x-auto overflow-y-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

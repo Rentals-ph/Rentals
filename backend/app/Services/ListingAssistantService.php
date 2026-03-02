@@ -414,6 +414,22 @@ PROMPT;
         array $newlyExtracted
     ): string {
         try {
+            // Deterministic follow-ups for simple cases to avoid LLM re-asking filled fields
+            // If only price is missing, ask price directly
+            if (count($missingFields) === 1 && $missingFields[0] === 'price') {
+                return "What's the asking price?";
+            }
+            // If price is already filled and only price_type is missing, ONLY ask about price_type
+            if (
+                count($missingFields) === 1 &&
+                $missingFields[0] === 'price_type' &&
+                isset($currentData['price']) &&
+                $currentData['price'] !== null &&
+                $currentData['price'] !== ''
+            ) {
+                return "Okay! What type of price is this? (monthly, weekly, daily, or yearly?)";
+            }
+
             $dataJson = json_encode($currentData, JSON_PRETTY_PRINT);
             $newJson = json_encode($newlyExtracted, JSON_PRETTY_PRINT);
             $missingJson = json_encode($missingFields);
@@ -585,14 +601,15 @@ PROMPT;
 
         } catch (Exception $e) {
             Log::error('ListingAssistant generatePropertyDescription failed: ' . $e->getMessage());
-            return $this->getFallbackDescription($propertyData);
+            return $this->getFallbackDescription($propertyData, $agentContext);
         }
     }
 
     /**
-     * Generate a basic fallback description when AI fails
+     * Generate a basic fallback description when AI fails.
+     * If agent notes are provided, lightly incorporate them.
      */
-    protected function getFallbackDescription(array $data): string
+    protected function getFallbackDescription(array $data, string $agentContext = ''): string
     {
         $type = $data['property_type'] ?? 'property';
         $location = $data['location'] ?? '';
@@ -626,6 +643,12 @@ PROMPT;
 
         if ($price) {
             $description .= "Offered at {$price}. ";
+        }
+
+        // Lightly incorporate agent notes (e.g., "pet friendly") if provided
+        $agentNotes = trim($agentContext);
+        if ($agentNotes !== '') {
+            $description .= " This property is " . $agentNotes . ". ";
         }
 
         $description .= "Contact us today to schedule a viewing!";
@@ -823,10 +846,67 @@ Length: 120-180 words";
         // Get or create conversation
         $conversation = $this->getOrCreateConversation($conversationId, $userId);
 
+        // Snapshot current data and history before this message
+        $currentData = $conversation->extracted_data ?? [];
+        $skippedFields = $conversation->skipped_fields ?? [];
+        $conversationHistory = $conversation->messages ?? [];
+
+        // --- Heuristics: handle simple replies to specific questions without relying solely on AI JSON ---
+        // We snapshot which required fields are missing BEFORE this message so we can safely set them.
+        $missingBefore = $this->identifyMissingFields($currentData, $skippedFields);
+        $nameMissing = in_array('property_name', $missingBefore, true);
+        $priceMissing = in_array('price', $missingBefore, true);
+        $lastAssistantMsg = '';
+        foreach (array_reverse($conversationHistory) as $msg) {
+            if (($msg['role'] ?? '') === 'assistant') {
+                $lastAssistantMsg = $msg['content'] ?? '';
+                break;
+            }
+        }
+
+        // If property_name is missing, the last assistant message asked for the name,
+        // and the agent replies with non-empty text, set property_name directly.
+        if ($nameMissing && stripos($lastAssistantMsg, 'name') !== false) {
+            $trimmed = trim($message);
+            if ($trimmed !== '') {
+                $currentData['property_name'] = $trimmed;
+                $conversation->extracted_data = $currentData;
+                $conversation->save();
+            }
+        }
+
+        // If price is currently missing, the last assistant message asked about price,
+        // and the agent replies with a plain number, set price directly before calling the AI.
+        if ($priceMissing && stripos($lastAssistantMsg, 'price') !== false) {
+            // Try to parse common price formats: "15000", "1,500,000", "15k", "7.5M", etc.
+            $trimmedPrice = trim($message);
+            if ($trimmedPrice !== '') {
+                if (preg_match('/([\d,.]+)\s*([kKmM]?)/', $trimmedPrice, $matches)) {
+                    $numberPart = $matches[1] ?? '';
+                    $suffix = $matches[2] ?? '';
+                    $normalizedNumber = str_replace(',', '', $numberPart);
+                    if ($normalizedNumber !== '' && is_numeric($normalizedNumber)) {
+                        $priceValue = (float) $normalizedNumber;
+                        // Handle shorthand: k = thousand, M = million
+                        if ($suffix === 'k' || $suffix === 'K') {
+                            $priceValue *= 1000;
+                        } elseif ($suffix === 'm' || $suffix === 'M') {
+                            $priceValue *= 1000000;
+                        }
+                        if ($priceValue > 0) {
+                            $currentData['price'] = $priceValue;
+                            $conversation->extracted_data = $currentData;
+                            $conversation->save();
+                        }
+                    }
+                }
+            }
+        }
+
         // Add user message to history
         $conversation->addMessage('user', $message);
 
-        // Parse the message
+        // Parse the message using updated data and history
         $result = $this->parseAgentMessage(
             $message,
             $conversation->messages ?? [],

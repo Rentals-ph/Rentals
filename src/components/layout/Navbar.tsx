@@ -232,8 +232,8 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
 
   return (
     <>
-      <header className="relative z-50 bg-white shadow-md overflow-x-hidden overflow-y-hidden">
-        <div className="flex items-center justify-between gap-2 px-3 sm:px-4 py-3 sm:py-5 md:px-10 lg:px-[150px] max-w-full min-w-0 overflow-x-hidden overflow-y-hidden">
+      <header className="relative z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div className="flex items-center justify-between gap-2 px-3 sm:px-4 py-3 sm:py-4 md:px-10 lg:px-[150px] max-w-full min-w-0 overflow-x-hidden overflow-y-hidden">
           {/* Mobile: toggle + logo side by side. Desktop: logo only in this group */}
           <div className="flex items-center gap-2 flex-shrink-0">
             <button 
@@ -257,47 +257,127 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
 
           {/* Desktop Navigation Centered - lg breakpoint so nav fits without overflow */}
           <div className="hidden lg:flex flex-1 justify-center items-center min-w-0 overflow-hidden">
-            <nav className="flex items-center gap-0 xl:gap-2 2xl:gap-8 justify-center w-full min-w-0">
-              <Link href="/" className={`text-rental-blue-600 font-outfit text-sm lg:text-sm md:px-1 xl:px-0.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
+            <nav className="flex items-center gap-1 xl:gap-2 2xl:gap-6 justify-center w-full min-w-0 px-3 py-1.5 rounded-full bg-white/70 border border-gray-100 shadow-[0_2px_8px_rgba(15,23,42,0.04)]">
+              <Link
+                href="/"
+                className={`font-outfit text-xs lg:text-sm px-3.5 py-1.5 whitespace-nowrap transition-all ${
+                  pathname === '/'
+                    ? 'text-rental-blue-700 font-semibold'
+                    : 'text-rental-blue-700 hover:text-rental-orange-500'
+                }`}
+                style={{
+                  borderBottomWidth: '2px',
+                  borderBottomStyle: 'solid',
+                  borderBottomColor: pathname === '/' ? '#205ED7' : 'transparent',
+                }}
+              >
                 HOME
               </Link>
-              <Link href="/about" className={`text-rental-blue-600 font-outfit text-sm lg:text-sm md:px-1 xl:px-0.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/about' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
+              <Link
+                href="/about"
+                className={`font-outfit text-xs lg:text-sm px-3.5 py-1.5 whitespace-nowrap transition-all ${
+                  pathname === '/about'
+                    ? 'text-rental-blue-700 font-semibold'
+                    : 'text-rental-blue-700 hover:text-rental-orange-500'
+                }`}
+                style={{
+                  borderBottomWidth: '2px',
+                  borderBottomStyle: 'solid',
+                  borderBottomColor: pathname === '/about' ? '#205ED7' : 'transparent',
+                }}
+              >
                 ABOUT US
               </Link>
-              <Link href="/properties" className={`text-rental-blue-600 font-outfit text-sm lg:text-sm md:px-1 xl:px-0.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/properties' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
+              <Link
+                href="/properties"
+                className={`font-outfit text-xs lg:text-sm px-3.5 py-1.5 whitespace-nowrap transition-all ${
+                  pathname === '/properties'
+                    ? 'text-rental-blue-700 font-semibold'
+                    : 'text-rental-blue-700 hover:text-rental-orange-500'
+                }`}
+                style={{
+                  borderBottomWidth: '2px',
+                  borderBottomStyle: 'solid',
+                  borderBottomColor: pathname === '/properties' ? '#205ED7' : 'transparent',
+                }}
+              >
                 PROPERTIES
               </Link>
-              <Link href="/agents" className={`text-rental-blue-600 font-outfit text-sm lg:text-sm md:px-1 xl:px-0.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/agents' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
+              <Link
+                href="/agents"
+                className={`font-outfit text-xs lg:text-sm px-3.5 py-1.5 whitespace-nowrap transition-all ${
+                  pathname === '/agents'
+                    ? 'text-rental-blue-700 font-semibold'
+                    : 'text-rental-blue-700 hover:text-rental-orange-500'
+                }`}
+                style={{
+                  borderBottomWidth: '2px',
+                  borderBottomStyle: 'solid',
+                  borderBottomColor: pathname === '/agents' ? '#205ED7' : 'transparent',
+                }}
+              >
                 AGENTS
               </Link>
-              <Link href="/blog" className={`text-rental-blue-600 font-outfit text-sm lg:text-sm md:px-1 xl:px-0.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/blog' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
-                BLOG  
+              <Link
+                href="/blog"
+                className={`font-outfit text-xs lg:text-sm px-3.5 py-1.5 whitespace-nowrap transition-all ${
+                  pathname === '/blog'
+                    ? 'text-rental-blue-700 font-semibold'
+                    : 'text-rental-blue-700 hover:text-rental-orange-500'
+                }`}
+                style={{
+                  borderBottomWidth: '2px',
+                  borderBottomStyle: 'solid',
+                  borderBottomColor: pathname === '/blog' ? '#205ED7' : 'transparent',
+                }}
+              >
+                BLOG
               </Link>
-              <Link href="/news" className={`text-rental-blue-600 font-outfit text-sm lg:text-sm md:px-1 xl:px-0.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/news' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
+              <Link
+                href="/news"
+                className={`font-outfit text-xs lg:text-sm px-3.5 py-1.5 whitespace-nowrap transition-all ${
+                  pathname === '/news'
+                    ? 'text-rental-blue-700 font-semibold'
+                    : 'text-rental-blue-700 hover:text-rental-orange-500'
+                }`}
+                style={{
+                  borderBottomWidth: '2px',
+                  borderBottomStyle: 'solid',
+                  borderBottomColor: pathname === '/news' ? '#205ED7' : 'transparent',
+                }}
+              >
                 NEWS
               </Link>
-              <Link href="/contact" className={`text-rental-blue-600 font-outfit text-sm lg:text-sm md:px-1 xl:px-0.5 whitespace-nowrap transition-colors hover:text-rental-orange-500 ${pathname === '/contact' ? 'font-extrabold tracking-[0.15em]' : 'font-normal'}`}>
+              <Link
+                href="/contact"
+                className={`font-outfit text-xs lg:text-sm px-3.5 py-1.5 whitespace-nowrap transition-all ${
+                  pathname === '/contact'
+                    ? 'text-rental-blue-700 font-semibold'
+                    : 'text-rental-blue-700 hover:text-rental-orange-500'
+                }`}
+                style={{
+                  borderBottomWidth: '2px',
+                  borderBottomStyle: 'solid',
+                  borderBottomColor: pathname === '/contact' ? '#205ED7' : 'transparent',
+                }}
+              >
                 CONTACT US
               </Link>
             </nav>
           </div>
           {/* User/Profile section */}
-          <div className="hidden lg:flex items-center justify-end flex-shrink-0 min-w-0 rounded-full"
-            style={{
-              border: '2px solid #205ED7',
-          }}
-          >
+          <div className="hidden lg:flex items-center justify-end flex-shrink-0 min-w-0">
             {isUserLoggedIn ? (
               <div className="relative" ref={userMenuRef}>
                 <button
                   type="button"
                   onClick={() => setShowUserMenu((prev) => !prev)}
-                  className="flex items-center gap-2.5 px-2 py-1.5 rounded-full border border-transparent hover:bg-gray-100 hover:border-gray-200 transition-colors outline-none focus:ring-2 focus:ring-rental-blue-500/30 focus:ring-offset-1"
+                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-full bg-white/80 border border-gray-200 hover:bg-gray-100 transition-colors outline-none focus:ring-2 focus:ring-rental-blue-500/30 focus:ring-offset-1"
                   aria-expanded={showUserMenu}
                   aria-haspopup="true"
                   aria-label="Open user menu"
                 >
-                  <span className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-white shadow-sm">
+                  <span className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0 ring-1 ring-white shadow-sm">
                     <img
                       src={userImage || ASSETS.PLACEHOLDER_PROFILE}
                       alt=""
@@ -312,11 +392,8 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
                       {getInitials(userName)}
                     </span>
                   </span>
-                  <span className="flex flex-col items-start justify-center text-left min-w-0 max-w-[140px]">
-                    <span className="text-[15px] font-semibold text-gray-900 font-outfit truncate w-full">{userName}</span>
-                    <span className="text-[13px] text-gray-500 font-outfit truncate w-full">
-                      {userRole === 'admin' ? 'Admin' : userRole === 'broker' ? 'Broker' : 'Agent'}
-                    </span>
+                  <span className="text-sm font-outfit font-medium text-gray-900 max-w-[120px] truncate">
+                    {userName}
                   </span>
                   <FiChevronDown
                     className={`flex-shrink-0 text-gray-500 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`}
@@ -373,9 +450,11 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
                 )}
               </div>
             ) : (
-              <button className="rounded-full !border-2 !border-rental-blue-600 bg-transparent text-rental-blue-600 px-3 sm:px-5 h-8 sm:h-10 font-outfit text-xs sm:text-sm md:text-sm font-medium cursor-pointer inline-flex items-center justify-center hover:bg-rental-blue-600 hover:text-white hover:scale-105 hover:shadow-[0_4px_14px_rgba(0,0,0,0.15)] active:scale-95 transition-all duration-200" onClick={handleLoginClick}>
-                <span className="hidden sm:inline">Login / Register</span>
-                <span className="sm:hidden">Login</span>
+              <button
+                className="rounded-full border border-rental-blue-600 bg-white/80 text-rental-blue-700 px-3 sm:px-4 h-8 font-outfit text-xs sm:text-sm font-medium cursor-pointer inline-flex items-center justify-center hover:bg-rental-blue-600 hover:text-white transition-all duration-200"
+                onClick={handleLoginClick}
+              >
+                Login / Register
               </button>
             )}
           </div>

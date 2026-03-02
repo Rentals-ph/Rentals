@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import VerticalPropertyCard from '../common/VerticalPropertyCard'
+import { SimpleVerticalPropertyCard } from '@/components/common'
+import FadeInOnView from '@/components/common/FadeInOnView'
 import { VerticalPropertyCardSkeleton } from '../common/VerticalPropertyCardSkeleton'
 import { propertiesApi } from '../../api'
 import type { Property } from '../../types'
@@ -222,42 +223,66 @@ const FeaturedProperties = () => {
     >
       <div className="w-full">
         {/* Header: title + subtitle; on mobile stack with View More below, on sm+ link aligned right */}
-        <div
-          className="relative flex flex-col xs:flex-row flex-wrap items-start sm:items-end gap-3 sm:gap-0 mb-4 pb-4"
-          style={{ borderBottom: '2px solid #E5E7EB' }}
+        <FadeInOnView
+          className="relative flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 sm:mb-8 pb-4"
+          as="div"
         >
-          <div className="text-left px-0 xs:px-2 min-w-0 flex-1">
-            <h2 className="font-outfit text-xl xs:text-2xl sm:text-4xl font-bold text-gray-900 m-0 leading-tight tracking-tight">
+          <div className="text-left px-0 xs:px-2 min-w-0 flex-1 max-w-xl">
+            <h2 className="text-gray-900 font-outfit text-2xl sm:text-3xl md:text-4xl font-bold leading-tight tracking-tight m-0 mb-2">
               Featured Properties
             </h2>
-            <p className="text-gray-600 font-outfit text-xs xs:text-sm sm:text-base md:text-lg font-light mt-1 sm:mt-2 mb-0">
+            <p className="text-gray-600 font-outfit text-sm sm:text-base md:text-lg leading-relaxed mt-1 sm:mt-2 mb-0">
               Handpicked properties from our verified agents
             </p>
           </div>
-          <Link
-            href="/properties"
-            className="w-full xs:w-auto order-2 xs:order-none sm:absolute sm:right-4 md:right-10 lg:right-0 text-rental-blue-500 bg-white font-outfit text-sm font-medium no-underline flex items-center justify-center gap-2 hover:bg-blue-200 transition-colors border-2 border-rental-blue-500 rounded-xl sm:rounded-2xl px-4 py-2.5 sm:px-5 sm:py-2 touch-manipulation"
-            style={{ border: '2px solid #205ED7' }}
-          >
-            View More Properties
-          </Link>
-        </div>
+          <div className="flex justify-center sm:justify-end">
+            <Link
+              href="/properties"
+              className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-full border-2 border-rental-blue-500 text-rental-blue-600 font-outfit text-sm sm:text-base font-semibold bg-white hover:bg-blue-50 transition-colors touch-manipulation"
+            >
+              View More Properties
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="flex-shrink-0"
+              >
+                <path
+                  d="M7 4L13 10L7 16"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </Link>
+          </div>
+        </FadeInOnView>
       </div>
 
       {/* Location chips: horizontal scroll on mobile when many, wrap on larger screens */}
-      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center sm:items-center gap-3 sm:gap-2 mb-2 relative">
+      <div className="flex flex-col gap-2 sm:gap-3 mb-2 sm:mb-3 relative">
+        <div className="flex items-center justify-between gap-2 px-1 sm:px-0">
+          <p className="text-gray-700 font-outfit text-xs sm:text-sm md:text-base font-medium m-0">
+            Browse featured homes by location
+          </p>
+          <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-gray-400 font-outfit">
+            Swipe to explore
+          </span>
+        </div>
         <div
-          className="subcategory-row flex items-center gap-1.5 sm:gap-2 overflow-x-auto overflow-y-hidden flex-nowrap sm:flex-wrap justify-start sm:justify-center p-1.5 rounded-lg w-full sm:w-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: '#E5E7EB' }}
+          className="subcategory-row flex items-center gap-1.5 sm:gap-2 overflow-x-auto overflow-y-hidden flex-nowrap sm:flex-wrap justify-start sm:justify-start p-1.5 sm:p-2 rounded-full sm:rounded-2xl bg-white/80 shadow-[0_1px_4px_rgba(148,163,184,0.25)] w-auto sm:w-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {locations.map((loc) => (
             <button
               key={loc}
               type="button"
-              className={`subcategory-chip flex-shrink-0 px-3 sm:px-4 py-2 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 touch-manipulation min-h-[40px] ${
+              className={`subcategory-chip flex-shrink-0 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 touch-manipulation min-h-[36px] sm:min-h-[40px] ${
                 selectedLocation === loc
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                  ? 'bg-blue-600 text-white shadow-[0_4px_12px_rgba(37,99,235,0.35)]'
+                  : 'bg-transparent text-gray-700 border border-gray-200 hover:bg-blue-50 hover:border-blue-300'
               }`}
               onClick={() => setSelectedLocation(loc)}
             >
@@ -308,23 +333,13 @@ const FeaturedProperties = () => {
                     key={`property-${setIndex}-${property.id}`}
                     className="featured-property-card-slot flex-shrink-0 w-[260px] min-w-[260px] xs:w-[280px] xs:min-w-[280px] sm:w-[360px] sm:min-w-[360px] md:w-[420px] md:min-w-[420px] mx-0.5 sm:mx-1 snap-start"
                   >
-                    <VerticalPropertyCard 
+                    <SimpleVerticalPropertyCard
                       id={property.id}
                       propertyType={property.type}
                       priceType={formatPriceType(property.price_type)}
                       price={formatPrice(property.price)}
                       title={property.title}
                       image={mainImage}
-                      images={images}
-                      rentManagerName={property.agent?.first_name && property.agent?.last_name
-                        ? `${property.agent.first_name} ${property.agent.last_name}`
-                        : property.agent?.full_name
-                        || property.rent_manager?.name
-                        || 'Rental.Ph Official'}
-                      rentManagerRole={property.agent
-                        ? getRentManagerRole(property.agent.verified)
-                        : getRentManagerRole(property.rent_manager?.is_official)}
-                      rentManagerImage={agentImage}
                       bedrooms={property.bedrooms}
                       bathrooms={property.bathrooms}
                       parking={0}

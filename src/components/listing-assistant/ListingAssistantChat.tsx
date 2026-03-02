@@ -355,24 +355,39 @@ export function ListingAssistantChat({
     if (!conversationId) return ''
 
     try {
-      // Reverse geocode to get location name
+      // Reverse geocode to get location and street address
       let locationName = ''
+      let streetAddress = ''
       try {
         const geoResponse = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14`,
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=16`,
           { headers: { 'User-Agent': 'RentalPH-PropertyListing/1.0' } }
         )
         const geoData = await geoResponse.json()
-        
-        // Extract meaningful location parts
+
         const address = geoData.address || {}
-        const parts = [
+
+        // Construct a human-friendly street address (house no. + road + local area)
+        const streetParts = [
+          address.house_number,
+          address.road || address.residential || address.footway,
           address.suburb || address.neighbourhood || address.village,
-          address.city || address.town || address.municipality,
-          address.state || address.region
         ].filter(Boolean)
-        
-        locationName = parts.slice(0, 2).join(', ') || geoData.display_name?.split(',').slice(0, 2).join(',') || ''
+        streetAddress =
+          streetParts.join(', ') ||
+          geoData.display_name?.split(',').slice(0, 3).join(', ').trim() ||
+          ''
+
+        // Construct a broader location (city + state/region) for the "Location" field
+        const locationParts = [
+          address.city || address.town || address.municipality || address.village,
+          address.state || address.region,
+        ].filter(Boolean)
+
+        locationName =
+          locationParts.slice(0, 2).join(', ') ||
+          geoData.display_name?.split(',').slice(0, 2).join(', ').trim() ||
+          ''
       } catch (geoErr) {
         console.warn('Reverse geocoding failed:', geoErr)
       }
@@ -381,10 +396,14 @@ export function ListingAssistantChat({
         latitude: lat,
         longitude: lng,
       }
-      
+
       // Only update location if we got a valid geocoded name
       if (locationName) {
         updatePayload.location = locationName
+      }
+      // Keep the "Full Address" field in sync with the pinned map location
+      if (streetAddress) {
+        updatePayload.address = streetAddress
       }
 
       const response = await listingAssistantApi.updateData(conversationId, updatePayload)
@@ -395,8 +414,9 @@ export function ListingAssistantChat({
           ...updatePayload,
         }))
       }
-      
-      return locationName
+
+      // Prefer showing the full street address if available, otherwise fall back to broader location
+      return streetAddress || locationName
     } catch (err) {
       setError('Failed to update location')
       console.error('Location update error:', err)
@@ -456,24 +476,60 @@ export function ListingAssistantChat({
           
           {messages.map((msg, idx) => {
             const isLatest = idx === messages.length - 1
-            let buttons: { label: string; value: string | number; onClick: () => void; variant?: 'default' | 'selected' | 'primary' | 'success' }[] | undefined
+            let buttons:
+              | {
+                  label: string
+                  value: string | number
+                  onClick: () => void
+                  variant?: 'default' | 'selected' | 'primary' | 'success'
+                }[]
+              | undefined
 
-            // When assistant asks about price type, show quick-select buttons
-            if (
-              msg.role === 'assistant' &&
-              isLatest &&
-              /price (type|is this price monthly|monthly, weekly, daily, or yearly)/i.test(msg.content)
-            ) {
-              const options = ['Monthly', 'Weekly', 'Daily', 'Yearly']
-              buttons = options.map((label) => ({
-                label,
-                value: label,
-                variant: label === 'Monthly' ? 'primary' : 'default',
-                onClick: () => {
-                  // Send the choice immediately as a message
-                  sendMessage(label)
-                },
-              }))
+            if (msg.role === 'assistant' && isLatest) {
+              const content = msg.content || ''
+
+              // Quick-select buttons for property type
+              if (/what\s+type\s+of\s+property\s+is\s+this/i.test(content)) {
+                const typeOptions = [
+                  { value: 'house', label: 'House' },
+                  { value: 'condo', label: 'Condo' },
+                  { value: 'apartment', label: 'Apartment' },
+                  { value: 'townhouse', label: 'Townhouse' },
+                  { value: 'studio', label: 'Studio' },
+                  { value: 'lot', label: 'Lot' },
+                  { value: 'commercial', label: 'Commercial' },
+                  { value: 'bedspace', label: 'Bedspace' },
+                  { value: 'warehouse', label: 'Warehouse' },
+                  { value: 'office', label: 'Office' },
+                ]
+                buttons = typeOptions.map((opt) => ({
+                  label: opt.label,
+                  value: opt.value,
+                  variant: opt.value === 'house' ? 'primary' : 'default',
+                  onClick: () => {
+                    // Send the selected type as a simple message; backend AI maps it to property_type
+                    sendMessage(opt.value)
+                  },
+                }))
+              }
+
+              // Quick-select buttons for price type
+              else if (
+                /price\s+(type|is this price monthly|monthly,\s*weekly,\s*daily,\s*or\s*yearly)/i.test(
+                  content
+                )
+              ) {
+                const options = ['Monthly', 'Weekly', 'Daily', 'Yearly']
+                buttons = options.map((label) => ({
+                  label,
+                  value: label,
+                  variant: label === 'Monthly' ? 'primary' : 'default',
+                  onClick: () => {
+                    // Send the choice immediately as a message
+                    sendMessage(label)
+                  },
+                }))
+              }
             }
 
             return (

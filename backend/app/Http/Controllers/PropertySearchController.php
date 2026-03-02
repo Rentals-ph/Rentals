@@ -556,6 +556,9 @@ class PropertySearchController extends Controller
         // Property-related keywords
         $propertyKeywords = [
             'apartment', 'condo', 'house', 'property', 'properties',
+            'listing', 'listings', 'rental', 'rentals',
+            'unit', 'units', 'room', 'rooms',
+            'home', 'homes',
             'bedroom', 'bathroom', 'location', 'area', 'price'
         ];
         
@@ -611,12 +614,12 @@ class PropertySearchController extends Controller
         
         // Patterns that explicitly request to see properties (must have action verbs + property keywords)
         $explicitPropertyRequestPatterns = [
-            '/\b(show|find|search|recommend|suggest|list|display|see|view|get|fetch)\s+(me\s+)?(any|some|available|all|the)?\s*(property|properties|apartment|condo|house|rental)/i',
-            '/\b(what|which|where)\s+(property|properties|apartment|condo|house|rental)/i',
-            '/\b(do\s+you\s+have|are\s+there|is\s+there)\s+(any|some|available)?\s*(property|properties)/i',
-            '/\b(any|some|available)\s+(property|properties|apartment|condo|house|rental)/i',
-            '/\btell\s+me\s+about\s+(the\s+)?(property|properties)/i',
-            '/\bcan\s+you\s+(show|find|recommend|suggest|list)\s+(me\s+)?(any|some|available)?\s*(property|properties)/i',
+            '/\b(show|find|search|recommend|suggest|list|display|see|view|get|fetch)\s+(me\s+)?(any|some|available|all|the)?\s*(property|properties|apartment|condo|house|rental|rentals|listing|listings|unit|units|room|rooms|home|homes)/i',
+            '/\b(what|which|where)\s+(property|properties|apartment|condo|house|rental|rentals|listing|listings|unit|units|room|rooms|home|homes)/i',
+            '/\b(do\s+you\s+have|are\s+there|is\s+there)\s+(any|some|available)?\s*(property|properties|rental|rentals|listing|listings|unit|units|room|rooms|home|homes)/i',
+            '/\b(any|some|available)\s+(property|properties|apartment|condo|house|rental|rentals|listing|listings|unit|units|room|rooms|home|homes)/i',
+            '/\btell\s+me\s+about\s+(the\s+)?(property|properties|rental|rentals|listing|listings|unit|units|room|rooms|home|homes)/i',
+            '/\bcan\s+you\s+(show|find|recommend|suggest|list)\s+(me\s+)?(any|some|available)?\s*(property|properties|rental|rentals|listing|listings|unit|units|room|rooms|home|homes)/i',
         ];
         
         foreach ($explicitPropertyRequestPatterns as $pattern) {

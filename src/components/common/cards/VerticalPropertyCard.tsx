@@ -212,13 +212,13 @@ function VerticalPropertyCard({
           )}
         </div>
         <div className="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
-          <p className="text-blue-600 text-xl sm:text-2xl md:text-3xl font-bold leading-tight">{price}</p>
+          <p className="text-blue-600 text-xl sm:text-2xl md:text-4xl font-bold leading-tight">{price}</p>
           {priceType && (
-            <span className="text-gray-500 text-xs sm:text-sm font-medium">{priceType}</span>
+            <span className="text-orange-500 text-xs sm:text-base font-medium">/{priceType}</span>
           )}
         </div>
         <div className="min-w-0">
-          <h3 className="text-gray-900 text-base sm:text-lg font-semibold leading-snug line-clamp-2">
+          <h3 className="text-gray-900 text-base sm:text-xl font-semibold leading-snug line-clamp-2">
             {title}
           </h3>
           {locationLine ? (
@@ -226,7 +226,7 @@ function VerticalPropertyCard({
               className="flex items-center gap-1.5 text-gray-500 font-normal min-w-0"
               title={fullAddress}
             >
-              <FiMapPin className="w-4 h-4 flex-shrink-0 text-gray-400" aria-hidden />
+           
               <span className="truncate" title={fullAddress}>{locationLine}</span>
             </div>
           ) : null}
@@ -379,7 +379,7 @@ function VerticalPropertyCard({
         </div>
 
         {/* Action buttons: Details, Heart, Share */}
-        <div className="flex items-center gap-1.5 sm:gap-2 mt-auto pt-1">
+        <div className="flex items-center gap-1.5 sm:gap-2  pt-1">
           <button
             type="button"
             onClick={(e) => {
