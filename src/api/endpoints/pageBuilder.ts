@@ -40,6 +40,11 @@ export interface PageBuilderData {
   property_description?: string
   property_images?: string[]
   property_price?: string
+  property_bedrooms?: number
+  property_bathrooms?: number
+  property_garage?: number
+  property_area?: string
+  property_amenities?: string[]
   contact_phone?: string
   contact_email?: string
   
@@ -54,9 +59,21 @@ export interface PageBuilderData {
     hero?: boolean
     propertyDescription?: boolean
     propertyImages?: boolean
+    propertyDetails?: boolean
+    amenities?: boolean
+    contact?: boolean
+    experience?: boolean
+    featured?: boolean
+    testimonialsSection?: boolean
+    readyToView?: boolean
     profileCard?: boolean
   }
   layout_sections?: Array<{
+    id: string
+    name: string
+    visible: boolean
+  }>
+  profile_layout_sections?: Array<{
     id: string
     name: string
     visible: boolean

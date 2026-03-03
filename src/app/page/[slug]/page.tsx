@@ -142,168 +142,161 @@ export default function PublicPageBuilderPage() {
     )
   }
 
+  // Profile page: default block order when profile_layout_sections not saved
+  const DEFAULT_PROFILE_LAYOUT = [
+    { id: 'profileHero', name: 'Hero Banner', visible: true },
+    { id: 'profileContactInfo', name: 'Contact Info', visible: true },
+    { id: 'profileBioAbout', name: 'Bio/About', visible: true },
+    { id: 'profileStatsBar', name: 'Stats Bar', visible: true },
+    { id: 'profileActiveListings', name: 'Active Listings', visible: true },
+    { id: 'profileClientReviews', name: 'Client Reviews', visible: true },
+    { id: 'profileSocialLinks', name: 'Social Links', visible: true }
+  ]
+
   // Profile Page
   if (pageData.page_type === 'profile') {
+    const profileSections = (pageData.profile_layout_sections && pageData.profile_layout_sections.length > 0)
+      ? pageData.profile_layout_sections
+      : DEFAULT_PROFILE_LAYOUT
+
     return (
-      <div style={{ 
+      <div style={{
         minHeight: '100vh',
-        backgroundColor: pageData.selected_theme === 'dark' ? '#1F2937' : 
-                        pageData.selected_theme === 'orange' ? '#F97316' :
-                        pageData.selected_theme === 'blue' ? '#3B82F6' : '#FFFFFF',
+        backgroundColor: pageData.selected_theme === 'dark' ? '#1F2937' :
+          pageData.selected_theme === 'orange' ? '#F97316' :
+            pageData.selected_theme === 'blue' ? '#3B82F6' : '#FFFFFF',
         padding: '40px 0'
       }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
-          {/* Profile Section */}
-          <div className="full-preview-profile-section" style={{ marginBottom: '40px' }}>
-            <div className="full-preview-profile-header">
-              <div className="full-preview-profile-image-wrapper">
-                <img 
-                  src={pageData.profile_image || ASSETS.PLACEHOLDER_PROFILE} 
-                  alt="Profile"
-                  className="full-preview-profile-image"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                  }}
-                />
-                <div className="full-preview-profile-fallback">
-                  {pageData.profile_card_name?.[0] || 'A'}{pageData.profile_card_name?.split(' ').pop()?.[0] || 'G'}
-                </div>
-              </div>
-              <div className="full-preview-profile-info">
-                <h2 className="full-preview-name">
-                  {pageData.profile_card_name || 'Agent Name'}
-                </h2>
-                {pageData.show_bio && pageData.bio && (
-                  <p className="full-preview-tagline">{pageData.bio}</p>
-                )}
-                {pageData.show_contact_number && pageData.contact_info && (
-                  <div className="full-preview-contact-icons">
-                    {pageData.contact_info.email && (
-                      <a 
-                        href={`mailto:${pageData.contact_info.email}`}
-                        className="full-preview-contact-icon" 
-                        title={pageData.contact_info.email}
-                      >
-                        <FiMail />
-                      </a>
-                    )}
-                    {pageData.contact_info.phone && (
-                      <a 
-                        href={`tel:${pageData.contact_info.phone}`}
-                        className="full-preview-contact-icon" 
-                        title={pageData.contact_info.phone}
-                      >
-                        <FiPhone />
-                      </a>
-                    )}
-                    {pageData.contact_info.message && (
-                      <a 
-                        href={pageData.contact_info.message}
-                        className="full-preview-contact-icon" 
-                        title={pageData.contact_info.message}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <FiMessageCircle />
-                      </a>
-                    )}
-                    {pageData.contact_info.website && (
-                      <a 
-                        href={pageData.contact_info.website}
-                        className="full-preview-contact-icon" 
-                        title={pageData.contact_info.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <FiGlobe />
-                      </a>
+          {profileSections.map((section: { id: string; name: string; visible: boolean }) => {
+            if (!section.visible) return null
+            const ci = pageData.contact_info
+            switch (section.id) {
+              case 'profileHero':
+                return (
+                  <div key={section.id} className="full-preview-profile-section" style={{ marginBottom: '40px' }}>
+                    <div
+                      className="full-preview-profile-header"
+                      style={{
+                        backgroundImage: (pageData.profile_card_image || pageData.profile_image) ? `url(${pageData.profile_card_image || pageData.profile_image})` : 'none',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        minHeight: '200px'
+                      }}
+                    >
+                      <div className="full-preview-profile-image-wrapper">
+                        <img src={pageData.profile_card_image || pageData.profile_image || ASSETS.PLACEHOLDER_PROFILE} alt="Profile" className="full-preview-profile-image" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                        <div className="full-preview-profile-fallback">{pageData.profile_card_name?.[0] || 'A'}{pageData.profile_card_name?.split(' ').pop()?.[0] || 'G'}</div>
+                      </div>
+                      <div className="full-preview-profile-info">
+                        <h2 className="full-preview-name">{pageData.profile_card_name || 'Agent Name'}</h2>
+                        <p className="full-preview-tagline">{pageData.profile_card_role || (pageData.profile_card_bio || pageData.bio)?.slice(0, 80) || ''}</p>
+                      </div>
+                    </div>
+                  </div>
+                )
+              case 'profileContactInfo':
+                return (
+                  <div key={section.id} className="full-preview-profile-section" style={{ marginBottom: '40px' }}>
+                    <h3 className="full-preview-section-title">Contact</h3>
+                    <div className="full-preview-contact-icons">
+                      {ci?.email && <a href={`mailto:${ci.email}`} className="full-preview-contact-icon" title={ci.email}><FiMail /></a>}
+                      {pageData.show_contact_number && ci?.phone && <a href={`tel:${ci.phone}`} className="full-preview-contact-icon" title={ci.phone}><FiPhone /></a>}
+                      {ci?.website && <a href={ci.website} target="_blank" rel="noopener noreferrer" className="full-preview-contact-icon" title={ci.website}><FiGlobe /></a>}
+                    </div>
+                  </div>
+                )
+              case 'profileBioAbout':
+                return (
+                  <div key={section.id} className="full-preview-profile-section" style={{ marginBottom: '40px' }}>
+                    <h3 className="full-preview-section-title">About</h3>
+                    <p className="full-preview-tagline" style={{ whiteSpace: 'pre-wrap' }}>{(pageData.profile_card_bio || pageData.bio) || ''}</p>
+                  </div>
+                )
+              case 'profileStatsBar':
+                return (
+                  <div key={section.id} className="full-preview-profile-section" style={{ marginBottom: '40px' }}>
+                    {pageData.show_experience_stats && pageData.experience_stats && pageData.experience_stats.length > 0 && (
+                      <div className="full-preview-experience-stats">
+                        {pageData.experience_stats.map((stat: any, index: number) => (
+                          <div key={index} className="full-preview-stat-item">
+                            <div className="full-preview-stat-value">{stat.value}</div>
+                            <div className="full-preview-stat-label">{stat.label}</div>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
-                )}
-                {pageData.show_experience_stats && pageData.experience_stats && pageData.experience_stats.length > 0 && (
-                  <div className="full-preview-experience-stats">
-                    {pageData.experience_stats.map((stat: any, index: number) => (
-                      <div key={index} className="full-preview-stat-item">
-                        <div className="full-preview-stat-value">{stat.value}</div>
-                        <div className="full-preview-stat-label">{stat.label}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Featured Listings */}
-          {pageData.show_featured_listings && pageData.featured_listings && pageData.featured_listings.length > 0 && (
-            <div className="full-preview-featured-section" style={{ marginBottom: '40px' }}>
-              <h3 className="full-preview-section-title">Featured Listings</h3>
-              <div className="full-preview-listings-grid">
-                {pageData.featured_listings.map((listing: any) => (
-                  <div key={listing.id} className="full-preview-listing-card">
-                    <div className="full-preview-listing-badge">
-                      <FiStar className="full-preview-star-icon" />
-                      <span>Featured</span>
-                    </div>
-                    <div className="full-preview-listing-image-wrapper">
-                      <img src={listing.image || ASSETS.PLACEHOLDER_PROPERTY} alt={listing.title} />
-                    </div>
-                    <div className="full-preview-listing-info">
-                      <div className="full-preview-listing-info-header">
-                        <div className="full-preview-listing-price">{formatPropertyPrice(listing)}</div>
-                        <button className="full-preview-listing-heart" aria-label="Favorite">
-                          <FiHeart />
-                        </button>
-                      </div>
-                      <div className="full-preview-listing-title">{listing.title}</div>
-                      <div className="full-preview-listing-category">{listing.type || listing.category}</div>
-                      <div className="full-preview-listing-info-footer">
-                        <div className="full-preview-listing-date">{formatPropertyDate(listing)}</div>
-                        <div className="full-preview-listing-view-count">
-                          <span>1</span>
+                )
+              case 'profileActiveListings':
+                return (
+                  <div key={section.id} style={{ marginBottom: '40px' }}>
+                    {pageData.show_featured_listings && pageData.featured_listings && pageData.featured_listings.length > 0 && (
+                      <div className="full-preview-featured-section">
+                        <h3 className="full-preview-section-title">Active Listings</h3>
+                        <div className="full-preview-listings-grid">
+                          {pageData.featured_listings.map((listing: any) => (
+                            <div key={listing.id} className="full-preview-listing-card">
+                              <div className="full-preview-listing-badge"><FiStar className="full-preview-star-icon" /><span>Featured</span></div>
+                              <div className="full-preview-listing-image-wrapper">
+                                <img src={listing.image || ASSETS.PLACEHOLDER_PROPERTY} alt={listing.title} />
+                              </div>
+                              <div className="full-preview-listing-info">
+                                <div className="full-preview-listing-info-header">
+                                  <div className="full-preview-listing-price">{formatPropertyPrice(listing)}</div>
+                                  <button type="button" className="full-preview-listing-heart" aria-label="Favorite"><FiHeart /></button>
+                                </div>
+                                <div className="full-preview-listing-title">{listing.title}</div>
+                                <div className="full-preview-listing-category">{listing.type || listing.category}</div>
+                                <div className="full-preview-listing-info-footer">
+                                  <div className="full-preview-listing-date">{formatPropertyDate(listing)}</div>
+                                  <div className="full-preview-listing-view-count"><span>1</span></div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    </div>
+                    )}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Testimonials */}
-          {pageData.show_testimonials && pageData.testimonials && pageData.testimonials.length > 0 && (
-            <div className="full-preview-testimonials-section">
-              <h3 className="full-preview-section-title">Client Testimonials</h3>
-              <div className="full-preview-testimonials-grid">
-                {pageData.testimonials.map((testimonial: any) => (
-                  <div key={testimonial.id} className="full-preview-testimonial-card">
-                    <div className="full-preview-testimonial-header">
-                      <img 
-                        src={testimonial.avatar || ASSETS.PLACEHOLDER_PROFILE} 
-                        alt={testimonial.name}
-                        className="full-preview-testimonial-avatar"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                        }}
-                      />
-                      <div className="full-preview-testimonial-avatar-fallback">
-                        {testimonial.name?.split(' ').map((n: string) => n[0]).join('') || 'TC'}
-                      </div>
-                      <div className="full-preview-testimonial-name">{testimonial.name}</div>
-                    </div>
-                    <p className="full-preview-testimonial-quote">"{testimonial.content}"</p>
-                    {testimonial.role && (
-                      <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '8px' }}>
-                        {testimonial.role}
+                )
+              case 'profileClientReviews':
+                return (
+                  <div key={section.id} style={{ marginBottom: '40px' }}>
+                    {pageData.show_testimonials && pageData.testimonials && pageData.testimonials.length > 0 && (
+                      <div className="full-preview-testimonials-section">
+                        <h3 className="full-preview-section-title">Client Reviews</h3>
+                        <div className="full-preview-testimonials-grid">
+                          {pageData.testimonials.map((testimonial: any) => (
+                            <div key={testimonial.id} className="full-preview-testimonial-card">
+                              <div className="full-preview-testimonial-header">
+                                <img src={testimonial.avatar || ASSETS.PLACEHOLDER_PROFILE} alt={testimonial.name} className="full-preview-testimonial-avatar" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                                <div className="full-preview-testimonial-avatar-fallback">{testimonial.name?.split(' ').map((n: string) => n[0]).join('') || 'TC'}</div>
+                                <div className="full-preview-testimonial-name">{testimonial.name}</div>
+                              </div>
+                              <p className="full-preview-testimonial-quote">"{testimonial.content}"</p>
+                              {testimonial.role && <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '8px' }}>{testimonial.role}</div>}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                )
+              case 'profileSocialLinks':
+                return (
+                  <div key={section.id} className="full-preview-profile-section" style={{ marginBottom: '40px' }}>
+                    <h3 className="full-preview-section-title">Connect</h3>
+                    <div className="full-preview-contact-icons">
+                      {ci?.website && <a href={ci.website} target="_blank" rel="noopener noreferrer" className="full-preview-contact-icon" title="Website"><FiGlobe /></a>}
+                      {ci?.email && <a href={`mailto:${ci.email}`} className="full-preview-contact-icon" title="Email"><FiMail /></a>}
+                    </div>
+                  </div>
+                )
+              default:
+                return null
+            }
+          })}
         </div>
       </div>
     )
@@ -319,7 +312,8 @@ export default function PublicPageBuilderPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-10 py-8">
           {/* Render sections in the order specified by layoutSections */}
           {layoutSections.map((section: any) => {
-            if (!section.visible || !sectionVisibility[section.id as keyof typeof sectionVisibility]) return null
+            const isVisibleFlag = (sectionVisibility as any)[section.id]
+            if (!section.visible || (isVisibleFlag === false)) return null
             
             switch (section.id) {
               case 'hero':
@@ -377,6 +371,55 @@ export default function PublicPageBuilderPage() {
                     </div>
                   </div>
                 )
+              
+              case 'propertyDetails': {
+                const bedrooms = (pageData as any).property_bedrooms ?? 0
+                const bathrooms = (pageData as any).property_bathrooms ?? 0
+                const garage = (pageData as any).property_garage ?? 0
+                const area = (pageData as any).property_area
+                return (
+                  <div key={section.id} className="mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-3">Property Details</h2>
+                    <div className="flex flex-wrap gap-4 sm:gap-6 text-base">
+                      <div className="flex items-center gap-2 text-gray-700">
+                        <svg className="w-6 h-6 text-gray-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+                        <span>{bedrooms} Bedrooms</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-700">
+                        <svg className="w-6 h-6 text-gray-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 17h14v-5H5v5zM5 7V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2" /></svg>
+                        <span>{garage} Garage</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-700">
+                        <svg className="w-6 h-6 text-gray-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z" /><path d="M12 4v2M8 4v1M16 4v1" /></svg>
+                        <span>{bathrooms} Bathrooms</span>
+                      </div>
+                      {area && (
+                        <div className="flex items-center gap-2 text-gray-700">
+                          <span className="font-medium">{area}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              }
+              
+              case 'amenities': {
+                const amenities = (pageData as any).property_amenities || []
+                return (
+                  <div key={section.id} className="mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-3">Amenities</h2>
+                    <div className="flex flex-wrap gap-2">
+                      {amenities.length > 0 ? (
+                        amenities.map((amenity: string, index: number) => (
+                          <span key={index} className="rounded-full border-2 border-orange-500 px-4 py-2 bg-gray-100 text-sm font-medium text-gray-700">
+                            {amenity}
+                          </span>
+                        ))
+                      ) : null}
+                    </div>
+                  </div>
+                )
+              }
               
               case 'profileCard':
                 return (
@@ -444,6 +487,215 @@ export default function PublicPageBuilderPage() {
                           )}
                         </div>
                       </div>
+                    </div>
+                  </div>
+                )
+
+              case 'contact': {
+                if (!(pageData.show_contact_number && pageData.contact_info && (pageData.contact_info.email || pageData.contact_info.phone || pageData.contact_info.website || pageData.contact_info.message))) {
+                  return null
+                }
+                return (
+                  <div key={section.id} className="mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Contact Information</h2>
+                    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {pageData.contact_info.phone && (
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                              <FiPhone className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-500 mb-1">Phone</div>
+                              <a href={`tel:${pageData.contact_info.phone}`} className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
+                                {pageData.contact_info.phone}
+                              </a>
+                            </div>
+                          </div>
+                        )}
+                        {pageData.contact_info.email && (
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                              <FiMail className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-500 mb-1">Email</div>
+                              <a href={`mailto:${pageData.contact_info.email}`} className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
+                                {pageData.contact_info.email}
+                              </a>
+                            </div>
+                          </div>
+                        )}
+                        {pageData.contact_info.website && (
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                              <FiGlobe className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-500 mb-1">Website</div>
+                              <a href={pageData.contact_info.website} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
+                                Visit Website
+                              </a>
+                            </div>
+                          </div>
+                        )}
+                        {pageData.contact_info.message && (
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                              <FiMessageCircle className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-500 mb-1">Message</div>
+                              <a href={pageData.contact_info.message} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
+                                Send Message
+                              </a>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )
+              }
+
+              case 'experience': {
+                const stats = pageData.experience_stats || []
+                if (!(pageData.show_experience_stats && stats.length > 0)) return null
+                return (
+                  <div key={section.id} className="mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Experience</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {stats.map((stat: any, index: number) => (
+                        <div key={index} className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 text-center">
+                          <div className="text-3xl font-bold text-blue-600 mb-1">{stat.value}</div>
+                          <div className="text-sm text-gray-600">{stat.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              }
+
+              case 'featured': {
+                const featured = pageData.featured_listings || []
+                if (!(pageData.show_featured_listings && featured.length > 0)) return null
+                return (
+                  <div key={section.id} className="mb-6">
+                    <h3 className="full-preview-section-title">Featured Listings</h3>
+                    <div className="full-preview-listings-grid">
+                      {featured.map((listing: any) => (
+                        <div key={listing.id} className="full-preview-listing-card">
+                          <div className="full-preview-listing-badge">
+                            <FiStar className="full-preview-star-icon" />
+                            <span>Featured</span>
+                          </div>
+                          <div className="full-preview-listing-image-wrapper">
+                            <img src={listing.image || ASSETS.PLACEHOLDER_PROPERTY} alt={listing.title} />
+                          </div>
+                          <div className="full-preview-listing-info">
+                            <div className="full-preview-listing-info-header">
+                              <div className="full-preview-listing-price">{formatPropertyPrice(listing)}</div>
+                              <button className="full-preview-listing-heart" aria-label="Favorite">
+                                <FiHeart />
+                              </button>
+                            </div>
+                            <div className="full-preview-listing-title">{listing.title}</div>
+                            <div className="full-preview-listing-category">{listing.type || listing.category}</div>
+                            <div className="full-preview-listing-info-footer">
+                              <div className="full-preview-listing-date">{formatPropertyDate(listing)}</div>
+                              <div className="full-preview-listing-view-count">
+                                <span>1</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              }
+
+              case 'testimonialsSection': {
+                const testimonials = pageData.testimonials || []
+                if (!(pageData.show_testimonials && testimonials.length > 0)) return null
+                return (
+                  <div key={section.id} className="mb-6">
+                    <h3 className="full-preview-section-title">Client Testimonials</h3>
+                    <div className="full-preview-testimonials-grid">
+                      {testimonials.map((testimonial: any) => (
+                        <div key={testimonial.id} className="full-preview-testimonial-card">
+                          <div className="full-preview-testimonial-header">
+                            <img 
+                              src={testimonial.avatar || ASSETS.PLACEHOLDER_PROFILE}
+                              alt={testimonial.name}
+                              className="full-preview-testimonial-avatar"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                              }}
+                            />
+                            <div className="full-preview-testimonial-avatar-fallback">
+                              {testimonial.name?.split(' ').map((n: string) => n[0]).join('') || 'TC'}
+                            </div>
+                            <div className="full-preview-testimonial-name">{testimonial.name}</div>
+                          </div>
+                          <p className="full-preview-testimonial-quote">"{testimonial.content}"</p>
+                          {testimonial.role && (
+                            <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '8px' }}>
+                              {testimonial.role}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              }
+
+              case 'readyToView':
+                return (
+                  <div key={section.id} className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900 mb-2">Ready To View?</h2>
+                      <p className="text-gray-600 mb-4">Schedule a tour or ask any questions about the property.</p>
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center gap-3 text-gray-700">
+                          <FiPhone className="w-5 h-5 text-gray-500" />
+                          <span>{pageData.contact_info?.phone || 'Phone number'}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-gray-700">
+                          <FiMail className="w-5 h-5 text-gray-500" />
+                          <span>{pageData.contact_info?.email || 'Email address'}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact {pageData.profile_card_name || 'Agent'}</h3>
+                      {/* Public page form is static; submission is handled client-side only */}
+                      <form className="space-y-3">
+                        <input
+                          type="text"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="Your name"
+                        />
+                        <input
+                          type="email"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="Your email"
+                        />
+                        <textarea
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
+                          placeholder="Your message"
+                          rows={4}
+                        />
+                        <button
+                          type="submit"
+                          className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          <span>Send Inquiry</span>
+                          <FiMessageCircle className="w-4 h-4" />
+                        </button>
+                      </form>
                     </div>
                   </div>
                 )

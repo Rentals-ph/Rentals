@@ -415,7 +415,7 @@ export default function AgentsPage() {
             </div>
 
             {/* Right: Search, filters, and CTA */}
-            <div className="space-y-6 lg:space-y-8">
+            <div className="space-y-6 lg:space-y-8 mt-[60px]">
               {/* Search & filters card */}
               <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-5 md:p-6">
                 <h3 className="text-sm sm:text-base font-semibold text-gray-800 mb-3 sm:mb-4">
