@@ -78,8 +78,8 @@ function AgentsShowcase() {
   }
 
   return (
-    <section className="bg-white px-4 sm:px-6 md:px-10 lg:px-[150px] w-full py-8 sm:py-10 md:py-14">
-      <div className="w-full mx-auto max-w-7xl">
+    <section className="bg-white px-3 xs:px-4 sm:px-6 md:px-10 lg:px-[150px] w-full py-8 sm:py-10 md:py-14">
+      <div className="w-full mx-auto">
         <FadeInOnView className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 sm:mb-8" as="div">
           <div className="text-center sm:text-left max-w-xl">
             <h2 className="text-gray-900 font-outfit text-2xl sm:text-3xl md:text-4xl font-bold leading-tight tracking-tight m-0 mb-2">

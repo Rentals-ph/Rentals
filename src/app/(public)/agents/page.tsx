@@ -195,114 +195,40 @@ export default function AgentsPage() {
         </div>
       </div>
 
-      {/* Sticky search bar - sticks below navbar (top offset ~navbar height) */}
-      <div className="sticky z-40 top-16 sm:top-20 lg:top-0 mt-4 sm:mt-6 md:mt-8 lg:mt-6 border-b border-gray-200 bg-white py-3 sm:py-4 md:py-5 px-4 sm:px-6 md:px-10 lg:px-[150px] mb-4 sm:mb-6 md:mb-8 shadow-md">
-        <div className="flex flex-col gap-3 sm:gap-4 w-full max-w-full">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full">
-            <div className="flex-1 w-full min-w-0 relative">
-              <svg
-                className="absolute left-3 sm:left-4 top-4 w-4 h-4 sm:w-5 sm:h-5 text-gray-500 pointer-events-none"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
-                <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-              <input
-                type="text"
-                className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg bg-white text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[44px]"
-                placeholder="Search agents..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label="Search agents"
-              />
-            </div>
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <select
-                className="flex-1 sm:flex-none min-w-0 px-3 sm:px-4 md:px-5 py-2.5 sm:py-3 border border-gray-300 rounded-lg bg-white text-gray-700 text-xs sm:text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
-                value={selectedProvince}
-                onChange={(e) => setSelectedProvince(e.target.value)}
-                aria-label="Filter by province"
-              >
-                <option value="">Province</option>
-                {uniqueLocations.map(location => (
-                  <option key={location} value={location}>{location}</option>
-                ))}
-              </select>
-              <select
-                className="flex-1 sm:flex-none min-w-0 px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg bg-white text-gray-700 text-xs sm:text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
-                value={selectedCity}
-                onChange={(e) => setSelectedCity(e.target.value)}
-                aria-label="Filter by city"
-              >
-                <option value="">City</option>
-                {uniqueLocations.map(location => (
-                  <option key={location} value={location}>{location}</option>
-                ))}
-              </select>
-              <div className="flex gap-1 flex-1 sm:flex-none justify-end sm:justify-start">
-                <button
-                  className={`flex-1 sm:flex-none min-w-0 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 min-h-[44px] touch-manipulation ${
-                    viewMode === 'list'
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                  }`}
-                  aria-label="List view"
-                  onClick={() => setViewMode('list')}
-                >
-                  <span className="hidden sm:inline">List view</span>
-                  <span className="sm:hidden">List</span>
-                </button>
-                <button
-                  className={`flex-1 sm:flex-none min-w-0 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 min-h-[44px] touch-manipulation ${
-                    viewMode === 'grid'
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                  }`}
-                  aria-label="Grid view"
-                  onClick={() => setViewMode('grid')}
-                >
-                  <span className="hidden sm:inline">Grid view</span>
-                  <span className="sm:hidden">Grid</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Find agents list */}
+      {/* Find agents list with right-side filters & CTA */}
       <main className="px-4 sm:px-6 md:px-10 lg:px-[150px] pb-8 sm:pb-10 md:pb-12">
         <section className="mx-auto max-w-full">
-          <h2 className="font-bold mb-4 sm:mb-6 md:mb-8 text-base sm:text-lg md:text-xl lg:text-2xl text-[#1A3DBF] uppercase tracking-wide text-left px-0">
-            Find an Agent
-          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(320px,1.2fr)] gap-6 lg:gap-10 items-start">
+            {/* Left: Agents list */}
+            <div>
+              <h2 className="font-bold mb-4 sm:mb-6 md:mb-8 text-base sm:text-lg md:text-xl lg:text-2xl text-[#1A3DBF] uppercase tracking-wide text-left px-0">
+                Find an Agent
+              </h2>
 
-          {loading ? (
-            <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6' : 'flex flex-col gap-4'}>
-              {Array.from({ length: viewMode === 'grid' ? 9 : 4 }).map((_, i) => (
-                <RentManagerCardSkeleton key={i} variant={viewMode === 'grid' ? 'grid' : 'list'} />
-              ))}
-            </div>
-          ) : filteredManagers.length > 0 ? (
-            <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6' : 'flex flex-col gap-4'}>
-              {filteredManagers.map((manager) => (
-                <div
-                  key={manager.id}
-                  className="bg-white overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-200 rounded-2xl border border-gray-200 shadow-sm min-w-0"
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => router.push(`/agents/${manager.id}`)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      router.push(`/agents/${manager.id}`)
-                    }
-                  }}
-                >
-                  {viewMode === 'grid' ? (
-                    <>
+              {loading ? (
+                <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6' : 'flex flex-col gap-4'}>
+                  {Array.from({ length: viewMode === 'grid' ? 9 : 4 }).map((_, i) => (
+                    <RentManagerCardSkeleton key={i} variant={viewMode === 'grid' ? 'grid' : 'list'} />
+                  ))}
+                </div>
+              ) : filteredManagers.length > 0 ? (
+                <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6' : 'flex flex-col gap-4'}>
+                  {filteredManagers.map((manager) => (
+                    <div
+                      key={manager.id}
+                      className="bg-white overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-200 rounded-2xl border border-gray-200 shadow-sm min-w-0"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => router.push(`/agents/${manager.id}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          router.push(`/agents/${manager.id}`)
+                        }
+                      }}
+                    >
+                      {viewMode === 'grid' ? (
+                        <>
                       <div className="w-full pt-0 pb-4">
                         <div className="relative overflow-hidden w-full aspect-square rounded-t-2xl bg-white">
                           <img
@@ -475,51 +401,142 @@ export default function AgentsPage() {
                       </div>
                     </>
                   )}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <EmptyState
+                  variant="empty"
+                  title="No agents found"
+                  description="No agents match your search or filters. Try adjusting your criteria or browse all agents."
+                  action={<EmptyStateAction href="/agents" primary>View all agents</EmptyStateAction>}
+                />
+              )}
             </div>
-          ) : (
-            <EmptyState
-              variant="empty"
-              title="No agents found"
-              description="No agents match your search or filters. Try adjusting your criteria or browse all agents."
-              action={<EmptyStateAction href="/agents" primary>View all agents</EmptyStateAction>}
-            />
-          )}
+
+            {/* Right: Search, filters, and CTA */}
+            <div className="space-y-6 lg:space-y-8">
+              {/* Search & filters card */}
+              <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-5 md:p-6">
+                <h3 className="text-sm sm:text-base font-semibold text-gray-800 mb-3 sm:mb-4">
+                  Search & Filter Agents
+                </h3>
+                <div className="flex flex-col gap-3 sm:gap-4 w-full max-w-full">
+                  <div className="w-full min-w-0 relative">
+                    <svg
+                      className="absolute left-3 sm:left-4 top-3.5 w-4 h-4 sm:w-5 sm:h-5 text-gray-500 pointer-events-none"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
+                      <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                    <input
+                      type="text"
+                      className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg bg-white text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[44px]"
+                      placeholder="Search agents..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      aria-label="Search agents"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs sm:text-sm font-medium text-gray-700">Province</label>
+                      <select
+                        className="w-full px-3 sm:px-4 md:px-5 py-2.5 sm:py-3 border border-gray-300 rounded-lg bg-white text-gray-700 text-xs sm:text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
+                        value={selectedProvince}
+                        onChange={(e) => setSelectedProvince(e.target.value)}
+                        aria-label="Filter by province"
+                      >
+                        <option value="">All provinces</option>
+                        {uniqueLocations.map(location => (
+                          <option key={location} value={location}>{location}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs sm:text-sm font-medium text-gray-700">City</label>
+                      <select
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg bg-white text-gray-700 text-xs sm:text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
+                        value={selectedCity}
+                        onChange={(e) => setSelectedCity(e.target.value)}
+                        aria-label="Filter by city"
+                      >
+                        <option value="">All cities</option>
+                        {uniqueLocations.map(location => (
+                          <option key={location} value={location}>{location}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t border-gray-100 mt-1">
+                    <span className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                      View mode
+                    </span>
+                    <div className="flex gap-2">
+                      <button
+                        className={`flex-1 min-w-0 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 min-h-[40px] touch-manipulation ${
+                          viewMode === 'list'
+                            ? 'bg-blue-600 text-white shadow-sm'
+                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                        }`}
+                        aria-label="List view"
+                        onClick={() => setViewMode('list')}
+                      >
+                        List view
+                      </button>
+                      <button
+                        className={`flex-1 min-w-0 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 min-h-[40px] touch-manipulation ${
+                          viewMode === 'grid'
+                            ? 'bg-blue-600 text-white shadow-sm'
+                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                        }`}
+                        aria-label="Grid view"
+                        onClick={() => setViewMode('grid')}
+                      >
+                        Grid view
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Work with Our Agents CTA */}
+              <div className="relative overflow-hidden rounded-2xl shadow-xl min-h-[260px] sm:min-h-[300px]">
+                <div className="absolute inset-0 w-full h-full z-0">
+                  <img
+                    src={ASSETS.BG_RENT_MANAGERS_FOOTER}
+                    alt=""
+                    className="w-full h-full object-cover object-center"
+                    style={{ objectPosition: 'center bottom' }}
+                  />
+                </div>
+                <div className="absolute inset-0 w-full h-full z-[1] bg-black/55" />
+                <div className="relative z-10 p-5 sm:p-6 md:p-7 flex flex-col items-center justify-center text-center min-h-[260px] sm:min-h-[300px]">
+                  <h2 className="text-white text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-2 sm:mb-3 md:mb-4 leading-tight">
+                    Work with Our Agents
+                  </h2>
+                  <p className="text-white text-xs sm:text-sm md:text-base lg:text-lg mb-4 sm:mb-5 md:mb-6 max-w-2xl">
+                    Connect with our network of trusted agents to find your perfect home.
+                  </p>
+                  <Link
+                    href="/properties"
+                    className="inline-flex items-center gap-2 sm:gap-3 px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-[rgba(32,94,215,0.9)] text-white font-outfit text-xs sm:text-sm md:text-base font-semibold rounded-full transition-all hover:opacity-90 min-h-[44px] items-center justify-center touch-manipulation"
+                  >
+                    <span>Become an agent</span>
+                    <svg width="16" height="16" className="flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
       </main>
-
       <PopularRentManagers />
-
-      {/* CTA - mobile responsive */}
-      <section className="relative py-10 sm:py-14 md:py-16 px-4 sm:px-6 md:px-10 lg:px-[150px] min-h-[260px] sm:min-h-[300px] overflow-hidden">
-        <div className="absolute inset-0 w-full h-full z-0">
-          <img
-            src={ASSETS.BG_RENT_MANAGERS_FOOTER}
-            alt=""
-            className="w-full h-full object-cover object-center"
-            style={{ objectPosition: 'center bottom' }}
-          />
-        </div>
-        <div className="absolute inset-0 w-full h-full z-[1] bg-black/55" />
-        <div className="relative z-10 max-w-4xl mx-auto text-center flex flex-col items-center justify-center min-h-[260px] sm:min-h-[300px] px-4">
-          <h2 className="text-white text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-3 sm:mb-4 md:mb-5 leading-tight">
-            Work with Our Agents
-          </h2>
-          <p className="text-white text-sm sm:text-base md:text-lg lg:text-xl mb-4 sm:mb-6 md:mb-8 max-w-2xl">
-            Connect with our network of trusted agents to find your perfect home.
-          </p>
-          <Link
-            href="/properties"
-            className="inline-flex items-center gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-[rgba(32,94,215,0.9)] text-white font-outfit text-sm sm:text-base font-semibold rounded-full transition-all hover:opacity-90 min-h-[44px] items-center justify-center touch-manipulation"
-          >
-            <span>Browse properties</span>
-            <svg width="20" height="20" className="flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </Link>
-        </div>
-      </section>
 
       <Footer />
     </div>

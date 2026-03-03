@@ -172,7 +172,10 @@ function buildAgentSearchUrl(params: { location?: string; license?: string }) {
   return `/agents${q ? `?${q}` : ''}`
 }
 
+type MainTab = 'searches' | 'agents'
+
 export default function PopularExplore() {
+  const [mainTab, setMainTab] = useState<MainTab>('searches')
   const [propertyTab, setPropertyTab] = useState<PropertyTab>('type')
   const [agentTab, setAgentTab] = useState<AgentTab>('location')
   const [propertyShowMore, setPropertyShowMore] = useState<Record<string, boolean>>({})
@@ -188,47 +191,65 @@ export default function PopularExplore() {
 
   return (
     <section className="bg-white px-4 sm:px-6 md:px-10 lg:px-[150px] w-full py-8 sm:py-12 md:py-16">
-      <div className="w-full mx-auto max-w-7xl">
-        <div className="text-center max-w-5xl mx-auto mb-6 sm:mb-8">
-          <h2 className="text-gray-900 font-outfit text-2xl sm:text-3xl md:text-4xl font-bold leading-tight tracking-tight mb-2">
-            Popular Real Estate Searches & Popular Real Estate Agents
-          </h2>
+      <div className="w-full mx-auto ">
+        <div className="text-center mx-auto mb-6 sm:mb-8">
+          <div className="flex justify-center border-b border-gray-200 mb-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <button
+              className={`px-4 sm:px-6 py-2 sm:py-3 bg-transparent border-none font-outfit text-base sm:text-lg md:text-xl font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${
+                mainTab === 'searches'
+                  ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
+                  : 'text-gray-500 hover:text-rental-blue-600'
+              }`}
+              onClick={() => setMainTab('searches')}
+            >
+              Popular Real Estate Searches
+            </button>
+            <button
+              className={`px-4 sm:px-6 py-2 sm:py-3 bg-transparent border-none font-outfit text-base sm:text-lg md:text-xl font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${
+                mainTab === 'agents'
+                  ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
+                  : 'text-gray-500 hover:text-rental-blue-600'
+              }`}
+              onClick={() => setMainTab('agents')}
+            >
+              Popular Real Estate Agents
+            </button>
+          </div>
           <p className="text-gray-600 font-outfit text-sm sm:text-base md:text-lg leading-relaxed">
-            Quickly jump into the most in-demand property searches or find trusted agents in key
-            Philippine cities.
+            {mainTab === 'searches'
+              ? 'Quickly jump into the most in-demand property searches.'
+              : 'Find trusted agents in key Philippine cities.'}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-start">
+        <div className="w-full mx-auto">
           {/* Popular property searches */}
-          <div>
-            <h3 className="font-outfit text-base sm:text-lg font-semibold text-gray-900 mb-2">
-              Popular Real Estate Searches
-            </h3>
-            <div className="flex border-b border-gray-200 mb-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <button
-                className={`px-3 sm:px-4 py-2 bg-transparent border-none font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${
-                  propertyTab === 'type'
-                    ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
-                    : 'text-gray-500 hover:text-rental-blue-600'
-                }`}
-                onClick={() => setPropertyTab('type')}
-              >
-                By Property Type
-              </button>
-              <button
-                className={`px-3 sm:px-4 py-2 bg-transparent border-none font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${
-                  propertyTab === 'location'
-                    ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
-                    : 'text-gray-500 hover:text-rental-blue-600'
-                }`}
-                onClick={() => setPropertyTab('location')}
-              >
-                By Location
-              </button>
-            </div>
+          {mainTab === 'searches' && (
+            <div>
+              <div className="flex border-b border-gray-200 mb-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <button
+                  className={`px-3 sm:px-4 py-2 bg-transparent border-none font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${
+                    propertyTab === 'type'
+                      ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
+                      : 'text-gray-500 hover:text-rental-blue-600'
+                  }`}
+                  onClick={() => setPropertyTab('type')}
+                >
+                  By Property Type
+                </button>
+                <button
+                  className={`px-3 sm:px-4 py-2 bg-transparent border-none font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${
+                    propertyTab === 'location'
+                      ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
+                      : 'text-gray-500 hover:text-rental-blue-600'
+                  }`}
+                  onClick={() => setPropertyTab('location')}
+                >
+                  By Location
+                </button>
+              </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 max-h-52 sm:max-h-56 overflow-y-auto pr-1">
+              <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 md:gap-5 pr-1">
               {propertyCategories.map((category) => {
                 const items = (propertyData as any)[category] as {
                   label: string
@@ -274,38 +295,37 @@ export default function PopularExplore() {
                   </div>
                 )
               })}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Popular agent searches */}
-          <div>
-            <h3 className="font-outfit text-base sm:text-lg font-semibold text-gray-900 mb-2">
-              Popular Real Estate Agents
-            </h3>
-            <div className="flex border-b border-gray-200 mb-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <button
-                className={`px-3 sm:px-4 py-2 bg-transparent border-none font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${
-                  agentTab === 'location'
-                    ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
-                    : 'text-gray-500 hover:text-rental-blue-600'
-                }`}
-                onClick={() => setAgentTab('location')}
-              >
-                By Location
-              </button>
-              <button
-                className={`px-3 sm:px-4 py-2 bg-transparent border-none font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${
-                  agentTab === 'license'
-                    ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
-                    : 'text-gray-500 hover:text-rental-blue-600'
-                }`}
-                onClick={() => setAgentTab('license')}
-              >
-                By License Type
-              </button>
-            </div>
+          {mainTab === 'agents' && (
+            <div>
+              <div className="flex border-b border-gray-200 mb-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <button
+                  className={`px-3 sm:px-4 py-2 bg-transparent border-none font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${
+                    agentTab === 'location'
+                      ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
+                      : 'text-gray-500 hover:text-rental-blue-600'
+                  }`}
+                  onClick={() => setAgentTab('location')}
+                >
+                  By Location
+                </button>
+                <button
+                  className={`px-3 sm:px-4 py-2 bg-transparent border-none font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${
+                    agentTab === 'license'
+                      ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
+                      : 'text-gray-500 hover:text-rental-blue-600'
+                  }`}
+                  onClick={() => setAgentTab('license')}
+                >
+                  By License Type
+                </button>
+              </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 max-h-52 sm:max-h-56 overflow-y-auto pr-1">
+              <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 md:gap-5 pr-1">
               {agentCategories.map((category) => {
                 const items =
                   agentTab === 'location'
@@ -365,8 +385,9 @@ export default function PopularExplore() {
                   </div>
                 )
               })}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </section>
