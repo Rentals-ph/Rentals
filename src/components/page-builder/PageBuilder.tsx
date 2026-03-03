@@ -200,7 +200,6 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
   // New features state
   const router = useRouter()
   const [previewMode, setPreviewMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
-  const [showPreview, setShowPreview] = useState(false)
   const [history, setHistory] = useState<any[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
@@ -692,13 +691,14 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
         e.preventDefault()
         handleRedo()
       }
-      // Ctrl+P to toggle preview
+      // Ctrl+P to toggle preview modal
       if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
         e.preventDefault()
-        setShowPreview(!showPreview)
+        setShowFullPreview((prev) => !prev)
       }
       // Escape to close modals/panels
       if (e.key === 'Escape') {
+        setShowFullPreview(false)
         setShowShortcutsModal(false)
         setOpenSectionId(null)
       }
@@ -706,7 +706,7 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
     
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [handleUndo, handleRedo, showPreview])
+  }, [handleUndo, handleRedo])
   
   // Unsaved changes warning
   useEffect(() => {
@@ -1407,14 +1407,14 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
             </div>
             
             <div className="flex items-center gap-3">
-              {/* Preview Toggle */}
+              {/* Show Preview - opens preview modal */}
               <button
-                onClick={() => setShowPreview(!showPreview)}
+                onClick={() => setShowFullPreview(true)}
                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 title="Toggle Preview (Ctrl+P)"
               >
-                {showPreview ? <FiX className="w-4 h-4" /> : <FiExternalLink className="w-4 h-4" />}
-                <span>{showPreview ? 'Hide Preview' : 'Show Preview'}</span>
+                <FiEye className="w-4 h-4" />
+                <span>Show Preview</span>
               </button>
               
               {/* Keyboard Shortcuts */}
@@ -1426,10 +1426,18 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
                 <FiHelpCircle className="w-5 h-5" />
               </button>
               
-              {/* Full Preview */}
+              {/* Full Preview - open whole page in new tab */}
               <button 
                 className="inline-flex items-center gap-2 py-2 px-4 bg-blue-600 text-white text-sm font-semibold rounded-lg border-0 cursor-pointer transition-all duration-200 shadow-sm hover:bg-blue-700"
-                onClick={() => setShowFullPreview(true)}
+                onClick={() => {
+                  const url = pageUrl || (pageSlug && typeof window !== 'undefined' ? `${window.location.origin}/page/${pageSlug}` : null)
+                  if (url) {
+                    window.open(url, '_blank', 'noopener,noreferrer')
+                  } else {
+                    toast.info('Save your page first to preview it in a new tab.')
+                  }
+                }}
+                title="Open full page in new tab"
               >
                 <FiExternalLink className="w-4 h-4" />
                 <span>Full Preview</span>
