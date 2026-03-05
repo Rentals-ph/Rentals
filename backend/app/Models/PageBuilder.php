@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\HasMedia;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PageBuilder extends Model
 {
-    use HasFactory;
+    use HasFactory, HasMedia;
 
     protected $fillable = [
         'user_id',
@@ -61,6 +62,54 @@ class PageBuilder extends Model
         'is_published' => 'boolean',
         'published_at' => 'datetime',
     ];
+
+    /**
+     * Get the profile image URL.
+     * Checks media table first, falls back to old profile_image column.
+     */
+    public function getProfileImageUrlAttribute(): ?string
+    {
+        return $this->getFirstMediaPath('profile_image')
+            ?? $this->attributes['profile_image'] ?? null;
+    }
+
+    /**
+     * Get the hero image URL.
+     * Checks media table first, falls back to old hero_image column.
+     */
+    public function getHeroImageUrlAttribute(): ?string
+    {
+        return $this->getFirstMediaPath('hero')
+            ?? $this->attributes['hero_image'] ?? null;
+    }
+
+    /**
+     * Get property images as an array.
+     * Checks media table first, falls back to old property_images JSON column.
+     */
+    public function getPropertyImagesAttribute(): array
+    {
+        $fromMedia = $this->getMedia('property_gallery')->pluck('path')->toArray();
+        if (!empty($fromMedia)) {
+            return $fromMedia;
+        }
+        // Use raw attribute to bypass the 'array' cast and get the raw JSON string
+        $raw = $this->attributes['property_images'] ?? null;
+        if (is_array($raw)) {
+            return $raw;
+        }
+        return json_decode($raw ?? '[]', true) ?? [];
+    }
+
+    /**
+     * Get the profile card image URL.
+     * Checks media table first, falls back to old profile_card_image column.
+     */
+    public function getProfileCardImageUrlAttribute(): ?string
+    {
+        return $this->getFirstMediaPath('profile_card')
+            ?? $this->attributes['profile_card_image'] ?? null;
+    }
 
     /**
      * Get the user that owns the page builder.

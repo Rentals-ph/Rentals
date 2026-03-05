@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\HasMedia;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class News extends Model
 {
-    use HasFactory;
+    use HasFactory, HasMedia;
 
     protected $fillable = [
         'title',
@@ -25,17 +26,35 @@ class News extends Model
     ];
 
     /**
+     * Get the image path.
+     * Checks media table first, falls back to old image_path/image columns.
+     * This accessor transparently replaces direct column access.
+     */
+    public function getImagePathAttribute(): ?string
+    {
+        return $this->getFirstMediaPath('thumbnail')
+            ?? $this->attributes['image_path'] ?? null
+            ?? $this->attributes['image'] ?? null;
+    }
+
+    /**
      * Get the full URL of the image.
      *
      * @return string|null
      */
     public function getImageUrlAttribute(): ?string
     {
-        if (!$this->image_path) {
+        // Delegate to getImagePathAttribute which handles media table fallback
+        $path = $this->image_path;
+        if (!$path) {
             return null;
         }
 
-        return asset('storage/' . $this->image_path);
+        // If it's already a full URL, return as is
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        return asset('storage/' . $path);
     }
 }
-

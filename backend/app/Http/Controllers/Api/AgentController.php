@@ -354,10 +354,12 @@ class AgentController extends Controller
                 ->orderBy('first_name')
                 ->get()
                 ->map(function ($agent) {
+                    // Use avatar accessor (checks media table first, falls back to image_path column)
                     $imageUrl = null;
-                    if ($agent->image_path) {
+                    $avatarPath = $agent->avatar ?? $agent->image_path;
+                    if ($avatarPath) {
                         try {
-                            $imageUrl = \App\Services\ImageService::url($agent->image_path);
+                            $imageUrl = \App\Services\ImageService::url($avatarPath);
                         } catch (\Exception $e) {
                             \Log::warning('Error generating image URL for agent ' . $agent->id . ': ' . $e->getMessage());
                             $imageUrl = null;
@@ -500,10 +502,11 @@ class AgentController extends Controller
             ], 403);
         }
         
-        // Get image URL if image_path exists
+        // Use avatar accessor (checks media table first, falls back to image_path column)
         $imageUrl = null;
-        if ($user->image_path) {
-            $imageUrl = \App\Services\ImageService::url($user->image_path);
+        $avatarPath = $user->avatar ?? $user->image_path;
+        if ($avatarPath) {
+            $imageUrl = \App\Services\ImageService::url($avatarPath);
         }
         
         return response()->json([
@@ -575,9 +578,11 @@ class AgentController extends Controller
             ], 404);
         }
         
+        // Use avatar accessor (checks media table first, falls back to image_path column)
         $imageUrl = null;
-        if ($agent->image_path) {
-            $imageUrl = \App\Services\ImageService::url($agent->image_path);
+        $avatarPath = $agent->avatar ?? $agent->image_path;
+        if ($avatarPath) {
+            $imageUrl = \App\Services\ImageService::url($avatarPath);
         }
         
         return response()->json([
@@ -747,10 +752,14 @@ class AgentController extends Controller
                     if (!$file->isValid()) {
                         \Log::warning('Invalid image file uploaded for user ' . $user->id);
                     } else {
-                        // Delete old image if exists
-                        if ($user->image_path) {
-                            \App\Services\ImageService::delete($user->image_path);
+                        // Delete old image file if exists (use raw to bypass accessor)
+                        $oldImagePath = $user->getRawOriginal('image_path');
+                        if ($oldImagePath) {
+                            \App\Services\ImageService::delete($oldImagePath);
                         }
+
+                        // Remove old avatar media record
+                        $user->deleteMedia('avatar');
                         
                         // Upload new image - use users directory structure with avatar.jpg filename
                         $directory = 'images/users/' . $user->id;
@@ -780,6 +789,9 @@ class AgentController extends Controller
                         if ($imagePath) {
                             $validated['image_path'] = $imagePath;
                             \Log::info('Image uploaded successfully for user ' . $user->id . ': ' . $imagePath);
+
+                            // Store in media table (new system) — must save first so $user->id is set
+                            $user->storeMedia($imagePath, 'avatar');
                         } else {
                             \Log::error('Failed to store image for user ' . $user->id . ' - storeAs returned false');
                         }
@@ -837,11 +849,12 @@ class AgentController extends Controller
                 \Log::warning('No update data for user ' . $user->id);
             }
             
-            // Get image URL if image_path exists
+            // Use avatar accessor (checks media table first, falls back to image_path column)
             $imageUrl = null;
-            if ($user->image_path) {
+            $avatarPath = $user->avatar ?? $user->image_path;
+            if ($avatarPath) {
                 try {
-                    $imageUrl = \App\Services\ImageService::url($user->image_path);
+                    $imageUrl = \App\Services\ImageService::url($avatarPath);
                 } catch (\Exception $e) {
                     \Log::warning('Error generating image URL for user ' . $user->id . ': ' . $e->getMessage());
                 }
