@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use OpenApi\Attributes as OA;
 
 class BrokerController extends Controller
@@ -345,28 +346,39 @@ class BrokerController extends Controller
 
         DB::beginTransaction();
         try {
-            $agent = User::create([
+            $agentData = [
                 'first_name' => $validated['first_name'],
                 'last_name' => $validated['last_name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'phone' => $validated['phone'] ?? null,
                 'role' => 'agent',
-                'company_id' => $companyId,
                 'created_by_broker_id' => $broker->id,
                 'status' => 'approved',
                 'verified' => true,
                 'is_active' => true,
-            ]);
+            ];
+
+            // Only include company_id if the column exists and value is not null
+            if ($companyId !== null && Schema::hasColumn('users', 'company_id')) {
+                $agentData['company_id'] = $companyId;
+            }
+
+            $agent = User::create($agentData);
 
             $subscription->increment('agents_used');
 
             DB::commit();
 
+            // Load company relationship only if company_id column exists
+            if (Schema::hasColumn('users', 'company_id')) {
+                $agent->load('company');
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Agent account created successfully',
-                'data' => $agent->load('company'),
+                'data' => $agent,
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
