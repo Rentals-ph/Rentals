@@ -234,9 +234,9 @@ export default function NewsPage() {
               {/* Combined Featured & News Block */}
               <div className="flex flex-col gap-8 sm:gap-10">
                 {/* 0. Feature Grid Section */}
-                <section className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-4 lg:h-[500px]">
+                <section className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-4 lg:h-250">
                   {/* Left: Big Feature */}
-                  <div className="lg:col-span-7 h-[200px] sm:h-[300px] lg:h-full">
+                  <div className="lg:col-span-7 h-[200px] sm:h-[300px] lg:h-[700px]">
                     {featureMain && (
                       <Link href={`/news/${featureMain.id}`} className="group relative block w-full h-full overflow-hidden rounded-xl bg-gray-100 shadow-sm">
                         <img
@@ -261,7 +261,7 @@ export default function NewsPage() {
                   </div>
 
                   {/* Right: 3 Smaller Features */}
-                  <div className="lg:col-span-5 flex flex-col gap-3 md:gap-4 h-full">
+                  <div className="lg:col-span-5 flex flex-col gap-3 md:gap-4 h-[700px]">
                     {/* Top wide in right col */}
                     {featureRight[0] && (
                       <Link href={`/news/${featureRight[0].id}`} className="group relative block w-full flex-1 overflow-hidden rounded-xl bg-gray-100 shadow-sm">

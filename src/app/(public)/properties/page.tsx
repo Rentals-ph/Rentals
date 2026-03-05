@@ -40,7 +40,7 @@ function PropertiesContent() {
   const [sortByPrice, setSortByPrice] = useState('')
   const [subCategory, setSubCategory] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
-  const [viewMode, setViewMode] = useState<'horizontal' | 'vertical' | 'map'>('vertical')
+  const [viewMode, setViewMode] = useState<'horizontal' | 'vertical' | 'map'>('horizontal')
   const [properties, setProperties] = useState<Property[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

@@ -21,6 +21,7 @@ export default {
         outfit: ['Outfit', 'Inter', 'sans-serif'],
         inter: ['Inter', 'sans-serif'],
         montserrat: ['Montserrat', 'sans-serif'],
+        serif: ['PT Serif Caption', 'serif'],
       },
       colors: {
         'rental-blue': {

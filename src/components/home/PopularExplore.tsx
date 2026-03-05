@@ -195,21 +195,19 @@ export default function PopularExplore() {
         <div className="text-center mx-auto mb-6 sm:mb-8">
           <div className="flex justify-center border-b border-gray-200 mb-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <button
-              className={`px-4 sm:px-6 py-2 sm:py-3 bg-transparent border-none font-outfit text-base sm:text-lg md:text-xl font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${
-                mainTab === 'searches'
-                  ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
-                  : 'text-gray-500 hover:text-rental-blue-600'
-              }`}
+              className={`px-4 sm:px-6 py-2 sm:py-3 bg-transparent border-none font-outfit text-base sm:text-lg md:text-xl font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${mainTab === 'searches'
+                ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
+                : 'text-gray-500 hover:text-rental-blue-600'
+                }`}
               onClick={() => setMainTab('searches')}
             >
               Popular Real Estate Searches
             </button>
             <button
-              className={`px-4 sm:px-6 py-2 sm:py-3 bg-transparent border-none font-outfit text-base sm:text-lg md:text-xl font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${
-                mainTab === 'agents'
-                  ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
-                  : 'text-gray-500 hover:text-rental-blue-600'
-              }`}
+              className={`px-4 sm:px-6 py-2 sm:py-3 bg-transparent border-none font-outfit text-base sm:text-lg md:text-xl font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${mainTab === 'agents'
+                ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
+                : 'text-gray-500 hover:text-rental-blue-600'
+                }`}
               onClick={() => setMainTab('agents')}
             >
               Popular Real Estate Agents
@@ -226,23 +224,21 @@ export default function PopularExplore() {
           {/* Popular property searches */}
           {mainTab === 'searches' && (
             <div>
-              <div className="flex border-b border-gray-200 mb-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex justify-center border-b border-gray-200 mb-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 <button
-                  className={`px-3 sm:px-4 py-2 bg-transparent border-none font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${
-                    propertyTab === 'type'
-                      ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
-                      : 'text-gray-500 hover:text-rental-blue-600'
-                  }`}
+                  className={`px-3 sm:px-4 py-2 bg-transparent border-none font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${propertyTab === 'type'
+                    ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
+                    : 'text-gray-500 hover:text-rental-blue-600'
+                    }`}
                   onClick={() => setPropertyTab('type')}
                 >
                   By Property Type
                 </button>
                 <button
-                  className={`px-3 sm:px-4 py-2 bg-transparent border-none font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${
-                    propertyTab === 'location'
-                      ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
-                      : 'text-gray-500 hover:text-rental-blue-600'
-                  }`}
+                  className={`px-3 sm:px-4 py-2 bg-transparent border-none font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${propertyTab === 'location'
+                    ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
+                    : 'text-gray-500 hover:text-rental-blue-600'
+                    }`}
                   onClick={() => setPropertyTab('location')}
                 >
                   By Location
@@ -250,51 +246,51 @@ export default function PopularExplore() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 md:gap-5 pr-1">
-              {propertyCategories.map((category) => {
-                const items = (propertyData as any)[category] as {
-                  label: string
-                  type: string
-                  location: string
-                }[]
-                const isExpanded = propertyShowMore[category]
-                const visibleItems = isExpanded ? items : items.slice(0, INITIAL_VISIBLE)
+                {propertyCategories.map((category) => {
+                  const items = (propertyData as any)[category] as {
+                    label: string
+                    type: string
+                    location: string
+                  }[]
+                  const isExpanded = propertyShowMore[category]
+                  const visibleItems = isExpanded ? items : items.slice(0, INITIAL_VISIBLE)
 
-                return (
-                  <div key={category} className="flex flex-col">
-                    <h4 className="font-outfit text-xs sm:text-sm font-semibold text-gray-700 tracking-wide pb-1.5">
-                      {category.toUpperCase()}
-                    </h4>
-                    <ul className="list-none p-0 m-0 flex flex-col gap-1">
-                      {visibleItems.map((item, idx) => (
-                        <li key={idx}>
-                          <Link
-                            href={buildPropertySearchUrl(item.type, item.location)}
-                            className="font-outfit text-[13px] sm:text-sm font-light text-gray-600 no-underline transition-colors hover:text-rental-blue-600 hover:underline"
-                          >
-                            {item.label}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                    {items.length > INITIAL_VISIBLE && (
-                      <button
-                        className="flex items-center gap-1.5 mt-3 px-0 py-1 bg-transparent border-none font-outfit text-xs sm:text-sm font-medium text-rental-blue-600 cursor-pointer transition-colors hover:text-rental-blue-700"
-                        onClick={() =>
-                          setPropertyShowMore((prev) => ({
-                            ...prev,
-                            [category]: !prev[category],
-                          }))
-                        }
-                      >
-                        {isExpanded ? 'View Less' : 'View More'}
-                        <FiChevronDown
-                          className={`text-sm transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                        />
-                      </button>
-                    )}
-                  </div>
-                )
-              })}
+                  return (
+                    <div key={category} className="flex flex-col">
+                      <h4 className="font-outfit text-xs sm:text-sm font-semibold text-gray-700 tracking-wide pb-1.5">
+                        {category.toUpperCase()}
+                      </h4>
+                      <ul className="list-none p-0 m-0 flex flex-col gap-1">
+                        {visibleItems.map((item, idx) => (
+                          <li key={idx}>
+                            <Link
+                              href={buildPropertySearchUrl(item.type, item.location)}
+                              className="font-outfit text-[13px] sm:text-sm font-light text-gray-600 no-underline transition-colors hover:text-rental-blue-600 hover:underline"
+                            >
+                              {item.label}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                      {items.length > INITIAL_VISIBLE && (
+                        <button
+                          className="flex items-center gap-1.5 mt-3 px-0 py-1 bg-transparent border-none font-outfit text-xs sm:text-sm font-medium text-rental-blue-600 cursor-pointer transition-colors hover:text-rental-blue-700"
+                          onClick={() =>
+                            setPropertyShowMore((prev) => ({
+                              ...prev,
+                              [category]: !prev[category],
+                            }))
+                          }
+                        >
+                          {isExpanded ? 'View Less' : 'View More'}
+                          <FiChevronDown
+                            className={`text-sm transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                          />
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )}
@@ -302,23 +298,21 @@ export default function PopularExplore() {
           {/* Popular agent searches */}
           {mainTab === 'agents' && (
             <div>
-              <div className="flex border-b border-gray-200 mb-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex justify-center border-b border-gray-200 mb-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 <button
-                  className={`px-3 sm:px-4 py-2 bg-transparent border-none font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${
-                    agentTab === 'location'
-                      ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
-                      : 'text-gray-500 hover:text-rental-blue-600'
-                  }`}
+                  className={`px-3 sm:px-4 py-2 bg-transparent border-none font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${agentTab === 'location'
+                    ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
+                    : 'text-gray-500 hover:text-rental-blue-600'
+                    }`}
                   onClick={() => setAgentTab('location')}
                 >
                   By Location
                 </button>
                 <button
-                  className={`px-3 sm:px-4 py-2 bg-transparent border-none font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${
-                    agentTab === 'license'
-                      ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
-                      : 'text-gray-500 hover:text-rental-blue-600'
-                  }`}
+                  className={`px-3 sm:px-4 py-2 bg-transparent border-none font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${agentTab === 'license'
+                    ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-rental-blue-600'
+                    : 'text-gray-500 hover:text-rental-blue-600'
+                    }`}
                   onClick={() => setAgentTab('license')}
                 >
                   By License Type
@@ -326,65 +320,65 @@ export default function PopularExplore() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 md:gap-5 pr-1">
-              {agentCategories.map((category) => {
-                const items =
-                  agentTab === 'location'
-                    ? (agentData as typeof agentLocationSearches)[category]
-                    : (agentData as typeof agentLicenseSearches)[category]
-                const isExpanded = agentShowMore[category]
-                const visibleItems = isExpanded ? items : items.slice(0, INITIAL_VISIBLE)
+                {agentCategories.map((category) => {
+                  const items =
+                    agentTab === 'location'
+                      ? (agentData as typeof agentLocationSearches)[category]
+                      : (agentData as typeof agentLicenseSearches)[category]
+                  const isExpanded = agentShowMore[category]
+                  const visibleItems = isExpanded ? items : items.slice(0, INITIAL_VISIBLE)
 
-                return (
-                  <div key={category} className="flex flex-col">
-                    <h4 className="font-outfit text-xs sm:text-sm font-semibold text-gray-700 tracking-wide pb-1.5">
-                      {category.toUpperCase()}
-                    </h4>
-                    <ul className="list-none p-0 m-0 flex flex-col gap-1">
-                      {visibleItems.map((item, idx) => {
-                        const href =
-                          agentTab === 'location'
-                            ? buildAgentSearchUrl({
+                  return (
+                    <div key={category} className="flex flex-col">
+                      <h4 className="font-outfit text-xs sm:text-sm font-semibold text-gray-700 tracking-wide pb-1.5">
+                        {category.toUpperCase()}
+                      </h4>
+                      <ul className="list-none p-0 m-0 flex flex-col gap-1">
+                        {visibleItems.map((item, idx) => {
+                          const href =
+                            agentTab === 'location'
+                              ? buildAgentSearchUrl({
                                 location: (item as { label: string; location: string }).location,
                               })
-                            : buildAgentSearchUrl({
+                              : buildAgentSearchUrl({
                                 location: (item as { label: string; license: string; location: string })
                                   .location,
                                 license: (item as { label: string; license: string; location: string })
                                   .license,
                               })
-                        return (
-                          <li key={idx}>
-                            <Link
-                              href={href}
-                              className="font-outfit text-[13px] sm:text-sm font-light text-gray-600 no-underline transition-colors hover:text-rental-blue-600 hover:underline"
-                            >
-                              {item.label}
-                            </Link>
-                          </li>
-                        )
-                      })}
-                    </ul>
-                    {items.length > INITIAL_VISIBLE && (
-                      <button
-                        type="button"
-                        className="flex items-center gap-1.5 mt-3 px-0 py-1 bg-transparent border-none font-outfit text-xs sm:text-sm font-medium cursor-pointer transition-colors"
-                        style={{ color: '#2563EB' }}
-                        onClick={() =>
-                          setAgentShowMore((prev) => ({
-                            ...prev,
-                            [category]: !prev[category],
-                          }))
-                        }
-                      >
-                        {isExpanded ? 'View Less' : 'View More'}
-                        <FiChevronDown
-                          className={`text-sm transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                        />
-                      </button>
-                    )}
-                  </div>
-                )
-              })}
+                          return (
+                            <li key={idx}>
+                              <Link
+                                href={href}
+                                className="font-outfit text-[13px] sm:text-sm font-light text-gray-600 no-underline transition-colors hover:text-rental-blue-600 hover:underline"
+                              >
+                                {item.label}
+                              </Link>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                      {items.length > INITIAL_VISIBLE && (
+                        <button
+                          type="button"
+                          className="flex items-center gap-1.5 mt-3 px-0 py-1 bg-transparent border-none font-outfit text-xs sm:text-sm font-medium cursor-pointer transition-colors"
+                          style={{ color: '#2563EB' }}
+                          onClick={() =>
+                            setAgentShowMore((prev) => ({
+                              ...prev,
+                              [category]: !prev[category],
+                            }))
+                          }
+                        >
+                          {isExpanded ? 'View Less' : 'View More'}
+                          <FiChevronDown
+                            className={`text-sm transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                          />
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )}

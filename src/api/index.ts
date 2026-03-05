@@ -20,7 +20,7 @@ export { brokerApi } from './endpoints/broker'
 
 // Export types from endpoints
 export type { GetPropertiesParams } from './endpoints/properties'
-export type { GetBlogsParams } from './endpoints/blogs'
+export type { GetBlogsParams, CreateBlogData, UpdateBlogData } from './endpoints/blogs'
 export type { GetNewsParams, News } from './endpoints/news'
 export type { AgentRegistrationData, AgentRegistrationResponse } from './endpoints/agents'
 export type { LoginCredentials, LoginResponse } from './endpoints/auth'

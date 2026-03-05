@@ -329,6 +329,7 @@ function AppSidebar() {
       <NavLink href="/admin" icon={FiHome} label="Dashboard" active={isActive('/admin')} />
       <NavLink href="/admin/agents" icon={FiUsers} label="User Management" active={isActive('/admin/agents')} />
       <NavLink href="/admin/properties" icon={FiLayers} label="Property Management" active={isActive('/admin/properties')} />
+      <NavLink href="/admin/blogs" icon={FiBookOpen} label="Blog Management" active={isActive('/admin/blogs')} />
     </>
   )
 

@@ -67,6 +67,13 @@ Route::get('/testimonials', [TestimonialController::class, 'index']);
 Route::get('/blogs', [BlogController::class, 'index']);
 Route::get('/blogs/{id}', [BlogController::class, 'show']);
 
+// Protected blog routes (admin only)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/blogs', [BlogController::class, 'store']);
+    Route::put('/blogs/{id}', [BlogController::class, 'update']);
+    Route::delete('/blogs/{id}', [BlogController::class, 'destroy']);
+});
+
 // News endpoints
 Route::get('/news', [NewsController::class, 'index']);
 Route::get('/news/{id}', [NewsController::class, 'show']);

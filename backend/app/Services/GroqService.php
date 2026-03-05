@@ -223,6 +223,7 @@ Rules:
 - Convert price shorthand: "5M" = 5000000, "500K" = 500000, "8 million" = 8000000
 - For small numbers like "1200", "1200.0", "1,200" - keep them as-is (1200), do NOT multiply by 1000
 - Extract property names, building names, or landmarks as "location" or "search_text"
+- CRITICAL: Always use spaces for multi-word strings in values (e.g. "Cebu City", NOT "Cebu_City" or "CebuCity").
 - CRITICAL: Do NOT infer property_type from property names. Only set property_type if user explicitly mentions a type (e.g., "condo", "house", "apartment"). Property names like "Azure Residences" or "BGC Tower" should NOT set property_type.
 - Normalize property types to match database values (e.g. "condo" → "Condominium", "house" → "House")
 - Normalize amenities to common terms (e.g. "pool" → "Swimming Pool", "parking" → "Parking")
@@ -242,7 +243,7 @@ PROMPT
 
             if (json_last_error() !== JSON_ERROR_NONE) {
                 Log::warning('Groq parseUserQuery: Invalid JSON returned', [
-                    'raw' => $response->choices[0]->message->content,
+                    'raw' => $response['choices'][0]['message']['content'],
                 ]);
                 return [];
             }
@@ -269,7 +270,24 @@ PROMPT
     {
         try {
             $count          = count($properties);
-            $propertiesJson = json_encode($properties, JSON_PRETTY_PRINT);
+            
+            // Optimize property data for AI (reduce token usage)
+            $minimalProperties = array_map(function($prop) {
+                return [
+                    'id' => $prop['id'] ?? null,
+                    'title' => $prop['title'] ?? 'N/A',
+                    'type' => $prop['type'] ?? 'N/A',
+                    'price' => $prop['price'] ?? 0,
+                    'price_type' => $prop['price_type'] ?? 'Monthly',
+                    'city' => $prop['city'] ?? 'N/A',
+                    'location' => ($prop['street_address'] ?? '') . ', ' . ($prop['city'] ?? ''),
+                    'bedrooms' => $prop['bedrooms'] ?? 0,
+                    'bathrooms' => $prop['bathrooms'] ?? 0,
+                    'description' => isset($prop['description']) ? substr($prop['description'], 0, 150) . '...' : null,
+                ];
+            }, $properties);
+
+            $propertiesJson = json_encode($minimalProperties, JSON_PRETTY_PRINT);
 
             // Build context information if available
             $contextInfo = '';

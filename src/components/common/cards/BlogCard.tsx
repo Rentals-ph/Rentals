@@ -54,7 +54,7 @@ function BlogCard({
             <h3 className="m-0 font-outfit text-base xs:text-lg sm:text-xl font-semibold leading-snug text-gray-900 line-clamp-1">
               {title}
             </h3>
-            <p className="m-0 font-outfit text-xs xs:text-sm sm:text-[13px] leading-relaxed text-gray-600 line-clamp-3">
+            <p className="m-0 font-outfit text-xs xs:text-sm sm:text-[13px] leading-relaxed text-gray-600 line-clamp-2">
               {excerpt}
             </p>
           </div>

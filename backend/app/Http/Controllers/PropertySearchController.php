@@ -411,10 +411,10 @@ class PropertySearchController extends Controller
         $q = strtolower(trim($query));
         // "latest listings in Cebu City", "new listings in Manila", "recent listings in Makati"
         $listingPatterns = [
-            '/\b(latest|newest|new|recent|fresh)\s+(listings?|properties|rentals?)\s+(in|at|for)\s+/i',
-            '/\b(listings?|properties|rentals?)\s+(in|at)\s+.+\s+(latest|newest|new|recent)\b/i',
+            '/\b(latest|newest|new|recent|fresh)\s+(listings?|properties|rentals?|houses?|apartments?|condos?|units?)/i',
+            '/\b(listings?|properties|rentals?|houses?|apartments?|condos?|units?)\s+(in|at|for)\s+.+\s+(latest|newest|new|recent)\b/i',
+            '/\b(latest|newest|new|recent)\s+(in|at|for)\s+.+/i',
             '/\b(latest|newest|new|recent)\s+(listings?|properties|rentals?)\s*$/i',
-            '/\b(latest|newest|new|recent)\s+(in|at)\s+.+/i',
         ];
         foreach ($listingPatterns as $pattern) {
             if (preg_match($pattern, $q)) {
@@ -435,23 +435,31 @@ class PropertySearchController extends Controller
     protected function ensureListingSearchCriteria(string $userQuery, array $criteria): array
     {
         $criteria = array_merge(['sort_by' => 'newest'], $criteria);
+        
+        // If location is already set by AI, don't override
         if (!empty($criteria['location']) || !empty($criteria['city'])) {
             return $criteria;
         }
+
         // Extract place from "latest listings in Cebu City", "new listings in Manila", etc.
-        if (preg_match('/\b(?:latest|newest|new|recent|fresh)\s+(?:listings?|properties|rentals?)\s+(?:in|at|for)\s+(.+?)(?:\s*$|,|\.)/i', $userQuery, $m)) {
+        // Pattern 1: [latest|new|...] [listings|...] in [Place]
+        if (preg_match('/\b(?:latest|newest|new|recent|fresh)\s+(?:listings?|properties|rentals?|houses?|apartments?|condos?|units?)\s+(?:in|at|for)\s+([^,.\?]+)/i', $userQuery, $m)) {
             $place = trim($m[1]);
-            if ($place !== '') {
-                $criteria['location'] = $place;
-                $criteria['city'] = $place;
-            }
-        } elseif (preg_match('/\b(?:in|at)\s+([A-Za-z\s]+?)(?:\s*$|,|\.)/i', $userQuery, $m)) {
+        } 
+        // Pattern 2: [latest|new|...] in [Place]
+        elseif (preg_match('/\b(?:latest|newest|new|recent|fresh)\s+(?:in|at|for)\s+([^,.\?]+)/i', $userQuery, $m)) {
             $place = trim($m[1]);
-            if (strlen($place) > 1) {
-                $criteria['location'] = $place;
-                $criteria['city'] = $place;
-            }
         }
+        // Pattern 3: fall back to [in|at] [Place]
+        elseif (preg_match('/\b(?:in|at)\s+([^,.\?]+)/i', $userQuery, $m)) {
+            $place = trim($m[1]);
+        }
+
+        if (isset($place) && $place !== '') {
+            $criteria['location'] = $place;
+            $criteria['city'] = $place;
+        }
+
         return $criteria;
     }
 
@@ -978,7 +986,7 @@ class PropertySearchController extends Controller
 
         // General text search - search in title and description for property names, keywords, etc.
         if (!empty($criteria['search_text'])) {
-            $searchText = "%{$criteria['search_text']}%";
+            $searchText = $this->formatFuzzySearch($criteria['search_text']);
             $query->where(function ($q) use ($searchText) {
                 $q->where('title', 'LIKE', $searchText)
                   ->orWhere('description', 'LIKE', $searchText);
@@ -988,7 +996,7 @@ class PropertySearchController extends Controller
         // Location search - check city, state_province, country, street_address, title, and description
         // This allows finding properties by name (e.g., "Azure Residences") even if extracted as location
         if (!empty($criteria['location'])) {
-            $locationSearch = "%{$criteria['location']}%";
+            $locationSearch = $this->formatFuzzySearch($criteria['location']);
             $query->where(function ($q) use ($locationSearch) {
                 $q->where('city', 'LIKE', $locationSearch)
                   ->orWhere('state_province', 'LIKE', $locationSearch)
@@ -1001,19 +1009,19 @@ class PropertySearchController extends Controller
 
         // Specific location fields (if extracted separately)
         if (!empty($criteria['country'])) {
-            $query->where('country', 'LIKE', "%{$criteria['country']}%");
+            $query->where('country', 'LIKE', $this->formatFuzzySearch($criteria['country']));
         }
 
         if (!empty($criteria['state_province'])) {
-            $query->where('state_province', 'LIKE', "%{$criteria['state_province']}%");
+            $query->where('state_province', 'LIKE', $this->formatFuzzySearch($criteria['state_province']));
         }
 
         if (!empty($criteria['city'])) {
-            $query->where('city', 'LIKE', "%{$criteria['city']}%");
+            $query->where('city', 'LIKE', $this->formatFuzzySearch($criteria['city']));
         }
 
         if (!empty($criteria['street_address'])) {
-            $query->where('street_address', 'LIKE', "%{$criteria['street_address']}%");
+            $query->where('street_address', 'LIKE', $this->formatFuzzySearch($criteria['street_address']));
         }
 
         // Property type filter (with normalization)
@@ -1146,6 +1154,19 @@ class PropertySearchController extends Controller
         }
 
         return $query->limit(10);
+    }
+ 
+    /**
+     * Format a search term for fuzzy LIKE matching.
+     * Replaces spaces and underscores with % wildcards.
+     */
+    protected function formatFuzzySearch(string $term): string
+    {
+        // Replace spaces, underscores, and hyphens with % for flexible matching
+        $fuzzy = str_replace([' ', '_', '-'], '%', trim($term));
+        // Remove consecutive % to keep it clean
+        $fuzzy = preg_replace('/%+/u', '%', $fuzzy);
+        return "%{$fuzzy}%";
     }
 
     /**
