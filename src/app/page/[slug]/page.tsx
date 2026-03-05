@@ -307,8 +307,27 @@ export default function PublicPageBuilderPage() {
     const layoutSections = pageData.layout_sections || []
     const sectionVisibility = pageData.section_visibility || {}
 
+    // Theme tokens from page builder (if present)
+    const globalDesign = (pageData as any).global_design || {}
+    const colorBackground = globalDesign.colorBackground || '#FFFFFF'
+    const colorText = globalDesign.colorText || '#111827'
+    const colorPrimary = globalDesign.colorPrimary || '#2563EB'
+    const fontBody = globalDesign.fontBody || 'Inter, system-ui, sans-serif'
+    const fontHeading = globalDesign.fontHeading || fontBody
+    const cornerRadius =
+      typeof globalDesign.borderRadius === 'number'
+        ? `${globalDesign.borderRadius}px`
+        : getCornerRadiusClass(pageData.selected_corner_radius)
+  
     return (
-      <div className="min-h-screen bg-white">
+      <div
+        className="min-h-screen"
+        style={{
+          backgroundColor: colorBackground,
+          color: colorText,
+          fontFamily: fontBody,
+        }}
+      >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-10 py-8">
           {/* Render sections in the order specified by layoutSections */}
           {layoutSections.map((section: any) => {
@@ -323,17 +342,37 @@ export default function PublicPageBuilderPage() {
                       className="relative w-full h-96 rounded-2xl overflow-hidden"
                       style={{
                         backgroundImage: pageData.hero_image ? `url(${pageData.hero_image})` : 'none',
-                        backgroundColor: pageData.hero_image ? 'transparent' : '#E5E7EB',
+                        backgroundColor: pageData.hero_image ? 'transparent' : colorPrimary,
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
-                        filter: `brightness(${100 - (pageData.overall_darkness || 30)}%)`
+                        filter: `brightness(${100 - (pageData.overall_darkness || 30)}%)`,
+                        borderRadius: cornerRadius,
                       }}
                     >
-                      <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center text-center px-6">
-                        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{pageData.main_heading}</h1>
-                        <p className="text-lg md:text-xl text-white/90 mb-6">{pageData.tagline}</p>
+                      <div
+                        className="absolute inset-0 flex flex-col items-center justify-center text-center px-6"
+                        style={{
+                          background:
+                            'linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.65))',
+                        }}
+                      >
+                        <h1
+                          className="text-4xl md:text-5xl font-bold text-white mb-4"
+                          style={{ fontFamily: fontHeading }}
+                        >
+                          {pageData.main_heading}
+                        </h1>
+                        <p className="text-lg md:text-xl text-white/90 mb-6">
+                          {pageData.tagline}
+                        </p>
                         {pageData.property_price && (
-                          <button className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors">
+                          <button
+                            className="px-6 py-3 font-semibold rounded-xl transition-colors"
+                            style={{
+                              backgroundColor: colorPrimary,
+                              color: '#FFFFFF',
+                            }}
+                          >
                             Starts at {pageData.property_price} /mo
                           </button>
                         )}
@@ -344,9 +383,16 @@ export default function PublicPageBuilderPage() {
               
               case 'propertyDescription':
                 return (
-                  <div key={section.id} className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-3">About</h2>
-                    <p className="text-gray-700 leading-relaxed">{pageData.property_description}</p>
+                  <div key={section.id} className="mb-6 sm:mb-8">
+                    <h2
+                      className="text-lg sm:text-xl font-bold mb-3 sm:mb-4"
+                      style={{ color: colorText, fontFamily: fontHeading }}
+                    >
+                      Property Overview
+                    </h2>
+                    <p className="text-gray-600 text-base sm:text-xl leading-relaxed m-0 whitespace-pre-wrap">
+                      {pageData.property_description}
+                    </p>
                   </div>
                 )
               
@@ -360,7 +406,7 @@ export default function PublicPageBuilderPage() {
                           <div 
                             key={index} 
                             className="aspect-square rounded-lg overflow-hidden bg-gray-200"
-                            style={{ borderRadius: getCornerRadiusClass(pageData.selected_corner_radius) }}
+                            style={{ borderRadius: cornerRadius }}
                           >
                             <img src={image} alt={`Interior ${index + 1}`} className="w-full h-full object-cover" />
                           </div>
@@ -378,9 +424,14 @@ export default function PublicPageBuilderPage() {
                 const garage = (pageData as any).property_garage ?? 0
                 const area = (pageData as any).property_area
                 return (
-                  <div key={section.id} className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-3">Property Details</h2>
-                    <div className="flex flex-wrap gap-4 sm:gap-6 text-base">
+                  <div key={section.id} className="mb-6 sm:mb-8">
+                    <h2
+                      className="text-lg sm:text-2xl font-bold mb-3 sm:mb-4"
+                      style={{ color: colorText, fontFamily: fontHeading }}
+                    >
+                      Property Details
+                    </h2>
+                    <div className="flex flex-wrap gap-4 sm:gap-6 md:gap-10 text-base sm:text-xl">
                       <div className="flex items-center gap-2 text-gray-700">
                         <svg className="w-6 h-6 text-gray-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
                         <span>{bedrooms} Bedrooms</span>
