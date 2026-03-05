@@ -155,6 +155,11 @@ class NewsController extends Controller
             'published_at' => $validated['published_at'] ?? now(),
         ]);
 
+        // Store in media table (new system)
+        if ($imagePath) {
+            $news->storeMedia($imagePath, 'thumbnail');
+        }
+
         // Image URL is automatically included via model accessor (getImageUrlAttribute)
 
         return response()->json([
@@ -220,13 +225,22 @@ class NewsController extends Controller
 
         // Handle image upload if new image is provided
         if ($request->hasFile('image')) {
-            // Delete old image if exists
-            ImageService::delete($news->image_path);
+            // Delete old image file if exists
+            $oldPath = $news->getRawOriginal('image_path') ?? $news->getRawOriginal('image');
+            ImageService::delete($oldPath);
+
+            // Remove old media record(s) for this collection
+            $news->deleteMedia('thumbnail');
 
             // Store the new image
             $imagePath = ImageService::upload($request->file('image'), 'images/posts');
             $validated['image'] = $imagePath;
             $validated['image_path'] = $imagePath;
+
+            // Store in media table (new system)
+            if ($imagePath) {
+                $news->storeMedia($imagePath, 'thumbnail');
+            }
         }
 
         // Update the news article
@@ -273,7 +287,11 @@ class NewsController extends Controller
         $news = News::findOrFail($id);
 
         // Delete the physical file if it exists
-        ImageService::delete($news->image_path);
+        $oldPath = $news->getRawOriginal('image_path') ?? $news->getRawOriginal('image');
+        ImageService::delete($oldPath);
+
+        // Remove media records
+        $news->deleteMedia('thumbnail');
 
         // Delete the database record
         $news->delete();

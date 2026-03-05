@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\HasMedia;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Property extends Model
 {
-    use HasFactory;
+    use HasFactory, HasMedia;
 
     protected $fillable = [
         'title',
@@ -59,6 +60,32 @@ class Property extends Model
     public function agent()
     {
         return $this->belongsTo(User::class, 'agent_id');
+    }
+
+    /**
+     * Get the thumbnail image path.
+     * Checks media table first, falls back to old columns.
+     */
+    public function getThumbnailAttribute(): ?string
+    {
+        return $this->getFirstMediaPath('thumbnail')
+            ?? $this->image_path
+            ?? $this->image;
+    }
+
+    /**
+     * Get the gallery images as an array.
+     * Checks media table first, falls back to old images column.
+     */
+    public function getGalleryAttribute(): array
+    {
+        $fromMedia = $this->getMedia('gallery')->pluck('path')->toArray();
+        if (!empty($fromMedia)) {
+            return $fromMedia;
+        }
+        // Use getRawOriginal to bypass the 'array' cast and get the raw JSON string
+        $rawImages = $this->getRawOriginal('images');
+        return json_decode($rawImages ?? '[]', true) ?? [];
     }
 
     /**
@@ -121,4 +148,3 @@ class Property extends Model
         }, $this->images);
     }
 }
-

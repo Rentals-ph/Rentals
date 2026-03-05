@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasMedia;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -9,7 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasMedia;
 
     /**
      * The attributes that are mass assignable.
@@ -69,6 +70,24 @@ class User extends Authenticatable
             'verified' => 'boolean',
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * Get the user's avatar image path.
+     * Checks media table first, falls back to old image_path column.
+     */
+    public function getAvatarAttribute(): ?string
+    {
+        return $this->getFirstMediaPath('avatar') ?? $this->image_path;
+    }
+
+    /**
+     * Get the user's license document path.
+     * Checks media table first, falls back to old license_document_path column.
+     */
+    public function getLicenseDocumentAttribute(): ?string
+    {
+        return $this->getFirstMediaPath('license') ?? $this->license_document_path;
     }
 
     /**
@@ -244,4 +263,3 @@ class User extends Authenticatable
         return $this->hasMany(Message::class, 'recipient_id');
     }
 }
-

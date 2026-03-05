@@ -354,6 +354,14 @@ class PropertyController extends Controller
                     'published_at' => now(),
                 ]);
 
+                // Store images in media table (new system)
+                if ($finalMainImagePath) {
+                    $property->storeMedia($finalMainImagePath, 'thumbnail');
+                }
+                foreach ($imagePaths as $index => $imgPath) {
+                    $property->storeMedia($imgPath, 'gallery', $index);
+                }
+
                 // Update broker subscription usage if broker
                 if ($user->isBroker()) {
                     $subscription = $user->activeSubscription;
@@ -738,10 +746,15 @@ class PropertyController extends Controller
                         'is_valid' => $uploadedFile->isValid(),
                     ]);
                     
-                    // Delete old main image if exists
-                    if ($property->image_path) {
-                        ImageService::delete($property->image_path);
+                    // Delete old main image file if exists (use raw column to bypass accessor)
+                    $oldImagePath = $property->getRawOriginal('image_path')
+                                 ?? $property->getRawOriginal('image');
+                    if ($oldImagePath) {
+                        ImageService::delete($oldImagePath);
                     }
+
+                    // Remove old thumbnail media record
+                    $property->deleteMedia('thumbnail');
                     
                     // Upload new image
                     $imagePath = ImageService::upload($uploadedFile, 'images/products');
@@ -749,6 +762,9 @@ class PropertyController extends Controller
                         $validated['image'] = $imagePath;
                         $validated['image_path'] = $imagePath;
                         $newImagePaths[] = $imagePath;
+
+                        // Store in media table (new system)
+                        $property->storeMedia($imagePath, 'thumbnail');
                     } else {
                         \Log::error('ImageService::upload returned null');
                     }
@@ -764,12 +780,19 @@ class PropertyController extends Controller
                             $imagesToKeep = json_decode($keepImagesJson, true) ?? [];
                         }
                     } else {
-                        // If no keep_images specified, keep all existing
-                        $imagesToKeep = $property->images && is_array($property->images) ? $property->images : [];
+                        // If no keep_images specified, keep all existing (use raw to bypass cast)
+                        $rawImages = $property->getRawOriginal('images');
+                        $existingImages = is_string($rawImages)
+                            ? (json_decode($rawImages, true) ?? [])
+                            : (is_array($rawImages) ? $rawImages : []);
+                        $imagesToKeep = $existingImages;
                     }
                     
                     // Delete images that are not in the keep list
-                    $allExistingImages = $property->images && is_array($property->images) ? $property->images : [];
+                    $rawImages = $property->getRawOriginal('images');
+                    $allExistingImages = is_string($rawImages)
+                        ? (json_decode($rawImages, true) ?? [])
+                        : (is_array($rawImages) ? $rawImages : []);
                     foreach ($allExistingImages as $oldImagePath) {
                         if (!in_array($oldImagePath, $imagesToKeep)) {
                             ImageService::delete($oldImagePath);
@@ -795,6 +818,12 @@ class PropertyController extends Controller
                     }
                     
                     $validated['images'] = $allImages;
+
+                    // Rebuild gallery media records
+                    $property->deleteMedia('gallery');
+                    foreach ($allImages as $index => $imgPath) {
+                        $property->storeMedia($imgPath, 'gallery', $index);
+                    }
                 } elseif ($request->hasFile('image') && !empty($newImagePaths)) {
                     // If only single image uploaded, merge with existing images
                     $imagesToKeep = [];
@@ -804,17 +833,30 @@ class PropertyController extends Controller
                             $imagesToKeep = json_decode($keepImagesJson, true) ?? [];
                         }
                     } else {
-                        $imagesToKeep = $property->images && is_array($property->images) ? $property->images : [];
+                        $rawImages = $property->getRawOriginal('images');
+                        $imagesToKeep = is_string($rawImages)
+                            ? (json_decode($rawImages, true) ?? [])
+                            : (is_array($rawImages) ? $rawImages : []);
                     }
                     // Add new image at the beginning
-                    $validated['images'] = array_merge([$newImagePaths[0]], $imagesToKeep);
+                    $mergedImages = array_merge([$newImagePaths[0]], $imagesToKeep);
+                    $validated['images'] = $mergedImages;
+
+                    // Rebuild gallery media records
+                    $property->deleteMedia('gallery');
+                    foreach ($mergedImages as $index => $imgPath) {
+                        $property->storeMedia($imgPath, 'gallery', $index);
+                    }
                 } elseif ($request->has('keep_images')) {
                     // If only keep_images is provided (removing images without adding new ones)
                     $keepImagesJson = $request->input('keep_images');
                     if ($keepImagesJson) {
                         $imagesToKeep = json_decode($keepImagesJson, true) ?? [];
                         // Delete images not in keep list
-                        $allExistingImages = $property->images && is_array($property->images) ? $property->images : [];
+                        $rawImages = $property->getRawOriginal('images');
+                        $allExistingImages = is_string($rawImages)
+                            ? (json_decode($rawImages, true) ?? [])
+                            : (is_array($rawImages) ? $rawImages : []);
                         foreach ($allExistingImages as $oldImagePath) {
                             if (!in_array($oldImagePath, $imagesToKeep)) {
                                 ImageService::delete($oldImagePath);
@@ -825,6 +867,12 @@ class PropertyController extends Controller
                         if (!empty($imagesToKeep)) {
                             $validated['image'] = $imagesToKeep[0];
                             $validated['image_path'] = $imagesToKeep[0];
+                        }
+
+                        // Rebuild gallery media records to reflect removed images
+                        $property->deleteMedia('gallery');
+                        foreach ($imagesToKeep as $index => $imgPath) {
+                            $property->storeMedia($imgPath, 'gallery', $index);
                         }
                     }
                 }
@@ -972,8 +1020,14 @@ class PropertyController extends Controller
                 ], 403);
             }
             
-            // Delete the physical file if it exists
-            ImageService::delete($property->image_path);
+            // Delete the physical file if it exists (use raw to bypass accessor)
+            $rawImagePath = $property->getRawOriginal('image_path')
+                         ?? $property->getRawOriginal('image');
+            ImageService::delete($rawImagePath);
+
+            // Remove all media records for this property
+            $property->deleteMedia('thumbnail');
+            $property->deleteMedia('gallery');
             
             // Delete the database record
             $property->delete();

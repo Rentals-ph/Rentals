@@ -156,6 +156,11 @@ class BlogController extends Controller
             'published_at' => $validated['published_at'] ?? now(),
         ]);
 
+        // Store in media table (new system)
+        if ($imagePath) {
+            $blog->storeMedia($imagePath, 'thumbnail');
+        }
+
         // Image URL is automatically included via model accessor (getImageUrlAttribute)
 
         return response()->json([
@@ -221,13 +226,22 @@ class BlogController extends Controller
 
         // Handle image upload if new image is provided
         if ($request->hasFile('image')) {
-            // Delete old image if exists
-            ImageService::delete($blog->image_path);
+            // Delete old image file if exists
+            $oldPath = $blog->getRawOriginal('image_path') ?? $blog->getRawOriginal('image');
+            ImageService::delete($oldPath);
+
+            // Remove old media record(s) for this collection
+            $blog->deleteMedia('thumbnail');
 
             // Store the new image
             $imagePath = ImageService::upload($request->file('image'), 'images/posts');
             $validated['image'] = $imagePath;
             $validated['image_path'] = $imagePath;
+
+            // Store in media table (new system)
+            if ($imagePath) {
+                $blog->storeMedia($imagePath, 'thumbnail');
+            }
         }
 
         // Update the blog post
@@ -274,7 +288,11 @@ class BlogController extends Controller
         $blog = Blog::findOrFail($id);
 
         // Delete the physical file if it exists
-        ImageService::delete($blog->image_path);
+        $oldPath = $blog->getRawOriginal('image_path') ?? $blog->getRawOriginal('image');
+        ImageService::delete($oldPath);
+
+        // Remove media records
+        $blog->deleteMedia('thumbnail');
 
         // Delete the database record
         $blog->delete();

@@ -1350,7 +1350,7 @@ class DatabaseSeeder extends Seeder
             Blog::create($blog);
         }
 
-        // News Articles - 10 total
+        // ── News Articles ──────────────────────────────────────────────────────
         $news = [
             [
                 'title' => 'Scientist Discover Promising New Treatment for Disease',
@@ -1582,6 +1582,10 @@ class DatabaseSeeder extends Seeder
         foreach ($news as $newsArticle) {
             News::create($newsArticle);
         }
+
+        // ── Migrate all seeded images → media table ────────────────────────────
+        // Must run AFTER all records above are created.
+        $this->call(MigrateImagesToMediaTable::class);
     }
 }
 
