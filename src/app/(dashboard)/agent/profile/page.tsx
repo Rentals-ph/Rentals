@@ -85,6 +85,12 @@ export default function AgentMyProfile() {
   const agentImage = resolveAgentAvatar(agent?.image || agent?.avatar || agent?.profile_image, agent?.id)
   const agentInitials = agentName.split(' ').map(n => n[0]).join('').toUpperCase() || 'A'
 
+  // High-level stats for the agent header card
+  const activeListingsCount = listings.length
+  const totalSold = (agent as any)?.total_properties_sold ?? '1,276'
+  const yearsExperience = (agent as any)?.years_of_experience ?? '23+'
+  const networkSize = (agent as any)?.network_size ?? '729'
+
   const [listings, setListings] = useState<Array<{
     id: number
     type: string
@@ -160,42 +166,126 @@ export default function AgentMyProfile() {
         <div className="mt-6"> {/* profile-section */}
           <h2 className="m-0 mb-6 text-2xl font-bold text-gray-900">My Profile</h2> {/* page-title */}
 
-          {/* Profile Card */}
+          {/* Profile Card - redesigned to match agent details layout */}
           {loading ? (
             <div className="p-8 text-center">Loading profile...</div>
           ) : (
-            <div className="bg-white rounded-xl p-8 mb-8 flex justify-between items-center shadow-sm md:flex-col md:items-start md:gap-6"> {/* profile-card */}
-              <div className="flex items-center gap-6 flex-1 md:flex-col md:items-start md:w-full"> {/* profile-card-left */}
-                <div className="w-35 h-35 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 relative p-1" style={{ background: 'linear-gradient(135deg, #EC4899 0%, #3B82F6 50%, #10B981 100%)' }}> {/* profile-avatar-large */}
-                  <div className="absolute inset-1 rounded-full bg-white z-[1]"></div>
-                  <img src={agentImage} alt={agentName} className="w-[calc(100%-8px)] h-[calc(100%-8px)] object-cover relative z-[2] rounded-full" onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    const fallback = target.nextElementSibling as HTMLElement;
-                    if (fallback) fallback.classList.remove('hidden');
-                  }} />
-                  <div className="w-[calc(100%-8px)] h-[calc(100%-8px)] flex items-center justify-center text-white font-semibold text-4xl relative z-[2] rounded-full hidden" style={{ background: 'linear-gradient(135deg, #EC4899 0%, #3B82F6 50%, #10B981 100%)' }}>{agentInitials}</div> {/* avatar-fallback-large */}
-                </div>
-                <div className="flex flex-col gap-3 flex-1 md:w-full"> {/* profile-info */}
-                  <h3 className="m-0 text-2xl font-bold text-gray-900 md:text-xl">{agentName}</h3> {/* profile-name */}
-                  <p className="m-0 text-base text-gray-600 font-medium">{agent?.verified ? 'Rent Manager' : 'Property Agent'}</p> {/* profile-role */}
-                  <div className="flex flex-col gap-2.5 md:w-full"> {/* profile-contact */}
-                    <div className="flex items-center gap-3"> {/* contact-item */}
-                      <FiPhone className="text-lg text-blue-600 flex-shrink-0" /> {/* contact-icon */}
-                      <span className="text-sm text-gray-700">{agentPhone}</span>
+            <div className="bg-white rounded-3xl mb-8 shadow-sm overflow-hidden"> {/* profile-card */}
+              {/* Gradient banner */}
+              <div className="relative h-28 sm:h-32 md:h-36 bg-gradient-to-r from-[#1f3c88] via-[#f97316] to-[#facc15]">
+                <div className="absolute inset-0 opacity-60" style={{ backgroundImage: 'radial-gradient(circle at 0% 0%, rgba(255,255,255,0.35) 0, transparent 50%), radial-gradient(circle at 100% 100%, rgba(0,0,0,0.25) 0, transparent 55%)' }} />
+              </div>
+
+              {/* Main content */}
+              <div className="px-6 sm:px-8 md:px-10 pb-8 -mt-16 relative z-[1]">
+                <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 items-start">
+                  {/* Left: avatar + main info */}
+                  <div className="flex items-center gap-5 sm:gap-6 flex-1 lg:max-w-md">
+                    <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg ring-4 ring-white"> {/* profile-avatar-large */}
+                      <img
+                        src={agentImage}
+                        alt={agentName}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement
+                          target.style.display = 'none'
+                          const fallback = target.nextElementSibling as HTMLElement
+                          if (fallback) fallback.classList.remove('hidden')
+                        }}
+                      />
+                      <div className="w-full h-full flex items-center justify-center text-white font-semibold text-3xl sm:text-4xl relative z-[2] rounded-2xl hidden" style={{ background: 'linear-gradient(135deg, #EC4899 0%, #3B82F6 50%, #10B981 100%)' }}>
+                        {agentInitials}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3"> {/* contact-item */}
-                      <FiMail className="text-lg text-blue-600 flex-shrink-0" /> {/* contact-icon */}
-                      <span className="text-sm text-gray-700">{agentEmail}</span>
+
+                    <div className="flex flex-col gap-2 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="m-0 text-2xl sm:text-3xl font-bold text-gray-900 truncate">{agentName}</h3>
+                        {agent?.verified && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-100">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            Verified
+                          </span>
+                        )}
+                      </div>
+                      <p className="m-0 text-sm sm:text-base text-gray-600 font-medium">
+                        {agent?.verified ? 'Rent Manager' : 'Property Agent'}
+                      </p>
+
+                      <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-3 text-sm text-gray-700">
+                        <div className="flex items-center gap-2">
+                          <FiPhone className="text-blue-600" />
+                          <span>{agentPhone}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <FiMail className="text-blue-600" />
+                          <span className="truncate">{agentEmail}</span>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap gap-3">
+                        <button className="inline-flex items-center justify-center rounded-full bg-[#f97316] px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-[#ea580c] transition-colors">
+                          Contact Me
+                        </button>
+                        <button className="inline-flex items-center justify-center rounded-full border border-gray-300 bg-white px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-gray-800 hover:bg-gray-50 transition-colors">
+                          View My Page
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Middle: stats */}
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-left text-sm sm:text-base lg:flex-1">
+                    <div>
+                      <p className="m-0 text-xs uppercase tracking-wide text-gray-500">Active Listings</p>
+                      <p className="m-0 mt-1 text-xl sm:text-2xl font-bold text-gray-900">{activeListingsCount.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="m-0 text-xs uppercase tracking-wide text-gray-500">Total Properties Sold</p>
+                      <p className="m-0 mt-1 text-xl sm:text-2xl font-bold text-gray-900">{totalSold}</p>
+                    </div>
+                    <div>
+                      <p className="m-0 text-xs uppercase tracking-wide text-gray-500">Years of Experience</p>
+                      <p className="m-0 mt-1 text-xl sm:text-2xl font-bold text-gray-900">{yearsExperience}</p>
+                    </div>
+                    <div>
+                      <p className="m-0 text-xs uppercase tracking-wide text-gray-500">Agent Network Size</p>
+                      <p className="m-0 mt-1 text-xl sm:text-2xl font-bold text-gray-900">{networkSize}</p>
+                    </div>
+                  </div>
+
+                  {/* Right: QR + label */}
+                  <div className="flex items-center lg:items-start justify-center lg:justify-end w-full lg:w-auto">
+                    <div className="flex flex-col items-center gap-3">
+                      <div
+                        className="w-28 h-28 sm:w-32 sm:h-32 bg-white border border-gray-200 rounded-2xl flex items-center justify-center shadow-sm"
+                        style={{
+                          backgroundImage:
+                            'repeating-linear-gradient(0deg, #000 0px, #000 2px, transparent 2px, transparent 8px), repeating-linear-gradient(90deg, #000 0px, #000 2px, transparent 2px, transparent 8px)',
+                          backgroundSize: '8px 8px',
+                          backgroundColor: '#fff'
+                        }}
+                      />
+                      <p className="m-0 text-[11px] sm:text-xs text-gray-500 text-center">
+                        Scan to view my profile
+                      </p>
                     </div>
                   </div>
                 </div>
+
+                {/* About blurb below card, matching “About The Agent” */}
+                <div className="mt-8 border-t border-gray-100 pt-6">
+                  <h3 className="m-0 mb-3 text-base sm:text-lg font-bold text-gray-900">
+                    About The Agent
+                  </h3>
+                  <p className="m-0 text-sm sm:text-base leading-relaxed text-gray-700">
+                    I am a licensed real estate professional dedicated to connecting property owners with high-quality tenants
+                    through personalized service and data-driven insights. By combining deep local market expertise with a
+                    modern, tech-forward approach, I work to streamline every step of the leasing process—from tenant
+                    screening to seamless contract negotiations—so you can enjoy maximum value and long-term peace of mind.
+                  </p>
+                </div>
               </div>
-            <div className="flex items-center justify-center md:w-full md:justify-start"> {/* profile-card-right */}
-              <div className="flex flex-col items-center gap-2"> {/* qr-code-container */}
-                <div className="w-32 h-32 bg-gray-100 border border-gray-200 rounded-lg flex items-center justify-center" style={{ backgroundImage: 'repeating-linear-gradient(0deg, #000 0px, #000 2px, transparent 2px, transparent 8px), repeating-linear-gradient(90deg, #000 0px, #000 2px, transparent 2px, transparent 8px)', backgroundSize: '8px 8px', backgroundColor: '#fff' }} /> {/* qr-code-box */}
-              </div>
-            </div>
             </div>
           )}
 

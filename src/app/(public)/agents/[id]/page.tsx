@@ -9,7 +9,7 @@ import VerticalPropertyCard from '@/components/common/VerticalPropertyCard'
 import { propertiesApi, agentsApi, messagesApi } from '@/api'
 import type { Property } from '@/types'
 import type { PaginatedResponse } from '@/api/types'
-import { ASSETS, getAsset } from '@/utils/assets'
+import { ASSETS } from '@/utils/assets'
 import { resolveAgentAvatar } from '@/utils/imageResolver'
 import PageHeader from '@/components/layout/PageHeader'
 import DigitalProfileCard from '@/components/common/DigitalProfileCard'
@@ -215,6 +215,11 @@ export default function AgentDetailsPage() {
     )
   }
 
+  const activeListingsCount = properties.length
+  const totalSold = '1,276'
+  const yearsExperience = '8+'
+  const networkSize = '729'
+
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       <main className="px-4 sm:px-6 md:px-10 lg:px-[150px] min-w-0">
@@ -228,106 +233,221 @@ export default function AgentDetailsPage() {
             <span className="text-gray-600 truncate max-w-[140px] sm:max-w-none" title={manager.name}>{manager.name}</span>
           </nav>
 
-          {/* Profile hero - mobile responsive */}
-          <section className="relative mb-6 sm:mb-8 md:mb-10 -mx-4 sm:-mx-6 md:-mx-10 lg:-mx-[150px]" aria-label="Agent profile hero">
-            <div
-              className="absolute inset-0 bg-no-repeat bg-cover bg-center"
-              style={{ backgroundImage: `url(${getAsset('BG_RENT_MANAGERS' as any) || ASSETS.BG_HERO_LANDING})` }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0A1B4D]/95 via-[#0A1B4D]/90 to-[#1B3A9B]/80" />
-
-            <div className="relative z-10 mx-auto px-4 sm:px-6 md:px-10 lg:px-[150px] py-6 sm:py-8 md:py-10 lg:py-12 flex flex-col lg:flex-row items-stretch gap-6 sm:gap-8 lg:gap-10 text-white min-w-0">
-              <div className="flex flex-1 flex-col sm:flex-row lg:w-4/5 items-stretch gap-4 sm:gap-6 min-w-0">
-                <div className="relative shrink-0 flex justify-center sm:justify-start self-stretch sm:items-stretch items-center">
-                  <div
-                    className="inline-flex w-28 h-28 sm:h-full sm:w-auto sm:max-h-52 lg:max-h-56 sm:aspect-square shadow-lg rounded-2xl overflow-hidden"
-                    style={{
-                      padding: '3px',
-                      background: 'linear-gradient(to right, #205ED7 0%, #FE8E0A 100%)',
-                    }}
-                  >
-                    <img
-                      src={getAgentImageUrl(manager.image)}
-                      alt={manager.name}
-                      className="w-full h-full bg-white rounded-xl object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement
-                        target.style.display = 'none'
-                        const fallback = target.nextElementSibling as HTMLElement
-                        if (fallback) fallback.style.display = 'flex'
-                      }}
-                    />
-                    <div className="w-full h-full rounded-xl bg-blue-500 flex items-center justify-center text-white text-xl sm:text-2xl md:text-3xl font-bold" style={{ display: manager.image ? 'none' : 'flex' }}>
-                      {getInitials(manager.name)}
+          {/* Profile hero - gradient background with three translucent containers */}
+          <section
+            className="relative mb-6 sm:mb-8 md:mb-10 -mx-4 sm:-mx-6 md:-mx-10 lg:-mx-[150px] bg-gradient-to-r from-blue-700 via-blue-500 to-orange-400"
+            aria-label="Agent profile hero"
+          >
+            <div className="mx-auto px-4 sm:px-6 md:px-10 lg:px-[150px] py-8 sm:py-10 md:py-12" style={{ background: 'linear-gradient(135deg, #0ea5e9 0%, #1d4ed8 40%, #f97316 100%)' }}>
+              {/* Top row: 3 columns on large screens */}
+              <div className="grid grid-cols-1 lg:grid-cols-[70%_30%] gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
+                {/* Left column: avatar + main info + company + QR */}
+                <div className="relative bg-white/10 backdrop-blur-md rounded-3xl px-5 sm:px-6 md:px-7 lg:px-8 py-5 sm:py-6 md:py-7 shadow-lg">
+                  {/* Company badge in top-right */}
+                  <div className="absolute top-4 right-4 flex flex-col items-end gap-2 text-right">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white flex items-center justify-center shadow-md">
+                      <span className="text-[10px] sm:text-xs font-semibold text-blue-700">
+                        Company
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-end gap-0.5">
+                      <p className="m-0 text-xs sm:text-sm font-semibold text-white">Filipino Homes</p>
+                      <p className="m-0 text-[11px] sm:text-xs text-blue-100/90">Cebu City</p>
                     </div>
                   </div>
-                </div>
-                <div className="space-y-3 sm:space-y-4 text-center sm:text-left min-w-0">
-                  <p className="text-xs sm:text-sm font-semibold tracking-widest uppercase text-blue-200">
-                    {manager.role}
-                  </p>
-                  <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold leading-tight break-words">
-                    {manager.name}
-                  </h1>
-                  <span className="inline-flex items-center px-3 sm:px-4 py-1.5 rounded-full bg-white/90 text-xs sm:text-sm font-medium text-blue-900">
-                    {properties.length} Active Listings
-                  </span>
-                  <div className="flex flex-wrap gap-2 sm:gap-3 justify-center sm:justify-start pt-2">
-                    <a href="#contact-manager" className="inline-flex items-center justify-center px-4 sm:px-6 py-2.5 rounded-full bg-[#FF7A1A] text-xs sm:text-sm font-semibold text-white shadow-md hover:bg-[#ff8a35] transition-colors min-h-[44px] touch-manipulation active:scale-[0.98]">
-                      Contact Me
-                    </a>
-                    <a href="#listings" className="inline-flex items-center justify-center px-4 sm:px-6 py-2.5 rounded-full border border-white/40 text-xs sm:text-sm font-semibold text-white hover:bg-white/10 transition-colors min-h-[44px] touch-manipulation active:scale-[0.98]">
+
+                  <div className="flex items-center gap-4 sm:gap-5 md:gap-6">
+                    <div className="w-20 h-20 sm:w-24 sm:h-44 md:w-48 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg ring-4 ring-white/40 bg-white">
+                      <img
+                        src={getAgentImageUrl(manager.image)}
+                        alt={manager.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement
+                          target.style.display = 'none'
+                          const fallback = target.nextElementSibling as HTMLElement
+                          if (fallback) fallback.style.display = 'flex'
+                        }}
+                      />
+                      <div
+                        className="w-full h-full flex items-center justify-center text-white font-semibold text-2xl sm:text-3xl rounded-2xl hidden"
+                       
+                      >
+                        {getInitials(manager.name)}
+                      </div>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <h1 className="m-0 text-xl sm:text-2xl md:text-3xl font-bold text-white truncate">
+                        {manager.name}
+                      </h1>
+                      <p className="m-0 mt-1 text-xs sm:text-sm md:text-base text-blue-100 font-medium">
+                        Property Agent
+                      </p>
+
+                      <div className="mt-3 flex items-center gap-2 text-xs sm:text-sm text-blue-50 flex-wrap">
+                        <span className="inline-flex items-center gap-1">
+                          <span className="font-semibold">{roundedRating.toFixed(1)}</span>
+                          <span className="flex items-center gap-0.5">
+                            {[...Array(5)].map((_, i) => (
+                              <svg
+                                key={i}
+                                className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${i < Math.round(overallRating) ? 'text-yellow-300' : 'text-blue-200/60'}`}
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                              >
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z" />
+                              </svg>
+                            ))}
+                          </span>
+                        </span>
+                        <span className="opacity-80">Top Rated Agent</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex flex-wrap gap-3">
+                    <a
+                      href="#listings"
+                      className="inline-flex items-center justify-center rounded-full bg-white text-blue-700 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold shadow-md hover:bg-blue-50 transition-colors"
+                    >
                       View Listings
                     </a>
+                    <a
+                      href="#contact-manager"
+                      className="inline-flex items-center justify-center rounded-full bg-emerald-500/90 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-white shadow-md hover:bg-emerald-400 transition-colors"
+                    >
+                      WhatsApp
+                    </a>
+                    <a
+                      href="#contact-manager"
+                      className="inline-flex items-center justify-center rounded-full border border-white/60 bg-white/10 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-white/20 transition-colors"
+                    >
+                      Email
+                    </a>
+                  </div>
+
+                  {/* Bottom-right QR code */}
+                  <div className="mt-5 flex items-center justify-end gap-3">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white flex items-center justify-center shadow-md">
+                      <div className="w-14 h-14 border-2 border-gray-900 grid grid-cols-3 grid-rows-3 gap-0.5">
+                        {[...Array(9)].map((_, i) => (
+                          <div
+                            key={i}
+                            className={i % 2 === 0 ? 'bg-gray-900' : 'bg-transparent'}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="m-0 text-[11px] sm:text-xs text-blue-100/90">
+                      Scan to view my profile
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right column: contact form */}
+                <aside
+                  id="contact-manager"
+                  className="bg-white/10 backdrop-blur-md rounded-3xl px-5 sm:px-6 lg:px-7 py-5 sm:py-6 lg:py-7 shadow-lg scroll-mt-4 sm:scroll-mt-6 min-w-0"
+                >
+                  <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-white">
+                    Contact {manager.name}
+                  </h3>
+                  <form className="space-y-3 sm:space-y-4" onSubmit={handleSubmit}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      <input
+                        name="firstName"
+                        placeholder="First Name"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2.5 sm:py-3 border border-white/40 bg-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm sm:text-base min-h-[44px] placeholder:text-blue-100 text-white"
+                        required
+                      />
+                      <input
+                        name="lastName"
+                        placeholder="Last Name"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2.5 sm:py-3 border border-white/40 bg-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm sm:text-base min-h-[44px] placeholder:text-blue-100 text-white"
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      <input
+                        name="phone"
+                        placeholder="Phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2.5 sm:py-3 border border-white/40 bg-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm sm:text-base min-h-[44px] placeholder:text-blue-100 text-white"
+                        required
+                      />
+                      <input
+                        type="email"
+                        name="email"
+                        placeholder="Email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2.5 sm:py-3 border border-white/40 bg-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm sm:text-base min-h-[44px] placeholder:text-blue-100 text-white"
+                        required
+                      />
+                    </div>
+                    <textarea
+                      name="message"
+                      placeholder="Your message"
+                      value={formData.message}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2.5 sm:py-3 border border-white/40 bg-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm sm:text-base min-h-[100px] placeholder:text-blue-100 text-white"
+                      rows={4}
+                      required
+                    />
+                    <button
+                      type="submit"
+                      className="w-full bg-white text-blue-700 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors min-h-[44px] touch-manipulation"
+                    >
+                      Contact
+                    </button>
+                  </form>
+                </aside>
+              </div>
+
+              {/* Bottom full-width stats row */}
+              <div className="mt-4 sm:mt-6 lg:mt-8 max-w-6xl mx-auto bg-white/10 backdrop-blur-md rounded-3xl px-5 sm:px-6 md:px-7 lg:px-10 py-5 sm:py-6 md:py-7 shadow-lg">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-5 sm:gap-x-8 sm:gap-y-6 text-left text-xs sm:text-sm md:text-base text-blue-50">
+                  <div>
+                    <p className="m-0 text-[10px] sm:text-xs uppercase tracking-wide text-blue-100/80">
+                      Active Listings
+                    </p>
+                    <p className="m-0 mt-1 text-xl sm:text-2xl font-extrabold text-white">
+                      {activeListingsCount.toLocaleString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="m-0 text-[10px] sm:text-xs uppercase tracking-wide text-blue-100/80">
+                      Total Properties Sold
+                    </p>
+                    <p className="m-0 mt-1 text-xl sm:text-2xl font-extrabold text-white">
+                      {totalSold}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="m-0 text-[10px] sm:text-xs uppercase tracking-wide text-blue-100/80">
+                      Years of Experience
+                    </p>
+                    <p className="m-0 mt-1 text-xl sm:text-2xl font-extrabold text-white">
+                      {yearsExperience}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="m-0 text-[10px] sm:text-xs uppercase tracking-wide text-blue-100/80">
+                      Agent Network Size
+                    </p>
+                    <p className="m-0 mt-1 text-xl sm:text-2xl font-extrabold text-white">
+                      {networkSize}
+                    </p>
                   </div>
                 </div>
               </div>
-              {/* Digital profile card - centered on mobile, end-aligned on desktop */}
-              <div className="flex flex-shrink-0 justify-center lg:justify-end min-w-0">
-                <DigitalProfileCard />
-              </div>
             </div>
-          </section>
-
-          {/* About + Contact - stack on mobile */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8 min-w-0">
-            <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 lg:p-8 min-w-0">
-              <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
-                <span className="px-3 sm:px-4 py-1.5 sm:py-2 bg-yellow-100 text-yellow-800 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-2">
-                  <span>⭐</span> CUSTOMER&apos;S CHOICE
-                </span>
-                <span className="px-3 sm:px-4 py-1.5 sm:py-2 bg-yellow-100 text-yellow-800 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-2">
-                  <span>⭐</span> 5 STAR AGENT
-                </span>
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-gray-800">ABOUT</h3>
-              <p className="text-gray-600 leading-relaxed mb-4 text-sm sm:text-base">
-                {manager.name} is an {manager.role} with {properties.length} property listings.
-              </p>
-              <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm md:text-base text-gray-600">
-                <li className="flex items-start gap-2"><span className="text-green-600 mt-0.5">✓</span> Proven expertise in rental properties and operations.</li>
-                <li className="flex items-start gap-2"><span className="text-green-600 mt-0.5">✓</span> Strong credentials in landlord-tenant laws and communication.</li>
-                <li className="flex items-start gap-2"><span className="text-green-600 mt-0.5">✓</span> Client-centered approach for seamless property management.</li>
-              </ul>
-            </div>
-
-            <aside id="contact-manager" className="bg-white rounded-xl shadow-md p-4 sm:p-6 lg:p-8 scroll-mt-4 sm:scroll-mt-6 min-w-0">
-              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-gray-800">Contact {manager.name}</h3>
-              <form className="space-y-3 sm:space-y-4" onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  <input name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleInputChange} className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base min-h-[44px]" required />
-                  <input name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleInputChange} className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base min-h-[44px]" required />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  <input name="phone" placeholder="Phone" value={formData.phone} onChange={handleInputChange} className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base min-h-[44px]" required />
-                  <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleInputChange} className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base min-h-[44px]" required />
-                </div>
-                <textarea name="message" placeholder="Your message" value={formData.message} onChange={handleInputChange} className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base min-h-[100px]" rows={4} required />
-                <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors min-h-[44px] touch-manipulation">
-                  Contact
-                </button>
-              </form>
-            </aside>
           </section>
 
           {/* Tabs + Listings */}

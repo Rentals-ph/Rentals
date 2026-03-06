@@ -823,6 +823,13 @@
         "description": "Rent managers hero section background",
         "originalName": "rent-manager-hero-bg.png"
         },
+      "BG_AGENT_DETAILS": {
+        "id": "BG_AGENT_DETAILS",
+        "path": "/assets/backgrounds/agent-details-banner.png",
+        "category": "backgrounds",
+        "description": "Agent details header banner",
+        "originalName": "agent-details-banner.png"
+      },
       "BG_RENT_MANAGERS_FOOTER": {
         "id": "BG_RENT_MANAGERS_FOOTER",
         "path": "/assets/backgrounds/rent-managers-footer.png",
