@@ -10,174 +10,285 @@ export default function AboutPage() {
     <div className="min-h-screen bg-white flex flex-col flex-1 w-full max-w-full overflow-x-hidden font-outfit">
 
       {/* --- HERO SECTION --- */}
-      <section className="w-full relative min-h-[280px] xs:min-h-[340px] sm:min-h-[400px] md:min-h-[500px] flex flex-col overflow-hidden">
+      <section className="w-full relative min-h-[400px] sm:min-h-[500px] md:min-h-[600px] flex flex-col overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full z-[1]">
           <img
             src={ASSETS.ABOUT_BACKGROUND}
             alt="About Us background"
             className="w-full h-full object-cover object-center"
+            style={{ imageRendering: 'auto' }}
           />
-          {/* Gradient overlay method matched with Blog hero */}
+          {/* Light overlay for text readability */}
           <div
-            className="absolute top-0 left-0 w-full h-full z-[2]"
-            style={{
-              background:
-                'linear-gradient(135deg, rgba(32, 94, 215, 0.85) 0%, rgba(105, 187, 255, 0.75) 50%, rgba(254, 142, 10, 0.85) 100%)',
-                opacity: 0.85,
-            }}
+            className="absolute top-0 left-0 w-full h-full z-[2] bg-black/20"
           />
         </div>
 
-        <div className="relative z-[3] max-w-[var(--page-max-width)] mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-20 w-full flex items-center justify-center flex-1">
+        <div className="relative z-[3] max-w-[var(--page-max-width)] mx-auto px-4 sm:px-6 py-16 sm:py-20 md:py-24 w-full flex items-center justify-center flex-1">
           <div className="text-center flex flex-col items-center justify-center">
-            <h1 className="font-extrabold text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl leading-tight m-0 tracking-tight">
-              <span className="text-rental-blue-500">About</span>{" "}
-              <span className="text-rental-orange-500">Rentals.ph</span>
+            <h1 className="font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-tight m-0 tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+              About Rentals.ph
             </h1>
-            <p className="text-sm sm:text-base md:text-lg font-semibold text-white m-0 mt-2 sm:mt-3">
-              We provide full service at every step.
+            <p className="text-base sm:text-lg md:text-xl font-semibold text-white m-0 mt-3 sm:mt-4 max-w-2xl drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">
+              We provide full service at every step to make real estate better.
             </p>
           </div>
         </div>
-
-        {/* Bottom Orange Bar */}
-        <div className="relative z-[3] w-full h-3 sm:h-4 bg-[#f97316]" />
       </section>
 
-      {/* --- CORE SECTIONS (STORY, MISSION, VISION) --- */}
-      <section className="bg-white py-10 sm:py-12 md:py-16 px-4 sm:px-6 md:px-10 lg:px-[150px] overflow-hidden"
-      style={{ background: 'linear-gradient(to bottom, #e8f0ff 0%, #ffffff 100%)' }}>
-        <div className="mx-auto max-w-[var(--page-max-width)] grid grid-rows-[repeat(3,auto)] gap-10 sm:gap-8 md:gap-12 items-stretch">
-
-          {/* OUR STORY */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-10 items-stretch min-h-0">
-            {/* Image Left */}
-            <div className="relative z-10 mx-auto w-full max-w-[400px] md:max-w-none order-2 md:order-1 h-full min-h-[200px] sm:min-h-[220px] md:min-h-0 md:max-h-[260px]">
-              <img
-                src={ASSETS.ABOUT_OUR_STORY}
-                alt="Our Story"
-                className="w-full h-full object-cover object-center rounded-2xl"
-              />
+      {/* --- KEY FEATURES SECTION --- */}
+      <section className="bg-white py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-10 lg:px-[150px]">
+        <div className="mx-auto max-w-[var(--page-max-width)]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
+            {/* Card 01 - Rent.ph Cares */}
+            <div className="relative bg-white rounded-lg border border-gray-200 shadow-sm p-6 md:p-8 flex flex-col min-h-[280px]">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="w-16 h-16 md:w-20 md:h-20 flex-shrink-0 flex items-center justify-center">
+                  <img src={ASSETS.ABOUT_RENTPH_CARES} alt="Rent.ph Cares" className="w-full h-full object-contain" onError={(e) => { e.currentTarget.style.display = 'none' }} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg md:text-xl font-bold text-[#205ed7] mb-2">
+                    Rent.ph Cares Your Rental, Their Hope
+                  </h3>
+                  <p className="text-sm md:text-base text-gray-600 leading-relaxed">
+                    Your Rentals, Their Hope. With Rent.ph Cares, every transaction fuels community programs and transforms lives. Rent a home, inspire a future.
+                  </p>
+                </div>
+              </div>
+              <div className="absolute bottom-4 right-4 text-6xl md:text-7xl font-bold text-[#f97316]/30 leading-none">
+                01
+              </div>
             </div>
-            {/* Text Right */}
-            <div className="flex flex-col justify-center items-center md:items-start text-center md:text-left relative order-1 md:order-2 py-2 overflow-hidden">
-              {/* Decorative Blob - smaller on mobile to avoid overflow */}
-              <div className="absolute right-[-20px] bottom-[-20px] w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 bg-[#fff3cd] rounded-full blur-[40px] sm:blur-[60px] opacity-50 sm:opacity-70 z-0 pointer-events-none"></div>
 
-              <h2 className="text-xl sm:text-3xl md:text-4xl font-extrabold mb-2 relative z-10 w-full">
-                <span className="text-[#205ed7]">OUR</span> <span className="text-[#f97316]">STORY</span>
-              </h2>
-              <p className="text-sm sm:text-base md:text-lg font-normal leading-snug text-gray-700 relative z-10 max-w-full">
-                Established in 2014 under Philippine Real Estate Management Solutions Inc., Rentals.ph was organized with one clear goal: to serve as the vehicle in translating real estate investments into productive assets. Today, we stand as the <span className="font-bold border-b-2 border-[#f97316]">only rental portal</span> backed by realtors, rent managers, and licensed real estate professionals.
-              </p>
+            {/* Card 02 - Your Trusted Rental Partner */}
+            <div className="relative bg-white rounded-lg border border-gray-200 shadow-sm p-6 md:p-8 flex flex-col min-h-[280px]">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="w-16 h-16 md:w-20 md:h-20 flex-shrink-0 flex items-center justify-center">
+                  <img src={ASSETS.ABOUT_TRUSTED_PARTNER} alt="Trusted Partner" className="w-full h-full object-contain" onError={(e) => { e.currentTarget.style.display = 'none' }} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg md:text-xl font-bold text-[#205ed7] mb-2">
+                    Your Trusted Rental Partner
+                  </h3>
+                  <p className="text-sm md:text-base text-gray-600 leading-relaxed">
+                    The Philippines' most trusted rental brand. Backed by a network of licensed realtors and managers, we provide the expert, personal assistance property owners and clients deserve.
+                  </p>
+                </div>
+              </div>
+              <div className="absolute bottom-4 right-4 text-6xl md:text-7xl font-bold text-[#f97316]/20 leading-none">
+                02
+              </div>
+            </div>
+
+            {/* Card 03 - Transforming Real Estate Investment */}
+            <div className="relative bg-white rounded-lg border border-gray-200 shadow-sm p-6 md:p-8 flex flex-col min-h-[280px]">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="w-16 h-16 md:w-20 md:h-20 flex-shrink-0 flex items-center justify-center">
+                  <img src={ASSETS.ABOUT_TRANSFORMING} alt="Transforming" className="w-full h-full object-contain" onError={(e) => { e.currentTarget.style.display = 'none' }} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg md:text-xl font-bold text-[#205ed7] mb-2">
+                    Transforming Real Estate Investment into Productive Assets
+                  </h3>
+                  <p className="text-sm md:text-base text-gray-600 leading-relaxed">
+                    Since 2014, Rent.ph has been dedicated to a single goal: turning real estate investments into productive assets through expert management solutions.
+                  </p>
+                </div>
+              </div>
+              <div className="absolute bottom-4 right-4 text-6xl md:text-7xl font-bold text-[#f97316]/20 leading-none">
+                03
+              </div>
+            </div>
+
+            {/* Card 04 - Comprehensive Rental Solution */}
+            <div className="relative bg-white rounded-lg border border-gray-200 shadow-sm p-6 md:p-8 flex flex-col min-h-[280px]">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="w-16 h-16 md:w-20 md:h-20 flex-shrink-0 flex items-center justify-center">
+                  <img src={ASSETS.ABOUT_COMPREHENSIVE} alt="Comprehensive" className="w-full h-full object-contain" onError={(e) => { e.currentTarget.style.display = 'none' }} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg md:text-xl font-bold text-[#205ed7] mb-2">
+                    Your Comprehensive Rental Solution Nationwide
+                  </h3>
+                  <p className="text-sm md:text-base text-gray-600 leading-relaxed">
+                    Together with Filipino Homes, we provide nationwide marketing for all property types—houses, condos, and warehouses—through our expert network in key cities and provinces.
+                  </p>
+                </div>
+              </div>
+              <div className="absolute bottom-4 right-4 text-6xl md:text-7xl font-bold text-[#f97316]/20 leading-none">
+                04
+              </div>
             </div>
           </div>
-
-          {/* OUR MISSION */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 items-stretch min-h-0">
-            {/* Text Left */}
-            <div className="flex flex-col justify-center items-center md:items-end text-center md:text-right relative order-1 py-2 overflow-hidden">
-              {/* Decorative Blob - smaller on mobile */}
-              <div className="absolute left-[-20px] top-[-20px] w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 bg-[#efe5ff] rounded-full blur-[40px] sm:blur-[60px] opacity-50 sm:opacity-80 z-0 pointer-events-none"></div>
-
-              <h2 className="text-xl sm:text-3xl md:text-4xl font-extrabold mb-2 relative z-10 w-full">
-                <span className="text-[#205ed7]">OUR</span> <span className="text-[#f97316]">MISSION</span>
-              </h2>
-              <p className="text-sm sm:text-base md:text-lg font-normal leading-snug text-gray-700 relative z-10 max-w-full">
-                To transform real estate investments into productive assets while providing exceptional service to property owners and tenants across the Philippines.
-              </p>
-            </div>
-            {/* Image Right */}
-            <div className="relative z-10 mx-auto w-full max-w-[400px] md:max-w-none order-2 h-full min-h-[200px] sm:min-h-[220px] md:min-h-0 md:max-h-[260px]">
-              <img
-                src={ASSETS.ABOUT_OUR_MISSION}
-                alt="Our Mission"
-                className="w-full h-full object-cover object-center rounded-lg"
-              />
-            </div>
-          </div>
-
-          {/* OUR VISION */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-10 items-stretch min-h-0">
-            {/* Image Left */}
-            <div className="relative z-10 mx-auto w-full max-w-[400px] md:max-w-none order-2 md:order-1 h-full min-h-[200px] sm:min-h-[220px] md:min-h-0 md:max-h-[260px]">
-              <img
-                src={ASSETS.ABOUT_OUR_VISION}
-                alt="Our Vision"
-                className="w-full h-full object-cover object-center rounded-lg"
-              />
-            </div>
-            {/* Text Right */}
-            <div className="flex flex-col justify-center items-center md:items-start text-center md:text-left relative order-1 md:order-2 py-2 overflow-hidden">
-              {/* Decorative Blob - smaller on mobile */}
-              <div className="absolute right-[-20px] bottom-[-20px] w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 bg-[#e8f0ff] rounded-full blur-[40px] sm:blur-[60px] opacity-50 sm:opacity-80 z-0 pointer-events-none"></div>
-
-              <h2 className="text-xl sm:text-3xl md:text-4xl font-extrabold mb-2 relative z-10 w-full">
-                <span className="text-[#205ed7]">OUR</span> <span className="text-[#f97316]">VISION</span>
-              </h2>
-              <p className="text-sm sm:text-base md:text-lg font-normal leading-snug text-gray-700 relative z-10 max-w-full">
-                To be the leading rental platform that connects property owners with quality tenants through innovative technology and trusted professional networks.
-              </p>
-            </div>
-          </div>
-
         </div>
       </section>
 
-      {/* --- WHAT WE OFFER SECTION --- */}
-      <section className="bg-white pt-6 sm:pt-8 px-4 sm:px-6 md:px-10 lg:px-[150px] pb-12 sm:pb-16 md:pb-20 border-t border-gray-100">
+      {/* --- OUR COMPANY STORY SECTION --- */}
+      <section className="bg-white py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-10 lg:px-[150px]">
         <div className="mx-auto max-w-[var(--page-max-width)]">
-          <h2 className="text-center text-xl sm:text-3xl md:text-4xl font-extrabold text-[#205ed7] mb-6 sm:mb-8 md:mb-10 tracking-tight">
-            WHAT WE OFFER
-          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+            {/* Text Left */}
+            <div className="flex flex-col justify-center">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4">
+                <span className="text-[#205ed7]">Our Company</span> <span className="text-[#f97316]">Story</span>
+              </h2>
+              <p className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed mb-6">
+                Established in 2014 under Philippine Real Estate Management Solutions Inc., Rentals.ph was organized with one clear goal: to serve as the vehicle in translating real estate investments into productive assets. Today, we stand as the only rental portal backed by realtors, rent managers, and licensed real estate professionals.
+              </p>
+              <button className="self-start bg-[#205ed7] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#1a4ba8] transition-colors">
+                Read More
+              </button>
+            </div>
+            {/* Image Right with Overlay */}
+            <div className="relative min-h-[400px] md:min-h-[500px]">
+              <img
+                src={ASSETS.ABOUT_OUR_STORY}
+                alt="Our Company Story - Team Working"
+                className="w-full h-full object-cover object-center rounded-lg absolute inset-0"
+              />
+              {/* Overlay with Rentals.ph logo centered */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-4">
+                <div className="relative flex flex-col items-center gap-4">
+                  {/* House Icon and Rentals.ph Text - Horizontal Layout */}
+                  <div className="flex items-center gap-3">
+                    {/* House Icon from SVG */}
+                    <div className="flex-shrink-0">
+                      <img 
+                        src={ASSETS.LOGO_ICON} 
+                        alt="Rentals.ph Logo" 
+                        className="w-16 h-16 md:w-20 md:h-20"
+                      />
+                    </div>
+                    {/* Rentals.ph Text */}
+                    <div className="flex flex-col">
+                      <div className="text-2xl md:text-3xl font-bold leading-tight">
+                        <span className="text-[#205ed7]">Rentals</span>
+                        <span className="text-[#f97316]">.ph</span>
+                      </div>
+                      <div className="text-xs md:text-sm font-bold text-[#f97316] uppercase tracking-wide mt-1">
+                        PHILIPPINES #1 PROPERTY RENTAL WEBSITE
+                      </div>
+                    </div>
+                  </div>
+                  {/* Speech Bubble - Positioned below */}
+                  <div className="relative bg-[#205ed7] text-white px-4 py-2 rounded-lg shadow-xl">
+                    <span className="text-sm md:text-base">This website is made with love </span>
+                    <span className="text-red-400">❤</span>
+                    {/* Speech bubble tail pointing up */}
+                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-[#205ed7]"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-5">
-            <div className="flex items-center gap-3 sm:gap-4 p-4 sm:p-6 md:p-8 rounded-xl border-2 border-[#f97316] bg-white shadow-sm"
-            style={{
-              border: '2px solid #f97316',
-            }}>
-              <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 flex-shrink-0 flex items-center justify-center">
-                <img src={ASSETS.ABOUT_RENTPH_CARES} alt="Rent.ph Cares" className="w-full h-full object-contain" onError={(e) => { e.currentTarget.style.display = 'none' }} />
+      {/* --- STATISTICS SECTION --- */}
+      <section className="bg-[#205ed7] py-10 sm:py-12 md:py-14 px-4 sm:px-6 relative overflow-hidden">
+        {/* Abstract glowing shapes background */}
+        <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[min(900px,100%)] opacity-15">
+          <div className="absolute top-12 left-8 w-44 h-44 sm:w-56 sm:h-56 bg-blue-300 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-12 right-8 w-56 h-56 sm:w-72 sm:h-72 bg-blue-200 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-52 h-52 sm:w-64 sm:h-64 bg-white rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="relative z-10 mx-auto max-w-[var(--page-max-width)]">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8 text-center">
+            <div>
+              <div className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-1">762</div>
+              <div className="text-sm sm:text-base md:text-lg text-white/90">Registered Agents</div>
+            </div>
+            <div>
+              <div className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-1">853</div>
+              <div className="text-sm sm:text-base md:text-lg text-white/90">Registered Brokers</div>
+            </div>
+            <div>
+              <div className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-1">12,453</div>
+              <div className="text-sm sm:text-base md:text-lg text-white/90">Happy Customers</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- THE CREW SECTION --- */}
+      <section className="bg-white py-8 sm:py-10 md:py-12 px-4 sm:px-6 md:px-10 lg:px-[150px]">
+        <div className="mx-auto max-w-[var(--page-max-width)]">
+          <div className="text-center mb-6 md:mb-8">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold mb-1">
+              <span className="text-[#205ed7]">The Crew</span>
+            </h2>
+            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
+              Our Awesome Team
+            </h3>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+            {/* Team Member 1 - Christian Yancha */}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden max-w-[240px] mx-auto w-full hover:shadow-md transition-shadow">
+              <div className="aspect-square w-full bg-gray-100 relative">
+                <img
+                  src={ASSETS.ABOUT_TEAM_LEADER}
+                  alt="Christian Yancha"
+                  className="w-full h-full object-cover object-center"
+                  style={{ imageRendering: 'crisp-edges' }}
+                  loading="lazy"
+                />
               </div>
-              <div className="min-w-0">
-                <h4 className="text-base sm:text-xl md:text-2xl font-bold text-[#205ed7] mb-0.5">Rent.ph Cares <span className="text-[#f97316]">Your Rental, Their Hope</span></h4>
-                <p className="text-sm sm:text-base md:text-xl text-gray-600 leading-snug m-0">Every transaction gives back to communities in need.</p>
+              <div className="p-3 text-center">
+                <h4 className="font-bold text-base text-gray-900 leading-tight">Christian Yancha</h4>
+                <p className="text-xs text-gray-600 mt-0.5">Team Leader</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 sm:gap-4 p-4 sm:p-6 md:p-8 rounded-xl border-2 border-[#f97316] bg-white shadow-sm"
-            style={{
-              border: '2px solid #f97316',
-            }}>
-              <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 flex-shrink-0 flex items-center justify-center">
-                <img src={ASSETS.ABOUT_TRUSTED_PARTNER} alt="Trusted Partner" className="w-full h-full object-contain" onError={(e) => { e.currentTarget.style.display = 'none' }} />
+
+            {/* Team Member 2 - Ian Dal */}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden max-w-[240px] mx-auto w-full hover:shadow-md transition-shadow">
+              <div className="aspect-square w-full bg-gray-100 relative">
+                <img
+                  src={ASSETS.ABOUT_TEAM_IAN}
+                  alt="Ian Dal"
+                  className="w-full h-full object-cover object-center"
+                  style={{ imageRendering: 'crisp-edges' }}
+                  loading="lazy"
+                />
               </div>
-              <div className="min-w-0">
-                <h4 className="text-base sm:text-xl md:text-2xl font-bold text-[#205ed7] mb-0.5">Your Trusted <span className="text-[#f97316]">Rental Partner</span></h4>
-                <p className="text-sm sm:text-base md:text-xl text-gray-600 leading-snug m-0">Certified real estate professionals, integrity, and personalized service.</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 sm:gap-4 p-4 sm:p-6 md:p-8 rounded-xl border-2 border-[#f97316] bg-white shadow-sm"
-            style={{
-              border: '2px solid #f97316',
-            }}>
-              <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 flex-shrink-0 flex items-center justify-center">
-                <img src={ASSETS.ABOUT_TRANSFORMING} alt="Transforming" className="w-full h-full object-contain" onError={(e) => { e.currentTarget.style.display = 'none' }} />
-              </div>
-              <div className="min-w-0">
-                <h4 className="text-base sm:text-xl md:text-2xl font-bold text-[#205ed7] mb-0.5">Transforming Investment <span className="text-[#f97316]">Into Assets</span></h4>
-                <p className="text-sm sm:text-base md:text-xl text-gray-600 leading-snug m-0">Comprehensive rental solutions for productive assets.</p>
+              <div className="p-3 text-center">
+                <h4 className="font-bold text-base text-gray-900 leading-tight">Ian Dal</h4>
+                <p className="text-xs text-gray-600 mt-0.5">Full Stack Developer</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 sm:gap-4 p-4 sm:p-6 md:p-8 rounded-xl border-2 border-[#f97316] bg-white shadow-sm"
-            style={{
-              border: '2px solid #f97316',
-            }}>
-              <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 flex-shrink-0 flex items-center justify-center">
-                <img src={ASSETS.ABOUT_COMPREHENSIVE} alt="Comprehensive" className="w-full h-full object-contain" onError={(e) => { e.currentTarget.style.display = 'none' }} />
+
+            {/* Team Member 3 - Donielle Isaac Lacaylacay */}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden max-w-[240px] mx-auto w-full hover:shadow-md transition-shadow">
+              <div className="aspect-square w-full bg-gray-100 relative">
+                <img
+                  src={ASSETS.ABOUT_TEAM_ISAAC}
+                  alt="Donielle Isaac Lacaylacay"
+                  className="w-full h-full object-cover object-center"
+                  style={{ imageRendering: 'crisp-edges' }}
+                  loading="lazy"
+                />
               </div>
-              <div className="min-w-0">
-                <h4 className="text-base sm:text-xl md:text-2xl font-bold text-[#205ed7] mb-0.5">Comprehensive <span className="text-[#f97316]">Rental Solution Nationwide</span></h4>
-                <p className="text-sm sm:text-base md:text-xl text-gray-600 leading-snug m-0">Rental solutions across the Philippines.</p>
+              <div className="p-3 text-center">
+                <h4 className="font-bold text-base text-gray-900 leading-tight">Donielle Isaac Lacaylacay</h4>
+                <p className="text-xs text-gray-600 mt-0.5">UI/UX Designer</p>
+              </div>
+            </div>
+
+            {/* Team Member 4 - Chris Niño Pagente */}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden max-w-[240px] mx-auto w-full hover:shadow-md transition-shadow">
+              <div className="aspect-square w-full bg-gray-100 relative">
+                <img
+                  src={ASSETS.ABOUT_TEAM_NYO}
+                  alt="Chris Niño Pagente"
+                  className="w-full h-full object-cover object-center"
+                  style={{ imageRendering: 'crisp-edges' }}
+                  loading="lazy"
+                />
+              </div>
+              <div className="p-3 text-center">
+                <h4 className="font-bold text-base text-gray-900 leading-tight">Chris Niño Pagente</h4>
+                <p className="text-xs text-gray-600 mt-0.5">Web Developer</p>
               </div>
             </div>
           </div>

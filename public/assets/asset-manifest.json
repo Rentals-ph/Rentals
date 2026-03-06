@@ -639,11 +639,11 @@
         },
         "ABOUT_BACKGROUND": {
           "id": "ABOUT_BACKGROUND",
-          "path": "/assets/images/about/aboutusbackgroundphoto.svg",
+          "path": "/assets/images/about/aboutusbackground.png",
           "category": "images",
           "subcategory": "about",
           "description": "About us background photo",
-          "originalName": "aboutusbackgroundphoto.svg"
+          "originalName": "aboutusbackground.png"
         },
         "ABOUT_LANDING_PAGE": {
           "id": "ABOUT_LANDING_PAGE",
@@ -724,6 +724,38 @@
           "subcategory": "about",
           "description": "Unsplash image variant 3",
           "originalName": "unsplash-eh-it-1-hg-4-hs3.png"
+        },
+        "ABOUT_TEAM_LEADER": {
+          "id": "ABOUT_TEAM_LEADER",
+          "path": "/assets/images/about/Teamleader.png",
+          "category": "images",
+          "subcategory": "about",
+          "description": "Team Leader - Christian Yancha",
+          "originalName": "Teamleader.png"
+        },
+        "ABOUT_TEAM_IAN": {
+          "id": "ABOUT_TEAM_IAN",
+          "path": "/assets/images/about/ian.png",
+          "category": "images",
+          "subcategory": "about",
+          "description": "Team Member - Ian Dal",
+          "originalName": "ian.png"
+        },
+        "ABOUT_TEAM_ISAAC": {
+          "id": "ABOUT_TEAM_ISAAC",
+          "path": "/assets/images/about/isaac.png",
+          "category": "images",
+          "subcategory": "about",
+          "description": "Team Member - Donielle Isaac Lacaylacay",
+          "originalName": "isaac.png"
+        },
+        "ABOUT_TEAM_NYO": {
+          "id": "ABOUT_TEAM_NYO",
+          "path": "/assets/images/about/nyo.png",
+          "category": "images",
+          "subcategory": "about",
+          "description": "Team Member - Chris Niño Pagente",
+          "originalName": "nyo.png"
         }
       }
     },
