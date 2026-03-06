@@ -17,6 +17,7 @@ import { useRouter } from 'next/navigation'
 import { listingAssistantApi } from '@/api/endpoints/listingAssistant'
 import type { ExtractedPropertyData } from '@/types/listingAssistant'
 import { LISTING_ROLE_CONFIG } from '@/config/listingRoles'
+import { compressImages } from '@/utils/imageCompression'
 
 // ─── Form Data Shape ─────────────────────────────────────────────────────────
 // Field names mirror CreateListingContext.CreateListingData so the manual form
@@ -321,6 +322,21 @@ export function useListingConversation(
     }
   }, [])
 
+  const getUploadErrorMessage = (err: unknown): string => {
+    const anyErr = err as any
+    const data = anyErr?.response?.data
+    const errors = data?.errors
+
+    const first =
+      (errors && (errors['images.0']?.[0] || errors.images?.[0])) ||
+      data?.message ||
+      anyErr?.message
+
+    return typeof first === 'string' && first.trim().length > 0
+      ? first
+      : 'Failed to upload images.'
+  }
+
   // ── uploadImages ─────────────────────────────────────────────────────────────
   const uploadImages = useCallback(async (files: File[]) => {
     const id = conversationIdRef.current
@@ -328,13 +344,65 @@ export function useListingConversation(
     setIsUploadingImages(true)
     setError(null)
     try {
-      const response = await listingAssistantApi.uploadImages(id, files)
+      const imageFiles = files.filter((f) => f.type?.startsWith('image/'))
+      if (imageFiles.length === 0) return
+
+      let filesToUpload = imageFiles
+      try {
+        filesToUpload = await compressImages(imageFiles, {
+          maxWidth: 1920,
+          maxHeight: 1920,
+          quality: 0.85,
+          maxSizeMB: 2,
+        })
+      } catch {
+        // Best-effort compression; fall back to originals.
+        filesToUpload = imageFiles
+      }
+
+      const response = await listingAssistantApi.uploadImages(id, filesToUpload)
       setFormData((prev) => ({
         ...prev,
         uploadedImages: response.images,
       }))
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to upload images.')
+      // If a single image is invalid/corrupt, the whole batch can fail.
+      // Retry one-by-one so good images still get through.
+      const baseMsg = getUploadErrorMessage(err)
+
+      try {
+        const imageFiles = files.filter((f) => f.type?.startsWith('image/'))
+        if (imageFiles.length > 1) {
+          let lastError: string | null = null
+          let uploadedAny = false
+
+          for (const file of imageFiles) {
+            let fileToUpload = file
+            try {
+              ;[fileToUpload] = await compressImages([file], { maxSizeMB: 2 })
+            } catch {
+              fileToUpload = file
+            }
+
+            try {
+              const res = await listingAssistantApi.uploadImages(id, [fileToUpload])
+              uploadedAny = true
+              setFormData((prev) => ({ ...prev, uploadedImages: res.images }))
+            } catch (singleErr: unknown) {
+              lastError = getUploadErrorMessage(singleErr)
+            }
+          }
+
+          if (uploadedAny) {
+            setError(lastError ? `Some images failed to upload: ${lastError}` : null)
+            return
+          }
+        }
+      } catch {
+        // ignore retry errors; fall back to base error
+      }
+
+      setError(baseMsg)
     } finally {
       setIsUploadingImages(false)
     }

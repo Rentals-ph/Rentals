@@ -263,7 +263,7 @@ const FeaturedProperties = () => {
       </div>
 
       {/* Location chips: horizontal scroll on mobile when many, wrap on larger screens */}
-      <div className="flex flex-col gap-2 sm:gap-3 mb-2 sm:mb-3 relative">
+      <FadeInOnView as="div" delayMs={120} className="flex flex-col gap-2 sm:gap-3 mb-2 sm:mb-3 relative">
         <div className="flex items-center justify-between gap-2 px-1 sm:px-0">
           <p className="text-gray-700 font-outfit text-xs sm:text-sm md:text-base font-medium m-0">
             Browse featured homes by location
@@ -290,10 +290,14 @@ const FeaturedProperties = () => {
             </button>
           ))}
         </div>
-      </div>
+      </FadeInOnView>
 
       {/* Carousel: responsive card widths; touch-friendly scroll on mobile */}
-      <div className="relative w-full mt-4 sm:mt-6 overflow-hidden -mx-3 xs:-mx-4 sm:mx-0 px-2 sm:px-0">
+      <FadeInOnView
+        as="div"
+        delayMs={220}
+        className="relative w-full mt-4 sm:mt-6 overflow-hidden -mx-3 xs:-mx-4 sm:mx-0 px-2 sm:px-0"
+      >
         <div
           className="flex gap-2 sm:gap-5 overflow-x-auto overflow-y-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-2 sm:pb-3 snap-x snap-mandatory touch-pan-x"
           ref={propertyCarouselRef}
@@ -359,7 +363,7 @@ const FeaturedProperties = () => {
             </div>
           )}
         </div>
-      </div>
+      </FadeInOnView>
 
       {/* Browse Properties by Location Section */}
       

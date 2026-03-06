@@ -158,30 +158,44 @@ const Blogs = () => {
         )}
         
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 items-stretch w-full overflow-visible">
+          <FadeInOnView
+            as="div"
+            delayMs={120}
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 items-stretch w-full overflow-visible"
+          >
             {Array.from({ length: cardsPerPage }).map((_, idx) => (
               <div key={idx} className="flex justify-center">
                 <BlogCardSkeleton size="small" className="w-full" />
               </div>
             ))}
-          </div>
+          </FadeInOnView>
         ) : currentPageBlogs.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 items-stretch w-full overflow-visible">
-            {currentPageBlogs.map((blog) => (
+          <FadeInOnView
+            as="div"
+            delayMs={120}
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 items-stretch w-full overflow-visible"
+          >
+            {currentPageBlogs.map((blog, index) => (
               <div key={blog.id} className="flex justify-center">
-                <BlogCard
-                  image={getImageUrl(blog.image)}
-                  category={blog.category}
-                  title={blog.title}
-                  excerpt={blog.excerpt}
-                  author={blog.author}
-                  date={formatDate(blog.published_at)}
-                  readTime={formatReadTime(blog.read_time)}
-                  link={`/blog/${blog.id}`}
-                />
+                <FadeInOnView
+                  as="div"
+                  delayMs={160 + index * 50}
+                  className="w-full"
+                >
+                  <BlogCard
+                    image={getImageUrl(blog.image)}
+                    category={blog.category}
+                    title={blog.title}
+                    excerpt={blog.excerpt}
+                    author={blog.author}
+                    date={formatDate(blog.published_at)}
+                    readTime={formatReadTime(blog.read_time)}
+                    link={`/blog/${blog.id}`}
+                  />
+                </FadeInOnView>
               </div>
             ))}
-          </div>
+          </FadeInOnView>
         ) : (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <p className="text-gray-600 font-outfit text-base mb-4">No blog posts found in this category.</p>

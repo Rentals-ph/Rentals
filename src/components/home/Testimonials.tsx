@@ -97,7 +97,11 @@ const Testimonials = () => {
           </FadeInOnView>
 
           {/* Right Section - Testimonials Cards (Horizontal Scroll) */}
-          <div className="w-full min-w-0 overflow-x-auto overflow-y-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <FadeInOnView
+            as="div"
+            delayMs={160}
+            className="w-full min-w-0 overflow-x-auto overflow-y-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
             {loading ? (
               <div className="flex gap-6 pb-4 pr-4 md:pr-8 w-max">
                 {Array.from({ length: 3 }).map((_, i) => (
@@ -105,15 +109,24 @@ const Testimonials = () => {
                 ))}
               </div>
             ) : testimonials.length > 0 ? (
-              <div className="flex gap-6 pb-4 snap-x snap-mandatory pr-4 md:pr-8 w-max" ref={scrollRef} style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}>
-                {testimonials.map((testimonial) => (
-                  <TestimonialCard
+              <div
+                className="flex gap-6 pb-4 snap-x snap-mandatory pr-4 md:pr-8 w-max"
+                ref={scrollRef}
+                style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}
+              >
+                {testimonials.map((testimonial, index) => (
+                  <FadeInOnView
                     key={testimonial.id}
-                    avatar={getAvatarUrl(testimonial.avatar)}
-                    text={testimonial.content}
-                    name={testimonial.name}
-                    role={testimonial.role}
-                  />
+                    as="div"
+                    delayMs={200 + index * 70}
+                  >
+                    <TestimonialCard
+                      avatar={getAvatarUrl(testimonial.avatar)}
+                      text={testimonial.content}
+                      name={testimonial.name}
+                      role={testimonial.role}
+                    />
+                  </FadeInOnView>
                 ))}
               </div>
             ) : (
@@ -121,7 +134,7 @@ const Testimonials = () => {
                 <p className="text-white font-outfit text-lg">No testimonials available at the moment.</p>
               </div>
             )}
-          </div>
+          </FadeInOnView>
         </div>
       </div>
     </section>

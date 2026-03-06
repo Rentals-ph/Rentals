@@ -261,7 +261,11 @@ function AppSidebar() {
   }
 
   const navLinkClass = (active: boolean) =>
-    `flex items-center gap-2.5 px-3 py-2.5 rounded-lg no-underline text-[13px] font-medium transition-all flex-shrink-0 ${active ? 'bg-blue-50 text-blue-500' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'} ${isCollapsed ? 'md:justify-center md:px-2' : ''}`
+    `flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl no-underline text-[13px] font-medium transition-all flex-shrink-0 ${
+      active
+        ? 'bg-rental-blue-600 text-white shadow-md shadow-rental-blue-600/25'
+        : 'text-rental-blue-800 hover:bg-white/80 hover:text-rental-orange-500 hover:shadow-sm'
+    } ${isCollapsed ? 'md:justify-center md:px-2' : ''}`
 
   const NavLink = ({
     href,
@@ -341,106 +345,165 @@ function AppSidebar() {
     <>
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="hidden fixed inset-0 bg-black/50 z-[999] md:block"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <aside 
+      <aside
         ref={sidebarRef}
-        className={`w-[280px] max-[480px]:w-[260px] bg-white border-r border-gray-200 flex flex-col fixed h-screen overflow-hidden z-[1000] md:-translate-x-full md:transition-transform md:duration-300 md:ease-in-out transition-[width] duration-200 ${isCollapsed ? 'md:w-[72px]' : 'lg:w-60'} ${isMobileMenuOpen ? 'md:translate-x-0' : ''}`}
+        className={`w-[280px] max-[480px]:w-[260px] fixed h-screen overflow-visible z-[1000] md:-translate-x-full md:transition-transform md:duration-300 md:ease-in-out transition-[width] duration-200 ${
+          isCollapsed ? 'md:w-[72px]' : 'lg:w-60'
+        } ${isMobileMenuOpen ? 'md:translate-x-0' : ''}`}
       >
-        <div className={`p-2.5 border-b border-gray-200 flex-shrink-0 ${isCollapsed ? 'md:px-2 md:overflow-visible' : ''}`}>
-          <div className={`flex items-center justify-center w-full mb-1 ${isCollapsed ? 'md:mb-0' : ''}`}>
-            <Link href="/" className={isCollapsed ? 'md:flex md:justify-center' : ''}>
-              <img
-                src={ASSETS.LOGO_HERO_MAIN}
-                alt="Rentals.ph logo"
-                className={`h-[60px] md:h-[50px] w-auto max-w-full object-contain ${isCollapsed ? 'md:!h-[60px] md:!w-[60px] md:!min-w-[60px] md:max-w-none' : ''}`}
-              />
-            </Link>
-          </div>
-          {/* Collapse toggle - visible whenever sidebar is shown (md and up) so it persists across resolution changes */}
-          <button
-            type="button"
-            onClick={() => setIsCollapsed((c) => !c)}
-            className="hidden md:flex items-center justify-center w-full mt-2 py-1.5 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
-            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            {isCollapsed ? <FiChevronRight className="text-lg" /> : <FiChevronLeft className="text-lg" />}
-          </button>
+        {/* Background layer to match public mobile sidebar aesthetics */}
+        <div className="absolute inset-0 bg-gradient-to-br from-rental-blue-50 via-white to-rental-orange-50/40 border-r border-rental-blue-100" aria-hidden />
+        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
+          <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-rental-blue-500/10 blur-2xl" />
+          <div className="absolute top-1/3 -left-8 w-24 h-24 rounded-full bg-rental-orange-500/15 blur-xl" />
+          <div className="absolute bottom-16 -right-6 w-28 h-28 rounded-full bg-rental-blue-400/10 blur-2xl" />
+          <div
+            className="absolute inset-0 opacity-[0.03]"
+            style={{
+              backgroundImage: `repeating-linear-gradient(
+                -45deg,
+                transparent,
+                transparent 20px,
+                #205ED7 20px,
+                #205ED7 21px
+              )`,
+            }}
+          />
         </div>
 
-        <nav className={`p-3 lg:py-2.5 lg:px-2 md:p-3 flex flex-col gap-4 lg:gap-3 md:gap-4 flex-1 overflow-y-auto overflow-x-hidden min-h-0 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb:hover]:bg-gray-400 ${isCollapsed ? 'md:py-2.5 md:px-2 md:gap-3' : ''}`} onClick={handleNavClick}>
-          {isAdminRoute ? renderAdminSidebar() : isBrokerRoute ? renderBrokerSidebar() : renderAgentSidebar()}
-        </nav>
-
-        {(isBrokerRoute || isAgentRoute) && (
-          <div className="relative flex-shrink-0" ref={logoutRef}>
-            {showLogoutDropdown && (
-              <div className={`absolute bottom-full left-3 right-3 bg-white border border-gray-200 rounded-[10px] shadow-[0_-4px_16px_rgba(0,0,0,0.12)] p-1.5 mb-1.5 z-[100] animate-[slideUpFade_0.15s_ease-out] ${isCollapsed ? 'left-2 right-2 flex flex-col gap-0.5' : ''}`}>
-                <button 
-                  className={`flex items-center w-full bg-transparent border-none rounded-lg text-sm font-medium text-gray-900 cursor-pointer transition-colors hover:bg-gray-50 ${isCollapsed ? 'justify-center px-2 py-2.5' : 'gap-2.5 px-3.5 py-2.5'}`}
-                  onClick={() => {
-                    router.push(isBrokerRoute ? '/broker/account' : '/agent/account')
-                    setShowLogoutDropdown(false)
-                  }}
-                  title="Account"
-                >
-                  <FiUser className="text-lg flex-shrink-0" />
-                  {!isCollapsed && <span>Account</span>}
-                </button>
-                <button
-                  className={`flex items-center w-full bg-transparent border-none rounded-lg text-sm font-medium text-red-500 cursor-pointer transition-colors hover:bg-red-50 ${isCollapsed ? 'justify-center px-2 py-2.5' : 'gap-2.5 px-3.5 py-2.5'}`}
-                  onClick={handleLogout}
-                  title="Logout"
-                >
-                  <FiLogOut className="text-lg flex-shrink-0" />
-                  {!isCollapsed && <span>Logout</span>}
-                </button>
-              </div>
-            )}
-            <div 
-              className={`flex items-center gap-2.5 px-5 py-4 border-t border-gray-200 flex-shrink-0 transition-colors cursor-pointer hover:bg-gray-100 ${isCollapsed ? 'md:justify-center md:px-2 md:py-3' : ''}`}
-              onClick={() => setShowLogoutDropdown(!showLogoutDropdown)}
-              title={isCollapsed ? (userName || 'Account / Logout') : undefined}
+        {/* Content wrapper */}
+        <div className="relative flex flex-col h-full text-gray-900">
+          <div
+            className={`relative p-2.5 border-b border-white/60 flex-shrink-0 backdrop-blur-sm ${
+              isCollapsed ? 'md:px-2 md:overflow-visible' : ''
+            }`}
+          >
+            <div
+              className={`flex items-center justify-center w-full mb-1 ${
+                isCollapsed ? 'md:mb-0' : ''
+              }`}
             >
-              <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 bg-gray-200">
+              <Link href="/" className={isCollapsed ? 'md:flex md:justify-center' : ''}>
                 <img
-                  src={userAvatar}
-                  alt={userName || 'User'}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement
-                    target.style.display = 'none'
-                    if (target.nextElementSibling) {
-                      (target.nextElementSibling as HTMLElement).style.display = 'flex'
-                    }
-                  }}
+                  src={ASSETS.LOGO_HERO_MAIN}
+                  alt="Rentals.ph logo"
+                  className={`h-[60px] md:h-[50px] w-auto max-w-full object-contain ${
+                    isCollapsed
+                      ? 'md:!h-[60px] md:!w-[60px] md:!min-w-[60px] md:max-w-none'
+                      : ''
+                  }`}
                 />
-                <div className="w-full h-full hidden items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-[13px]">
-                  {userName ? userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
-                </div>
-              </div>
-              {!isCollapsed && (
-                <div className="flex flex-col gap-px flex-1 min-w-0">
-                  <span className="text-[13px] font-semibold text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis">
-                    {userName || (isBrokerRoute ? 'Broker' : 'Agent')}
-                  </span>
-                  <span className="text-[11px] text-gray-400">
-                    {isBrokerRoute 
-                      ? 'Broker' 
-                      : isVerified 
-                        ? 'Rent Manager' 
-                        : 'Property Agent'}
-                  </span>
+              </Link>
+            </div>
+            {/* Collapse toggle - circular button that overflows sidebar on the right (desktop only) */}
+            <button
+              type="button"
+              onClick={() => setIsCollapsed((c) => !c)}
+              className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 w-9 h-9 items-center justify-center rounded-full text-gray-600 hover:text-gray-900 bg-white shadow-md shadow-rental-blue-500/20 border border-white/80 hover:bg-rental-blue-50 transition-colors"
+              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {isCollapsed ? <FiChevronRight className="text-lg" /> : <FiChevronLeft className="text-lg" />}
+            </button>
+          </div>
+
+          <nav
+            className={`p-3 lg:py-2.5 lg:px-2 md:p-3 flex flex-col gap-4 lg:gap-3 md:gap-4 flex-1 overflow-y-auto overflow-x-hidden min-h-0 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-rental-blue-300 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb:hover]:bg-rental-blue-400 ${
+              isCollapsed ? 'md:py-2.5 md:px-2 md:gap-3' : ''
+            }`}
+            onClick={handleNavClick}
+          >
+            {isAdminRoute ? renderAdminSidebar() : isBrokerRoute ? renderBrokerSidebar() : renderAgentSidebar()}
+          </nav>
+
+          {(isBrokerRoute || isAgentRoute) && (
+            <div className="relative flex-shrink-0" ref={logoutRef}>
+              {showLogoutDropdown && (
+                <div
+                  className={`absolute bottom-full left-3 right-3 bg-white/95 border border-gray-200 rounded-[12px] shadow-[0_-6px_20px_rgba(15,23,42,0.18)] p-1.5 mb-2 z-[100] animate-[slideUpFade_0.15s_ease-out] ${
+                    isCollapsed ? 'left-2 right-2 flex flex-col gap-0.5' : ''
+                  }`}
+                >
+                  <button
+                    className={`flex items-center w-full bg-transparent border-none rounded-lg text-sm font-medium text-gray-900 cursor-pointer transition-colors hover:bg-gray-50 ${
+                      isCollapsed ? 'justify-center px-2 py-2.5' : 'gap-2.5 px-3.5 py-2.5'
+                    }`}
+                    onClick={() => {
+                      router.push(isBrokerRoute ? '/broker/account' : '/agent/account')
+                      setShowLogoutDropdown(false)
+                    }}
+                    title="Account"
+                  >
+                    <FiUser className="text-lg flex-shrink-0" />
+                    {!isCollapsed && <span>Account</span>}
+                  </button>
+                  <button
+                    className={`flex items-center w-full bg-transparent border-none rounded-lg text-sm font-medium text-red-500 cursor-pointer transition-colors hover:bg-red-50 ${
+                      isCollapsed ? 'justify-center px-2 py-2.5' : 'gap-2.5 px-3.5 py-2.5'
+                    }`}
+                    onClick={handleLogout}
+                    title="Logout"
+                  >
+                    <FiLogOut className="text-lg flex-shrink-0" />
+                    {!isCollapsed && <span>Logout</span>}
+                  </button>
                 </div>
               )}
+              <div
+                className={`flex items-center gap-2.5 px-5 py-4 border-t border-white/60 bg-white/60 backdrop-blur-sm flex-shrink-0 transition-colors cursor-pointer hover:bg-white ${
+                  isCollapsed ? 'md:justify-center md:px-2 md:py-3' : ''
+                }`}
+                onClick={() => setShowLogoutDropdown(!showLogoutDropdown)}
+                title={isCollapsed ? userName || 'Account / Logout' : undefined}
+              >
+                <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-rental-blue-500 to-rental-blue-700 ring-2 ring-white shadow-md">
+                  <img
+                    src={userAvatar}
+                    alt={userName || 'User'}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement
+                      target.style.display = 'none'
+                      if (target.nextElementSibling) {
+                        ;(target.nextElementSibling as HTMLElement).style.display = 'flex'
+                      }
+                    }}
+                  />
+                  <div className="w-full h-full hidden items-center justify-center text-white font-semibold text-[13px]">
+                    {userName
+                      ? userName
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .toUpperCase()
+                          .slice(0, 2)
+                      : 'U'}
+                  </div>
+                </div>
+                {!isCollapsed && (
+                  <div className="flex flex-col gap-px flex-1 min-w-0">
+                    <span className="text-[13px] font-semibold text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis">
+                      {userName || (isBrokerRoute ? 'Broker' : 'Agent')}
+                    </span>
+                    <span className="text-[11px] text-rental-blue-700/80">
+                      {isBrokerRoute
+                        ? 'Broker'
+                        : isVerified
+                          ? 'Rent Manager'
+                          : 'Property Agent'}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </aside>
     </>
   )

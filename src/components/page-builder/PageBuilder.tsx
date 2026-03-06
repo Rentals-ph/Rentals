@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import AppSidebar from '../../components/common/AppSidebar'
 import AgentHeader from '../../components/agent/AgentHeader'
 import { ASSETS } from '@/utils/assets'
-import { pageBuilderApi, propertiesApi, testimonialsApi, apiClient } from '@/api'
+import { pageBuilderApi, propertiesApi, testimonialsApi, apiClient, agentsApi, brokerApi } from '@/api'
 import type { Property, Testimonial } from '@/types'
 import Testimonials from '@/components/home/Testimonials'
 import { toast, ToastContainer } from '@/utils/toast'
@@ -319,11 +319,20 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
       try {
         setLoadingProperties(true)
         setLoadingTestimonials(true)
-        
-        // Get current user ID from auth (you may need to adjust this based on your auth setup)
-        // For now, we'll get all properties and filter client-side
-        const properties = await propertiesApi.getAll()
-        const propertiesArray = Array.isArray(properties) ? properties : (properties as any).data || []
+
+        // Role-aware listings:
+        // - Agents: only properties belonging to the current agent
+        // - Brokers: their own properties + properties from agents under them
+        let propertiesArray: Property[] = []
+        if (userType === 'agent') {
+          const me = await agentsApi.getCurrent()
+          propertiesArray = await propertiesApi.getByAgentId(me.id)
+        } else {
+          const brokerProperties = await brokerApi.getProperties()
+          propertiesArray = Array.isArray(brokerProperties)
+            ? brokerProperties
+            : (brokerProperties as any)?.data || []
+        }
         setAvailableProperties(propertiesArray)
         
         const testimonialsData = await testimonialsApi.getAll()
@@ -337,7 +346,7 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
     }
     
     loadAvailableData()
-  }, [])
+  }, [userType])
   
   // Helper function to capture current state for history
   const captureState = useCallback(() => {
@@ -3888,6 +3897,16 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
                             property.price_type ? `/${property.price_type}` : '/mo'
                           }`
                         : ''
+                      const agentLabel =
+                        userType === 'broker' &&
+                        (property.agent
+                          ? [property.agent.first_name, property.agent.last_name].filter(Boolean).join(' ') ||
+                            (property.agent as any).full_name ||
+                            (property.agent as any).name ||
+                            `Agent #${property.agent_id}`
+                          : property.agent_id
+                            ? `Agent #${property.agent_id}`
+                            : null)
 
                       return (
                         <div
@@ -3906,6 +3925,11 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
                             )}
                             {priceLabel && (
                               <div className="text-xs text-blue-600 mt-1">{priceLabel}</div>
+                            )}
+                            {agentLabel && (
+                              <div className="text-xs text-gray-500 mt-1">
+                                Listed by: <span className="font-medium text-gray-700">{agentLabel}</span>
+                              </div>
                             )}
                           </div>
                           <button
@@ -3947,7 +3971,18 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
                     Select a property to feature on your page:
                   </p>
                   <div style={{ display: 'grid', gap: '12px', maxHeight: '400px', overflowY: 'auto' }}>
-                    {availableProperties.map((property) => (
+                    {availableProperties.map((property) => {
+                      const featuredAgentLabel =
+                        userType === 'broker' &&
+                        (property.agent
+                          ? [property.agent.first_name, property.agent.last_name].filter(Boolean).join(' ') ||
+                            (property.agent as any).full_name ||
+                            (property.agent as any).name ||
+                            `Agent #${property.agent_id}`
+                          : property.agent_id
+                            ? `Agent #${property.agent_id}`
+                            : null)
+                      return (
                       <div
                         key={property.id}
                         onClick={() => handleSelectFeaturedListing(property)}
@@ -3981,12 +4016,18 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
                           <div style={{ fontSize: '14px', color: '#3B82F6', marginTop: '4px' }}>
                             ₱{property.price.toLocaleString('en-US')}{property.price_type ? `/${property.price_type}` : '/mo'}
                           </div>
+                          {featuredAgentLabel && (
+                            <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>
+                              Listed by: <span style={{ fontWeight: '500', color: '#374151' }}>{featuredAgentLabel}</span>
+                            </div>
+                          )}
                         </div>
                         {featuredListings.some(l => l.id === property.id) && (
                           <FiCheck style={{ color: '#10B981', fontSize: '20px' }} />
                         )}
                       </div>
-                    ))}
+                    );
+                    })}
                   </div>
                   {featuredListings.length > 0 && (
                     <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #E5E7EB' }}>

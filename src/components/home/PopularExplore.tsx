@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { FiChevronDown } from 'react-icons/fi'
+import FadeInOnView from '@/components/common/FadeInOnView'
 
 // ---------- Property searches ----------
 
@@ -192,7 +193,10 @@ export default function PopularExplore() {
   return (
     <section className="bg-white px-4 sm:px-6 md:px-10 lg:px-[150px] w-full py-8 sm:py-12 md:py-16">
       <div className="w-full mx-auto ">
-        <div className="text-center mx-auto mb-6 sm:mb-8">
+        <FadeInOnView
+          as="div"
+          className="text-center mx-auto mb-6 sm:mb-8"
+        >
           <div className="flex justify-center border-b border-gray-200 mb-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <button
               className={`px-4 sm:px-6 py-2 sm:py-3 bg-transparent border-none font-outfit text-base sm:text-lg md:text-xl font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${mainTab === 'searches'
@@ -218,12 +222,12 @@ export default function PopularExplore() {
               ? 'Quickly jump into the most in-demand property searches.'
               : 'Find trusted agents in key Philippine cities.'}
           </p>
-        </div>
+        </FadeInOnView>
 
         <div className="w-full mx-auto">
           {/* Popular property searches */}
           {mainTab === 'searches' && (
-            <div>
+            <FadeInOnView as="div" delayMs={120}>
               <div className="flex justify-center border-b border-gray-200 mb-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 <button
                   className={`px-3 sm:px-4 py-2 bg-transparent border-none font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${propertyTab === 'type'
@@ -292,12 +296,12 @@ export default function PopularExplore() {
                   )
                 })}
               </div>
-            </div>
+            </FadeInOnView>
           )}
 
           {/* Popular agent searches */}
           {mainTab === 'agents' && (
-            <div>
+            <FadeInOnView as="div" delayMs={120}>
               <div className="flex justify-center border-b border-gray-200 mb-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 <button
                   className={`px-3 sm:px-4 py-2 bg-transparent border-none font-outfit text-xs sm:text-sm md:text-base font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${agentTab === 'location'
@@ -380,7 +384,7 @@ export default function PopularExplore() {
                   )
                 })}
               </div>
-            </div>
+            </FadeInOnView>
           )}
         </div>
       </div>
