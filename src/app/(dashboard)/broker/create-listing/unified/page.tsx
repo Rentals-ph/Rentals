@@ -2,6 +2,7 @@
 
 import UnifiedListingForm from '@/components/listing/UnifiedListingForm'
 
-export default function BrokerCreateListing() {
+export default function BrokerCreateListingUnified() {
   return <UnifiedListingForm role="broker" />
 }
+

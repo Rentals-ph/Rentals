@@ -1,7 +1,7 @@
 'use client'
 
-import { CreateListingPage } from '@/components/create-listing'
+import UnifiedListingForm from '@/components/listing/UnifiedListingForm'
 
 export default function AgentCreateListing() {
-  return <CreateListingPage role="agent" />
+  return <UnifiedListingForm role="agent" />
 }
