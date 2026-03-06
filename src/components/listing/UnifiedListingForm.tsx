@@ -1202,21 +1202,21 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                       <div className="px-[18px] py-4 space-y-3">
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className={FL}>City</label>
-                            <div className="relative">
-                              <select className={`${FS} ${aiFilled('location')}`} value={formData.city} onChange={e => updateField('city', e.target.value)} disabled={!formData.state}>
-                                <option value="">--Select--</option>
-                                {availableCities.map(c => <option key={c} value={c}>{c}</option>)}
-                              </select>
-                              <FiChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#7A7268] pointer-events-none w-3.5 h-3.5" />
-                            </div>
-                          </div>
-                          <div>
                             <label className={FL}>State / Province</label>
                             <div className="relative">
                               <select className={`${FS} ${aiFilled('location')}`} value={formData.state} onChange={e => updateField('state', e.target.value)}>
                                 <option value="">--Select--</option>
                                 {philippinesProvinces.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
+                              </select>
+                              <FiChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#7A7268] pointer-events-none w-3.5 h-3.5" />
+                            </div>
+                          </div>
+                          <div>
+                            <label className={FL}>City</label>
+                            <div className="relative">
+                              <select className={`${FS} ${aiFilled('location')}`} value={formData.city} onChange={e => updateField('city', e.target.value)} disabled={!formData.state}>
+                                <option value="">--Select--</option>
+                                {availableCities.map(c => <option key={c} value={c}>{c}</option>)}
                               </select>
                               <FiChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#7A7268] pointer-events-none w-3.5 h-3.5" />
                             </div>

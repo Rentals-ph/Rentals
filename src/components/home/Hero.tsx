@@ -747,9 +747,13 @@ function Hero() {
         )}
 
         {/* Search bar and filters or Chat container - constrained to same max-width as page; no horizontal overflow */}
-        <div className={`mt-2 sm:mt-6 md:mt-8 w-full max-w-7xl mx-auto transition-all duration-500 px-0 sm:px-2 ${
-          isChatMode ? 'flex flex-col w-full' : 'max-h-[400px]'
-        }`}>
+        <FadeInOnView
+          delayMs={260}
+          className={`mt-2 sm:mt-6 md:mt-8 w-full max-w-7xl mx-auto transition-all duration-500 px-0 sm:px-2 ${
+            isChatMode ? 'flex flex-col w-full' : 'max-h-[400px]'
+          }`}
+          as="div"
+        >
           {isChatMode ? (
             <>
               {/* Single rounded container for Chat Mode: header + two-column content; on mobile overflow-visible so inner chat can scroll */}
@@ -1143,70 +1147,78 @@ function Hero() {
                     </button>
                   </div>
 
-                  {/* Advanced Options - Inside search container, toggled by filter button */}
-                  {showAdvancedOptions && (
-                    <div className="pt-1 w-full border-t border-gray-300/20 mt-3">
-                      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-5 -mb-2.5">
-                        <div className="flex flex-col gap-1">
-                          <label className="font-outfit text-xs font-medium text-gray-700">Min. Bedrooms</label>
-                          <select 
-                            className="h-[38px] p-2 px-3 border border-gray-300/65 rounded-md bg-white text-gray-700 font-outfit text-xs cursor-pointer transition-colors appearance-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%229%22%20height%3D%226%22%20viewBox%3D%220%200%209%206%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M1%201L4.5%205L8%201%22%20stroke%3D%22%23374151%22%20stroke-width%3D%221%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_12px_center] bg-[length:9px_6px] pr-8 hover:border-[#205ED7] focus:border-[#205ED7] focus:outline-none"
-                            value={minBeds}
-                            onChange={(e) => setMinBeds(e.target.value)}
-                          >
-                            <option value="">Any</option>
-                            <option value="1">1+</option>
-                            <option value="2">2+</option>
-                            <option value="3">3+</option>
-                            <option value="4">4+</option>
-                          </select>
-                        </div>
+                  {/* Advanced Options - Inside search container, animated when filter button is toggled */}
+                  <div
+                    className={`w-full transition-all duration-300 ease-out origin-top ${
+                      showAdvancedOptions
+                        ? 'pt-1 mt-3 border-t border-gray-300/20 max-h-[500px] opacity-100 scale-100'
+                        : 'pt-0 mt-0 border-t border-transparent max-h-0 opacity-0 scale-[0.98] overflow-hidden'
+                    }`}
+                  >
+                    <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-5 -mb-2.5">
+                      <div className="flex flex-col gap-1">
+                        <label className="font-outfit text-xs font-medium text-gray-700">Min. Bedrooms</label>
+                        <select 
+                          className="h-[38px] p-2 px-3 border border-gray-300/65 rounded-md bg-white text-gray-700 font-outfit text-xs cursor-pointer transition-colors appearance-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%229%22%20height%3D%226%22%20viewBox%3D%220%200%209%206%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M1%201L4.5%205L8%201%22%20stroke%3D%22%23374151%22%20stroke-width%3D%221%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_12px_center] bg-[length:9px_6px] pr-8 hover:border-[#205ED7] focus:border-[#205ED7] focus:outline-none"
+                          value={minBeds}
+                          onChange={(e) => setMinBeds(e.target.value)}
+                        >
+                          <option value="">Any</option>
+                          <option value="1">1+</option>
+                          <option value="2">2+</option>
+                          <option value="3">3+</option>
+                          <option value="4">4+</option>
+                        </select>
+                      </div>
 
-                        <div className="flex flex-col gap-1">
-                          <label className="font-outfit text-xs font-medium text-gray-700">Min. Bathrooms</label>
-                          <select 
-                            className="h-[38px] p-2 px-3 border border-gray-300/65 rounded-md bg-white text-gray-700 font-outfit text-xs cursor-pointer transition-colors appearance-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%229%22%20height%3D%226%22%20viewBox%3D%220%200%209%206%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M1%201L4.5%205L8%201%22%20stroke%3D%22%23374151%22%20stroke-width%3D%221%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_12px_center] bg-[length:9px_6px] pr-8 hover:border-[#205ED7] focus:border-[#205ED7] focus:outline-none"
-                            value={minBaths}
-                            onChange={(e) => setMinBaths(e.target.value)}
-                          >
-                            <option value="">Any</option>
-                            <option value="1">1+</option>
-                            <option value="2">2+</option>
-                            <option value="3">3+</option>
-                            <option value="4">4+</option>
-                          </select>
-                        </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="font-outfit text-xs font-medium text-gray-700">Min. Bathrooms</label>
+                        <select 
+                          className="h-[38px] p-2 px-3 border border-gray-300/65 rounded-md bg-white text-gray-700 font-outfit text-xs cursor-pointer transition-colors appearance-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%229%22%20height%3D%226%22%20viewBox%3D%220%200%209%206%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M1%201L4.5%205L8%201%22%20stroke%3D%22%23374151%22%20stroke-width%3D%221%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_12px_center] bg-[length:9px_6px] pr-8 hover:border-[#205ED7] focus:border-[#205ED7] focus:outline-none"
+                          value={minBaths}
+                          onChange={(e) => setMinBaths(e.target.value)}
+                        >
+                          <option value="">Any</option>
+                          <option value="1">1+</option>
+                          <option value="2">2+</option>
+                          <option value="3">3+</option>
+                          <option value="4">4+</option>
+                        </select>
+                      </div>
 
-                        <div className="flex flex-col gap-1">
-                          <label className="font-outfit text-xs font-medium text-gray-700">Price Range</label>
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="number"
-                              className="flex-1 min-w-0 h-[38px] p-2 px-3 border border-gray-300/65 rounded-md bg-white text-gray-700 font-outfit text-xs transition-colors hover:border-[#205ED7] focus:border-[#205ED7] focus:outline-none"
-                              placeholder="Min"
-                              value={priceMin}
-                              onChange={(e) => setPriceMin(e.target.value)}
-                            />
-                            <span className="font-outfit text-xs text-gray-600 font-medium">to</span>
-                            <input
-                              type="number"
-                              className="flex-1 min-w-0 h-[38px] p-2 px-3 border border-gray-300/65 rounded-md bg-white text-gray-700 font-outfit text-xs transition-colors hover:border-[#205ED7] focus:border-[#205ED7] focus:outline-none"
-                              placeholder="Max"
-                              value={priceMax}
-                              onChange={(e) => setPriceMax(e.target.value)}
-                            />
-                          </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="font-outfit text-xs font-medium text-gray-700">Price Range</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            className="flex-1 min-w-0 h-[38px] p-2 px-3 border border-gray-300/65 rounded-md bg-white text-gray-700 font-outfit text-xs transition-colors hover:border-[#205ED7] focus:border-[#205ED7] focus:outline-none"
+                            placeholder="Min"
+                            value={priceMin}
+                            onChange={(e) => setPriceMin(e.target.value)}
+                          />
+                          <span className="font-outfit text-xs text-gray-600 font-medium">to</span>
+                          <input
+                            type="number"
+                            className="flex-1 min-w-0 h-[38px] p-2 px-3 border border-gray-300/65 rounded-md bg-white text-gray-700 font-outfit text-xs transition-colors hover:border-[#205ED7] focus:border-[#205ED7] focus:outline-none"
+                            placeholder="Max"
+                            value={priceMax}
+                            onChange={(e) => setPriceMax(e.target.value)}
+                          />
                         </div>
                       </div>
                     </div>
-                  )}
+                  </div>
               </div>
             </>
           )}
-        </div>
+        </FadeInOnView>
 
         {/* Recommended Searches - Outside search container; in chat mode on mobile: compact single-line scroll so chat has more room */}
-        <div className={`relative z-10 w-full max-w-4xl px-2 sm:px-5 ${isChatMode ? 'mt-2 sm:mt-3.5 mb-20 sm:mb-28 md:mb-32' : 'mt-3 sm:mt-3.5'}`}>
+        <FadeInOnView
+          delayMs={420}
+          as="div"
+          className={`relative z-10 w-full max-w-4xl px-2 sm:px-5 ${isChatMode ? 'mt-2 sm:mt-3.5 mb-20 sm:mb-28 md:mb-32' : 'mt-3 sm:mt-3.5'}`}
+        >
           <div className={`flex gap-1.5 sm:gap-2 justify-center ${isChatMode ? 'flex-nowrap overflow-x-auto overflow-y-hidden py-1 -mx-2 px-2 [scrollbar-width:none] sm:flex-wrap sm:overflow-visible' : 'flex-wrap'}`}>
             {recommendedSearches.map((search, index) => (
               <button
@@ -1218,7 +1230,7 @@ function Hero() {
               </button>
             ))}
           </div>
-        </div>
+        </FadeInOnView>
       </div>
 
       {/* Scroll-down indicator - centered at bottom, fades out on scroll */}

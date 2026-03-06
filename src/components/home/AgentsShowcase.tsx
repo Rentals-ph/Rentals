@@ -143,59 +143,69 @@ function AgentsShowcase() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-          {visibleAgents.map((agent) => (
-            <Link
+        <FadeInOnView
+          as="div"
+          delayMs={140}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6"
+        >
+          {visibleAgents.map((agent, index) => (
+            <FadeInOnView
               key={agent.id}
-              href={`/agents/${agent.id}`}
-              className="group bg-white rounded-2xl border border-gray-200 shadow-[0_6px_18px_rgba(15,23,42,0.07)] hover:shadow-[0_10px_24px_rgba(15,23,42,0.14)] transition-all overflow-hidden flex flex-col min-w-0"
+              as="div"
+              delayMs={180 + index * 70}
+              className="w-full"
             >
-              <div className="relative w-full aspect-[4/3] bg-gray-100 overflow-hidden">
-                {agent.image ? (
-                  <img
-                    src={agent.image}
-                    alt={agent.name}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="h-full w-full flex items-center justify-center bg-rental-blue-600 text-white font-outfit text-xl font-semibold">
-                    {agent.name
-                      .split(' ')
-                      .filter(Boolean)
-                      .slice(0, 2)
-                      .map((part) => part[0])
-                      .join('')
-                      .toUpperCase()}
-                  </div>
-                )}
-              </div>
-              <div className="flex flex-col gap-1.5 px-4 sm:px-5 py-4 sm:py-5">
-                <h3 className="font-outfit text-base sm:text-lg font-semibold text-gray-900 m-0 truncate">
-                  {agent.name}
-                </h3>
-                <p className="font-outfit text-xs sm:text-sm text-rental-blue-600 m-0">
-                  {agent.role}
-                </p>
-                <p className="font-outfit text-xs sm:text-sm text-gray-500 m-0 flex items-center gap-1.5">
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="flex-shrink-0 text-gray-400"
-                  >
-                    <path
-                      d="M10 2C6.686 2 4 4.686 4 8C4 12.418 10 18 10 18C10 18 16 12.418 16 8C16 4.686 13.314 2 10 2ZM10 10.5C8.619 10.5 7.5 9.381 7.5 8C7.5 6.619 8.619 5.5 10 5.5C11.381 5.5 12.5 6.619 12.5 8C12.5 9.381 11.381 10.5 10 10.5Z"
-                      fill="currentColor"
+              <Link
+                href={`/agents/${agent.id}`}
+                className="group bg-white rounded-2xl border border-gray-200 shadow-[0_6px_18px_rgba(15,23,42,0.07)] hover:shadow-[0_10px_24px_rgba(15,23,42,0.14)] transition-all overflow-hidden flex flex-col min-w-0"
+              >
+                <div className="relative w-full aspect-[4/3] bg-gray-100 overflow-hidden">
+                  {agent.image ? (
+                    <img
+                      src={agent.image}
+                      alt={agent.name}
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
-                  </svg>
-                  <span className="truncate">{agent.location}</span>
-                </p>
-              </div>
-            </Link>
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center bg-rental-blue-600 text-white font-outfit text-xl font-semibold">
+                      {agent.name
+                        .split(' ')
+                        .filter(Boolean)
+                        .slice(0, 2)
+                        .map((part) => part[0])
+                        .join('')
+                        .toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col gap-1.5 px-4 sm:px-5 py-4 sm:py-5">
+                  <h3 className="font-outfit text-base sm:text-lg font-semibold text-gray-900 m-0 truncate">
+                    {agent.name}
+                  </h3>
+                  <p className="font-outfit text-xs sm:text-sm text-rental-blue-600 m-0">
+                    {agent.role}
+                  </p>
+                  <p className="font-outfit text-xs sm:text-sm text-gray-500 m-0 flex items-center gap-1.5">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="flex-shrink-0 text-gray-400"
+                    >
+                      <path
+                        d="M10 2C6.686 2 4 4.686 4 8C4 12.418 10 18 10 18C10 18 16 12.418 16 8C16 4.686 13.314 2 10 2ZM10 10.5C8.619 10.5 7.5 9.381 7.5 8C7.5 6.619 8.619 5.5 10 5.5C11.381 5.5 12.5 6.619 12.5 8C12.5 9.381 11.381 10.5 10 10.5Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                    <span className="truncate">{agent.location}</span>
+                  </p>
+                </div>
+              </Link>
+            </FadeInOnView>
           ))}
-        </div>
+        </FadeInOnView>
       </div>
     </section>
   )
