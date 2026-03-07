@@ -42,6 +42,8 @@ import {
   FiEyeOff,
   FiChevronUp,
   FiChevronDown,
+  FiChevronLeft,
+  FiChevronRight,
   FiTrash2,
   FiMove,
   FiCheck,
@@ -65,8 +67,8 @@ const DEFAULT_LAYOUT_SECTIONS: { id: string; name: string; visible: boolean }[] 
   { id: 'propertyImages', name: 'Property Images', visible: true },
   { id: 'propertyDetails', name: 'Property Details', visible: true },
   { id: 'amenities', name: 'Amenities', visible: true },
-  { id: 'contact', name: 'Contact Information', visible: true },
-  { id: 'experience', name: 'Experience', visible: true },
+  { id: 'contact', name: 'Contact Information', visible: false },
+  { id: 'experience', name: 'Experience', visible: false },
   { id: 'featured', name: 'Featured Listings', visible: true },
   { id: 'testimonialsSection', name: 'Client Testimonials', visible: true },
   { id: 'readyToView', name: 'Ready To View', visible: true },
@@ -190,6 +192,7 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
   const [overallDarkness, setOverallDarkness] = useState(30)
   const [propertyDescription, setPropertyDescription] = useState('')
   const [propertyImages, setPropertyImages] = useState<string[]>([])
+  const [propertyGalleryIndex, setPropertyGalleryIndex] = useState(0)
   const [profileCardName, setProfileCardName] = useState('')
   const [profileCardRole, setProfileCardRole] = useState('')
   const [profileCardBio, setProfileCardBio] = useState('')
@@ -214,8 +217,8 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
     propertyImages: true,
     propertyDetails: true,
     amenities: true,
-    contact: true,
-    experience: true,
+    contact: false,
+    experience: false,
     featured: true,
     testimonialsSection: true,
     readyToView: true,
@@ -1364,34 +1367,17 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
     setTestimonials(prev => prev.filter((_, i) => i !== index))
   }
   
-  // Contact form submission
+  // Contact form submission (preview only – inquiries are sent from the published page)
   const handleContactFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    try {
-      // In a real app, this would send to a contact/inquiry API
-      // For now, we'll just show an alert
-      if (!contactFormName || !contactFormEmail || !contactFormMessage) {
-        alert('Please fill in all fields')
-        return
-      }
-      
-      // TODO: Implement actual API call to submit inquiry
-      console.log('Contact form submission:', {
-        name: contactFormName,
-        email: contactFormEmail,
-        message: contactFormMessage,
-        pageId: pageBuilderId,
-        pageType: activeTab
-      })
-      
-      alert('Thank you for your inquiry! We will get back to you soon.')
-      setContactFormName('')
-      setContactFormEmail('')
-      setContactFormMessage('')
-    } catch (error) {
-      console.error('Error submitting contact form:', error)
-      alert('Failed to send inquiry. Please try again.')
+    if (!contactFormName?.trim() || !contactFormEmail?.trim() || !contactFormMessage?.trim()) {
+      toast.error('Please fill in all fields.')
+      return
     }
+    toast.success('Preview only – use your published page to send inquiries.')
+    setContactFormName('')
+    setContactFormEmail('')
+    setContactFormMessage('')
   }
   
   // Remove property image
@@ -1695,9 +1681,11 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
     addToHistory()
   }
 
-  // Helper function to format property price
+  // Helper function to format property price (safe for null/undefined price)
   const formatPropertyPrice = (property: Property) => {
-    return `₱${property.price.toLocaleString('en-US')}${property.price_type ? `/${property.price_type}` : '/mo'}`
+    const price = property?.price != null ? Number(property.price) : null
+    if (price === null) return '₱—'
+    return `₱${price.toLocaleString('en-US')}${property.price_type ? `/${property.price_type}` : '/mo'}`
   }
   
   // Helper function to format property date
@@ -1714,7 +1702,7 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
       <AppSidebar/>
 
       <main className="main-with-sidebar flex-1 min-h-screen"> {/* agent-main */}
-        <div className="p-8 lg:py-6 md:py-4 md:pt-15">
+        <div className="p-4 sm:p-6 md:p-8 lg:py-6 md:py-4 md:pt-15 min-w-0 overflow-x-hidden">
           {userType === 'agent' ? (
             <AgentHeader 
               title={activeTab === 'profile' ? "Page Builder > Profile" : "Page Builder > Property"} 
@@ -1831,9 +1819,9 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
           
           {!isLoading && (
 
-          <div className="grid grid-cols-[1fr_1fr] gap-6 lg:grid-cols-[1fr_2fr]"> {/* page-builder-container */}
+          <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-[1fr_2fr] min-w-0"> {/* page-builder-container */}
           {/* Left Column - Customization */}
-          <div className="flex flex-col gap-6"> {/* page-builder-left */}
+          <div className="flex flex-col gap-4 md:gap-6 min-w-0"> {/* page-builder-left */}
             {activeTab === 'profile' ? (
               <>
                 {/* Profile mode tabs: Content | Section */}
@@ -2675,14 +2663,66 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
                                     className="text-xs text-blue-600 hover:text-blue-700 font-medium"
                                     onClick={handleAddFeaturedListing}
                                   >
-                                    {featuredListings.length > 0 ? 'Edit' : 'Add'}
+                                    Add
                                   </button>
                                 </div>
-                                {featuredListings.length > 0 && (
-                                  <p className="text-xs text-gray-500">
-                                    {featuredListings.length} listing
-                                    {featuredListings.length !== 1 ? 's' : ''} selected
-                                  </p>
+                                {featuredListings.length > 0 ? (
+                                  <div className="space-y-2">
+                                    <p className="text-xs text-gray-500">
+                                      {featuredListings.length} listing
+                                      {featuredListings.length !== 1 ? 's' : ''} selected
+                                    </p>
+                                    <ul className="space-y-2 max-h-48 overflow-y-auto">
+                                      {featuredListings.map((listing, index) => {
+                                        const img =
+                                          listing.image_url ||
+                                          listing.image ||
+                                          (listing.images_url && listing.images_url[0]) ||
+                                          (listing.images && listing.images[0]) ||
+                                          ASSETS.PLACEHOLDER_PROPERTY
+                                        return (
+                                          <li
+                                            key={listing.id}
+                                            className="flex items-center gap-2 p-2 rounded-lg border border-gray-200 bg-gray-50"
+                                          >
+                                            <img
+                                              src={img}
+                                              alt={listing.title}
+                                              className="w-10 h-10 rounded object-cover flex-shrink-0"
+                                            />
+                                            <div className="flex-1 min-w-0">
+                                              <p className="text-xs font-medium text-gray-900 truncate">{listing.title}</p>
+                                              <p className="text-xs text-gray-500 truncate">
+                                                {listing.price != null
+                                                  ? `₱${Number(listing.price).toLocaleString('en-US')}${listing.price_type ? `/${listing.price_type}` : '/mo'}`
+                                                  : listing.location || ''}
+                                              </p>
+                                            </div>
+                                            <div className="flex items-center gap-1 flex-shrink-0">
+                                              <button
+                                                type="button"
+                                                className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                                onClick={() => handleEditFeaturedListing(index)}
+                                                title="Edit listing"
+                                              >
+                                                <FiEdit3 className="w-3.5 h-3.5" />
+                                              </button>
+                                              <button
+                                                type="button"
+                                                className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                onClick={() => handleRemoveFeaturedListing(index)}
+                                                title="Remove listing"
+                                              >
+                                                <FiTrash2 className="w-3.5 h-3.5" />
+                                              </button>
+                                            </div>
+                                          </li>
+                                        )
+                                      })}
+                                    </ul>
+                                  </div>
+                                ) : (
+                                  <p className="text-xs text-gray-500 italic">No featured listings yet. Click Add to select properties.</p>
                                 )}
                               </div>
                             )
@@ -3355,12 +3395,12 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
           </div>
 
           {/* Right Column - Preview */}
-          <div className="flex flex-col">
-            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <div className="flex flex-col min-w-0 w-full">
+            <div className="bg-white rounded-2xl shadow-sm overflow-hidden w-full max-w-full">
               <div className="border-b border-gray-200">
                 <div className="flex">
                   <button
-                    className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                    className={`flex-1 px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm font-medium transition-colors ${
                       activeTab === 'profile' 
                         ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600' 
                         : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
@@ -3370,7 +3410,7 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
                     Profile
                   </button>
                   <button
-                    className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                    className={`flex-1 px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm font-medium transition-colors ${
                       activeTab === 'property' 
                         ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600' 
                         : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
@@ -3383,7 +3423,7 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
               </div>
 
               <div
-                className="bg-gray-50 min-h-[1600px] overflow-y-auto p-6"
+                className="bg-gray-50 min-h-[400px] sm:min-h-[600px] md:min-h-[1000px] lg:min-h-[1600px] overflow-y-auto overflow-x-hidden p-4 sm:p-6"
                 style={{
                   backgroundColor: (globalDesign as any).colorBackground || '#F9FAFB',
                   color: (globalDesign as any).colorText || '#111827',
@@ -3391,7 +3431,7 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
                 }}
               >
                 {activeTab === 'profile' && (
-                  <div className="bg-white rounded-2xl p-6">
+                  <div className="bg-white rounded-2xl p-4 sm:p-6 max-w-full min-w-0 overflow-hidden break-words">
                     {profileLayoutSections.map((section) => {
                       if (!section.visible) return null
                       switch (section.id) {
@@ -3473,28 +3513,28 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
                             <div key={section.id} className="mb-6">
                               {showFeaturedListings && featuredListings.length > 0 ? (
                                 <>
-                                  <h3 className="text-xl font-bold text-gray-900 mb-4">Active Listings</h3>
+                                  <h3 className="text-xl font-bold mb-4" style={{ color: (globalDesign as any).colorText || '#111827' }}>Active Listings</h3>
                                   <div className="flex gap-4 overflow-x-auto pb-2">
                                     {featuredListings.map((listing) => (
                                       <div key={listing.id} className="flex-shrink-0 w-72 bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200">
                                         <div className="relative">
                                           <div className="w-full h-48 bg-gray-200">
-                                            <img src={listing.image || ASSETS.PLACEHOLDER_PROPERTY} alt={listing.title} className="w-full h-full object-cover" />
+                                            <img src={listing.image_url || listing.image || ASSETS.PLACEHOLDER_PROPERTY} alt={listing.title || 'Listing'} className="w-full h-full object-cover" />
                                           </div>
                                         </div>
                                         <div className="p-4">
-                                          <div className="text-lg font-bold text-blue-600 mb-1">{formatPropertyPrice(listing)}</div>
-                                          <div className="text-sm font-semibold text-gray-900 mb-1 line-clamp-1">{listing.title}</div>
-                                          <div className="text-xs text-gray-500">{listing.type}</div>
+                                          <div className="text-lg font-bold mb-1" style={{ color: (globalDesign as any).colorPrimary || '#2563EB' }}>{formatPropertyPrice(listing)}</div>
+                                          <div className="text-sm font-semibold text-gray-900 mb-1 line-clamp-1">{listing.title || 'Untitled'}</div>
+                                          <div className="text-xs text-gray-500">{listing.type || 'Property'}</div>
                                         </div>
                                       </div>
                                     ))}
                                   </div>
                                 </>
                               ) : (
-                                <div className="bg-gray-50 rounded-xl p-6 border border-dashed border-gray-200">
-                                  <h3 className="text-lg font-bold text-gray-900 mb-2">Active Listings</h3>
-                                  <p className="text-sm text-gray-500">Add featured listings in Content.</p>
+                                <div className="rounded-xl p-6 border border-dashed border-gray-200 text-center text-sm" style={{ backgroundColor: (globalDesign as any).colorBackground ? `${(globalDesign as any).colorBackground}80` : undefined, color: (globalDesign as any).colorText || '#6B7280' }}>
+                                  <h3 className="text-lg font-bold mb-2" style={{ color: (globalDesign as any).colorText || '#111827' }}>Active Listings</h3>
+                                  <p className="text-gray-500">Add featured listings in Content.</p>
                                 </div>
                               )}
                             </div>
@@ -3560,7 +3600,7 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
 
                 {activeTab === 'property' && (
                   <div
-                    className="bg-white rounded-2xl p-6 px-4 sm:px-6 md:px-10"
+                    className="bg-white rounded-2xl p-4 sm:p-6 sm:px-6 md:px-10 max-w-full min-w-0 overflow-hidden break-words"
                     style={{
                       backgroundColor: (globalDesign as any).colorBackground || '#FFFFFF',
                       color: (globalDesign as any).colorText || '#111827',
@@ -3643,27 +3683,78 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
                             </div>
                           )
                         
-                        case 'propertyImages':
+                        case 'propertyImages': {
+                          const images = propertyImages
+                          const currentIndex = images.length > 0 ? Math.min(propertyGalleryIndex, images.length - 1) : 0
+                          const goPrev = () => setPropertyGalleryIndex((i) => (i <= 0 ? images.length - 1 : i - 1))
+                          const goNext = () => setPropertyGalleryIndex((i) => (i >= images.length - 1 ? 0 : i + 1))
                           return (
                             <div key={section.id} className="mb-6">
-                              <h2 className="text-2xl font-bold text-gray-900 mb-4">What's Inside?</h2>
-                              <div className="grid grid-cols-3 gap-4">
-                                {propertyImages.length > 0 ? (
-                                  propertyImages.map((image, index) => (
-                                    <div 
-                                      key={index} 
-                                      className="aspect-square rounded-lg overflow-hidden bg-gray-200"
-                                      style={{ borderRadius: getCornerRadiusClass() }}
-                                    >
-                                      <img src={image} alt={`Interior ${index + 1}`} className="w-full h-full object-cover" />
+                              <div className="rounded-xl overflow-hidden bg-gray-900 shadow-lg" style={{ borderRadius: getCornerRadiusClass() }}>
+                                {/* Top bar: title / context */}
+                                <div className="flex items-center justify-between px-4 py-2.5 bg-gray-800/90 text-gray-200 text-sm">
+                                  <span className="font-medium">What&apos;s Inside?</span>
+                                  {images.length > 0 && (
+                                    <span className="text-gray-400">
+                                      {currentIndex + 1} / {images.length}
+                                    </span>
+                                  )}
+                                </div>
+                                {/* Main viewer */}
+                                <div className="relative aspect-video bg-gray-800">
+                                  {images.length > 0 ? (
+                                    <>
+                                      <img
+                                        src={images[currentIndex]}
+                                        alt={`Interior ${currentIndex + 1}`}
+                                        className="w-full h-full object-contain"
+                                      />
+                                      <button
+                                        type="button"
+                                        onClick={goPrev}
+                                        className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-colors"
+                                        aria-label="Previous"
+                                      >
+                                        <FiChevronLeft className="w-5 h-5" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={goNext}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-colors"
+                                        aria-label="Next"
+                                      >
+                                        <FiChevronRight className="w-5 h-5" />
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+                                      <p className="italic">Property images will appear here...</p>
                                     </div>
-                                  ))
-                                ) : (
-                                  <p className="text-gray-500 italic col-span-3">Property images will appear here...</p>
+                                  )}
+                                </div>
+                                {/* Thumbnail strip */}
+                                {images.length > 1 && (
+                                  <div className="flex gap-2 p-3 overflow-x-auto bg-gray-800/80 border-t border-gray-700/50">
+                                    {images.map((image, index) => (
+                                      <button
+                                        key={index}
+                                        type="button"
+                                        onClick={() => setPropertyGalleryIndex(index)}
+                                        className={`flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition-all ${
+                                          index === currentIndex
+                                            ? 'border-white ring-2 ring-white/50'
+                                            : 'border-transparent opacity-70 hover:opacity-100'
+                                        }`}
+                                      >
+                                        <img src={image} alt={`Thumb ${index + 1}`} className="w-full h-full object-cover" />
+                                      </button>
+                                    ))}
+                                  </div>
                                 )}
                               </div>
                             </div>
                           )
+                        }
                         
                         case 'propertyDetails':
                           return (
@@ -3719,20 +3810,64 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
                             </div>
                           )
                         
-                        case 'amenities':
+                        case 'amenities': {
+                          const primaryColor = (globalDesign as any).colorPrimary || '#2563EB'
+                          const textColor = (globalDesign as any).colorText || '#111827'
                           return (
                             <div key={section.id} className="mb-6">
-                              <h2 className="text-2xl font-bold text-gray-900 mb-3">Amenities</h2>
+                              <h2 className="text-2xl font-bold mb-3" style={{ color: textColor, fontFamily: (globalDesign as any).fontHeading || (globalDesign as any).fontBody }}>Amenities</h2>
                               <div className="flex flex-wrap gap-2">
                                 {propertyAmenities.length > 0 ? (
                                   propertyAmenities.map((amenity, index) => (
-                                    <span key={index} className="rounded-full border-2 border-orange-500 px-4 py-2 bg-gray-100 text-sm font-medium text-gray-700">
+                                    <span
+                                      key={index}
+                                      className="rounded-full border-2 px-4 py-2 text-sm font-medium"
+                                      style={{
+                                        borderColor: primaryColor,
+                                        backgroundColor: `${primaryColor}12`,
+                                        color: textColor,
+                                      }}
+                                    >
                                       {amenity}
                                     </span>
                                   ))
                                 ) : (
-                                  <p className="text-gray-500 italic">Add amenities in the left panel.</p>
+                                  <p className="italic" style={{ color: textColor, opacity: 0.7 }}>Add amenities in the left panel.</p>
                                 )}
+                              </div>
+                            </div>
+                          )
+                        }
+                        
+                        case 'featured':
+                          if (!showFeaturedListings || featuredListings.length === 0) {
+                            return (
+                              <div key={section.id} className="mb-6">
+                                <h3 className="text-lg font-bold mb-2" style={{ color: (globalDesign as any).colorText || '#111827' }}>Featured Listings</h3>
+                                <div className="rounded-xl p-6 border border-dashed border-gray-200 text-center text-sm" style={{ backgroundColor: (globalDesign as any).colorBackground ? `${(globalDesign as any).colorBackground}80` : undefined, color: (globalDesign as any).colorText ? `${(globalDesign as any).colorText}99` : '#6B7280' }}>
+                                  Add featured listings in Content.
+                                </div>
+                              </div>
+                            )
+                          }
+                          return (
+                            <div key={section.id} className="mb-6">
+                              <h3 className="text-xl font-bold mb-4" style={{ color: (globalDesign as any).colorText || '#111827', fontFamily: (globalDesign as any).fontHeading || (globalDesign as any).fontBody }}>Featured Listings</h3>
+                              <div className="flex gap-4 overflow-x-auto pb-2">
+                                {featuredListings.map((listing) => (
+                                  <div key={listing.id} className="flex-shrink-0 w-72 bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200">
+                                    <div className="relative">
+                                      <div className="w-full h-48 bg-gray-200">
+                                        <img src={listing.image_url || listing.image || ASSETS.PLACEHOLDER_PROPERTY} alt={listing.title || 'Listing'} className="w-full h-full object-cover" />
+                                      </div>
+                                    </div>
+                                    <div className="p-4">
+                                      <div className="text-lg font-bold mb-1" style={{ color: (globalDesign as any).colorPrimary || '#2563EB' }}>{formatPropertyPrice(listing)}</div>
+                                      <div className="text-sm font-semibold text-gray-900 mb-1 line-clamp-1">{listing.title || 'Untitled'}</div>
+                                      <div className="text-xs text-gray-500">{listing.type || 'Property'}</div>
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                             </div>
                           )

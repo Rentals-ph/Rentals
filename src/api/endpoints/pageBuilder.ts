@@ -7,6 +7,7 @@ import apiClient from '../client'
 export interface PageBuilderData {
   id?: number
   user_id?: number
+  user?: { id: number; name?: string; first_name?: string; last_name?: string; email?: string }
   user_type: 'agent' | 'broker'
   page_type: 'profile' | 'property'
   page_slug?: string

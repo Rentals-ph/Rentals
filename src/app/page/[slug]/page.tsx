@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Footer from '@/components/layout/Footer'
 import { EmptyState, EmptyStateAction } from '@/components/common'
-import { pageBuilderApi } from '@/api'
+import { pageBuilderApi, messagesApi } from '@/api'
 import type { PageBuilderData } from '@/api'
+import { toast, ToastContainer } from '@/utils/toast'
 import { ASSETS } from '@/utils/assets'
 import { 
   FiMail,
@@ -13,7 +14,9 @@ import {
   FiMessageCircle,
   FiGlobe,
   FiStar,
-  FiHeart
+  FiHeart,
+  FiChevronLeft,
+  FiChevronRight
 } from 'react-icons/fi'
 // import '../../agent/page-builder/page.css' // Removed - file doesn't exist
 
@@ -26,6 +29,7 @@ export default function PublicPageBuilderPage() {
   const [contactFormName, setContactFormName] = useState('')
   const [contactFormEmail, setContactFormEmail] = useState('')
   const [contactFormMessage, setContactFormMessage] = useState('')
+  const [galleryIndex, setGalleryIndex] = useState(0)
 
   useEffect(() => {
     const fetchPage = async () => {
@@ -34,18 +38,9 @@ export default function PublicPageBuilderPage() {
       try {
         setLoading(true)
         setError(null)
-        console.log('Fetching page with slug:', slug)
         const data = await pageBuilderApi.getBySlug(slug)
-        console.log('Page data received:', data)
         setPageData(data)
       } catch (err: any) {
-        console.error('Error fetching page:', err)
-        console.error('Error details:', {
-          message: err.message,
-          response: err.response?.data,
-          status: err.response?.status,
-          url: err.config?.url
-        })
         setError(err.response?.data?.message || err.message || 'Page not found')
       } finally {
         setLoading(false)
@@ -57,28 +52,31 @@ export default function PublicPageBuilderPage() {
 
   const handleContactFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!pageData) return
+    const recipientId = pageData.user_id ?? pageData.user?.id
+    if (!recipientId) {
+      toast.error('Unable to send inquiry: page owner information is missing.')
+      return
+    }
+    if (!contactFormName?.trim() || !contactFormEmail?.trim() || !contactFormMessage?.trim()) {
+      toast.error('Please fill in all fields.')
+      return
+    }
     try {
-      if (!contactFormName || !contactFormEmail || !contactFormMessage) {
-        alert('Please fill in all fields')
-        return
-      }
-      
-      // TODO: Implement actual API call to submit inquiry
-      console.log('Contact form submission:', {
-        name: contactFormName,
-        email: contactFormEmail,
-        message: contactFormMessage,
-        pageId: pageData?.id,
-        pageType: pageData?.page_type
+      await messagesApi.send({
+        recipient_id: recipientId,
+        sender_name: contactFormName.trim(),
+        sender_email: contactFormEmail.trim(),
+        message: contactFormMessage.trim(),
+        type: 'contact',
+        subject: `Inquiry from your ${pageData.page_type === 'profile' ? 'Profile' : 'Property'} page`,
       })
-      
-      alert('Thank you for your inquiry! We will get back to you soon.')
+      toast.success('Thank you for your inquiry! We will get back to you soon.')
       setContactFormName('')
       setContactFormEmail('')
       setContactFormMessage('')
-    } catch (error) {
-      console.error('Error submitting contact form:', error)
-      alert('Failed to send inquiry. Please try again.')
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to send inquiry. Please try again.')
     }
   }
 
@@ -92,8 +90,10 @@ export default function PublicPageBuilderPage() {
   }
 
   const formatPropertyPrice = (property: any) => {
-    if (!property) return ''
-    return `₱${property.price != null ? property.price.toLocaleString('en-US') : ''}${property.price_type ? `/${property.price_type}` : '/mo'}`
+    if (!property) return '₱—'
+    const price = property.price != null ? Number(property.price) : null
+    if (price === null || Number.isNaN(price)) return '₱—'
+    return `₱${price.toLocaleString('en-US')}${property.price_type ? `/${property.price_type}` : '/mo'}`
   }
 
   const formatPropertyDate = (property: any) => {
@@ -138,6 +138,7 @@ export default function PublicPageBuilderPage() {
           </div>
         </main>
         <Footer />
+        <ToastContainer />
       </div>
     )
   }
@@ -159,12 +160,15 @@ export default function PublicPageBuilderPage() {
       ? pageData.profile_layout_sections
       : DEFAULT_PROFILE_LAYOUT
 
+    const profileBg = pageData.selected_theme === 'dark' ? '#1F2937' :
+      pageData.selected_theme === 'orange' ? '#F97316' :
+        pageData.selected_theme === 'blue' ? '#3B82F6' : '#FFFFFF'
+    const profileTextColor = profileBg === '#FFFFFF' ? '#111827' : '#FFFFFF'
     return (
       <div style={{
         minHeight: '100vh',
-        backgroundColor: pageData.selected_theme === 'dark' ? '#1F2937' :
-          pageData.selected_theme === 'orange' ? '#F97316' :
-            pageData.selected_theme === 'blue' ? '#3B82F6' : '#FFFFFF',
+        backgroundColor: profileBg,
+        color: profileTextColor,
         padding: '40px 0'
       }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
@@ -189,8 +193,8 @@ export default function PublicPageBuilderPage() {
                         <div className="full-preview-profile-fallback">{pageData.profile_card_name?.[0] || 'A'}{pageData.profile_card_name?.split(' ').pop()?.[0] || 'G'}</div>
                       </div>
                       <div className="full-preview-profile-info">
-                        <h2 className="full-preview-name">{pageData.profile_card_name || 'Agent Name'}</h2>
-                        <p className="full-preview-tagline">{pageData.profile_card_role || (pageData.profile_card_bio || pageData.bio)?.slice(0, 80) || ''}</p>
+                        <h2 className="full-preview-name" style={{ color: profileTextColor }}>{pageData.profile_card_name || 'Agent Name'}</h2>
+                        <p className="full-preview-tagline" style={{ color: profileTextColor, opacity: 0.95 }}>{pageData.profile_card_role || (pageData.profile_card_bio || pageData.bio)?.slice(0, 80) || ''}</p>
                       </div>
                     </div>
                   </div>
@@ -198,7 +202,7 @@ export default function PublicPageBuilderPage() {
               case 'profileContactInfo':
                 return (
                   <div key={section.id} className="full-preview-profile-section" style={{ marginBottom: '40px' }}>
-                    <h3 className="full-preview-section-title">Contact</h3>
+                    <h3 className="full-preview-section-title" style={{ color: profileTextColor }}>Contact</h3>
                     <div className="full-preview-contact-icons">
                       {ci?.email && <a href={`mailto:${ci.email}`} className="full-preview-contact-icon" title={ci.email}><FiMail /></a>}
                       {pageData.show_contact_number && ci?.phone && <a href={`tel:${ci.phone}`} className="full-preview-contact-icon" title={ci.phone}><FiPhone /></a>}
@@ -209,8 +213,8 @@ export default function PublicPageBuilderPage() {
               case 'profileBioAbout':
                 return (
                   <div key={section.id} className="full-preview-profile-section" style={{ marginBottom: '40px' }}>
-                    <h3 className="full-preview-section-title">About</h3>
-                    <p className="full-preview-tagline" style={{ whiteSpace: 'pre-wrap' }}>{(pageData.profile_card_bio || pageData.bio) || ''}</p>
+                    <h3 className="full-preview-section-title" style={{ color: profileTextColor }}>About</h3>
+                    <p className="full-preview-tagline" style={{ whiteSpace: 'pre-wrap', color: profileTextColor, opacity: 0.9 }}>{(pageData.profile_card_bio || pageData.bio) || ''}</p>
                   </div>
                 )
               case 'profileStatsBar':
@@ -233,7 +237,7 @@ export default function PublicPageBuilderPage() {
                   <div key={section.id} style={{ marginBottom: '40px' }}>
                     {pageData.show_featured_listings && pageData.featured_listings && pageData.featured_listings.length > 0 && (
                       <div className="full-preview-featured-section">
-                        <h3 className="full-preview-section-title">Active Listings</h3>
+                        <h3 className="full-preview-section-title" style={{ color: profileTextColor }}>Active Listings</h3>
                         <div className="full-preview-listings-grid">
                           {pageData.featured_listings.map((listing: any) => (
                             <div key={listing.id} className="full-preview-listing-card">
@@ -265,7 +269,7 @@ export default function PublicPageBuilderPage() {
                   <div key={section.id} style={{ marginBottom: '40px' }}>
                     {pageData.show_testimonials && pageData.testimonials && pageData.testimonials.length > 0 && (
                       <div className="full-preview-testimonials-section">
-                        <h3 className="full-preview-section-title">Client Reviews</h3>
+                        <h3 className="full-preview-section-title" style={{ color: profileTextColor }}>Client Reviews</h3>
                         <div className="full-preview-testimonials-grid">
                           {pageData.testimonials.map((testimonial: any) => (
                             <div key={testimonial.id} className="full-preview-testimonial-card">
@@ -286,7 +290,7 @@ export default function PublicPageBuilderPage() {
               case 'profileSocialLinks':
                 return (
                   <div key={section.id} className="full-preview-profile-section" style={{ marginBottom: '40px' }}>
-                    <h3 className="full-preview-section-title">Connect</h3>
+                    <h3 className="full-preview-section-title" style={{ color: profileTextColor }}>Connect</h3>
                     <div className="full-preview-contact-icons">
                       {ci?.website && <a href={ci.website} target="_blank" rel="noopener noreferrer" className="full-preview-contact-icon" title="Website"><FiGlobe /></a>}
                       {ci?.email && <a href={`mailto:${ci.email}`} className="full-preview-contact-icon" title="Email"><FiMail /></a>}
@@ -390,33 +394,78 @@ export default function PublicPageBuilderPage() {
                     >
                       Property Overview
                     </h2>
-                    <p className="text-gray-600 text-base sm:text-xl leading-relaxed m-0 whitespace-pre-wrap">
+                    <p className="text-base sm:text-xl leading-relaxed m-0 whitespace-pre-wrap" style={{ color: colorText, opacity: 0.9 }}>
                       {pageData.property_description}
                     </p>
                   </div>
                 )
               
-              case 'propertyImages':
+              case 'propertyImages': {
+                const images = pageData.property_images || []
+                const currentIndex = images.length > 0 ? Math.min(galleryIndex, images.length - 1) : 0
+                const goPrev = () => setGalleryIndex((i) => (i <= 0 ? images.length - 1 : i - 1))
+                const goNext = () => setGalleryIndex((i) => (i >= images.length - 1 ? 0 : i + 1))
                 return (
-                  <div key={section.id} className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">What's Inside?</h2>
-                    <div className="grid grid-cols-3 gap-4">
-                      {(pageData.property_images || []).length > 0 ? (
-                        (pageData.property_images || []).map((image: string, index: number) => (
-                          <div 
-                            key={index} 
-                            className="aspect-square rounded-lg overflow-hidden bg-gray-200"
-                            style={{ borderRadius: cornerRadius }}
-                          >
-                            <img src={image} alt={`Interior ${index + 1}`} className="w-full h-full object-cover" />
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-gray-500 italic col-span-3">Property images will appear here...</p>
+                  <div key={section.id} className="mb-6 overflow-hidden" style={{ borderRadius: cornerRadius, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.06)' }}>
+                    <div style={{ backgroundColor: colorPrimary, color: '#fff' }} className="flex items-center justify-between px-4 py-2.5 text-sm">
+                      <span className="font-medium" style={{ fontFamily: fontHeading }}>What&apos;s Inside?</span>
+                      {images.length > 0 && (
+                        <span style={{ opacity: 0.9 }}>{currentIndex + 1} / {images.length}</span>
                       )}
                     </div>
+                    <div className="relative aspect-video bg-gray-200" style={{ backgroundColor: `${colorText}12` }}>
+                      {images.length > 0 ? (
+                        <>
+                          <img
+                            src={images[currentIndex]}
+                            alt={`Interior ${currentIndex + 1}`}
+                            className="w-full h-full object-contain"
+                          />
+                          <button
+                            type="button"
+                            onClick={goPrev}
+                            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-colors"
+                            aria-label="Previous image"
+                          >
+                            <FiChevronLeft className="w-5 h-5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={goNext}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-colors"
+                            aria-label="Next image"
+                          >
+                            <FiChevronRight className="w-5 h-5" />
+                          </button>
+                        </>
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center" style={{ color: colorText, opacity: 0.8 }}>
+                          <p className="italic">Property images will appear here...</p>
+                        </div>
+                      )}
+                    </div>
+                    {images.length > 1 && (
+                      <div className="flex gap-2 p-3 overflow-x-auto border-t" style={{ backgroundColor: `${colorText}08`, borderColor: `${colorText}20` }}>
+                        {images.map((image: string, index: number) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => setGalleryIndex(index)}
+                            className="flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2"
+                            style={{
+                              borderColor: index === currentIndex ? colorPrimary : 'transparent',
+                              boxShadow: index === currentIndex ? `0 0 0 1px ${colorPrimary}` : undefined,
+                              opacity: index === currentIndex ? 1 : 0.75,
+                            }}
+                          >
+                            <img src={image} alt={`Thumb ${index + 1}`} className="w-full h-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )
+              }
               
               case 'propertyDetails': {
                 const bedrooms = (pageData as any).property_bedrooms ?? 0
@@ -431,21 +480,21 @@ export default function PublicPageBuilderPage() {
                     >
                       Property Details
                     </h2>
-                    <div className="flex flex-wrap gap-4 sm:gap-6 md:gap-10 text-base sm:text-xl">
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <svg className="w-6 h-6 text-gray-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+                    <div className="flex flex-wrap gap-4 sm:gap-6 md:gap-10 text-base sm:text-xl" style={{ color: colorText, opacity: 0.9 }}>
+                      <div className="flex items-center gap-2">
+                        <svg className="w-6 h-6 flex-shrink-0" style={{ color: colorText, opacity: 0.7 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
                         <span>{bedrooms} Bedrooms</span>
                       </div>
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <svg className="w-6 h-6 text-gray-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 17h14v-5H5v5zM5 7V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2" /></svg>
+                      <div className="flex items-center gap-2">
+                        <svg className="w-6 h-6 flex-shrink-0" style={{ opacity: 0.7 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 17h14v-5H5v5zM5 7V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2" /></svg>
                         <span>{garage} Garage</span>
                       </div>
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <svg className="w-6 h-6 text-gray-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z" /><path d="M12 4v2M8 4v1M16 4v1" /></svg>
+                      <div className="flex items-center gap-2">
+                        <svg className="w-6 h-6 flex-shrink-0" style={{ opacity: 0.7 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z" /><path d="M12 4v2M8 4v1M16 4v1" /></svg>
                         <span>{bathrooms} Bathrooms</span>
                       </div>
                       {area && (
-                        <div className="flex items-center gap-2 text-gray-700">
+                        <div className="flex items-center gap-2">
                           <span className="font-medium">{area}</span>
                         </div>
                       )}
@@ -458,11 +507,11 @@ export default function PublicPageBuilderPage() {
                 const amenities = (pageData as any).property_amenities || []
                 return (
                   <div key={section.id} className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-3">Amenities</h2>
+                    <h2 className="text-2xl font-bold mb-3" style={{ color: colorText, fontFamily: fontHeading }}>Amenities</h2>
                     <div className="flex flex-wrap gap-2">
                       {amenities.length > 0 ? (
                         amenities.map((amenity: string, index: number) => (
-                          <span key={index} className="rounded-full border-2 border-orange-500 px-4 py-2 bg-gray-100 text-sm font-medium text-gray-700">
+                          <span key={index} className="rounded-full border-2 px-4 py-2 text-sm font-medium" style={{ borderColor: colorPrimary, backgroundColor: `${colorPrimary}12`, color: colorText }}>
                             {amenity}
                           </span>
                         ))
@@ -472,7 +521,10 @@ export default function PublicPageBuilderPage() {
                 )
               }
               
-              case 'profileCard':
+              case 'profileCard': {
+                // Skip standalone profile card when readyToView is present (agent is shown inside merged block)
+                const hasReadyToView = layoutSections.some((s: any) => s.id === 'readyToView')
+                if (hasReadyToView) return null
                 return (
                   <div 
                     key={section.id}
@@ -541,6 +593,7 @@ export default function PublicPageBuilderPage() {
                     </div>
                   </div>
                 )
+              }
 
               case 'contact': {
                 if (!(pageData.show_contact_number && pageData.contact_info && (pageData.contact_info.email || pageData.contact_info.phone || pageData.contact_info.website || pageData.contact_info.message))) {
@@ -548,8 +601,8 @@ export default function PublicPageBuilderPage() {
                 }
                 return (
                   <div key={section.id} className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Contact Information</h2>
-                    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                    <h2 className="text-2xl font-bold mb-4" style={{ color: colorText, fontFamily: fontHeading }}>Contact Information</h2>
+                    <div className="rounded-lg p-6 shadow-sm border border-gray-200" style={{ backgroundColor: 'rgba(255,255,255,0.95)' }}>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {pageData.contact_info.phone && (
                           <div className="flex items-center gap-3">
@@ -614,12 +667,12 @@ export default function PublicPageBuilderPage() {
                 if (!(pageData.show_experience_stats && stats.length > 0)) return null
                 return (
                   <div key={section.id} className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Experience</h2>
+                    <h2 className="text-2xl font-bold mb-4" style={{ color: colorText, fontFamily: fontHeading }}>Experience</h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {stats.map((stat: any, index: number) => (
-                        <div key={index} className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 text-center">
-                          <div className="text-3xl font-bold text-blue-600 mb-1">{stat.value}</div>
-                          <div className="text-sm text-gray-600">{stat.label}</div>
+                        <div key={index} className="rounded-lg p-4 shadow-sm border border-gray-200 text-center" style={{ backgroundColor: 'rgba(255,255,255,0.95)' }}>
+                          <div className="text-3xl font-bold mb-1" style={{ color: colorPrimary }}>{stat.value}</div>
+                          <div className="text-sm" style={{ color: colorText, opacity: 0.9 }}>{stat.label}</div>
                         </div>
                       ))}
                     </div>
@@ -632,32 +685,23 @@ export default function PublicPageBuilderPage() {
                 if (!(pageData.show_featured_listings && featured.length > 0)) return null
                 return (
                   <div key={section.id} className="mb-6">
-                    <h3 className="full-preview-section-title">Featured Listings</h3>
-                    <div className="full-preview-listings-grid">
+                    <h3 className="text-xl font-bold mb-4" style={{ color: colorText, fontFamily: fontHeading }}>Featured Listings</h3>
+                    <div className="flex gap-4 overflow-x-auto pb-2">
                       {featured.map((listing: any) => (
-                        <div key={listing.id} className="full-preview-listing-card">
-                          <div className="full-preview-listing-badge">
-                            <FiStar className="full-preview-star-icon" />
-                            <span>Featured</span>
-                          </div>
-                          <div className="full-preview-listing-image-wrapper">
-                            <img src={listing.image || ASSETS.PLACEHOLDER_PROPERTY} alt={listing.title} />
-                          </div>
-                          <div className="full-preview-listing-info">
-                            <div className="full-preview-listing-info-header">
-                              <div className="full-preview-listing-price">{formatPropertyPrice(listing)}</div>
-                              <button className="full-preview-listing-heart" aria-label="Favorite">
-                                <FiHeart />
-                              </button>
+                        <div key={listing.id} className="flex-shrink-0 w-72 bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200">
+                          <div className="relative">
+                            <div className="w-full h-48 bg-gray-200">
+                              <img
+                                src={listing.image_url || listing.image || ASSETS.PLACEHOLDER_PROPERTY}
+                                alt={listing.title || 'Listing'}
+                                className="w-full h-full object-cover"
+                              />
                             </div>
-                            <div className="full-preview-listing-title">{listing.title}</div>
-                            <div className="full-preview-listing-category">{listing.type || listing.category}</div>
-                            <div className="full-preview-listing-info-footer">
-                              <div className="full-preview-listing-date">{formatPropertyDate(listing)}</div>
-                              <div className="full-preview-listing-view-count">
-                                <span>1</span>
-                              </div>
-                            </div>
+                          </div>
+                          <div className="p-4">
+                            <div className="text-lg font-bold mb-1" style={{ color: colorPrimary }}>{formatPropertyPrice(listing)}</div>
+                            <div className="text-sm font-semibold text-gray-900 mb-1 line-clamp-1">{listing.title || 'Untitled'}</div>
+                            <div className="text-xs text-gray-500">{listing.type || listing.category || 'Property'}</div>
                           </div>
                         </div>
                       ))}
@@ -671,7 +715,7 @@ export default function PublicPageBuilderPage() {
                 if (!(pageData.show_testimonials && testimonials.length > 0)) return null
                 return (
                   <div key={section.id} className="mb-6">
-                    <h3 className="full-preview-section-title">Client Testimonials</h3>
+                    <h3 className="full-preview-section-title" style={{ color: colorText }}>Client Testimonials</h3>
                     <div className="full-preview-testimonials-grid">
                       {testimonials.map((testimonial: any) => (
                         <div key={testimonial.id} className="full-preview-testimonial-card">
@@ -703,269 +747,135 @@ export default function PublicPageBuilderPage() {
                 )
               }
 
-              case 'readyToView':
+              case 'readyToView': {
+                // Follow theme: use global_design primary when set, else brand color
+                const contactCardBg =
+                  (globalDesign as any).colorPrimary
+                    ? (globalDesign as any).colorPrimary
+                    : pageData.selected_brand_color === 'white' ? '#3B82F6' :
+                      pageData.selected_brand_color === 'dark' ? '#1F2937' :
+                      pageData.selected_brand_color === 'orange' ? '#F97316' :
+                      pageData.selected_brand_color === 'blue' ? '#3B82F6' : '#3B82F6'
+                const contactRadius =
+                  typeof (globalDesign as any).borderRadius === 'number'
+                    ? `${(globalDesign as any).borderRadius}px`
+                    : getCornerRadiusClass(pageData.selected_corner_radius)
                 return (
-                  <div key={section.id} className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900 mb-2">Ready To View?</h2>
-                      <p className="text-gray-600 mb-4">Schedule a tour or ask any questions about the property.</p>
-                      <div className="flex flex-col gap-3">
-                        <div className="flex items-center gap-3 text-gray-700">
-                          <FiPhone className="w-5 h-5 text-gray-500" />
-                          <span>{pageData.contact_info?.phone || 'Phone number'}</span>
+                  <div key={section.id} className="mb-6 overflow-hidden" style={{ borderRadius: contactRadius, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1)' }}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 min-h-0">
+                      {/* Left: agent + ready to view in one branded card */}
+                      <div
+                        className="p-6 md:p-8 text-white flex flex-col justify-between"
+                        style={{ backgroundColor: contactCardBg, borderRadius: 0 }}
+                      >
+                        <div>
+                          <div className="flex items-start gap-4 mb-6">
+                            <div className="flex-shrink-0">
+                              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden bg-white/20 border-2 border-white/30">
+                                <img
+                                  src={pageData.profile_card_image || ASSETS.PLACEHOLDER_PROFILE}
+                                  alt={pageData.profile_card_name || 'Agent'}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 
+                                className="text-xl md:text-2xl font-extrabold text-white mb-1 tracking-tight"
+                                style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2), 0 0 20px rgba(255,255,255,0.15)' }}
+                              >
+                                {pageData.profile_card_name || 'Agent'}
+                              </h3>
+                              {pageData.profile_card_role && (
+                                <span className="inline-block text-xs font-semibold uppercase tracking-widest text-white/95 px-2.5 py-1 rounded-md bg-white/20 mb-2">
+                                  {pageData.profile_card_role}
+                                </span>
+                              )}
+                              {pageData.profile_card_bio && (
+                                <p className="text-sm text-white font-medium mt-2 line-clamp-2 pl-3 border-l-2 border-white/50">
+                                  {pageData.profile_card_bio}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <h2 className="text-xl md:text-2xl font-bold mb-2" style={{ fontFamily: fontHeading }}>Ready To View?</h2>
+                          <p className="text-sm text-white/90 mb-4">Schedule a tour or ask any questions about the property.</p>
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-3 text-white/90">
+                              <FiPhone className="w-4 h-4 flex-shrink-0" />
+                              <span className="text-sm">{pageData.contact_info?.phone || pageData.contact_phone || 'Phone number'}</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-white/90">
+                              <FiMail className="w-4 h-4 flex-shrink-0" />
+                              <span className="text-sm truncate">{pageData.contact_info?.email || pageData.contact_email || 'Email address'}</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-3 text-gray-700">
-                          <FiMail className="w-5 h-5 text-gray-500" />
-                          <span>{pageData.contact_info?.email || 'Email address'}</span>
+                        <div className="flex items-center gap-3 mt-6 pt-4 border-t border-white/20">
+                          {pageData.contact_email && (
+                            <a href={`mailto:${pageData.contact_email}`} className="w-9 h-9 rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors flex items-center justify-center" aria-label="Email"><FiMail className="w-4 h-4" /></a>
+                          )}
+                          {pageData.contact_phone && (
+                            <a href={`tel:${pageData.contact_phone}`} className="w-9 h-9 rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors flex items-center justify-center" aria-label="Phone"><FiPhone className="w-4 h-4" /></a>
+                          )}
+                          {pageData.contact_info?.message && (
+                            <a href={pageData.contact_info.message} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors flex items-center justify-center" aria-label="Message"><FiMessageCircle className="w-4 h-4" /></a>
+                          )}
+                          {pageData.contact_info?.website && (
+                            <a href={pageData.contact_info.website} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors flex items-center justify-center" aria-label="Website"><FiGlobe className="w-4 h-4" /></a>
+                          )}
                         </div>
                       </div>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact {pageData.profile_card_name || 'Agent'}</h3>
-                      {/* Public page form is static; submission is handled client-side only */}
-                      <form className="space-y-3">
-                        <input
-                          type="text"
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Your name"
-                        />
-                        <input
-                          type="email"
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Your email"
-                        />
-                        <textarea
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
-                          placeholder="Your message"
-                          rows={4}
-                        />
-                        <button
-                          type="submit"
-                          className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                          <span>Send Inquiry</span>
-                          <FiMessageCircle className="w-4 h-4" />
-                        </button>
-                      </form>
+                      {/* Right: contact form */}
+                      <div className="rounded-none md:rounded-r-2xl p-6 md:p-8 flex flex-col justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.98)', borderRadius: 0 }}>
+                        <h3 className="text-lg font-semibold mb-4" style={{ color: colorText }}>Contact {pageData.profile_card_name || 'Agent'}</h3>
+                        <form onSubmit={handleContactFormSubmit} className="flex flex-col gap-3">
+                          <input
+                            type="text"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Your name"
+                            value={contactFormName}
+                            onChange={(e) => setContactFormName(e.target.value)}
+                            required
+                          />
+                          <input
+                            type="email"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Your email"
+                            value={contactFormEmail}
+                            onChange={(e) => setContactFormEmail(e.target.value)}
+                            required
+                          />
+                          <textarea
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
+                            placeholder="Your message"
+                            value={contactFormMessage}
+                            onChange={(e) => setContactFormMessage(e.target.value)}
+                            rows={4}
+                            required
+                          />
+                          <button
+                            type="submit"
+                            className="inline-flex items-center justify-center gap-2 px-6 py-3 text-white font-semibold rounded-lg transition-colors"
+                            style={{ backgroundColor: contactCardBg }}
+                          >
+                            <span>Send Inquiry</span>
+                            <FiMessageCircle className="w-4 h-4" />
+                          </button>
+                        </form>
+                      </div>
                     </div>
                   </div>
                 )
+              }
               
               default:
                 return null
             }
           })}
 
-          {/* Contact Information Section */}
-          {pageData.show_contact_number && pageData.contact_info && (pageData.contact_info.email || pageData.contact_info.phone || pageData.contact_info.website || pageData.contact_info.message) && (
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Contact Information</h2>
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {pageData.contact_info.phone && (
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                        <FiPhone className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="text-xs text-gray-500 mb-1">Phone</div>
-                        <a href={`tel:${pageData.contact_info.phone}`} className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
-                          {pageData.contact_info.phone}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                  {pageData.contact_info.email && (
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                        <FiMail className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="text-xs text-gray-500 mb-1">Email</div>
-                        <a href={`mailto:${pageData.contact_info.email}`} className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
-                          {pageData.contact_info.email}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                  {pageData.contact_info.website && (
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                        <FiGlobe className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="text-xs text-gray-500 mb-1">Website</div>
-                        <a href={pageData.contact_info.website} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
-                          Visit Website
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                  {pageData.contact_info.message && (
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                        <FiMessageCircle className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="text-xs text-gray-500 mb-1">Message</div>
-                        <a href={pageData.contact_info.message} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
-                          Send Message
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Experience Stats Section */}
-          {pageData.show_experience_stats && pageData.experience_stats && pageData.experience_stats.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Experience</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {pageData.experience_stats.map((stat: any, index: number) => (
-                  <div key={index} className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 text-center">
-                    <div className="text-3xl font-bold text-blue-600 mb-1">{stat.value}</div>
-                    <div className="text-sm text-gray-600">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Featured Listings Section */}
-          {pageData.show_featured_listings && pageData.featured_listings && pageData.featured_listings.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Featured Listings</h2>
-              <div className="flex gap-4 overflow-x-auto pb-2">
-                {pageData.featured_listings.map((listing: any) => (
-                  <div key={listing.id} className="flex-shrink-0 w-72 bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200">
-                    <div className="relative">
-                      <div className="absolute top-2 left-2 z-10 flex items-center gap-1 px-2 py-1 bg-blue-600 text-white text-xs font-semibold rounded">
-                        <FiStar className="w-3 h-3 fill-current" />
-                        <span>Featured</span>
-                      </div>
-                      <div className="w-full h-48 bg-gray-200">
-                        <img src={listing.image || ASSETS.PLACEHOLDER_PROPERTY} alt={listing.title} className="w-full h-full object-cover" />
-                      </div>
-                      <button className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition-colors shadow-sm" aria-label="Favorite">
-                        <FiHeart className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <div className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="text-lg font-bold text-blue-600">{formatPropertyPrice(listing)}</div>
-                      </div>
-                      <div className="text-sm font-semibold text-gray-900 mb-1 line-clamp-1">{listing.title}</div>
-                      <div className="text-xs text-gray-500 mb-3">{listing.type || listing.category}</div>
-                      <div className="flex items-center justify-between text-xs text-gray-500">
-                        <div>{formatPropertyDate(listing)}</div>
-                        <div className="flex items-center gap-1">
-                          <span>1</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Client Testimonials Section */}
-          {pageData.show_testimonials && pageData.testimonials && pageData.testimonials.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Client Testimonials</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {pageData.testimonials.map((testimonial: any) => (
-                  <div key={testimonial.id} className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-                        <img 
-                          src={testimonial.avatar || ASSETS.PLACEHOLDER_PROFILE} 
-                          alt={testimonial.name}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = 'none';
-                          }}
-                        />
-                        <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm hidden">
-                          {testimonial.name?.split(' ').map((n: string) => n[0]).join('') || 'TC'}
-                        </div>
-                      </div>
-                      <div className="text-sm font-semibold text-gray-900">{testimonial.name}</div>
-                    </div>
-                    <p className="text-sm text-gray-700 italic mb-2">"{testimonial.content}"</p>
-                    {testimonial.role && (
-                      <div className="text-xs text-gray-500">
-                        {testimonial.role}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Ready To View? Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Ready To View?</h2>
-              <p className="text-gray-600 mb-4">Schedule a tour or ask any questions about the property.</p>
-              <div className="flex flex-col gap-3">
-                {pageData.contact_phone && (
-                  <div className="flex items-center gap-3 text-gray-700">
-                    <FiPhone className="w-5 h-5 text-gray-500" />
-                    <span>{pageData.contact_phone}</span>
-                  </div>
-                )}
-                {pageData.contact_email && (
-                  <div className="flex items-center gap-3 text-gray-700">
-                    <FiMail className="w-5 h-5 text-gray-500" />
-                    <span>{pageData.contact_email}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact {pageData.profile_card_name || 'Agent'}</h3>
-              <form onSubmit={handleContactFormSubmit} className="flex flex-col gap-3">
-                <input
-                  type="text"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Your name"
-                  value={contactFormName}
-                  onChange={(e) => setContactFormName(e.target.value)}
-                  required
-                />
-                <input
-                  type="email"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Your email"
-                  value={contactFormEmail}
-                  onChange={(e) => setContactFormEmail(e.target.value)}
-                  required
-                />
-                <textarea
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
-                  placeholder="Your message"
-                  value={contactFormMessage}
-                  onChange={(e) => setContactFormMessage(e.target.value)}
-                  rows={4}
-                  required
-                />
-                <button 
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                  type="submit"
-                >
-                  <span>Send Inquiry</span>
-                  <FiMessageCircle className="w-4 h-4" />
-                </button>
-              </form>
-            </div>
-          </div>
         </div>
+        <ToastContainer />
       </div>
     )
   }
