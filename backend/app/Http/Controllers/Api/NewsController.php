@@ -87,12 +87,13 @@ class NewsController extends Controller
             ),
         ]
     )]
-    public function show($id)
+    public function show($identifier)
     {
-        $news = News::findOrFail($id);
-        
-        // Image URL is automatically included via model accessor (getImageUrlAttribute)
-        
+        // Support both numeric IDs (backward compat) and slugs
+        $news = is_numeric($identifier)
+            ? News::findOrFail($identifier)
+            : News::where('slug', $identifier)->firstOrFail();
+
         return response()->json($news);
     }
 
@@ -131,12 +132,13 @@ class NewsController extends Controller
     {
         // Validate the request
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'excerpt' => 'nullable|string|max:500',
-            'category' => 'nullable|string|max:100',
-            'author' => 'nullable|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'title'        => 'required|string|max:255',
+            'slug'         => 'nullable|string|max:255|unique:news,slug|regex:/^[a-z0-9-]+$/',
+            'content'      => 'required|string',
+            'excerpt'      => 'nullable|string|max:500',
+            'category'     => 'nullable|string|max:100',
+            'author'       => 'nullable|string|max:255',
+            'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'published_at' => 'nullable|date',
         ]);
 
@@ -145,7 +147,8 @@ class NewsController extends Controller
 
         // Create the news article
         $news = News::create([
-            'title' => $validated['title'],
+            'title'   => $validated['title'],
+            'slug'    => $validated['slug'] ?? null, // HasSlug auto-generates if null
             'content' => $validated['content'],
             'excerpt' => $validated['excerpt'] ?? null,
             'category' => $validated['category'] ?? null,
@@ -210,16 +213,19 @@ class NewsController extends Controller
     )]
     public function update(Request $request, $id)
     {
-        $news = News::findOrFail($id);
+        $news = is_numeric($id)
+            ? News::findOrFail($id)
+            : News::where('slug', $id)->firstOrFail();
 
         // Validate the request
         $validated = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
-            'content' => 'sometimes|required|string',
-            'excerpt' => 'nullable|string|max:500',
-            'category' => 'nullable|string|max:100',
-            'author' => 'nullable|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'title'        => 'sometimes|required|string|max:255',
+            'slug'         => 'nullable|string|max:255|unique:news,slug,' . $news->id . '|regex:/^[a-z0-9-]+$/',
+            'content'      => 'sometimes|required|string',
+            'excerpt'      => 'nullable|string|max:500',
+            'category'     => 'nullable|string|max:100',
+            'author'       => 'nullable|string|max:255',
+            'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'published_at' => 'nullable|date',
         ]);
 
@@ -284,7 +290,9 @@ class NewsController extends Controller
     )]
     public function destroy($id)
     {
-        $news = News::findOrFail($id);
+        $news = is_numeric($id)
+            ? News::findOrFail($id)
+            : News::where('slug', $id)->firstOrFail();
 
         // Delete the physical file if it exists
         $oldPath = $news->getRawOriginal('image_path') ?? $news->getRawOriginal('image');

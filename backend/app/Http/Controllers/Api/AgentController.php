@@ -563,14 +563,17 @@ class AgentController extends Controller
             ),
         ]
     )]
-    public function getById($id): JsonResponse
+    public function getById($identifier): JsonResponse
     {
-        $agent = User::where('role', 'agent')
-            ->where('id', $id)
+        // Support both numeric ID (backward compat) and slug
+        $query = User::whereIn('role', ['agent', 'broker'])
             ->where('status', 'approved')
-            ->where('is_active', true)
-            ->first();
-        
+            ->where('is_active', true);
+
+        $agent = is_numeric($identifier)
+            ? $query->where('id', $identifier)->first()
+            : $query->where('slug', $identifier)->first();
+
         if (!$agent) {
             return response()->json([
                 'success' => false,
@@ -588,19 +591,20 @@ class AgentController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'id' => $agent->id,
-                'first_name' => $agent->first_name,
-                'last_name' => $agent->last_name,
-                'full_name' => $agent->full_name,
-                'email' => $agent->email,
-                'phone' => $agent->phone,
-                'agency_name' => $agent->agency_name,
-                'city' => $agent->city,
-                'state' => $agent->state,
-                'image' => $imageUrl,
-                'image_path' => $agent->image_path,
-                'profile_image' => $imageUrl,
-                'avatar' => $imageUrl,
+                'id'              => $agent->id,
+                'slug'            => $agent->slug,
+                'first_name'      => $agent->first_name,
+                'last_name'       => $agent->last_name,
+                'full_name'       => $agent->full_name,
+                'email'           => $agent->email,
+                'phone'           => $agent->phone,
+                'agency_name'     => $agent->agency_name,
+                'city'            => $agent->city,
+                'state'           => $agent->state,
+                'image'           => $imageUrl,
+                'image_path'      => $agent->image_path,
+                'profile_image'   => $imageUrl,
+                'avatar'          => $imageUrl,
                 'properties_count' => $agent->properties()->count(),
             ],
         ]);
@@ -727,13 +731,14 @@ class AgentController extends Controller
             }
             
             $validated = $request->validate([
-                'first_name' => 'sometimes|nullable|string|max:255',
-                'last_name' => 'sometimes|nullable|string|max:255',
-                'phone' => 'sometimes|nullable|string|max:20',
-                'city' => 'sometimes|nullable|string|max:255',
-                'state' => 'sometimes|nullable|string|max:255',
+                'first_name'     => 'sometimes|nullable|string|max:255',
+                'last_name'      => 'sometimes|nullable|string|max:255',
+                'slug'           => 'nullable|string|max:255|unique:users,slug,' . $user->id . '|regex:/^[a-z0-9-]+$/',
+                'phone'          => 'sometimes|nullable|string|max:20',
+                'city'           => 'sometimes|nullable|string|max:255',
+                'state'          => 'sometimes|nullable|string|max:255',
                 'office_address' => 'sometimes|nullable|string|max:500',
-                'image' => 'sometimes|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
+                'image'          => 'sometimes|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
             ]);
             
             // Handle image upload

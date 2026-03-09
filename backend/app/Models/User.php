@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasMedia;
+use App\Traits\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,7 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasMedia;
+    use HasApiTokens, HasFactory, Notifiable, HasMedia, HasSlug;
 
     /**
      * The attributes that are mass assignable.
@@ -43,6 +44,8 @@ class User extends Authenticatable
         'status',
         'verified',
         'is_active',
+        'views_count',
+        'slug',
     ];
 
     /**
@@ -96,6 +99,27 @@ class User extends Authenticatable
     public function getFullNameAttribute(): string
     {
         return "{$this->first_name} {$this->last_name}";
+    }
+
+    // -------------------------------------------------------------------------
+    // HasSlug overrides — only agents and brokers get slugs
+    // -------------------------------------------------------------------------
+
+    /**
+     * The slug is derived from the user's full name.
+     */
+    public function getSlugSource(): string
+    {
+        return trim(($this->first_name ?? '') . ' ' . ($this->last_name ?? ''));
+    }
+
+    /**
+     * Only auto-generate a slug for agent and broker accounts.
+     * Tenants, admins, super_admins, and moderators remain NULL.
+     */
+    public function shouldGenerateSlug(): bool
+    {
+        return in_array($this->role, ['agent', 'broker']);
     }
 
     /**
@@ -248,6 +272,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if user is a tenant.
+     */
+    public function isTenant(): bool
+    {
+        return $this->role === 'tenant';
+    }
+
+    /**
      * Get messages sent by this user.
      */
     public function sentMessages()
@@ -261,5 +293,75 @@ class User extends Authenticatable
     public function receivedMessages()
     {
         return $this->hasMany(Message::class, 'recipient_id');
+    }
+
+    // -------------------------------------------------------------------------
+    // Tenant relationships
+    // -------------------------------------------------------------------------
+
+    /**
+     * Tenant profile (only exists when role = 'tenant').
+     */
+    public function tenantProfile()
+    {
+        return $this->hasOne(TenantProfile::class);
+    }
+
+    /**
+     * Properties saved/bookmarked by this tenant.
+     */
+    public function savedProperties()
+    {
+        return $this->hasMany(SavedProperty::class);
+    }
+
+    /**
+     * Chat rooms this user participates in (as tenant).
+     */
+    public function tenantChatRooms()
+    {
+        return $this->hasMany(ChatRoom::class, 'user_id');
+    }
+
+    /**
+     * Chat rooms this user owns (as agent/broker).
+     */
+    public function agentChatRooms()
+    {
+        return $this->hasMany(ChatRoom::class, 'agent_id');
+    }
+
+    /**
+     * In-app notifications for this user.
+     */
+    public function userNotifications()
+    {
+        return $this->hasMany(UserNotification::class);
+    }
+
+    /**
+     * Reviews written by this user.
+     */
+    public function writtenReviews()
+    {
+        return $this->hasMany(Review::class, 'reviewer_id')
+            ->where('reviewer_type', 'user');
+    }
+
+    /**
+     * Reviews received about this user (agent/broker profile reviews).
+     */
+    public function receivedReviews()
+    {
+        return $this->hasMany(Review::class, 'reviewable_id')
+            ->where('reviewable_type', self::class);
+    }
+
+    /**
+     * Profile view records for this user (polymorphic via profile_views).
+     */
+    public function profileViews()
+    {
+        return $this->morphMany(ProfileView::class, 'viewable');
     }
 }

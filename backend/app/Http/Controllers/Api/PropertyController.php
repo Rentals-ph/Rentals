@@ -165,12 +165,13 @@ class PropertyController extends Controller
             ),
         ]
     )]
-    public function show($id)
+    public function show($identifier)
     {
-        $property = Property::with('agent')->findOrFail($id);
-        
-        // Image URL is automatically included via model accessor (getImageUrlAttribute)
-        
+        // Support both numeric IDs (backward compat) and slugs
+        $property = is_numeric($identifier)
+            ? Property::with('agent')->findOrFail($identifier)
+            : Property::with('agent')->where('slug', $identifier)->firstOrFail();
+
         return response()->json($property);
     }
 
@@ -254,6 +255,7 @@ class PropertyController extends Controller
 
             $validated = $request->validate([
                 'title' => 'required|string|max:255',
+                'slug'  => 'nullable|string|max:255|unique:properties,slug|regex:/^[a-z0-9-]+$/',
                 'description' => 'required|string',
                 'type' => 'required|string|max:255',
                 'price' => 'required|numeric|min:0',
@@ -328,6 +330,7 @@ class PropertyController extends Controller
                 // Create property in single operation
                 $property = Property::create([
                     'title' => $validated['title'],
+                    'slug'  => $validated['slug'] ?? null, // HasSlug auto-generates if null
                     'description' => $validated['description'],
                     'type' => $validated['type'],
                     'price' => $validated['price'],
@@ -696,6 +699,7 @@ class PropertyController extends Controller
             // Use 'sometimes' to only validate fields that are present in the request
             $validated = $request->validate([
                 'title' => 'sometimes|string|max:255',
+                'slug'  => 'nullable|string|max:255|unique:properties,slug,' . $property->id . '|regex:/^[a-z0-9-]+$/',
                 'description' => 'sometimes|string',
                 'type' => 'sometimes|string|max:255',
                 'price' => 'sometimes|numeric|min:0',
@@ -967,6 +971,67 @@ class PropertyController extends Controller
         }
     }
 
+    /**
+     * Update the listing status of a property.
+     * Only the owning agent/broker may change this.
+     *
+     * PATCH /properties/{id}/status
+     * Body: { status: 'available' | 'rented' | 'under_negotiation' | 'unlisted' }
+     */
+    public function updateStatus(Request $request, $identifier)
+    {
+        try {
+            $user = $request->user();
+
+            if (!$user || (!$user->isAgent() && !$user->isBroker())) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized. Agent or Broker authentication required.',
+                ], 403);
+            }
+
+            // Support both numeric IDs (backward compat) and slugs
+            $property = is_numeric($identifier)
+                ? Property::findOrFail($identifier)
+                : Property::where('slug', $identifier)->firstOrFail();
+
+            if ($property->agent_id !== $user->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized. You can only update the status of your own properties.',
+                ], 403);
+            }
+
+            $validated = $request->validate([
+                'status' => 'required|string|in:' . implode(',', \App\Models\Property::STATUSES),
+            ]);
+
+            $property->update(['status' => $validated['status']]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Property status updated to "' . $validated['status'] . '".',
+                'data'    => $property->only(['id', 'title', 'status']),
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Property not found',
+            ], 404);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationErrorResponse($e);
+        } catch (\Exception $e) {
+            \Log::error('Error updating property status: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while updating the property status.',
+                'error'   => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
+        }
+    }
+
     #[OA\Delete(
         path: "/properties/{id}",
         summary: "Delete a property",
@@ -998,7 +1063,7 @@ class PropertyController extends Controller
             ),
         ]
     )]
-    public function destroy(Request $request, $id)
+    public function destroy(Request $request, $identifier)
     {
         try {
             $user = $request->user();
@@ -1010,7 +1075,10 @@ class PropertyController extends Controller
                 ], 403);
             }
 
-            $property = Property::findOrFail($id);
+            // Support both numeric IDs (backward compat) and slugs
+            $property = is_numeric($identifier)
+                ? Property::findOrFail($identifier)
+                : Property::where('slug', $identifier)->firstOrFail();
             
             // Ensure the agent can only delete their own properties
             if ($property->agent_id !== $user->id) {

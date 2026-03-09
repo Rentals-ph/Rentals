@@ -3,15 +3,20 @@
 namespace App\Models;
 
 use App\Traits\HasMedia;
+use App\Traits\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Property extends Model
 {
-    use HasFactory, HasMedia;
+    use HasFactory, HasMedia, HasSlug;
+
+    /** Slug is generated from the `title` field (HasSlug default). */
+    protected string $slugFrom = 'title';
 
     protected $fillable = [
         'title',
+        'slug',
         'description',
         'description_template',
         'ai_generated_description',
@@ -40,6 +45,8 @@ class Property extends Model
         'agent_id',
         'published_at',
         'draft_status',
+        'status',
+        'views_count',
     ];
 
     protected $casts = [
@@ -51,6 +58,11 @@ class Property extends Model
     ];
 
     /**
+     * Valid listing statuses.
+     */
+    public const STATUSES = ['available', 'rented', 'under_negotiation', 'unlisted'];
+
+    /**
      * The accessors to append to the model's array form.
      *
      * @var array
@@ -60,6 +72,47 @@ class Property extends Model
     public function agent()
     {
         return $this->belongsTo(User::class, 'agent_id');
+    }
+
+    /**
+     * Reviews for this property.
+     */
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'reviewable_id')
+            ->where('reviewable_type', self::class);
+    }
+
+    /**
+     * Approved reviews only.
+     */
+    public function approvedReviews()
+    {
+        return $this->reviews()->where('status', 'approved');
+    }
+
+    /**
+     * Users who saved this property.
+     */
+    public function savedByUsers()
+    {
+        return $this->hasMany(SavedProperty::class);
+    }
+
+    /**
+     * Chat rooms associated with this property.
+     */
+    public function chatRooms()
+    {
+        return $this->hasMany(ChatRoom::class);
+    }
+
+    /**
+     * Individual view records for this property.
+     */
+    public function views()
+    {
+        return $this->hasMany(PropertyView::class);
     }
 
     /**
@@ -146,5 +199,43 @@ class Property extends Model
             // Otherwise, assume it's in storage
             return asset('storage/' . $imagePath);
         }, $this->images);
+    }
+
+    // -------------------------------------------------------------------------
+    // Helper methods
+    // -------------------------------------------------------------------------
+
+    public function isForRent(): bool
+    {
+        return in_array(strtolower((string) $this->type), ['rent', 'for rent']);
+    }
+
+    public function isForSale(): bool
+    {
+        return in_array(strtolower((string) $this->type), ['sale', 'for sale']);
+    }
+
+    public function isAvailable(): bool
+    {
+        return $this->status === 'available';
+    }
+
+    // -------------------------------------------------------------------------
+    // Scopes
+    // -------------------------------------------------------------------------
+
+    public function scopeForRent($query)
+    {
+        return $query->whereIn(\DB::raw('LOWER(type)'), ['rent', 'for rent']);
+    }
+
+    public function scopeForSale($query)
+    {
+        return $query->whereIn(\DB::raw('LOWER(type)'), ['sale', 'for sale']);
+    }
+
+    public function scopeAvailable($query)
+    {
+        return $query->where('status', 'available');
     }
 }

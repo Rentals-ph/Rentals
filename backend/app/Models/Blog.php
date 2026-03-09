@@ -3,32 +3,44 @@
 namespace App\Models;
 
 use App\Traits\HasMedia;
+use App\Traits\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Blog extends Model
 {
-    use HasFactory, HasMedia;
+    use HasFactory, HasMedia, HasSlug;
+
+    /** Slug is generated from `title` (HasSlug default). */
+    protected string $slugFrom = 'title';
 
     protected $fillable = [
         'title',
+        'slug',
         'content',
         'excerpt',
         'category',
         'read_time',
-        'likes',
-        'comments',
+        'likes',      // Legacy column kept for backward compat
+        'comments',   // Legacy column kept for backward compat
         'author',
         'image',
         'image_path',
         'published_at',
+        'views_count',
+        'likes_count',
+        'comments_count',
     ];
 
     protected $casts = [
-        'published_at' => 'datetime',
-        'read_time' => 'integer',
-        'likes' => 'integer',
-        'comments' => 'integer',
+        'published_at'   => 'datetime',
+        'read_time'      => 'integer',
+        'likes'          => 'integer',
+        'comments'       => 'integer',
+        'views_count'    => 'integer',
+        'likes_count'    => 'integer',
+        'comments_count' => 'integer',
     ];
 
     /**
@@ -42,6 +54,34 @@ class Blog extends Model
             ?? $this->attributes['image_path'] ?? null
             ?? $this->attributes['image'] ?? null;
     }
+
+    // -------------------------------------------------------------------------
+    // Engagement relationships
+    // -------------------------------------------------------------------------
+
+    public function views(): HasMany
+    {
+        return $this->hasMany(BlogView::class);
+    }
+
+    public function likes(): HasMany
+    {
+        return $this->hasMany(BlogLike::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(BlogComment::class)->whereNull('parent_id')->latest();
+    }
+
+    public function allComments(): HasMany
+    {
+        return $this->hasMany(BlogComment::class)->latest();
+    }
+
+    // -------------------------------------------------------------------------
+    // Image accessors
+    // -------------------------------------------------------------------------
 
     /**
      * Get the full URL of the image.

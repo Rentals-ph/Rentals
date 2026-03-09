@@ -88,12 +88,13 @@ class BlogController extends Controller
             ),
         ]
     )]
-    public function show($id)
+    public function show($identifier)
     {
-        $blog = Blog::findOrFail($id);
-        
-        // Image URL is automatically included via model accessor (getImageUrlAttribute)
-        
+        // Support both numeric IDs (backward compat) and slugs
+        $blog = is_numeric($identifier)
+            ? Blog::findOrFail($identifier)
+            : Blog::where('slug', $identifier)->firstOrFail();
+
         return response()->json($blog);
     }
 
@@ -132,12 +133,13 @@ class BlogController extends Controller
     {
         // Validate the request
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'excerpt' => 'nullable|string|max:500',
-            'category' => 'nullable|string|max:100',
-            'author' => 'nullable|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'title'        => 'required|string|max:255',
+            'slug'         => 'nullable|string|max:255|unique:blogs,slug|regex:/^[a-z0-9-]+$/',
+            'content'      => 'required|string',
+            'excerpt'      => 'nullable|string|max:500',
+            'category'     => 'nullable|string|max:100',
+            'author'       => 'nullable|string|max:255',
+            'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'published_at' => 'nullable|date',
         ]);
 
@@ -146,7 +148,8 @@ class BlogController extends Controller
 
         // Create the blog post
         $blog = Blog::create([
-            'title' => $validated['title'],
+            'title'   => $validated['title'],
+            'slug'    => $validated['slug'] ?? null, // HasSlug auto-generates if null
             'content' => $validated['content'],
             'excerpt' => $validated['excerpt'] ?? null,
             'category' => $validated['category'] ?? null,
@@ -211,16 +214,19 @@ class BlogController extends Controller
     )]
     public function update(Request $request, $id)
     {
-        $blog = Blog::findOrFail($id);
+        $blog = is_numeric($id)
+            ? Blog::findOrFail($id)
+            : Blog::where('slug', $id)->firstOrFail();
 
         // Validate the request
         $validated = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
-            'content' => 'sometimes|required|string',
-            'excerpt' => 'nullable|string|max:500',
-            'category' => 'nullable|string|max:100',
-            'author' => 'nullable|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'title'        => 'sometimes|required|string|max:255',
+            'slug'         => 'nullable|string|max:255|unique:blogs,slug,' . $blog->id . '|regex:/^[a-z0-9-]+$/',
+            'content'      => 'sometimes|required|string',
+            'excerpt'      => 'nullable|string|max:500',
+            'category'     => 'nullable|string|max:100',
+            'author'       => 'nullable|string|max:255',
+            'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'published_at' => 'nullable|date',
         ]);
 
@@ -285,7 +291,9 @@ class BlogController extends Controller
     )]
     public function destroy($id)
     {
-        $blog = Blog::findOrFail($id);
+        $blog = is_numeric($id)
+            ? Blog::findOrFail($id)
+            : Blog::where('slug', $id)->firstOrFail();
 
         // Delete the physical file if it exists
         $oldPath = $blog->getRawOriginal('image_path') ?? $blog->getRawOriginal('image');

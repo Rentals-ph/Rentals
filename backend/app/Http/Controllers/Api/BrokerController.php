@@ -57,6 +57,21 @@ class BrokerController extends Controller
     }
 
     /**
+     * Show a single company by ID or slug (public endpoint).
+     */
+    public function showCompany($identifier): JsonResponse
+    {
+        $company = is_numeric($identifier)
+            ? Company::findOrFail($identifier)
+            : Company::where('slug', $identifier)->firstOrFail();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $company,
+        ]);
+    }
+
+    /**
      * Create a new company.
      */
     public function createCompany(Request $request): JsonResponse
@@ -64,24 +79,63 @@ class BrokerController extends Controller
         $broker = $this->ensureBroker($request);
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name'        => 'required|string|max:255',
+            'slug'        => 'nullable|string|max:255|unique:companies,slug|regex:/^[a-z0-9-]+$/',
             'description' => 'nullable|string',
-            'address' => 'nullable|string|max:500',
-            'phone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'website' => 'nullable|url|max:255',
+            'address'     => 'nullable|string|max:500',
+            'phone'       => 'nullable|string|max:20',
+            'email'       => 'nullable|email|max:255',
+            'website'     => 'nullable|url|max:255',
         ]);
 
         $company = Company::create([
             'broker_id' => $broker->id,
             ...$validated,
+            // HasSlug generates the slug automatically if not provided
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Company created successfully',
-            'data' => $company,
+            'data'    => $company,
         ], 201);
+    }
+
+    /**
+     * Update a company.
+     */
+    public function updateCompany(Request $request, $identifier): JsonResponse
+    {
+        $broker = $this->ensureBroker($request);
+
+        $company = is_numeric($identifier)
+            ? Company::where('broker_id', $broker->id)->findOrFail($identifier)
+            : Company::where('broker_id', $broker->id)->where('slug', $identifier)->firstOrFail();
+
+        if ($company->broker_id !== $broker->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. You can only update your own companies.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'name'        => 'sometimes|string|max:255',
+            'slug'        => 'nullable|string|max:255|unique:companies,slug,' . $company->id . '|regex:/^[a-z0-9-]+$/',
+            'description' => 'nullable|string',
+            'address'     => 'nullable|string|max:500',
+            'phone'       => 'nullable|string|max:20',
+            'email'       => 'nullable|email|max:255',
+            'website'     => 'nullable|url|max:255',
+        ]);
+
+        $company->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Company updated successfully',
+            'data'    => $company->fresh(),
+        ]);
     }
 
     /**

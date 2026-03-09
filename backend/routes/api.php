@@ -16,7 +16,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/properties/featured', [PropertyController::class, 'featured']);
 Route::get('/properties', [PropertyController::class, 'index']);
-Route::get('/properties/{id}', [PropertyController::class, 'show']);
+// Primary: /properties/{slug}  — also accepts numeric IDs for backward compat
+Route::get('/properties/{slug}', [PropertyController::class, 'show']);
 Route::post('/property/search', [PropertySearchController::class, 'search']);
 
 // Conversation management endpoints
@@ -57,26 +58,35 @@ Route::middleware('auth:sanctum')->prefix('listing/assistant')->group(function (
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/properties', [PropertyController::class, 'store']);
     Route::post('/properties/bulk', [PropertyController::class, 'bulkStore']);
-    Route::put('/properties/{id}', [PropertyController::class, 'update']);
-    Route::post('/properties/{id}', [PropertyController::class, 'update']); // Support POST with _method=PUT for FormData
-    Route::delete('/properties/{id}', [PropertyController::class, 'destroy']);
+    Route::put('/properties/{slug}', [PropertyController::class, 'update']);
+    Route::post('/properties/{slug}', [PropertyController::class, 'update']); // POST alias for FormData
+    Route::delete('/properties/{slug}', [PropertyController::class, 'destroy']);
 });
 
 Route::get('/testimonials', [TestimonialController::class, 'index']);
 
 Route::get('/blogs', [BlogController::class, 'index']);
-Route::get('/blogs/{id}', [BlogController::class, 'show']);
+// Primary: /blogs/{slug}  — also accepts numeric IDs for backward compat
+Route::get('/blogs/{slug}', [BlogController::class, 'show']);
 
 // Protected blog routes (admin only)
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/blogs', [BlogController::class, 'store']);
-    Route::put('/blogs/{id}', [BlogController::class, 'update']);
-    Route::delete('/blogs/{id}', [BlogController::class, 'destroy']);
+    Route::put('/blogs/{slug}', [BlogController::class, 'update']);
+    Route::delete('/blogs/{slug}', [BlogController::class, 'destroy']);
 });
 
 // News endpoints
 Route::get('/news', [NewsController::class, 'index']);
-Route::get('/news/{id}', [NewsController::class, 'show']);
+// Primary: /news/{slug}  — also accepts numeric IDs for backward compat
+Route::get('/news/{slug}', [NewsController::class, 'show']);
+
+// Protected news routes (admin only)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/news', [NewsController::class, 'store']);
+    Route::put('/news/{slug}', [NewsController::class, 'update']);
+    Route::delete('/news/{slug}', [NewsController::class, 'destroy']);
+});
 
 // Authentication routes (unified for agents and admins)
 Route::post('/register', [AuthController::class, 'register']);
@@ -97,7 +107,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/agents/me', [AgentController::class, 'update']); // Support POST with _method=PUT for FormData
     Route::get('/agents/dashboard/stats', [AgentController::class, 'dashboardStats']);
 });
-Route::get('/agents/{id}', [AgentController::class, 'getById']);
+// Primary: /agents/{slug}  — also accepts numeric IDs for backward compat
+Route::get('/agents/{identifier}', [AgentController::class, 'getById']);
 
 // Admin routes (protected by authentication)
 Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
@@ -113,6 +124,9 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::delete('/users/{id}', [AdminController::class, 'deleteUser']);
 });
 
+// Public company profile — /companies/{slug} or /companies/{id}
+Route::get('/companies/{identifier}', [BrokerController::class, 'showCompany']);
+
 // Broker routes (protected by authentication)
 Route::middleware('auth:sanctum')->prefix('broker')->group(function () {
     // Dashboard
@@ -121,6 +135,8 @@ Route::middleware('auth:sanctum')->prefix('broker')->group(function () {
     // Company management
     Route::post('/companies', [BrokerController::class, 'createCompany']);
     Route::get('/companies', [BrokerController::class, 'getCompanies']);
+    Route::put('/companies/{identifier}', [BrokerController::class, 'updateCompany']);
+    Route::post('/companies/{identifier}', [BrokerController::class, 'updateCompany']); // POST alias
     
     // Team management
     Route::post('/teams', [BrokerController::class, 'createTeam']);
@@ -138,6 +154,13 @@ Route::middleware('auth:sanctum')->prefix('broker')->group(function () {
     
     // Subscription management
     Route::post('/subscribe', [BrokerController::class, 'subscribeToPlan']);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROPERTY STATUS
+// ─────────────────────────────────────────────────────────────────────────────
+Route::middleware('auth:sanctum')->group(function () {
+    Route::patch('/properties/{slug}/status', [PropertyController::class, 'updateStatus']);
 });
 
 // Message routes
@@ -167,5 +190,162 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/page-builder/{slug}/publish', [PageBuilderController::class, 'publishBySlug']);
     Route::post('/page-builder/id/{id}/publish', [PageBuilderController::class, 'publish']);
     Route::post('/upload', [UploadController::class, 'upload']);
+});
+
+// =============================================================================
+// TWO-TIER TENANT SYSTEM
+// =============================================================================
+use App\Http\Controllers\Api\TenantAuthController;
+use App\Http\Controllers\Api\ChatRoomController;
+use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\SavedPropertyController;
+use App\Http\Controllers\Api\NotificationController;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Guest sessions (Tier 1)
+// ─────────────────────────────────────────────────────────────────────────────
+// Start / retrieve a guest session; returns a browser token
+Route::post('/tenant/guest/session', [TenantAuthController::class, 'startGuestSession']);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tenant registration & email verification (Tier 2)
+// Reuses the same /verify-email/* flow already in place for brokers.
+// ─────────────────────────────────────────────────────────────────────────────
+Route::post('/tenant/register', [TenantAuthController::class, 'register']);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Authenticated tenant routes
+// ─────────────────────────────────────────────────────────────────────────────
+Route::middleware('auth:sanctum')->prefix('tenant')->group(function () {
+    // Profile
+    Route::get('/me', [TenantAuthController::class, 'me']);
+    Route::put('/me', [TenantAuthController::class, 'updateProfile']);
+    Route::post('/me', [TenantAuthController::class, 'updateProfile']); // POST alias for FormData
+
+    // Upgrade / merge a guest session into this tenant account
+    Route::post('/upgrade-guest', [TenantAuthController::class, 'upgradeGuest']);
+
+    // Saved properties
+    Route::get('/saved-properties', [SavedPropertyController::class, 'index']);
+    Route::post('/saved-properties/{propertyId}/toggle', [SavedPropertyController::class, 'toggle']);
+    Route::get('/saved-properties/{propertyId}', [SavedPropertyController::class, 'check']);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Chat — guest.session middleware runs on ALL chat routes so both
+//         registered users (sanctum) and guests (X-Guest-Token) work.
+// ─────────────────────────────────────────────────────────────────────────────
+Route::middleware('guest.session')->prefix('chat')->group(function () {
+    // Inbox (all rooms for this user/guest)
+    Route::get('/rooms', [ChatRoomController::class, 'index']);
+
+    // Find or create a room for a property
+    Route::post('/rooms', [ChatRoomController::class, 'findOrCreate']);
+
+    // Messages within a room
+    Route::get('/rooms/{roomId}/messages', [ChatRoomController::class, 'messages']);
+    Route::post('/rooms/{roomId}/messages', [ChatRoomController::class, 'sendMessage']);
+    Route::put('/rooms/{roomId}/read', [ChatRoomController::class, 'markRead']);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Reviews
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Public read — anyone can view approved reviews
+Route::get('/properties/{id}/reviews', [ReviewController::class, 'forProperty']);
+Route::get('/agents/{id}/reviews', [ReviewController::class, 'forAgent']);
+
+// Write — registered tenant or guest (guest.session runs to attach session)
+Route::middleware('guest.session')->group(function () {
+    Route::post('/properties/{id}/reviews', [ReviewController::class, 'submitForProperty']);
+});
+
+// Agent reviews require tenant auth
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/agents/{id}/reviews', [ReviewController::class, 'submitForAgent']);
+});
+
+// Admin moderation
+Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
+    Route::get('/reviews/pending', [ReviewController::class, 'pendingReviews']);
+    Route::put('/reviews/{id}/moderate', [ReviewController::class, 'moderate']);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Notifications — registered users only (tenants, agents, brokers)
+// ─────────────────────────────────────────────────────────────────────────────
+Route::middleware('auth:sanctum')->prefix('notifications')->group(function () {
+    Route::get('/', [NotificationController::class, 'index']);
+    Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::put('/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::put('/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::delete('/{id}', [NotificationController::class, 'destroy']);
+});
+
+// =============================================================================
+// ANALYTICS & ENGAGEMENT
+// =============================================================================
+use App\Http\Controllers\Api\PropertyViewController;
+use App\Http\Controllers\Api\ProfileViewController;
+use App\Http\Controllers\Api\BlogViewController;
+use App\Http\Controllers\Api\BlogLikeController;
+use App\Http\Controllers\Api\BlogCommentController;
+use App\Http\Controllers\Api\NewsViewController;
+use App\Http\Controllers\Api\NewsLikeController;
+use App\Http\Controllers\Api\NewsCommentController;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Property views
+// guest.session middleware attaches a GuestSession (creates one if absent) so
+// all visitors — registered, guest-session, or anonymous — can be tracked.
+// ─────────────────────────────────────────────────────────────────────────────
+Route::middleware('guest.session')->group(function () {
+    Route::post('/properties/{property}/views', [PropertyViewController::class, 'record']);
+    Route::get('/properties/{property}/views',  [PropertyViewController::class, 'count']);
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Agent / Broker profile views
+    // ─────────────────────────────────────────────────────────────────────────
+    Route::post('/agents/{user}/views', [ProfileViewController::class, 'record']);
+    Route::get('/agents/{user}/views',  [ProfileViewController::class, 'count']);
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Blog engagement
+    // ─────────────────────────────────────────────────────────────────────────
+    Route::post('/blogs/{blog}/views',    [BlogViewController::class, 'record']);
+    Route::get('/blogs/{blog}/views',     [BlogViewController::class, 'count']);
+
+    Route::get('/blogs/{blog}/likes',     [BlogLikeController::class, 'show']);
+    Route::post('/blogs/{blog}/likes',    [BlogLikeController::class, 'toggle']);
+
+    Route::get('/blogs/{blog}/comments',  [BlogCommentController::class, 'index']);
+    Route::post('/blogs/{blog}/comments', [BlogCommentController::class, 'store']);
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // News engagement
+    // ─────────────────────────────────────────────────────────────────────────
+    Route::post('/news/{news}/views',    [NewsViewController::class, 'record']);
+    Route::get('/news/{news}/views',     [NewsViewController::class, 'count']);
+
+    Route::get('/news/{news}/likes',     [NewsLikeController::class, 'show']);
+    Route::post('/news/{news}/likes',    [NewsLikeController::class, 'toggle']);
+
+    Route::get('/news/{news}/comments',  [NewsCommentController::class, 'index']);
+    Route::post('/news/{news}/comments', [NewsCommentController::class, 'store']);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Comment deletion — authenticated users (own comment) or admin/moderator
+// ─────────────────────────────────────────────────────────────────────────────
+Route::middleware('auth:sanctum')->group(function () {
+    Route::delete('/blogs/{blog}/comments/{comment}', [BlogCommentController::class, 'destroy']);
+    Route::delete('/news/{news}/comments/{comment}',  [NewsCommentController::class, 'destroy']);
+});
+
+// Admin / Moderator — delete any comment (explicit admin prefix keeps parity with existing admin routes)
+Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
+    Route::delete('/blogs/{blog}/comments/{comment}', [BlogCommentController::class, 'destroy']);
+    Route::delete('/news/{news}/comments/{comment}',  [NewsCommentController::class, 'destroy']);
 });
 
