@@ -273,16 +273,16 @@ const FeaturedProperties = () => {
         className="relative w-full mt-4 sm:mt-6"
       >
         {loading || (selectedLocation !== 'All Locations' && browseLoading) ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 justify-items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={`skeleton-${i}`} className="w-full" style={{ minWidth: '290px', maxWidth: '375px' }}>
+              <div key={`skeleton-${i}`} className="w-full">
                 <VerticalPropertyCardSkeleton />
               </div>
             ))}
           </div>
         ) : paginatedProperties.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 justify-items-center">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
               {paginatedProperties.map((property) => {
                 const propertySize = property.area 
                   ? `${property.area} sqft` 
@@ -306,7 +306,7 @@ const FeaturedProperties = () => {
                   || 'Rental.Ph Official'
                 
                 return (
-                  <div key={property.id} className="w-full" style={{ minWidth: '280px', maxWidth: '345px' }}>
+                  <div key={property.id} className="w-full">
                     <VerticalPropertyCard
                       id={property.id}
                       propertyType={property.type}
