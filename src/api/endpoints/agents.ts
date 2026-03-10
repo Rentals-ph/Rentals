@@ -44,6 +44,9 @@ export interface Agent {
   phone?: string | null
   whatsapp?: string | null
   agency_name?: string | null
+  company_name?: string | null
+  description?: string | null
+  company_image?: string | null
   office_address?: string | null
   city?: string | null
   state?: string | null

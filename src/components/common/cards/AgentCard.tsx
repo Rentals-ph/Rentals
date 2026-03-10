@@ -314,10 +314,10 @@ export default function AgentCard({
           </p>
         )}
 
-        {/* Description - can be blank */}
+        {/* Description - always show section */}
         {description && (
           <p
-            className="mb-3 sm:mb-4 text-gray-600"
+            className="mb-3 sm:mb-4 text-gray-600 line-clamp-3"
             style={{
               fontSize: 'clamp(11px, 2.5vw, 13px)',
               lineHeight: '1.5',

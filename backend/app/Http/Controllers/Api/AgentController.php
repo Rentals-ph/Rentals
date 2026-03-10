@@ -347,6 +347,8 @@ class AgentController extends Controller
                     'phone',
                     'whatsapp',
                     'agency_name',
+                    'company_name',
+                    'description',
                     'city',
                     'state',
                     'image_path',
@@ -366,6 +368,17 @@ class AgentController extends Controller
                         }
                     }
                     
+                    // Get company image from media table
+                    $companyImageUrl = null;
+                    $companyImage = $agent->getFirstMedia('company');
+                    if ($companyImage) {
+                        try {
+                            $companyImageUrl = \App\Services\ImageService::url($companyImage->path);
+                        } catch (\Exception $e) {
+                            \Log::warning('Error generating company image URL for agent ' . $agent->id . ': ' . $e->getMessage());
+                        }
+                    }
+                    
                     return [
                         'id' => $agent->id,
                         'first_name' => $agent->first_name,
@@ -375,6 +388,9 @@ class AgentController extends Controller
                         'phone' => $agent->phone,
                         'whatsapp' => $agent->whatsapp,
                         'agency_name' => $agent->agency_name,
+                        'company_name' => $agent->company_name,
+                        'description' => $agent->description,
+                        'company_image' => $companyImageUrl,
                         'city' => $agent->city,
                         'state' => $agent->state,
                         'properties_count' => $agent->properties_count ?? 0,
@@ -588,6 +604,17 @@ class AgentController extends Controller
             $imageUrl = \App\Services\ImageService::url($avatarPath);
         }
         
+        // Get company image from media table
+        $companyImageUrl = null;
+        $companyImage = $agent->getFirstMedia('company');
+        if ($companyImage) {
+            try {
+                $companyImageUrl = \App\Services\ImageService::url($companyImage->path);
+            } catch (\Exception $e) {
+                \Log::warning('Error generating company image URL for agent ' . $agent->id . ': ' . $e->getMessage());
+            }
+        }
+        
         return response()->json([
             'success' => true,
             'data' => [
@@ -599,6 +626,9 @@ class AgentController extends Controller
                 'email'           => $agent->email,
                 'phone'           => $agent->phone,
                 'agency_name'     => $agent->agency_name,
+                'company_name'    => $agent->company_name,
+                'description'     => $agent->description,
+                'company_image'   => $companyImageUrl,
                 'city'            => $agent->city,
                 'state'           => $agent->state,
                 'image'           => $imageUrl,

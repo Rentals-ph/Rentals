@@ -60,6 +60,8 @@ class DatabaseSeeder extends Seeder
                     'phone' => '+63 32 123 4567',
                     'whatsapp' => '639321234567',
                     'agency_name' => 'Rentals.ph Official',
+                    'company_name' => 'Rentals.ph Official',
+                    'description' => 'A licensed real estate professional with over 8 years of experience in the Philippine rental market, specializing in connecting property owners with high-quality tenants through personalized service and data-driven insights.',
                     'license_type' => 'broker',
                     'prc_license_number' => 'PRC-001',
                 ]
@@ -81,6 +83,8 @@ class DatabaseSeeder extends Seeder
                     'phone' => '+63 917 123 4567',
                     'whatsapp' => '639171234567',
                     'agency_name' => 'Premium Realty',
+                    'company_name' => 'Premium Realty Group',
+                    'description' => 'Experienced real estate professional specializing in luxury properties and high-end rentals. Committed to providing exceptional service and finding the perfect match for both property owners and tenants.',
                     'license_type' => 'broker',
                     'prc_license_number' => 'PRC-002',
                 ]
@@ -102,6 +106,8 @@ class DatabaseSeeder extends Seeder
                     'phone' => '+63 917 234 5678',
                     'whatsapp' => '639172345678',
                     'agency_name' => 'Elite Properties',
+                    'company_name' => 'Elite Properties Real Estate',
+                    'description' => 'Dedicated real estate agent with a passion for helping clients find their ideal properties. Specializing in residential and commercial rentals with a focus on customer satisfaction.',
                     'license_type' => 'salesperson',
                     'prc_license_number' => 'PRC-003',
                 ]
@@ -123,6 +129,8 @@ class DatabaseSeeder extends Seeder
                     'phone' => '+63 917 345 6789',
                     'whatsapp' => '639173456789',
                     'agency_name' => 'Metro Realty Group',
+                    'company_name' => 'Metro Realty Group',
+                    'description' => 'Professional real estate broker with extensive knowledge of the Cebu market. Expert in property management, tenant relations, and market analysis.',
                     'license_type' => 'broker',
                     'prc_license_number' => 'PRC-004',
                 ]
@@ -144,6 +152,8 @@ class DatabaseSeeder extends Seeder
                     'phone' => '+63 917 456 7890',
                     'whatsapp' => '639174567890',
                     'agency_name' => 'City Properties',
+                    'company_name' => 'City Properties Realty',
+                    'description' => 'Skilled real estate agent focused on urban properties and modern living spaces. Helping clients navigate the rental market with expertise and professionalism.',
                     'license_type' => 'salesperson',
                     'prc_license_number' => 'PRC-005',
                 ]
@@ -165,6 +175,8 @@ class DatabaseSeeder extends Seeder
                     'phone' => '+63 917 567 8901',
                     'whatsapp' => '639175678901',
                     'agency_name' => 'Luxury Homes',
+                    'company_name' => 'Luxury Homes Real Estate',
+                    'description' => 'Premium real estate broker specializing in luxury properties and high-end rentals. Known for attention to detail and exceptional client service.',
                     'license_type' => 'broker',
                     'prc_license_number' => 'PRC-006',
                 ]
@@ -186,6 +198,8 @@ class DatabaseSeeder extends Seeder
                     'phone' => '+63 917 678 9012',
                     'whatsapp' => '639176789012',
                     'agency_name' => 'Prime Real Estate',
+                    'company_name' => 'Prime Real Estate Services',
+                    'description' => 'Experienced real estate professional with a strong track record in property management and tenant relations. Committed to excellence in every transaction.',
                     'license_type' => 'salesperson',
                     'prc_license_number' => 'PRC-007',
                 ]
@@ -207,6 +221,8 @@ class DatabaseSeeder extends Seeder
                     'phone' => '+63 917 789 0123',
                     'whatsapp' => '639177890123',
                     'agency_name' => 'Dream Properties',
+                    'company_name' => 'Dream Properties Realty',
+                    'description' => 'Passionate real estate broker helping clients find their dream homes. Specializing in family-friendly properties and long-term rentals.',
                     'license_type' => 'broker',
                     'prc_license_number' => 'PRC-008',
                 ]
@@ -228,23 +244,59 @@ class DatabaseSeeder extends Seeder
                     'phone' => '+63 917 890 1234',
                     'whatsapp' => '639178901234',
                     'agency_name' => 'Global Realty',
+                    'company_name' => 'CondorHome RealEstate Agency',
+                    'description' => 'A licensed real estate professional with over 8 years of experience in the Philippine rental market, specializing in connecting property owners with high-quality tenants through personalized service and data-driven insights.',
                     'license_type' => 'salesperson',
                     'prc_license_number' => 'PRC-009',
                 ]
             ),
         ];
 
+        // Add company pictures to agents using media table
+        $companyImages = [
+            'official@rentals.ph' => 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=400&h=300&fit=crop',
+            'glaiza.jerome@rentals.ph' => 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop',
+            'miguel.abella@rentals.ph' => 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=300&fit=crop',
+            'maria.santos@rentals.ph' => 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=400&h=300&fit=crop',
+            'john.reyes@rentals.ph' => 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=300&fit=crop',
+            'catherine.lim@rentals.ph' => 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=300&fit=crop',
+            'roberto.cruz@rentals.ph' => 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400&h=300&fit=crop',
+            'angela.fernandez@rentals.ph' => 'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?w=400&h=300&fit=crop',
+            'james.wilson@rentals.ph' => 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop',
+        ];
+
+        foreach ($agents as $agent) {
+            if (isset($companyImages[$agent->email])) {
+                // Store company image in media table with collection 'company'
+                $imageUrl = $companyImages[$agent->email];
+                $imagePath = 'images/companies/' . $agent->id . '/company.jpg';
+                
+                // Download and store the image
+                $imageContent = @file_get_contents($imageUrl);
+                if ($imageContent !== false) {
+                    $directory = storage_path('app/public/images/companies/' . $agent->id);
+                    if (!is_dir($directory)) {
+                        mkdir($directory, 0755, true);
+                    }
+                    file_put_contents(storage_path('app/public/' . $imagePath), $imageContent);
+                    
+                    // Store in media table
+                    $agent->storeMedia($imagePath, 'company', 0, 'image/jpeg', strlen($imageContent));
+                }
+            }
+        }
+
         // Update agents to ensure they have profile pictures and other fields
         $agentUpdates = [
-            ['email' => 'official@rentals.ph', 'image_path' => 'images/users/1/avatar.jpg', 'city' => 'Cebu City', 'state' => 'Cebu', 'phone' => '+63 32 123 4567', 'whatsapp' => '639321234567', 'agency_name' => 'Rentals.ph Official', 'license_type' => 'broker', 'prc_license_number' => 'PRC-001'],
-            ['email' => 'glaiza.jerome@rentals.ph', 'image_path' => 'images/users/2/avatar.jpg', 'city' => 'Cebu City', 'state' => 'Cebu', 'phone' => '+63 917 123 4567', 'whatsapp' => '639171234567', 'agency_name' => 'Premium Realty', 'license_type' => 'broker', 'prc_license_number' => 'PRC-002'],
-            ['email' => 'miguel.abella@rentals.ph', 'image_path' => 'images/users/3/avatar.jpg', 'city' => 'Cebu City', 'state' => 'Cebu', 'phone' => '+63 917 234 5678', 'whatsapp' => '639172345678', 'agency_name' => 'Elite Properties', 'license_type' => 'salesperson', 'prc_license_number' => 'PRC-003'],
-            ['email' => 'maria.santos@rentals.ph', 'image_path' => 'images/users/4/avatar.jpg', 'city' => 'Cebu City', 'state' => 'Cebu', 'phone' => '+63 917 345 6789', 'whatsapp' => '639173456789', 'agency_name' => 'Metro Realty Group', 'license_type' => 'broker', 'prc_license_number' => 'PRC-004'],
-            ['email' => 'john.reyes@rentals.ph', 'image_path' => 'images/users/5/avatar.jpg', 'city' => 'Cebu City', 'state' => 'Cebu', 'phone' => '+63 917 456 7890', 'whatsapp' => '639174567890', 'agency_name' => 'City Properties', 'license_type' => 'salesperson', 'prc_license_number' => 'PRC-005'],
-            ['email' => 'catherine.lim@rentals.ph', 'image_path' => 'images/users/6/avatar.jpg', 'city' => 'Cebu City', 'state' => 'Cebu', 'phone' => '+63 917 567 8901', 'whatsapp' => '639175678901', 'agency_name' => 'Luxury Homes', 'license_type' => 'broker', 'prc_license_number' => 'PRC-006'],
-            ['email' => 'roberto.cruz@rentals.ph', 'image_path' => 'images/users/7/avatar.jpg', 'city' => 'Cebu City', 'state' => 'Cebu', 'phone' => '+63 917 678 9012', 'whatsapp' => '639176789012', 'agency_name' => 'Prime Real Estate', 'license_type' => 'salesperson', 'prc_license_number' => 'PRC-007'],
-            ['email' => 'angela.fernandez@rentals.ph', 'image_path' => 'images/users/8/avatar.jpg', 'city' => 'Cebu City', 'state' => 'Cebu', 'phone' => '+63 917 789 0123', 'whatsapp' => '639177890123', 'agency_name' => 'Dream Properties', 'license_type' => 'broker', 'prc_license_number' => 'PRC-008'],
-            ['email' => 'james.wilson@rentals.ph', 'image_path' => 'images/users/9/avatar.jpg', 'city' => 'Cebu City', 'state' => 'Cebu', 'phone' => '+63 917 890 1234', 'whatsapp' => '639178901234', 'agency_name' => 'Global Realty', 'license_type' => 'salesperson', 'prc_license_number' => 'PRC-009'],
+            ['email' => 'official@rentals.ph', 'image_path' => 'images/users/1/avatar.jpg', 'city' => 'Cebu City', 'state' => 'Cebu', 'phone' => '+63 32 123 4567', 'whatsapp' => '639321234567', 'agency_name' => 'Rentals.ph Official', 'company_name' => 'Rentals.ph Official', 'description' => 'A licensed real estate professional with over 8 years of experience in the Philippine rental market, specializing in connecting property owners with high-quality tenants through personalized service and data-driven insights.', 'license_type' => 'broker', 'prc_license_number' => 'PRC-001'],
+            ['email' => 'glaiza.jerome@rentals.ph', 'image_path' => 'images/users/2/avatar.jpg', 'city' => 'Cebu City', 'state' => 'Cebu', 'phone' => '+63 917 123 4567', 'whatsapp' => '639171234567', 'agency_name' => 'Premium Realty', 'company_name' => 'Premium Realty Group', 'description' => 'Experienced real estate professional specializing in luxury properties and high-end rentals. Committed to providing exceptional service and finding the perfect match for both property owners and tenants.', 'license_type' => 'broker', 'prc_license_number' => 'PRC-002'],
+            ['email' => 'miguel.abella@rentals.ph', 'image_path' => 'images/users/3/avatar.jpg', 'city' => 'Cebu City', 'state' => 'Cebu', 'phone' => '+63 917 234 5678', 'whatsapp' => '639172345678', 'agency_name' => 'Elite Properties', 'company_name' => 'Elite Properties Real Estate', 'description' => 'Dedicated real estate agent with a passion for helping clients find their ideal properties. Specializing in residential and commercial rentals with a focus on customer satisfaction.', 'license_type' => 'salesperson', 'prc_license_number' => 'PRC-003'],
+            ['email' => 'maria.santos@rentals.ph', 'image_path' => 'images/users/4/avatar.jpg', 'city' => 'Cebu City', 'state' => 'Cebu', 'phone' => '+63 917 345 6789', 'whatsapp' => '639173456789', 'agency_name' => 'Metro Realty Group', 'company_name' => 'Metro Realty Group', 'description' => 'Professional real estate broker with extensive knowledge of the Cebu market. Expert in property management, tenant relations, and market analysis.', 'license_type' => 'broker', 'prc_license_number' => 'PRC-004'],
+            ['email' => 'john.reyes@rentals.ph', 'image_path' => 'images/users/5/avatar.jpg', 'city' => 'Cebu City', 'state' => 'Cebu', 'phone' => '+63 917 456 7890', 'whatsapp' => '639174567890', 'agency_name' => 'City Properties', 'company_name' => 'City Properties Realty', 'description' => 'Skilled real estate agent focused on urban properties and modern living spaces. Helping clients navigate the rental market with expertise and professionalism.', 'license_type' => 'salesperson', 'prc_license_number' => 'PRC-005'],
+            ['email' => 'catherine.lim@rentals.ph', 'image_path' => 'images/users/6/avatar.jpg', 'city' => 'Cebu City', 'state' => 'Cebu', 'phone' => '+63 917 567 8901', 'whatsapp' => '639175678901', 'agency_name' => 'Luxury Homes', 'company_name' => 'Luxury Homes Real Estate', 'description' => 'Premium real estate broker specializing in luxury properties and high-end rentals. Known for attention to detail and exceptional client service.', 'license_type' => 'broker', 'prc_license_number' => 'PRC-006'],
+            ['email' => 'roberto.cruz@rentals.ph', 'image_path' => 'images/users/7/avatar.jpg', 'city' => 'Cebu City', 'state' => 'Cebu', 'phone' => '+63 917 678 9012', 'whatsapp' => '639176789012', 'agency_name' => 'Prime Real Estate', 'company_name' => 'Prime Real Estate Services', 'description' => 'Experienced real estate professional with a strong track record in property management and tenant relations. Committed to excellence in every transaction.', 'license_type' => 'salesperson', 'prc_license_number' => 'PRC-007'],
+            ['email' => 'angela.fernandez@rentals.ph', 'image_path' => 'images/users/8/avatar.jpg', 'city' => 'Cebu City', 'state' => 'Cebu', 'phone' => '+63 917 789 0123', 'whatsapp' => '639177890123', 'agency_name' => 'Dream Properties', 'company_name' => 'Dream Properties Realty', 'description' => 'Passionate real estate broker helping clients find their dream homes. Specializing in family-friendly properties and long-term rentals.', 'license_type' => 'broker', 'prc_license_number' => 'PRC-008'],
+            ['email' => 'james.wilson@rentals.ph', 'image_path' => 'images/users/9/avatar.jpg', 'city' => 'Cebu City', 'state' => 'Cebu', 'phone' => '+63 917 890 1234', 'whatsapp' => '639178901234', 'agency_name' => 'Global Realty', 'company_name' => 'CondorHome RealEstate Agency', 'description' => 'A licensed real estate professional with over 8 years of experience in the Philippine rental market, specializing in connecting property owners with high-quality tenants through personalized service and data-driven insights.', 'license_type' => 'salesperson', 'prc_license_number' => 'PRC-009'],
         ];
 
         foreach ($agentUpdates as $update) {

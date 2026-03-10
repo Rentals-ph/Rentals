@@ -136,7 +136,12 @@ trait HasSlug
         $slug = mb_strtolower($value, 'UTF-8');
 
         // Transliterate accented characters to ASCII equivalents when possible
-        $slug = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $slug) ?: $slug;
+        if (function_exists('iconv')) {
+            $slug = \iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $slug) ?: $slug;
+        } else {
+            // Fallback: use Str::ascii() if iconv is not available
+            $slug = Str::ascii($slug);
+        }
 
         // Replace anything that is not alphanumeric with a hyphen
         $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);

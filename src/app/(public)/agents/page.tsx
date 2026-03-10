@@ -78,9 +78,9 @@ export default function AgentsPage() {
             phone: a.phone || undefined,
             whatsapp: a.whatsapp || undefined,
             image: a.profile_image || a.image || a.avatar || a.image_path || null,
-            companyImage: (a as any).company_image || (a as any).agency_image || (a as any).company_logo || null,
-            companyName: a.agency_name || null,
-            description: (a as any).description || null,
+            companyImage: a.company_image || null,
+            companyName: a.company_name || null,
+            description: a.description || null,
           } as AgentInfo
         })
         setManagers(mapped)

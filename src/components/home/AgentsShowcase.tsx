@@ -52,9 +52,9 @@ function AgentsShowcase() {
               a.profile_image || a.image || a.avatar || a.image_path || null,
               a.id,
             ),
-            companyImage: a.company_image || a.agency_image || a.company_logo || null,
-            companyName: a.agency_name || null,
-            description: (a as any).description || null,
+            companyImage: a.company_image || null,
+            companyName: a.company_name || null,
+            description: a.description || null,
           }
         })
 

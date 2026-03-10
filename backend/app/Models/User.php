@@ -31,6 +31,8 @@ class User extends Authenticatable
         'date_of_birth',
         'role',
         'agency_name',
+        'company_name',
+        'description',
         'office_address',
         'city',
         'state',
