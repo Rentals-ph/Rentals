@@ -38,13 +38,6 @@ export default function AgentsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const searchParams = useSearchParams()
 
-  const features = [
-    { id: 1, icon: '/assets/icons/secure.svg', alt: 'secure', title: 'Property Management', description: 'Expert handling of property listings, maintenance coordination, and tenant relations.' },
-    { id: 2, icon: '/assets/icons/support.svg', alt: 'support', title: 'Tenant Screening', description: 'Thorough background checks and verification to ensure reliable tenants.' },
-    { id: 3, icon: '/assets/icons/listing.svg', alt: 'listing', title: 'Professional Service', description: 'Licensed and verified managers committed to quality service.' },
-    { id: 4, icon: '/assets/icons/insight.svg', alt: 'insight', title: 'Legal Compliance', description: 'Ensuring all rental agreements meet legal requirements and standards.' },
-  ]
-
   useEffect(() => {
     let mounted = true
     const load = async () => {
@@ -117,72 +110,134 @@ export default function AgentsPage() {
 
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
-      {/* Hero - mobile responsive: person hidden on mobile; on md+ person's head protrudes above section */}
-      <section
-        className="relative mt-0 sm:mt-16 md:mt-20 pt-6 sm:pt-12 md:pt-16 pb-6 sm:pb-12 md:pb-16 px-4 sm:px-6 md:px-10 lg:px-[150px] min-h-[320px] sm:min-h-[400px] md:min-h-[500px] lg:min-h-[550px] overflow-visible"
-        style={{
-          backgroundImage: `url(${ASSETS.BG_RENT_MANAGERS_HERO})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
-      >
-        <div className="mx-auto relative flex flex-col lg:flex-row items-center max-w-full min-h-[280px] sm:min-h-[320px] lg:min-h-[300px] overflow-visible">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 items-center w-full overflow-visible">
-            <div className="order-2 lg:order-1 text-left max-w-[650px]">
-              <h1 className="font-bold text-white mb-3 sm:mb-4 md:mb-6 leading-tight text-xl sm:text-2xl md:text-3xl lg:text-4xl">
-                What are Agents?
-              </h1>
-              <p className="text-white leading-relaxed text-sm sm:text-base md:text-lg lg:text-xl font-light">
-                Agents are trusted professionals who help property owners manage their
-                rental properties and assist tenants in finding their perfect home. They handle
-                everything from property listings to tenant screening, making the rental process
-                smooth and stress-free for everyone involved.
-              </p>
-            </div>
-            {/* Person: hidden on mobile; on md+ positioned so head protrudes above hero */}
-            <div className="order-1 lg:order-2 hidden md:flex justify-center lg:justify-end w-full lg:max-w-[50%] overflow-visible items-end self-stretch min-h-[320px] lg:min-h-0">
-              <div className="absolute top-3 right-0 flex items-end justify-end w-full max-w-[280px] md:max-w-[360px] lg:max-w-[420px] xl:max-w-[500px] overflow-visible" style={{ marginTop: '-12%' }}>
-                <img
-                  className="w-full h-auto max-h-[85vh] object-contain object-bottom block"
-                  src={ASSETS.AGENTS_HERO_PERSON}
-                  alt="Agent"
-                />
-              </div>
+      {/* Hero - match About hero height & left-aligned content */}
+      <section className="w-full relative min-h-[220px] xs:min-h-[260px] sm:min-h-[320px] md:min-h-[400px] flex flex-col overflow-hidden">
+        {/* Background image + gradient overlay */}
+        <div className="absolute top-0 left-0 w-full h-full z-[1]">
+          <img
+            src={ASSETS.BG_RENT_MANAGERS_HERO}
+            alt="Agents hero background"
+            className="w-full h-full object-cover object-center"
+          />
+          <div
+            className="absolute top-0 left-0 w-full h-full z-[2]"
+            style={{
+              background:
+                'linear-gradient(90deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.6) 35%, rgba(0, 0, 0, 0.45) 65%, rgba(0, 0, 0, 0.3) 100%)',
+              opacity: 0.95,
+            }}
+          />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-[3] max-w-[var(--page-max-width)] mx-auto px-4 sm:px-6 py-10 sm:py-14 md:py-16 w-full flex items-center justify-start flex-1">
+          <div className="text-left flex flex-col items-start justify-center max-w-xl">
+            <h1 className="font-outfit font-extrabold text-white tracking-tight leading-tight m-0 text-xl xs:text-2xl mobile:text-3xl sm:text-4xl md:text-5xl lg:text-6xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
+              AGENTS
+            </h1>
+            <p className="max-w-2xl font-outfit text-white m-0 mt-3 text-sm xs:text-base md:text-xl drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]">
+              Agents are trusted professionals who help property owners manage their rental properties and assist tenants
+              in finding their perfect home. They handle everything from property listings to tenant screening, making
+              the rental process smooth and stress-free for everyone involved.
+            </p>
+          </div>
+        </div>
+
+        {/* Right-side three agents image, fixed to bottom of hero */}
+        <div className="hidden md:block absolute bottom-0 right-0 z-[3] translate-y-[2px]">
+          <div className="flex items-end pr-4 sm:pr-8 md:pr-20 lg:pr-56">
+            <div className="flex items-end">              {/* Largest on the left */}
+              <img
+                src={ASSETS.AGENTS_HERO_PERSON}
+                alt="Professional rental agents"
+                className="h-[260px] lg:h-[320px] xl:h-[360px] w-auto object-contain drop-shadow-[0_20px_60px_rgba(0,0,0,0.85)]"
+              />
+              {/* Medium in the middle, overlapping */}
+              <img
+                src={ASSETS.AGENTS_HERO_PERSON}
+                alt="Professional rental agents"
+                className="h-[235px] lg:h-[260px] xl:h-[320px] w-auto object-contain -ml-20 lg:-ml-22 xl:-ml-24 drop-shadow-[0_18px_56px_rgba(0,0,0,0.8)]"
+              />
+              {/* Smallest on the right */}
+              <img
+                src={ASSETS.AGENTS_HERO_PERSON}
+                alt="Professional rental agents"
+                className="h-[210px] lg:h-[260px] xl:h-[290px] w-auto object-contain -ml-20 lg:-ml-22 xl:-ml-24 drop-shadow-[0_16px_52px_rgba(0,0,0,0.75)]"
+              />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Feature cards - overlapping hero, mobile responsive */}
-      <div className="mx-auto px-4 sm:px-6 md:px-10 lg:px-[150px] relative -mt-24 sm:-mt-28 md:-mt-32 lg:-mt-40 z-10 pt-4 pb-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-          {features.map((feature) => (
-            <div
-              key={feature.id}
-              className="bg-white p-4 sm:p-5 md:p-6 rounded-2xl border-[3px] border-[rgb(29,78,216)] shadow-[0_4px_20px_rgba(0,0,0,0.08)]"
-              style={{ border: '3px solid #1D4ED8' }}
-            >
-              <div className="flex flex-col items-center text-center gap-2 sm:gap-3 md:gap-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0">
-                  <img
-                    src={feature.icon}
-                    alt={feature.alt}
-                    className="w-10 h-10 sm:w-12 sm:h-12"
-                    style={{ filter: 'brightness(0) saturate(100%) invert(27%) sepia(95%) saturate(2598%) hue-rotate(210deg) brightness(95%) contrast(92%)' }}
-                  />
-                </div>
-                <div className="font-bold text-base sm:text-lg md:text-xl text-[#2563EB]">
-                  {feature.title}
-                </div>
-                <p className="text-center text-sm sm:text-base md:text-lg text-gray-600 leading-snug">
-                  {feature.description}
-                </p>
-              </div>
+      {/* Results header below hero - styled like properties page */}
+      <section className="px-4 sm:px-6 md:px-10 lg:px-[150px] pt-6 sm:pt-8 pb-2">
+        <div className="mx-auto max-w-[var(--page-max-width)]">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm sm:text-base font-outfit">
+              <span className="text-gray-600">Results for : </span>
+              <span className="text-blue-600 font-medium">Agents</span>
             </div>
-          ))}
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 justify-end">
+              {/* Sort + view controls (reuse properties styles) */}
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-600 font-outfit hidden sm:inline">Sort by</span>
+                <select
+                  className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-8"
+                  style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%23205ED7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.5rem center' }}
+                  defaultValue="newest"
+                >
+                  <option value="newest">Newest</option>
+                  <option value="oldest">Oldest</option>
+                </select>
+                <div className="flex rounded-lg border border-gray-200 p-1 bg-white">
+                  <button
+                    type="button"
+                    className={`px-3 py-1.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-600'}`}
+                    onClick={() => setViewMode('grid')}
+                    aria-label="Grid view"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="2" width="5" height="5" rx="1" />
+                      <rect x="9" y="2" width="5" height="5" rx="1" />
+                      <rect x="2" y="9" width="5" height="5" rx="1" />
+                      <rect x="9" y="9" width="5" height="5" rx="1" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    className={`px-3 py-1.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-600'}`}
+                    onClick={() => setViewMode('list')}
+                    aria-label="List view"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="2" y1="4" x2="14" y2="4" />
+                      <line x1="2" y1="8" x2="14" y2="8" />
+                      <line x1="2" y1="12" x2="14" y2="12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Search Filters button on the right */}
+              <button
+                type="button"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-blue-600 text-blue-600 bg-white font-outfit text-sm font-medium hover:bg-blue-50 transition-colors self-end sm:self-auto"
+              >
+                <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="4" y1="6" x2="20" y2="6" />
+                  <circle cx="4" cy="6" r="2" />
+                  <line x1="4" y1="12" x2="20" y2="12" />
+                  <circle cx="4" cy="12" r="2" />
+                  <line x1="4" y1="18" x2="20" y2="18" />
+                  <circle cx="4" cy="18" r="2" />
+                </svg>
+                <span>Search Filters</span>
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
       {/* Find agents list with right-side filters & CTA */}
       <main className="px-4 sm:px-6 md:px-10 lg:px-[150px] pb-8 sm:pb-10 md:pb-12">

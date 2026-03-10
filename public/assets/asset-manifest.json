@@ -647,11 +647,11 @@
         },
         "ABOUT_LANDING_PAGE": {
           "id": "ABOUT_LANDING_PAGE",
-          "path": "/assets/images/about/landing-page.jpg",
+          "path": "/assets/images/about/about_hero_background.png",
           "category": "images",
           "subcategory": "about",
           "description": "Landing page image",
-          "originalName": "Landing Page.jpg"
+          "originalName": "about_hero_background.png"
         },
         "ABOUT_ISTOCK_10": {
           "id": "ABOUT_ISTOCK_10",
@@ -663,11 +663,11 @@
         },
         "ABOUT_ISTOCK_11": {
           "id": "ABOUT_ISTOCK_11",
-          "path": "/assets/images/about/istockphoto-511061090-612-x-612-11.png",
+          "path": "/assets/images/about/about_ourstory.png",
           "category": "images",
           "subcategory": "about",
-          "description": "iStock photo variant 11",
-          "originalName": "istockphoto-511061090-612-x-612-11.png"
+          "description": "Our company story hero image",
+          "originalName": "about_hero_background.png"
         },
         "ABOUT_OUR_STORY": {
           "id": "ABOUT_OUR_STORY",
@@ -1000,28 +1000,28 @@
     "partners": {
       "PARTNER_1": {
         "id": "PARTNER_1",
-        "path": "/assets/partners/partner1.svg",
+        "path": "/assets/partners/partner1.png",
         "category": "partners",
         "description": "Partner logo 1",
         "originalName": "partner1.svg"
       },
       "PARTNER_2": {
         "id": "PARTNER_2",
-        "path": "/assets/partners/partner2.svg",
+        "path": "/assets/partners/partner2.png",
         "category": "partners",
         "description": "Partner logo 2",
         "originalName": "partner2.svg"
       },
       "PARTNER_3": {
         "id": "PARTNER_3",
-        "path": "/assets/partners/partner3.svg",
+        "path": "/assets/partners/partner3.png",
         "category": "partners",
         "description": "Partner logo 3",
         "originalName": "partner3.svg"
       },
       "PARTNER_5": {
         "id": "PARTNER_5",
-        "path": "/assets/partners/partner5.svg",
+        "path": "/assets/partners/partner4.png",
         "category": "partners",
         "description": "Partner logo 5",
         "originalName": "partner5.svg"
