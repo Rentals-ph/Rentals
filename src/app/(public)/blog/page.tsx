@@ -163,7 +163,7 @@ export default function BlogPage() {
 
       {/* ── Featured Post Hero Section ── */}
       {blogs.length > 0 && (
-        <section className="w-full bg-[#F5F9FF] px-4 sm:px-6 md:px-10 lg:px-[150px] pt-8 pb-4 sm:pt-12 md:pt-16">
+        <section className="w-full bg-[#F5F9FF] px-4 sm:px-6 md:px-10 lg:px-[150px] pt-8 pb-4 sm:pt-12 md:pt-16 mx-auto">
           <div className="max-w-[var(--page-max-width)] ">
             <div className="grid grid-cols-1 lg:grid-cols-[70%_30%] ">
               {/* Left: Large Image (70% width) */}
@@ -233,7 +233,7 @@ export default function BlogPage() {
       )}
 
       {/* ── Blog Grid + Categories Sidebar ── */}
-      <section className="w-full bg-[#F5F9FF] px-4 sm:px-6 md:px-10 lg:px-[150px] pb-8">
+      <section className="w-full bg-[#F5F9FF] px-4 sm:px-6 md:px-10 lg:px-[150px] pb-8 mx-auto">
         <div className="max-w-[var(--page-max-width)]">
           <div className="grid grid-cols-1 lg:grid-cols-[70%_30%] ">
             {/* Left Column: Blog Grid (70% width) */}
@@ -258,23 +258,23 @@ export default function BlogPage() {
                       </div>
                       {/* Content */}
                       <div className="p-4 flex flex-col gap-3 flex-1">
-                        <span className="text-xs text-gray-500 font-outfit">
+                        <span className="text-sm text-gray-500 font-outfit">
                           {post.category || 'Real Estate'}
                         </span>
-                        <h3 className="text-lg font-bold text-gray-900 font-outfit line-clamp-2 leading-tight">
+                        <h3 className="text-xl font-bold text-gray-900 font-outfit line-clamp-2 leading-tight">
                           {post.title}
                         </h3>
-                        <p className="text-sm text-gray-600 font-outfit line-clamp-2 leading-relaxed">
+                        <p className="text-base text-gray-600 font-outfit line-clamp-2 leading-relaxed">
                           {post.excerpt || post.content?.substring(0, 100) + '...'}
                         </p>
-                        <div className="flex items-center gap-2 text-xs text-gray-500 font-outfit">
+                        <div className="flex items-center gap-2 text-sm text-gray-500 font-outfit">
                           <span>By {post.author || 'Anonymous'}</span>
                           <span>•</span>
                           <span>{formatDateShort(post.published_at)}</span>
                         </div>
                         <Link
                           href={`/blog/${post.id}`}
-                          className="flex items-center justify-center px-4 py-2 bg-[#266FFD] text-white font-semibold text-xs font-outfit rounded-md hover:bg-[#1a5dd8] transition-colors w-full mt-auto"
+                          className="flex items-center justify-center px-4 py-2 bg-[#266FFD] text-white font-semibold text-sm font-outfit rounded-md hover:bg-[#1a5dd8] transition-colors w-full mt-auto"
                         >
                           READ MORE
                         </Link>

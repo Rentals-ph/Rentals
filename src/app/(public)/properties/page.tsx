@@ -100,11 +100,6 @@ function PropertiesContent() {
   const locations = ['Metro Manila', 'Makati City', 'BGC', 'Quezon City', 'Mandaluyong', 'Pasig', 'Cebu City', 'Davao City', 'Lapulapu', 'Manila']
   const bathOptions = ['1', '2', '3', '4+']
   const bedOptions = ['1', '2', '3', '4+']
-  const amenitiesOptions = [
-    'Elevator in building', 'Swimming Pool', 'Gym/Fitness Center', 'Parking', 
-    'Air Conditioning', 'Furnished', 'Wi-Fi', 'Security', 'Balcony', 
-    'Garden', 'Pet Friendly', 'Near Public Transport'
-  ]
 
   // Fetch all properties for accurate category counts
   useEffect(() => {
@@ -257,8 +252,29 @@ function PropertiesContent() {
       if (priceMax) priceMatch = priceMatch && price <= parseInt(priceMax)
     }
 
-    return bathMatch && bedMatch && priceMatch
+    // Amenities filter: property must include all selected amenities
+    const amenitiesMatch =
+      selectedAmenities.length === 0 ||
+      (property.amenities && selectedAmenities.every(selected =>
+        property.amenities!.some(a => a && a.toLowerCase() === selected.toLowerCase())
+      ))
+
+    return bathMatch && bedMatch && priceMatch && amenitiesMatch
   })
+
+  // Dynamically compute available amenities from currently filtered properties
+  const availableAmenities = useMemo(() => {
+    const amenitySet = new Set<string>()
+    filteredProperties.forEach(property => {
+      property.amenities?.forEach(rawAmenity => {
+        const amenity = rawAmenity?.trim()
+        if (amenity) {
+          amenitySet.add(amenity)
+        }
+      })
+    })
+    return Array.from(amenitySet).sort((a, b) => a.localeCompare(b))
+  }, [filteredProperties])
 
   // Calculate categories dynamically from all properties with filters applied
   // Use allPropertiesForCount which has all properties, then apply current filters
@@ -294,7 +310,7 @@ function PropertiesContent() {
       })
     }
     
-    // Apply client-side filters (bathrooms, bedrooms, price)
+    // Apply client-side filters (bathrooms, bedrooms, price, amenities)
     filtered = filtered.filter(property => {
       const bathMatch = !minBaths || property.bathrooms >= parseInt(minBaths)
       const bedMatch = !minBeds || property.bedrooms >= parseInt(minBeds)
@@ -306,7 +322,13 @@ function PropertiesContent() {
         if (priceMax) priceMatch = priceMatch && price <= parseInt(priceMax)
       }
 
-      return bathMatch && bedMatch && priceMatch
+      const amenitiesMatch =
+        selectedAmenities.length === 0 ||
+        (property.amenities && selectedAmenities.every(selected =>
+          property.amenities!.some(a => a && a.toLowerCase() === selected.toLowerCase())
+        ))
+
+      return bathMatch && bedMatch && priceMatch && amenitiesMatch
     })
     
     // Count by type - use actual property types from database, not predefined list
@@ -631,7 +653,7 @@ function PropertiesContent() {
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2 font-outfit">Amenities</label>
             <div className="grid grid-cols-2 gap-2">
-              {amenitiesOptions.map((amenity) => (
+              {availableAmenities.map((amenity) => (
                 <label key={amenity} className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -874,7 +896,7 @@ function PropertiesContent() {
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2 font-outfit">Amenities</label>
                 <div className="grid grid-cols-2 gap-2">
-                  {amenitiesOptions.map((amenity) => (
+              {availableAmenities.map((amenity) => (
                     <label key={amenity} className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
