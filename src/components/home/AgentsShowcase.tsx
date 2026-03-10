@@ -27,7 +27,7 @@ function AgentsShowcase() {
   const [agents, setAgents] = useState<AgentSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 4 // 1 row × 4 cards per row
+  const itemsPerPage = 3 // 1 row × 3 cards per row
 
   useEffect(() => {
     let mounted = true
@@ -137,8 +137,8 @@ function AgentsShowcase() {
           className="relative w-full mt-4 sm:mt-6"
         >
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-              {Array.from({ length: 4 }).map((_, i) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+              {Array.from({ length: 3 }).map((_, i) => (
                 <div key={`skeleton-${i}`} className="w-full">
                   <div className="bg-gray-200 animate-pulse h-[400px] rounded-2xl" />
                 </div>
@@ -146,7 +146,7 @@ function AgentsShowcase() {
             </div>
           ) : visibleAgents.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
                 {visibleAgents.map((agent, index) => (
                   <FadeInOnView
                     key={agent.id}

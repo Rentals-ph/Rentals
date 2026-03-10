@@ -20,7 +20,7 @@ const FeaturedProperties = () => {
   const [loading, setLoading] = useState(true)
   const [browseLoading, setBrowseLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 8 // 2 rows × 4 cards per row
+  const itemsPerPage = 6 // 2 rows × 3 cards per row
 
   // Only include city names that are 1-2 words (exclude long address-like strings)
   const isShortCityName = (s: string) => s.trim().split(/\s+/).length <= 2
@@ -273,16 +273,16 @@ const FeaturedProperties = () => {
         className="relative w-full mt-4 sm:mt-6"
       >
         {loading || (selectedLocation !== 'All Locations' && browseLoading) ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 justify-items-center">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={`skeleton-${i}`} className="w-full" style={{ minWidth: '280px', maxWidth: '345px' }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 justify-items-center">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={`skeleton-${i}`} className="w-full" style={{ minWidth: '290px', maxWidth: '375px' }}>
                 <VerticalPropertyCardSkeleton />
               </div>
             ))}
           </div>
         ) : paginatedProperties.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 justify-items-center">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 justify-items-center">
               {paginatedProperties.map((property) => {
                 const propertySize = property.area 
                   ? `${property.area} sqft` 
