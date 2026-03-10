@@ -868,24 +868,7 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
             ))}
           </div>
 
-          {/* Right: save + publish */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleSave}
-              disabled={saveStatus === 'saving'}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 disabled:opacity-50 transition-colors">
-              {saveStatus === 'saving' ? (
-                <span className="w-3.5 h-3.5 border-2 border-gray-400 border-t-rental-blue-600 rounded-full animate-spin" />
-              ) : '💾'}
-              {saveStatus === 'saving' ? 'Saving…' : 'Save'}
-            </button>
-
-            <button
-              onClick={() => setShowPublishModal(true)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${isPublished ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-rental-blue-600 hover:bg-rental-blue-700 text-white'}`}>
-              {isPublished ? '🟢 Published' : '🚀 Publish'}
-            </button>
-          </div>
+         
         </header>
 
         {/* ── Main Area ── */}
