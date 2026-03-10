@@ -130,7 +130,7 @@ export default function AgentsPage() {
         </div>
 
         {/* Content */}
-        <div className="relative z-[3] max-w-[var(--page-max-width)] mx-auto px-4 sm:px-6 py-10 sm:py-14 md:py-16 w-full flex items-center justify-start flex-1">
+        <div className="relative z-[3] max-w-[var(--page-max-width)] mx-auto py-10 sm:py-14 md:py-16 w-full flex items-center justify-start flex-1">
           <div className="text-left flex flex-col items-start justify-center max-w-xl">
             <h1 className="font-outfit font-extrabold text-white tracking-tight leading-tight m-0 text-xl xs:text-2xl mobile:text-3xl sm:text-4xl md:text-5xl lg:text-6xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
               AGENTS
