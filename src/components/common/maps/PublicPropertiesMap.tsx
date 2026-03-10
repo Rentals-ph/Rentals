@@ -423,7 +423,7 @@ const PublicPropertiesMap = forwardRef<PublicPropertiesMapHandle, PublicProperti
           <button
             type="button"
             onClick={() => setIsFullView(true)}
-            className="absolute top-3 right-3 z-[1000] flex items-center gap-2 rounded-lg bg-white/95 px-3 py-2 text-sm font-semibold text-slate-800 shadow-lg ring-1 ring-black/10 transition hover:bg-white hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="absolute bottom-3 left-3 z-[1000] flex items-center gap-2 rounded-lg bg-white/95 px-3 py-2 text-sm font-semibold text-slate-800 shadow-lg ring-1 ring-black/10 transition hover:bg-white hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             aria-label="Expand map to full view"
             title="Full view"
           >

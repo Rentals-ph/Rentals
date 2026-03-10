@@ -7,7 +7,7 @@ import { blogsApi } from '@/api'
 import type { Blog } from '@/types'
 import { ASSETS } from '@/utils/assets'
 import { Pagination, BlogCardSkeleton } from '@/components/common'
-import { FiChevronLeft, FiChevronRight } from 'react-icons/fi'
+import { FiChevronLeft, FiChevronRight, FiHeart, FiMessageCircle, FiShare2 } from 'react-icons/fi'
 
 export default function BlogPage() {
   const [currentPage, setCurrentPage] = useState(1)
@@ -120,157 +120,265 @@ export default function BlogPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-white overflow-x-hidden">
-      {/* ── Previous Hero Section ── */}
-      <section className="w-full relative min-h-[280px] sm:min-h-[360px] md:min-h-[420px] lg:min-h-[500px] flex flex-col overflow-hidden">
+    <div className="flex min-h-screen flex-col bg-[#F5F9FF] overflow-x-hidden">
+      {/* ── Hero Section ── */}
+      <section className="w-full relative min-h-[220px] xs:min-h-[260px] sm:min-h-[320px] md:min-h-[400px] flex flex-col overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full z-[1]">
           <img
             src="/assets/images/blog/blog-hero-bg.png"
-            alt=""
+            alt="Blog hero background"
             className="w-full h-full object-cover object-center"
           />
-          <div className="absolute inset-0 z-[2] bg-gradient-to-b from-[#224580]/20 to-transparent" aria-hidden />
-        </div>
-        <div className="relative z-[3] max-w-[var(--page-max-width)] mx-auto px-4 sm:px-6 md:px-10 lg:px-[150px] py-10 sm:py-16 md:py-24 lg:py-32 w-full flex items-center justify-center flex-1">
-          <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-8 w-full max-w-6xl">
-            {/* Left: paper illustration */}
-            <div className="hidden lg:block flex-shrink-0 w-32 xl:w-40 order-1">
-              <img src="/assets/images/blog/blog-paper.png" alt="" className="w-full h-auto object-contain" />
-            </div>
-            {/* Center: title + description */}
-            <div className="flex flex-col items-center justify-center text-center flex-1 order-2 min-w-0">
-              <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-rental-orange-500 font-outfit uppercase m-0 mb-3 sm:mb-6">
-                BLOGS
-              </h1>
-              <p className="text-white font-outfit text-xs sm:text-sm md:text-base lg:text-lg max-w-[720px] leading-relaxed m-0 px-1">
-                Stay Ahead Of The Curve With Expert Insights, Market Trends, And Essential Guides To Philippine Real
-                Estate. From Investment Tips To Neighborhood Spotlights, We Bring You The Stories Shaping The Future
-                Of Homeownership.
-              </p>
-            </div>
-            {/* Right: laptop illustration */}
-            <div className="hidden lg:block flex-shrink-0 w-32 xl:w-40 order-3">
-              <img src="/assets/images/blog/blog-laptop.png" alt="" className="w-full h-auto object-contain" />
-            </div>
+          <div
+            className="absolute top-0 left-0 w-full h-full z-[2]"
+            style={{
+              background:
+                'linear-gradient(90deg, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.50) 35%, rgba(0, 0, 0, 0.45) 65%, rgba(0, 0, 0, 0.35) 100%)',
+              opacity: 0.9,
+            }}
+          />
+          {/* Left: paper illustration */}
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 z-[2] hidden lg:block">
+            <img src="/assets/images/blog/blog-paper.png" alt="" className="w-32 xl:w-40 h-auto object-contain" />
+          </div>
+          {/* Right: laptop illustration */}
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 z-[2] hidden lg:block">
+            <img src="/assets/images/blog/blog-laptop.png" alt="" className="w-32 xl:w-40 h-auto object-contain" />
           </div>
         </div>
-        <div className="relative z-[3] w-full h-3 bg-rental-orange-500" />
+
+        <div className="relative z-[3] max-w-[var(--page-max-width)] mx-auto py-10 sm:py-14 md:py-16 w-full flex items-center justify-start flex-1">
+          <div className="text-left flex flex-col items-start justify-center max-w-xl">
+            <h1
+              className="font-outfit font-extrabold text-white tracking-tight leading-tight m-0 text-xl xs:text-2xl mobile:text-3xl sm:text-4xl md:text-5xl lg:text-6xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
+            >
+              BLOGS
+            </h1>
+            <p className="max-w-3xl font-outfit text-white m-0 mt-3 px-1 text-sm xs:text-base md:text-xl drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]">
+              Stay Ahead Of The Curve With Expert Insights, Market Trends, And Essential Guides To Philippine Real Estate. From Investment Tips To Neighborhood Spotlights, We Bring You The Stories Shaping The Future Of Homeownership.
+            </p>
+          </div>
+        </div>
       </section>
 
-      
-
-      {/* ── 3. Main Body: Content + Sidebar ── */}
-      <div className="w-full mt-5 px-4 sm:px-6 md:px-10 lg:px-[150px] mb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          {/* Left Column (Main Content) */}
-          <div className="lg:col-span-8 flex flex-col gap-12">
-            {/* Featured Post */}
-            {featuredPost && (
-              <div className="flex flex-col gap-6">
-                <div className="relative aspect-[16/7] overflow-hidden group">
-                  <img src={getImageUrl(featuredPost.image)} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                  <DateBadge date={featuredPost.published_at} />
+      {/* ── Featured Post Hero Section ── */}
+      {blogs.length > 0 && (
+        <section className="w-full bg-[#F5F9FF] px-4 sm:px-6 md:px-10 lg:px-[150px] pt-8 pb-4 sm:pt-12 md:pt-16">
+          <div className="max-w-[var(--page-max-width)] ">
+            <div className="grid grid-cols-1 lg:grid-cols-[70%_30%] ">
+              {/* Left: Large Image (70% width) */}
+              <div className="relative aspect-[16/9] overflow-hidden">
+                <img 
+                  src={getImageUrl(blogs[0].image)} 
+                  alt={blogs[0].title}
+                  className="w-full h-full object-cover"
+                />
+                {/* Engagement Icons */}
+                <div className="absolute bottom-4 left-4 flex items-center gap-3 z-10">
+                  <button className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-semibold text-gray-700 hover:bg-white transition-colors">
+                    <FiHeart className="w-4 h-4 text-red-500" />
+                    <span>{blogs[0].likes ?? 374}</span>
+                  </button>
+                  <button className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-semibold text-gray-700 hover:bg-white transition-colors">
+                    <FiMessageCircle className="w-4 h-4 text-blue-500" />
+                    <span>{blogs[0].comments ?? 23}</span>
+                  </button>
+                  <button className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-semibold text-gray-700 hover:bg-white transition-colors">
+                    <FiShare2 className="w-4 h-4 text-gray-600" />
+                  </button>
                 </div>
-                <div className="flex flex-col items-center text-center gap-3">
-                  <span className="text-rental-orange-500 font-bold text-xs uppercase tracking-widest">{featuredPost.category}</span>
-                  <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 font-outfit max-w-[90%] mx-auto leading-tight">
-                    {featuredPost.title}
+              </div>
+
+              {/* Right: Content Panel (30% width) */}
+              <div className="flex flex-col justify-between bg-white p-6 lg:p-8 rounded-lg">
+                <div>
+                  <span className="text-xs sm:text-sm text-[#205ED7] font-outfit mb-2">
+                    {blogs[0].category || 'Real Estate'}
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 font-outfit mb-4 leading-tight">
+                    {blogs[0].title}
                   </h2>
-                  <div className="flex items-center gap-2 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                    <span>by {featuredPost.author}</span>
-                    <span>•</span>
-                    <span>{formatDateShort(featuredPost.published_at)}</span>
-                    <span>•</span>
-                    <span>No Comments</span>
-                  </div>
-                  <p className="text-gray-600 font-outfit leading-relaxed max-w-[85%] mx-auto mt-2">
-                    {featuredPost.content || "Proin ac rhoncus eros. Ut vulputate lacus non sodales pretium. Maecenas tristique massa mi, nec condimentum libero accumsan nec. Interdum et malesuada fames ac ante ipsum primis in faucibus."}
+                  <p className="text-sm sm:text-base text-gray-600 font-outfit mb-6 leading-relaxed">
+                    {blogs[0].excerpt || blogs[0].content?.substring(0, 150) + '...' || 'Tips and strategies for finding and securing pet-friendly rental properties.'}
                   </p>
+                </div>
+                <div>
+                  <div className="h-px w-full bg-gray-200 mb-6"></div>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                      <span className="text-gray-600 font-semibold text-sm">
+                        {blogs[0].author?.charAt(0) || 'A'}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold text-gray-900 font-outfit">
+                        By {blogs[0].author || 'Anonymous'}
+                      </span>
+                      <span className="text-xs text-gray-500 font-outfit">
+                        {formatDate(blogs[0].published_at)}
+                      </span>
+                    </div>
+                  </div>
                   <Link
-                    href={`/blog/${featuredPost.id}`}
-                    className="mt-4 px-8 py-3 bg-white border-2 border-gray-100 text-gray-900 font-black text-xs font-outfit tracking-[0.2em] rounded-sm hover:border-rental-orange-500 hover:text-rental-orange-500 transition-all uppercase"
+                    href={`/blog/${blogs[0].id}`}
+                    className="flex items-center justify-center px-6 py-3 bg-[#266FFD] text-white font-semibold text-sm font-outfit rounded-md hover:bg-[#1a5dd8] transition-colors w-full"
                   >
-                    Read More
+                    READ MORE
                   </Link>
                 </div>
               </div>
-            )}
-
-            {/* Grid of Other Posts */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 mt-4">
-              {otherPosts.map(post => (
-                <article key={post.id} className="flex flex-col gap-4">
-                  <div className="relative aspect-[16/7] overflow-hidden group">
-                    <img src={getImageUrl(post.image)} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                    <DateBadge date={post.published_at} />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <span className="text-rental-orange-500 font-bold text-[10px] uppercase tracking-[0.15em]">{post.category}</span>
-                    <h3 className="text-xl font-bold text-gray-900 font-outfit line-clamp-2 leading-tight">
-                      {post.title}
-                    </h3>
-                    <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest flex gap-2">
-                      <span>by {post.author}</span>
-                      <span>•</span>
-                      <span>No Comments</span>
-                    </div>
-                    <p className="text-gray-600 text-sm font-outfit leading-relaxed line-clamp-3 mt-1">
-                      {post.content || post.excerpt}
-                    </p>
-                  </div>
-                </article>
-              ))}
-            </div>
-
-            {/* Centered Pagination Button */}
-            <div className="flex justify-center mt-6">
-              <button className="px-10 py-3.5 bg-gray-50 text-gray-900 font-black text-xs font-outfit tracking-[0.25em] rounded-md hover:bg-gray-100 transition-colors uppercase border border-gray-100">
-                Load More
-              </button>
             </div>
           </div>
+        </section>
+      )}
 
-          {/* Right Column (Sidebar) */}
-          <div className="lg:col-span-4 flex flex-col gap-12">
-            
-
-            {/* Feature Posts */}
-            <section>
-     
-            <div className="flex flex-col gap-6">
-            {sidebarPosts.map(post => (
-              <Link key={post.id} href={`/blog/${post.id}`} className="group flex flex-col gap-2">
-                <div className="relative aspect-[22/9] overflow-hidden">
-                  <img src={getImageUrl(post.image)} alt="" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
-
-                  {/* Black overlay behind text */}
-                  <div className="absolute h-[40%] bottom-0 left-0 right-0 bg-black/50 z-10" />
-
-                  <div className="absolute inset-0 flex items-end justify-left p-4 z-20">
-                    <h4 className="text-white text-xl font-semibold text-left drop-shadow-md leading-tight group-hover:scale-110 transition-transform">{post.title}</h4>
-                  </div>
+      {/* ── Blog Grid + Categories Sidebar ── */}
+      <section className="w-full bg-[#F5F9FF] px-4 sm:px-6 md:px-10 lg:px-[150px] pb-8">
+        <div className="max-w-[var(--page-max-width)]">
+          <div className="grid grid-cols-1 lg:grid-cols-[70%_30%] ">
+            {/* Left Column: Blog Grid (70% width) */}
+            <div>
+              {loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mr-5">
+                  {[...Array(3)].map((_, i) => (
+                    <BlogCardSkeleton key={i} />
+                  ))}
                 </div>
-              </Link>
-            ))}
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mr-5">
+                  {blogs.slice(1, 4).map(post => (
+                    <article key={post.id} className="flex flex-col bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                      {/* Square Image */}
+                      <div className="relative aspect-square overflow-hidden">
+                        <img 
+                          src={getImageUrl(post.image)} 
+                          alt={post.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      {/* Content */}
+                      <div className="p-4 flex flex-col gap-3 flex-1">
+                        <span className="text-xs text-gray-500 font-outfit">
+                          {post.category || 'Real Estate'}
+                        </span>
+                        <h3 className="text-lg font-bold text-gray-900 font-outfit line-clamp-2 leading-tight">
+                          {post.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 font-outfit line-clamp-2 leading-relaxed">
+                          {post.excerpt || post.content?.substring(0, 100) + '...'}
+                        </p>
+                        <div className="flex items-center gap-2 text-xs text-gray-500 font-outfit">
+                          <span>By {post.author || 'Anonymous'}</span>
+                          <span>•</span>
+                          <span>{formatDateShort(post.published_at)}</span>
+                        </div>
+                        <Link
+                          href={`/blog/${post.id}`}
+                          className="flex items-center justify-center px-4 py-2 bg-[#266FFD] text-white font-semibold text-xs font-outfit rounded-md hover:bg-[#1a5dd8] transition-colors w-full mt-auto"
+                        >
+                          READ MORE
+                        </Link>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
             </div>
-            </section>
 
-            {/* Categories */}
-            <section>
-              <h3 className="text-xs font-black font-outfit text-gray-900 uppercase tracking-[0.3em] mb-6 border-b border-gray-200 pb-2">Categories</h3>
-              <div className="flex flex-col text-xs font-bold font-outfit text-gray-500 tracking-[0.1em] uppercase">
-                {displayTags.slice(0, 6).map((tag, idx) => (
-                  <Link key={tag} href={`/blog/category/${tag.toLowerCase()}`} className="flex justify-between items-center py-2.5 border-b border-gray-50 hover:text-rental-orange-500 transition-colors">
-                    <span>{tag}</span>
-                    <span className="text-gray-300">({(12 - idx)})</span>
-                  </Link>
-                ))}
+            {/* Right Column: Categories Sidebar (30% width) */}
+            <div className="lg:sticky lg:top-8 h-fit">
+              <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 overflow-hidden">
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-gray-900 font-outfit mb-2">
+                    Categories
+                  </h3>
+                  <div className="h-1 w-12 bg-gradient-to-r from-[#266FFD] to-[#205ED7] rounded-full"></div>
+                </div>
+                <ul className="flex flex-col gap-1.5 list-none">
+                  {displayTags.map((tag, index) => (
+                    <li key={tag} className="list-none">
+                      <Link 
+                        href={`/blog/category/${tag.toLowerCase()}`}
+                        className="group relative flex items-center justify-between py-3 px-4 rounded-lg bg-gray-50 hover:bg-[#F5F9FF] border-l-4 border-transparent hover:border-[#266FFD] transition-all duration-200 hover:shadow-sm"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-medium text-gray-700 font-outfit group-hover:text-[#266FFD] transition-colors duration-200">
+                            {tag}
+                          </span>
+                        </div>
+                        <span className="text-xs font-semibold text-gray-400 group-hover:text-[#266FFD] transition-colors duration-200 bg-white group-hover:bg-[#E8F0FE] px-2.5 py-1 rounded-full min-w-[2rem] text-center">
+                          {blogs.filter(b => b.category === tag).length || (displayTags.length - index + 3)}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </section>
-
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* ── Additional Blog Post Section (Vertical Layout) ── */}
+      {blogs.length > 4 && (
+        <section className="w-full bg-[#F5F9FF] px-4 sm:px-6 md:px-10  lg:px-[150px] py-8">
+          <div className="max-w-[var(--page-max-width)] mx-auto">
+            <div className="flex flex-col bg-white rounded-lg overflow-hidden shadow-sm">
+              {/* Large Image */}
+              <div className="relative w-full aspect-[16/9] overflow-hidden">
+                <img 
+                  src={getImageUrl(blogs[4].image)} 
+                  alt={blogs[4].title}
+                  className="w-full h-full object-cover"
+                />
+                {/* Engagement Icons */}
+                <div className="absolute bottom-4 left-4 flex items-center gap-3 z-10">
+                  <button className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-semibold text-gray-700 hover:bg-white transition-colors">
+                    <FiHeart className="w-4 h-4 text-red-500" />
+                    <span>{blogs[4].likes ?? 0}</span>
+                  </button>
+                  <button className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-semibold text-gray-700 hover:bg-white transition-colors">
+                    <FiMessageCircle className="w-4 h-4 text-blue-500" />
+                    <span>{blogs[4].comments ?? 0}</span>
+                  </button>
+                  <button className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-semibold text-gray-700 hover:bg-white transition-colors">
+                    <FiShare2 className="w-4 h-4 text-gray-600" />
+                  </button>
+                </div>
+              </div>
+              {/* Content Below Image */}
+              <div className="p-6 lg:p-8 flex flex-col">
+                <span className="text-xs sm:text-sm text-gray-500 font-outfit mb-2">
+                  {blogs[4].category || 'Real Estate'}
+                </span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 font-outfit mb-4 leading-tight">
+                  {blogs[4].title}
+                </h2>
+                <p className="text-sm sm:text-base text-gray-600 font-outfit mb-6 leading-relaxed">
+                  {blogs[4].excerpt || blogs[4].content?.substring(0, 200) + '...' || 'Stay informed with the latest insights and trends in Philippine real estate.'}
+                </p>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                    <span className="text-gray-600 font-semibold text-sm">
+                      {blogs[4].author?.charAt(0) || 'A'}
+                    </span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-900 font-outfit">
+                      By {blogs[4].author || 'Anonymous'}
+                    </span>
+                    <span className="text-xs text-gray-500 font-outfit">
+                      {formatDate(blogs[4].published_at)}
+                    </span>
+                  </div>
+                </div>
+               
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
 
       <Footer />
     </div>
