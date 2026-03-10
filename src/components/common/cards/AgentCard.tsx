@@ -155,7 +155,14 @@ export default function AgentCard({
                   <a
                     href={`mailto:${email}`}
                     onClick={(e) => e.stopPropagation()}
-                    className="px-[12px] py-[4px] rounded-[5px] border border-[#205ED7] text-[#205ED7] text-[9px] font-medium leading-[1.26] hover:bg-blue-50 transition-colors whitespace-nowrap flex-shrink-0"
+                    className="rounded-[5px] text-[#205ED7] hover:bg-blue-50 transition-colors whitespace-nowrap flex-shrink-0 flex items-center justify-center"
+                    style={{
+                      padding: '10px 12px',
+                      border: '1px solid #205ED7',
+                      fontSize: '9px',
+                      fontWeight: 500,
+                      lineHeight: '1.26',
+                    }}
                   >
                     Email
                   </a>
@@ -166,7 +173,14 @@ export default function AgentCard({
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="px-[11.02px] py-[4.13px] rounded-[5px] border border-[#22C55E] text-[#22C55E] text-[9px] font-medium leading-[1.26] hover:bg-green-50 transition-colors whitespace-nowrap flex-shrink-0"
+                    className="rounded-[5px] text-[#22C55E] hover:bg-green-50 transition-colors whitespace-nowrap flex-shrink-0 flex items-center justify-center"
+                    style={{
+                      padding: '10px 12px',
+                      border: '1px solid #22C55E',
+                      fontSize: '9px',
+                      fontWeight: 500,
+                      lineHeight: '1.26',
+                    }}
                   >
                     WhatsApp
                   </a>
@@ -242,11 +256,24 @@ export default function AgentCard({
           >
             <span>{getInitials(name)}</span>
           </div>
-          {/* Listings badge - top left */}
+          
+          {/* Listings count badge - top left (like property type badge) */}
           {showListings && listings !== undefined && (
-            <div className="absolute top-[8px] left-[8px]">
-              <div className="bg-[#266FFD] rounded-[5px] px-[12px] py-[6px]">
-                <span className="text-white text-[11px] font-semibold leading-[1.26]">
+            <div className="absolute top-0 left-0 m-0 z-10">
+              <div 
+                className="rounded-tl-[5px] rounded-br-[5px]"
+                style={{
+                  backgroundColor: '#266FFD',
+                  padding: '7.99px 18px',
+                }}
+              >
+                <span 
+                  className="text-white font-semibold uppercase tracking-wide"
+                  style={{
+                    fontSize: '10px',
+                    lineHeight: '1.26',
+                  }}
+                >
                   {listings} Listings
                 </span>
               </div>
@@ -356,7 +383,15 @@ export default function AgentCard({
             <a
               href={`mailto:${email}`}
               onClick={(e) => e.stopPropagation()}
-              className="px-[12px] py-[4px] rounded-[5px] border border-[#205ED7] text-[#205ED7] text-[9px] font-medium leading-[1.26] hover:bg-blue-50 transition-colors whitespace-nowrap flex-shrink-0"
+              className="rounded-[5px] text-[#205ED7] hover:bg-blue-50 transition-colors whitespace-nowrap flex-shrink-0 flex items-center justify-center"
+              style={{
+                padding: '10px 12px',
+                border: '1px solid #205ED7',
+                fontSize: '9px',
+                fontWeight: 500,
+                lineHeight: '1.26',
+                height: '100%',
+              }}
             >
               Email
             </a>
@@ -368,7 +403,15 @@ export default function AgentCard({
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="px-[11.02px] py-[4.13px] rounded-[5px] border border-[#22C55E] text-[#22C55E] text-[9px] font-medium leading-[1.26] hover:bg-green-50 transition-colors whitespace-nowrap flex-shrink-0"
+              className="rounded-[5px] text-[#22C55E] hover:bg-green-50 transition-colors whitespace-nowrap flex-shrink-0 flex items-center justify-center"
+              style={{
+                padding: '10px 12px',
+                border: '1px solid #22C55E',
+                fontSize: '9px',
+                fontWeight: 500,
+                lineHeight: '1.26',
+                height: '100%',
+              }}
             >
               WhatsApp
             </a>

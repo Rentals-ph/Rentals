@@ -56,10 +56,18 @@ export const blogsApi = {
   },
 
   /**
-   * Get blog by ID
+   * Get blog by ID or slug
    */
-  getById: async (id: number): Promise<Blog> => {
+  getById: async (id: number | string): Promise<Blog> => {
     const response = await apiClient.get<Blog>(`/blogs/${id}`)
+    return response.data
+  },
+  
+  /**
+   * Get blog by slug
+   */
+  getBySlug: async (slug: string): Promise<Blog> => {
+    const response = await apiClient.get<Blog>(`/blogs/${slug}`)
     return response.data
   },
 

@@ -113,8 +113,14 @@ function VerticalPropertyCard({
           }}
         />
         
-        {/* Gradient overlay at bottom */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent pointer-events-none" />
+        {/* Gradient overlay at bottom - fades from black at bottom to transparent at center */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.3) 30%, rgba(0,0,0,0.15) 45%, rgba(0,0,0,0.05) 55%, transparent 60%)',
+            filter: 'blur(0.5px)'
+          }}
+        />
         
         {/* Property type badge - top left */}
         <div className="absolute top-0 left-0 m-0">

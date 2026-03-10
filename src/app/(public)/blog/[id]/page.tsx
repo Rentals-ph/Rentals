@@ -26,23 +26,38 @@ export default function BlogDetailsPage() {
       try {
         setLoading(true)
         setIsPortraitImage(false) // Reset image orientation when loading new blog
-        const blogId = parseInt(id)
-        if (isNaN(blogId)) {
-          console.error('Invalid blog ID')
-          return
+        
+        // Support both numeric ID and slug - backend handles both
+        let data: Blog
+        try {
+          // Try to use the ID/slug directly (backend supports both)
+          data = await blogsApi.getById(id)
+        } catch (error: any) {
+          // If direct fetch fails, try fetching all and finding by slug
+          if (error?.response?.status === 404) {
+            const allBlogs = await blogsApi.getAll()
+            const blog = allBlogs.find((b: any) => (b as any).slug === id || b.id.toString() === id)
+            if (!blog) {
+              throw new Error('Blog not found')
+            }
+            data = blog
+          } else {
+            throw error
+          }
         }
         
-        const data = await blogsApi.getById(blogId)
         setBlogPost(data)
         
         // Fetch related articles (other blogs in the same category)
         const allBlogs = await blogsApi.getAll()
         const related = allBlogs
-          .filter(blog => blog.id !== blogId && blog.category === data.category)
+          .filter(blog => blog.id !== data.id && blog.category === data.category)
           .slice(0, 3)
         setRelatedArticles(related)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching blog:', error)
+        // Set blogPost to null to trigger 404 state
+        setBlogPost(null)
       } finally {
         setLoading(false)
       }
