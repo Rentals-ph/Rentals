@@ -240,9 +240,13 @@ function PropertiesContent() {
     fetchProperties()
   }, [selectedLocation, selectedType, searchQuery, currentPage, viewMode])
 
-  // Client-side filtering for additional filters (bathrooms, bedrooms, price range)
-  // Note: These filters could also be moved to the backend API for better performance
+  // Client-side filtering for additional filters (listing type, bathrooms, bedrooms, price range)
   const filteredProperties = properties.filter(property => {
+    // Listing type filter
+    const listingTypeMatch = listingTypeFilter === 'all' ||
+      (listingTypeFilter === 'for_rent' && (property.listing_type === 'for_rent' || (!property.listing_type && !!property.price_type))) ||
+      (listingTypeFilter === 'for_sale' && (property.listing_type === 'for_sale' || (!property.listing_type && !property.price_type)))
+
     const bathMatch = !minBaths || property.bathrooms >= parseInt(minBaths)
     const bedMatch = !minBeds || property.bedrooms >= parseInt(minBeds)
 
@@ -260,7 +264,7 @@ function PropertiesContent() {
         property.amenities!.some(a => a && a.toLowerCase() === selected.toLowerCase())
       ))
 
-    return bathMatch && bedMatch && priceMatch && amenitiesMatch
+    return listingTypeMatch && bathMatch && bedMatch && priceMatch && amenitiesMatch
   })
 
   // Dynamically compute available amenities from currently filtered properties
@@ -1398,9 +1402,11 @@ function PropertiesContent() {
                         const cardProps = {
                           id: property.id,
                           propertyType: property.type,
+                          listingType: property.listing_type as 'for_rent' | 'for_sale' | null,
                           date: listedDate,
                           dateListed: listedDate,
                           priceType: formatPriceType(property.price_type),
+                          priceUnit: property.listing_type === 'for_sale' ? undefined : (formatPriceType(property.price_type) ? `/${formatPriceType(property.price_type)}` : '/mo'),
                           price: formatPrice(property.price),
                           title: property.title,
                           image: mainImage,

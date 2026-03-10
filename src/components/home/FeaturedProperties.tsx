@@ -304,9 +304,10 @@ const FeaturedProperties = () => {
                     <VerticalPropertyCard
                       id={property.id}
                       propertyType={property.type}
+                      listingType={property.listing_type as 'for_rent' | 'for_sale' | null}
                       priceType={formatPriceType(property.price_type)}
                       price={formatPrice(property.price)}
-                      priceUnit={formatPriceType(property.price_type) ? `/${formatPriceType(property.price_type)}` : '/monthly'}
+                      priceUnit={property.listing_type === 'for_sale' ? undefined : (formatPriceType(property.price_type) ? `/${formatPriceType(property.price_type)}` : '/mo')}
                       title={property.title}
                       description={property.description}
                       image={mainImage}

@@ -85,12 +85,6 @@ export default function AgentMyProfile() {
   const agentImage = resolveAgentAvatar(agent?.image || agent?.avatar || agent?.profile_image, agent?.id)
   const agentInitials = agentName.split(' ').map(n => n[0]).join('').toUpperCase() || 'A'
 
-  // High-level stats for the agent header card
-  const activeListingsCount = listings.length
-  const totalSold = (agent as any)?.total_properties_sold ?? '1,276'
-  const yearsExperience = (agent as any)?.years_of_experience ?? '23+'
-  const networkSize = (agent as any)?.network_size ?? '729'
-
   const [listings, setListings] = useState<Array<{
     id: number
     type: string
@@ -103,6 +97,12 @@ export default function AgentMyProfile() {
     area: number | string
   }>>([])
   const [listingsLoading, setListingsLoading] = useState(true)
+
+  // High-level stats for the agent header card
+  const activeListingsCount = listings.length
+  const totalSold = (agent as any)?.total_properties_sold ?? '1,276'
+  const yearsExperience = (agent as any)?.years_of_experience ?? '23+'
+  const networkSize = (agent as any)?.network_size ?? '729'
 
   useEffect(() => {
     const fetchAgentListings = async () => {

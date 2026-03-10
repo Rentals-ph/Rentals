@@ -129,19 +129,23 @@ export function OwnerReviewStepContent({
       setIsCompressing(false)
 
       const formDataObj = new FormData()
-      const propertyDataObj = {
+      const propertyDataObj: Record<string, string> = {
         title: data.title,
         description: data.description,
         type: data.category,
         location: data.street || data.city || data.state || data.country,
+        listing_type: data.listingType,
         price: finalPrice,
-        price_type: finalPriceType,
         bedrooms: data.bedrooms.toString(),
         bathrooms: data.bathrooms.toString(),
         garage: data.garage.toString(),
         area: data.floorArea.toString(),
         lot_area: data.lotArea.toString(),
         floor_area_unit: data.floorUnit,
+      }
+      // Only include price_type for rental properties
+      if (data.listingType !== 'for_sale') {
+        propertyDataObj.price_type = finalPriceType
       }
       Object.entries(propertyDataObj).forEach(([key, value]) => {
         formDataObj.append(key, value)

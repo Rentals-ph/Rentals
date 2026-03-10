@@ -48,6 +48,7 @@ export interface ListingFormData {
   uploadedImages: Array<{ path: string; url: string; original_name: string; size: number; mime_type: string }>
   videoUrl: string
   // Pricing
+  listingType: 'for_rent' | 'for_sale'
   price: string
   priceType: 'Monthly' | 'Weekly' | 'Daily' | 'Yearly'
   // Attributes
@@ -75,6 +76,7 @@ const DEFAULT_FORM_DATA: ListingFormData = {
   images: [],
   uploadedImages: [],
   videoUrl: '',
+  listingType: 'for_rent',
   price: '',
   priceType: 'Monthly',
   amenities: [],
@@ -115,7 +117,8 @@ function formDataToExtracted(data: ListingFormData): Partial<ExtractedPropertyDa
     area_sqm: data.floorArea > 0 ? data.floorArea : null,
     lot_area_sqm: data.lotArea > 0 ? data.lotArea : null,
     price: data.price ? Number(data.price) : null,
-    price_type: data.priceType as ExtractedPropertyData['price_type'],
+    status: data.listingType as ExtractedPropertyData['status'],
+    price_type: data.listingType === 'for_sale' ? null : data.priceType as ExtractedPropertyData['price_type'],
     amenities: data.amenities.length > 0 ? data.amenities : null,
     furnishing_status: (data.furnishing as ExtractedPropertyData['furnishing_status']) || null,
     address: data.street || null,
@@ -158,6 +161,9 @@ function extractedToFormData(
 
   if (extracted.price != null)
     updated.price = String(extracted.price)
+
+  if (extracted.status != null)
+    updated.listingType = (extracted.status === 'for_sale' || extracted.status === 'pre_selling') ? 'for_sale' : 'for_rent'
 
   if (extracted.price_type != null)
     updated.priceType = extracted.price_type as ListingFormData['priceType']

@@ -545,6 +545,7 @@ class ListingAssistantController extends Controller
             'description_template' => $data['description_template'] ?? null,
             'ai_generated_description' => $data['ai_generated_description'] ?? null,
             'type' => $this->mapPropertyType($data['property_type'] ?? 'house'),
+            'listing_type' => in_array($data['status'] ?? null, ['for_sale', 'pre_selling']) ? 'for_sale' : 'for_rent',
             'price' => $data['price'] ?? 0,
             'price_type' => $this->mapPriceType($data['price_type'] ?? null, $data['status'] ?? null),
             'bedrooms' => $data['bedrooms'] ?? 0,

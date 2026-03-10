@@ -216,9 +216,11 @@ Return ONLY a valid JSON object with the following fields (extract ANYTHING ment
 - is_featured       (boolean or null) — true if user wants featured properties, false if not, null if not mentioned
 - search_text       (string or null)  — any general text to search in title or description (property names, keywords, etc.)
 - sort_by           (string or null)  — "newest" when user says latest/newest/new/recent/fresh listings or properties (order by newest first); otherwise null
+- listing_type      (string)          — ALWAYS include this field. Use "for_sale" ONLY if the user explicitly asks about buying, purchasing, or properties "for sale". In ALL other cases — including when the user says nothing about listing type — use "for_rent" as the default.
 
 Rules:
 - Return null for any field not mentioned or unclear
+- listing_type must ALWAYS be either "for_rent" or "for_sale", never null
 - IMPORTANT: When user says "price of X", "costing X", or "for X", use exact_price (NOT min_price). Only use min_price/max_price for range queries like "under X", "above X", "between X and Y"
 - Convert price shorthand: "5M" = 5000000, "500K" = 500000, "8 million" = 8000000
 - For small numbers like "1200", "1200.0", "1,200" - keep them as-is (1200), do NOT multiply by 1000

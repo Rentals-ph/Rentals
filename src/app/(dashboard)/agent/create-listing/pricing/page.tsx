@@ -85,7 +85,7 @@ export default function AgentCreateListingPricing() {
 
     try {
       // Update pricing first
-      updateData({ price, priceType })
+      updateData({ price, priceType, listingType: data.listingType })
 
       // Compress images
       let compressedImage: File | null = null
@@ -107,19 +107,23 @@ export default function AgentCreateListingPricing() {
       // Create FormData
       const formDataObj = new FormData()
       
-      const propertyDataObj = {
+      const propertyDataObj: Record<string, string> = {
         title: data.title,
         description: data.description,
         type: data.category,
         location: data.street || data.city || data.state || data.country,
+        listing_type: data.listingType,
         price: price,
-        price_type: priceType,
         bedrooms: data.bedrooms.toString(),
         bathrooms: data.bathrooms.toString(),
         garage: data.garage.toString(),
         area: data.floorArea.toString(),
         lot_area: data.lotArea.toString(),
         floor_area_unit: data.floorUnit,
+      }
+      // Only include price_type for rental properties
+      if (data.listingType !== 'for_sale') {
+        propertyDataObj.price_type = priceType
       }
       
       Object.entries(propertyDataObj).forEach(([key, value]) => {

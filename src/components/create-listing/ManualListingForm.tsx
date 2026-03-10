@@ -93,6 +93,7 @@ export function ManualListingForm() {
   const [thumbnails, setThumbnails] = useState<string[]>([])
   const [videoUrl, setVideoUrl] = useState(data.videoUrl)
   // Pricing
+  const [listingType, setListingType] = useState<'for_rent' | 'for_sale'>(data.listingType)
   const [price, setPrice] = useState(data.price)
   const [priceType, setPriceType] = useState<'Monthly' | 'Weekly' | 'Daily' | 'Yearly'>(data.priceType)
   // Attributes
@@ -121,6 +122,7 @@ export function ManualListingForm() {
     setLongitude(data.longitude || '')
     setImages(data.images)
     setVideoUrl(data.videoUrl)
+    setListingType(data.listingType)
     setPrice(data.price)
     setPriceType(data.priceType)
     setAmenities(data.amenities)
@@ -259,19 +261,23 @@ export function ManualListingForm() {
       }
       setIsCompressing(false)
       const formDataObj = new FormData()
-      const propertyData = {
+      const propertyData: Record<string, string> = {
         title,
         description,
         type: category,
         location: street || city || state || country,
+        listing_type: listingType,
         price,
-        price_type: priceType,
         bedrooms: bedrooms.toString(),
         bathrooms: bathrooms.toString(),
         garage: garage.toString(),
         area: floorArea.toString(),
         lot_area: lotArea.toString(),
         floor_area_unit: floorUnit,
+      }
+      // Only include price_type for rental properties
+      if (listingType !== 'for_sale') {
+        propertyData.price_type = priceType
       }
       Object.entries(propertyData).forEach(([k, v]) => formDataObj.append(k, v))
       if (amenities.length > 0) formDataObj.append('amenities', JSON.stringify(amenities))
@@ -474,15 +480,30 @@ export function ManualListingForm() {
           {/* Pricing */}
           <section id="section-pricing" className="section-card p-7 pb-6 bg-white rounded-xl shadow-sm">
             <h2 className="m-0 mb-4 text-2xl font-bold text-gray-900">Pricing</h2>
-            <div className="grid grid-cols-[1.1fr_0.9fr] gap-6 lg:grid-cols-1">
-              <div>
-                <label className={labelClass}>Price</label>
-                <div className="relative"><div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"><FiDollarSign className="w-5 h-5" /></div><input type="text" className={`${inputClass} pl-11`} placeholder="Price" value={price} onChange={(e) => setPrice(e.target.value)} /></div>
+            <div className="mb-5">
+              <label className={labelClass}>Listing Type</label>
+              <div className="flex gap-3">
+                <button type="button" onClick={() => setListingType('for_rent')}
+                  className={`flex-1 h-11 rounded-lg border-2 text-sm font-semibold transition-all ${listingType === 'for_rent' ? 'bg-blue-600 border-blue-600 text-white shadow-md' : 'bg-white border-gray-300 text-gray-600 hover:border-blue-400'}`}>
+                  For Rent
+                </button>
+                <button type="button" onClick={() => setListingType('for_sale')}
+                  className={`flex-1 h-11 rounded-lg border-2 text-sm font-semibold transition-all ${listingType === 'for_sale' ? 'bg-green-600 border-green-600 text-white shadow-md' : 'bg-white border-gray-300 text-gray-600 hover:border-green-400'}`}>
+                  For Sale
+                </button>
               </div>
+            </div>
+            <div className={`grid gap-6 lg:grid-cols-1 ${listingType === 'for_rent' ? 'grid-cols-[1.1fr_0.9fr]' : 'grid-cols-1'}`}>
               <div>
-                <label className={labelClass}>Price Type</label>
-                <div className="relative"><select className={selectClass} value={priceType} onChange={(e) => setPriceType(e.target.value as 'Monthly' | 'Weekly' | 'Daily' | 'Yearly')}><option value="Monthly">Monthly</option><option value="Weekly">Weekly</option><option value="Daily">Daily</option><option value="Yearly">Yearly</option></select><FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" /></div>
+                <label className={labelClass}>{listingType === 'for_sale' ? 'Selling Price' : 'Price'}</label>
+                <div className="relative"><div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"><FiDollarSign className="w-5 h-5" /></div><input type="text" className={`${inputClass} pl-11`} placeholder={listingType === 'for_sale' ? 'Total selling price' : 'Price'} value={price} onChange={(e) => setPrice(e.target.value)} /></div>
               </div>
+              {listingType === 'for_rent' && (
+                <div>
+                  <label className={labelClass}>Price Type</label>
+                  <div className="relative"><select className={selectClass} value={priceType} onChange={(e) => setPriceType(e.target.value as 'Monthly' | 'Weekly' | 'Daily' | 'Yearly')}><option value="Monthly">Monthly</option><option value="Weekly">Weekly</option><option value="Daily">Daily</option><option value="Yearly">Yearly</option></select><FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" /></div>
+                </div>
+              )}
             </div>
           </section>
 
@@ -516,7 +537,7 @@ export function ManualListingForm() {
                 {([
                   { key: 'category', label: 'Category', value: propertySummary.category, sectionId: 'section-category' },
                   { key: 'title', label: 'Title', value: propertySummary.title, sectionId: 'section-details' },
-                  { key: 'price', label: 'Price', value: `${propertySummary.price} (${propertySummary.priceType})`, sectionId: 'section-pricing' },
+                  { key: 'price', label: 'Price', value: listingType === 'for_sale' ? `${propertySummary.price} (For Sale)` : `${propertySummary.price} (${propertySummary.priceType})`, sectionId: 'section-pricing' },
                   { key: 'location', label: 'Location', value: propertySummary.location, sectionId: 'section-location' },
                   { key: 'bedrooms', label: 'Bedrooms', value: propertySummary.bedrooms, sectionId: 'section-details' },
                   { key: 'bathrooms', label: 'Bathrooms', value: propertySummary.bathrooms, sectionId: 'section-details' },

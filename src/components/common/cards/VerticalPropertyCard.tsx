@@ -9,6 +9,7 @@ import SharePopup, { type SharePlatform } from '../misc/SharePopup'
 interface VerticalPropertyCardProps {
   id?: number | string
   propertyType?: string
+  listingType?: 'for_rent' | 'for_sale' | null
   priceType?: string
   price?: string
   priceUnit?: string
@@ -38,9 +39,10 @@ interface VerticalPropertyCardProps {
 function VerticalPropertyCard({
   id,
   propertyType = 'Apartment',
+  listingType,
   priceType,
   price = '$ 25000.00',
-  priceUnit = '/monthly',
+  priceUnit,
   dateListed,
   title = 'Azure Residences - 2BR Corner Suite',
   description = 'Beautiful corner suite with modern amenities, floor-to-ceiling windows, and stunning city views. Located in the heart of IT Park with easy access to shopping, dining, and transportation....',
@@ -242,7 +244,13 @@ function VerticalPropertyCard({
         {/* Price */}
         <div className="flex items-baseline gap-[6px]">
           <p className="text-[#387CFF] text-[20px] sm:text-[22px] lg:text-[24px] font-medium leading-[1.26]">{price}</p>
-          <span className="text-[#FE8E0A] text-[14px] sm:text-[15px] lg:text-[16px] font-medium leading-[1.26]">{priceUnit || (priceType ? `/${priceType}` : '')}</span>
+          {listingType === 'for_sale' ? (
+            <span className="text-[#22C55E] text-[11px] sm:text-[12px] font-semibold leading-[1.26] uppercase tracking-wide">For Sale</span>
+          ) : (
+            <span className="text-[#FE8E0A] text-[14px] sm:text-[15px] lg:text-[16px] font-medium leading-[1.26]">
+              {priceUnit || (priceType ? `/${priceType}` : '/mo')}
+            </span>
+          )}
         </div>
 
         {/* Description */}

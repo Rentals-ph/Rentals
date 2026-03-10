@@ -753,7 +753,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
     details:    formData.title,
     location:   [formData.city, formData.state].filter(Boolean).join(', '),
     images:     formData.uploadedImages.length > 0 ? `${formData.uploadedImages.length} photo(s)` : '',
-    pricing:    formData.price ? `₱ ${Number(formData.price).toLocaleString()} / ${formData.priceType}` : '',
+    pricing:    formData.price ? (formData.listingType === 'for_sale' ? `₱ ${Number(formData.price).toLocaleString()} (For Sale)` : `₱ ${Number(formData.price).toLocaleString()} / ${formData.priceType}`) : '',
     attributes: formData.amenities.length > 0 ? formData.amenities.slice(0, 3).join(', ') : '',
     review:     '',
   }), [formData])
@@ -1317,26 +1317,44 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                     {renderSectionHeader('pricing', 5, 'Pricing', 'Rent amount & frequency')}
                     {expandedSections.has('pricing') && (
                       <div className="px-[18px] py-4">
-                        <div className="grid grid-cols-2 gap-3">
+                        {/* Listing Type toggle */}
+                        <div>
+                          <label className={FL}>Listing Type</label>
+                          <div className="flex gap-2">
+                            <button type="button"
+                              onClick={() => updateField('listingType', 'for_rent')}
+                              className={`flex-1 h-9 rounded-lg border-2 text-[12px] font-semibold transition-all ${formData.listingType === 'for_rent' ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-[#E2DDD4] text-[#7A7268] hover:border-blue-400'}`}>
+                              For Rent
+                            </button>
+                            <button type="button"
+                              onClick={() => updateField('listingType', 'for_sale')}
+                              className={`flex-1 h-9 rounded-lg border-2 text-[12px] font-semibold transition-all ${formData.listingType === 'for_sale' ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-[#E2DDD4] text-[#7A7268] hover:border-green-400'}`}>
+                              For Sale
+                            </button>
+                          </div>
+                        </div>
+                        <div className={`grid gap-3 ${formData.listingType === 'for_rent' ? 'grid-cols-2' : 'grid-cols-1'}`}>
                           <div>
-                            <label className={FL}>Price</label>
+                            <label className={FL}>{formData.listingType === 'for_sale' ? 'Selling Price (₱)' : 'Price (₱)'}</label>
                             <div className="relative">
                               <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[13px] text-[#7A7268]">₱</span>
-                              <input type="text" className={`${FI} pl-6 ${aiFilled('price')}`} placeholder="e.g. 45000" value={formData.price} onChange={e => updateField('price', e.target.value)} />
+                              <input type="text" className={`${FI} pl-6 ${aiFilled('price')}`} placeholder={formData.listingType === 'for_sale' ? 'e.g. 4500000' : 'e.g. 45000'} value={formData.price} onChange={e => updateField('price', e.target.value)} />
                             </div>
                           </div>
-                          <div>
-                            <label className={FL}>Price Type</label>
-                            <div className="relative">
-                              <select className={`${FS} ${aiFilled('price_type')}`} value={formData.priceType} onChange={e => updateField('priceType', e.target.value as 'Monthly' | 'Weekly' | 'Daily' | 'Yearly')}>
-                                <option value="Monthly">Monthly</option>
-                                <option value="Weekly">Weekly</option>
-                                <option value="Daily">Daily</option>
-                                <option value="Yearly">Yearly</option>
-                              </select>
-                              <FiChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#7A7268] pointer-events-none w-3.5 h-3.5" />
+                          {formData.listingType === 'for_rent' && (
+                            <div>
+                              <label className={FL}>Price Type</label>
+                              <div className="relative">
+                                <select className={`${FS} ${aiFilled('price_type')}`} value={formData.priceType} onChange={e => updateField('priceType', e.target.value as 'Monthly' | 'Weekly' | 'Daily' | 'Yearly')}>
+                                  <option value="Monthly">Monthly</option>
+                                  <option value="Weekly">Weekly</option>
+                                  <option value="Daily">Daily</option>
+                                  <option value="Yearly">Yearly</option>
+                                </select>
+                                <FiChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#7A7268] pointer-events-none w-3.5 h-3.5" />
+                              </div>
                             </div>
-                          </div>
+                          )}
                         </div>
                       </div>
                     )}
@@ -1448,7 +1466,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                         {([
                           { label: 'Category',   value: formData.category || 'Not set', sid: 'category' },
                           { label: 'Title',      value: formData.title || 'Not set',    sid: 'details'  },
-                          { label: 'Price',      value: formData.price ? `₱ ${Number(formData.price).toLocaleString()} / ${formData.priceType}` : 'Not set', sid: 'pricing' },
+                          { label: 'Price',      value: formData.price ? (formData.listingType === 'for_sale' ? `₱ ${Number(formData.price).toLocaleString()} (For Sale)` : `₱ ${Number(formData.price).toLocaleString()} / ${formData.priceType}`) : 'Not set', sid: 'pricing' },
                           { label: 'Location',   value: [formData.city, formData.state].filter(Boolean).join(', ') || 'Not set', sid: 'location' },
                           { label: 'Bedrooms',   value: String(formData.bedrooms),  sid: 'details' },
                           { label: 'Bathrooms',  value: String(formData.bathrooms), sid: 'details' },

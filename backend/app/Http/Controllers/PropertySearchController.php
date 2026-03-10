@@ -1052,6 +1052,11 @@ class PropertySearchController extends Controller
             }
         }
 
+        // Listing type filter (for_rent / for_sale) — applied in both strict and relaxed mode
+        // Default to "for_rent" if not specified
+        $listingType = !empty($criteria['listing_type']) ? $criteria['listing_type'] : 'for_rent';
+        $query->where('listing_type', $listingType);
+
         // Price filters (only in strict mode - skip in relaxed mode to allow more results)
         if ($strict) {
             // Handle exact price match (when user specifies "price of X")

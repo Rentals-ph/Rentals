@@ -259,6 +259,7 @@ class PropertyController extends Controller
                 'description' => 'required|string',
                 'type' => 'required|string|max:255',
                 'price' => 'required|numeric|min:0',
+                'listing_type' => 'nullable|string|in:for_rent,for_sale',
                 'price_type' => 'nullable|string|in:Monthly,Weekly,Daily,Yearly,monthly,weekly,daily,yearly',
                 'bedrooms' => 'required|integer|min:0',
                 'bathrooms' => 'required|integer|min:0',
@@ -280,13 +281,18 @@ class PropertyController extends Controller
                 'street_address' => 'nullable|string',
             ]);
 
-            // Normalize price_type to capitalized format
-            if (isset($validated['price_type'])) {
+            // Resolve listing_type — default to for_rent
+            $listingType = $validated['listing_type'] ?? 'for_rent';
+
+            // Normalize price_type to capitalized format; null it out for for_sale properties
+            if ($listingType === 'for_sale') {
+                $validated['price_type'] = null;
+            } elseif (isset($validated['price_type'])) {
                 $validated['price_type'] = ucfirst(strtolower($validated['price_type']));
             }
 
             // Use database transaction for data integrity
-            $property = \DB::transaction(function () use ($validated, $request, $user) {
+            $property = \DB::transaction(function () use ($validated, $request, $user, $listingType) {
                 // Handle multiple image uploads
                 $imagePaths = [];
                 
@@ -333,8 +339,9 @@ class PropertyController extends Controller
                     'slug'  => $validated['slug'] ?? null, // HasSlug auto-generates if null
                     'description' => $validated['description'],
                     'type' => $validated['type'],
+                    'listing_type' => $listingType,
                     'price' => $validated['price'],
-                    'price_type' => $validated['price_type'] ?? 'Monthly',
+                    'price_type' => $validated['price_type'] ?? ($listingType === 'for_sale' ? null : 'Monthly'),
                     'bedrooms' => $validated['bedrooms'],
                     'bathrooms' => $validated['bathrooms'],
                     'garage' => $validated['garage'] ?? 0,
@@ -703,6 +710,7 @@ class PropertyController extends Controller
                 'description' => 'sometimes|string',
                 'type' => 'sometimes|string|max:255',
                 'price' => 'sometimes|numeric|min:0',
+                'listing_type' => 'nullable|string|in:for_rent,for_sale',
                 'price_type' => 'nullable|string|in:Monthly,Weekly,Daily,Yearly,monthly,weekly,daily,yearly',
                 'bedrooms' => 'sometimes|integer|min:0',
                 'bathrooms' => 'sometimes|integer|min:0',
@@ -727,13 +735,18 @@ class PropertyController extends Controller
                 'published_at' => 'nullable|date',
             ]);
 
-            // Normalize price_type to capitalized format
-            if (isset($validated['price_type'])) {
+            // Resolve listing_type for this update (use new value or existing)
+            $updateListingType = $validated['listing_type'] ?? $property->listing_type ?? 'for_rent';
+
+            // Normalize price_type; null it out for for_sale properties
+            if ($updateListingType === 'for_sale') {
+                $validated['price_type'] = null;
+            } elseif (isset($validated['price_type'])) {
                 $validated['price_type'] = ucfirst(strtolower($validated['price_type']));
             }
 
             // Use database transaction for data integrity
-            $property = \DB::transaction(function () use ($validated, $request, $property) {
+            $property = \DB::transaction(function () use ($validated, $request, $property, $updateListingType) {
                 // Handle multiple image uploads
                 $newImagePaths = [];
                 
@@ -906,6 +919,9 @@ class PropertyController extends Controller
                 if (isset($validated['price'])) {
                     $validated['price'] = (float)$validated['price'];
                 }
+
+                // Ensure listing_type is always set on update
+                $validated['listing_type'] = $updateListingType;
 
                 // Update the property with validated data
                 $property->update($validated);

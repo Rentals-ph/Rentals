@@ -30,6 +30,7 @@ export interface CreateListingData {
   videoUrl: string
   
   // Pricing
+  listingType: 'for_rent' | 'for_sale'
   price: string
   priceType: 'Monthly' | 'Weekly' | 'Daily' | 'Yearly'
   
@@ -63,6 +64,7 @@ const defaultData: CreateListingData = {
   zoom: '15',
   images: [],
   videoUrl: '',
+  listingType: 'for_rent',
   price: '',
   priceType: 'Monthly',
   amenities: [],
