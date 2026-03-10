@@ -132,7 +132,7 @@ export default function AgentsPage() {
         </div>
 
         {/* Content */}
-        <div className="relative z-[3] max-w-[var(--page-max-width)] mx-auto py-10 sm:py-14 md:py-16 w-full flex items-center justify-start flex-1">
+        <div className="relative z-[3] max-w-6xl mx-auto py-10 sm:py-14 md:py-16 w-full flex items-center justify-start flex-1">
           <div className="text-left flex flex-col items-start justify-center max-w-xl">
             <h1 className="font-outfit font-extrabold text-white tracking-tight leading-tight m-0 text-xl xs:text-2xl mobile:text-3xl sm:text-4xl md:text-5xl lg:text-6xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
               AGENTS
@@ -172,8 +172,8 @@ export default function AgentsPage() {
       </section>
 
       {/* Results header below hero - styled like properties page */}
-      <section className="px-4 sm:px-6 md:px-10 lg:px-[150px] pt-6 sm:pt-8 pb-2">
-        <div className="mx-auto max-w-[var(--page-max-width)]">
+      <section className="px-6 sm:px-10 lg:px-20 pt-6 sm:pt-8 pb-2">
+        <div className="mx-auto max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(320px,1.2fr)] gap-3 sm:gap-4 items-start lg:items-center">
             {/* Left column: results + sort + view mode controls (aligned with agents grid) */}
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
@@ -241,8 +241,8 @@ export default function AgentsPage() {
       </section>
 
       {/* Find agents list with right-side filters & CTA */}
-      <main className="px-4 sm:px-6 md:px-10 lg:px-[150px] pb-8 sm:pb-10 md:pb-12">
-        <section className="mx-auto max-w-[var(--page-max-width)]">
+      <main className="px-6 sm:px-10 lg:px-20 pb-8 sm:pb-10 md:pb-12">
+        <section className="mx-auto max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(320px,1.2fr)] gap-6 lg:gap-10 items-start">
             {/* Left: Agents list */}
             <div>

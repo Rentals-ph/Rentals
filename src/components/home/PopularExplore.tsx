@@ -191,8 +191,8 @@ export default function PopularExplore() {
   const INITIAL_VISIBLE = 5
 
   return (
-    <section className="bg-white px-4 sm:px-6 md:px-10 lg:px-[150px] w-full py-8 sm:py-12 md:py-16">
-      <div className="w-full mx-auto ">
+    <section className="bg-white page-x w-full py-8 sm:py-12 md:py-16">
+      <div className="page-w">
         <FadeInOnView
           as="div"
           className="text-center mx-auto mb-6 sm:mb-8"

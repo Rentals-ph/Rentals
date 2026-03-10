@@ -49,8 +49,45 @@
   --page-padding-desktop: 32px;
   --page-padding-tablet: 24px;
   --page-padding-mobile: 16px;
-  --page-max-width: 1400px;
+  --page-max-width: 72rem;
   --app-sidebar-width: 280px;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Global Page Layout Helpers — mirrors the news page spacing
+
+   CORRECT PATTERN (Pattern A):
+     <section class="page-x bg-white py-8">      ← outer: padding only
+       <div class="page-w">…content…</div>       ← inner: max-width only
+     </section>
+
+   WRONG PATTERN (Pattern B — makes content narrower than expected):
+     <div class="page-w page-x">…</div>          ← both on same element
+
+   page-x  →  px-6 (mobile) / px-10 (sm) / px-20 (lg)
+   page-w  →  max-w-6xl (72rem / 1152px) + mx-auto + w-full
+───────────────────────────────────────────────────────────────── */
+.page-x {
+  padding-left: 1.5rem;    /* 24px — px-6 */
+  padding-right: 1.5rem;
+}
+@media (min-width: 640px) {
+  .page-x {
+    padding-left: 2.5rem;  /* 40px — px-10 */
+    padding-right: 2.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .page-x {
+    padding-left: 5rem;    /* 80px — px-20 */
+    padding-right: 5rem;
+  }
+}
+.page-w {
+  max-width: 72rem;        /* 1152px — max-w-6xl */
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Main content: offset by collapsible sidebar (desktop); full width on mobile */

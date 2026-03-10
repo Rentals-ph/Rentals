@@ -16,8 +16,8 @@ import { TestimonialCardSkeleton } from '@/components/common/TestimonialCardSkel
 /** Featured Properties section skeleton (title + chips + carousel of cards) */
 function FeaturedPropertiesFallback() {
   return (
-    <section className="border-t-0 relative min-h-[60vh] flex px-3 xs:px-4 sm:px-6 md:px-10 lg:px-[150px] flex-col justify-center py-6 sm:py-12 pb-4">
-      <div className="w-full">
+    <section className="border-t-0 relative min-h-[60vh] flex page-x flex-col justify-center py-6 sm:py-12 pb-4">
+      <div className="page-w">
         <div className="relative flex justify-center items-end mb-4">
           <div className="text-center">
             <span className="block h-9 w-64 rounded bg-gray-200 animate-pulse mx-auto" />
@@ -46,8 +46,8 @@ function FeaturedPropertiesFallback() {
 /** Blogs section skeleton (title + 3 cards) */
 function BlogsFallback() {
   return (
-    <section className="bg-white px-4 sm:px-6 md:px-10 lg:px-[150px] w-full min-h-[70vh] flex flex-col justify-center py-6 sm:py-8">
-      <div className="w-full mx-auto py-4 sm:py-5">
+    <section className="bg-white page-x w-full min-h-[70vh] flex flex-col justify-center py-6 sm:py-8">
+      <div className="page-w py-4 sm:py-5">
         <div className="relative flex justify-center items-start mb-4 sm:mb-6">
           <div className="text-center">
             <span className="block h-9 w-32 rounded bg-gray-200 animate-pulse mx-auto" />
@@ -79,8 +79,8 @@ function BlogsFallback() {
 /** Agents section skeleton (title + 4 cards) */
 function AgentsShowcaseFallback() {
   return (
-    <section className="bg-[#F9FAFB] px-4 sm:px-6 md:px-10 lg:px-[150px] w-full py-8 sm:py-10 md:py-14">
-      <div className="w-full mx-auto max-w-7xl">
+    <section className="bg-[#F9FAFB] page-x w-full py-8 sm:py-10 md:py-14">
+      <div className="page-w">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 sm:mb-8">
           <div className="text-center sm:text-left max-w-xl mx-auto sm:mx-0">
             <span className="block h-7 w-48 rounded bg-gray-200 animate-pulse mb-2" />
@@ -113,9 +113,9 @@ function AgentsShowcaseFallback() {
 /** Testimonials section skeleton (title block + 3 cards) */
 function TestimonialsFallback() {
   return (
-    <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden mb-0 lg:pl-[150px] py-12">
+    <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden mb-0 page-x py-12">
       <div className="absolute inset-0 z-[1] bg-gray-300/50" />
-      <div className="relative z-[3] w-full mx-auto min-w-0">
+      <div className="relative z-[3] page-w min-w-0">
         <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-8 lg:gap-[50px] items-start w-full">
           <div className="flex flex-col gap-4 pt-0 w-full">
             <span className="h-[150px] w-[150px] rounded-full bg-gray-200 animate-pulse" />

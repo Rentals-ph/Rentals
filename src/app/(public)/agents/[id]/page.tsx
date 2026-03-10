@@ -179,7 +179,7 @@ export default function AgentDetailsPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         <PageHeader title="AGENT PROFILE" />
-        <div className="text-center py-10 px-4 sm:px-6 md:px-10 lg:px-[150px]">
+        <div className="text-center py-10 px-6 sm:px-10 lg:px-20">
           <p className="text-gray-600 text-sm sm:text-base">Loading agent profile...</p>
         </div>
         <Footer />
@@ -191,7 +191,7 @@ export default function AgentDetailsPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         <PageHeader title="AGENT PROFILE" />
-        <div className="px-4 sm:px-6 md:px-10 lg:px-[150px] py-4 bg-white">
+        <div className="px-6 sm:px-10 lg:px-20 py-4 bg-white">
           <nav className="flex items-center gap-2 text-xs sm:text-sm flex-wrap">
             <Link href="/" className="text-blue-600 hover:text-blue-800">Home</Link>
             <span className="text-gray-400">&gt;</span>
@@ -200,7 +200,7 @@ export default function AgentDetailsPage() {
             <span className="text-gray-600">Not Found</span>
           </nav>
         </div>
-        <main className="px-4 sm:px-6 md:px-10 lg:px-[150px] py-8">
+        <main className="px-6 sm:px-10 lg:px-20 py-8">
           <div className="max-w-2xl mx-auto">
             <EmptyState
               variant="notFound"
@@ -222,7 +222,7 @@ export default function AgentDetailsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
-      <main className="px-4 sm:px-6 md:px-10 lg:px-[150px] min-w-0">
+      <main className="px-6 sm:px-10 lg:px-20 min-w-0">
         <div className="mx-auto max-w-full min-w-0">
           {/* Breadcrumb - mobile friendly */}
           <nav className="py-3 sm:py-4 flex items-center gap-2 text-xs sm:text-sm flex-wrap" aria-label="Breadcrumb">
@@ -238,7 +238,7 @@ export default function AgentDetailsPage() {
             className="relative mb-6 sm:mb-8 md:mb-10 -mx-4 sm:-mx-6 md:-mx-10 lg:-mx-[150px] bg-gradient-to-r from-blue-700 via-blue-500 to-orange-400"
             aria-label="Agent profile hero"
           >
-            <div className="mx-auto px-4 sm:px-6 md:px-10 lg:px-[150px] py-8 sm:py-10 md:py-12" style={{ background: 'linear-gradient(135deg, #0ea5e9 0%, #1d4ed8 40%, #f97316 100%)' }}>
+            <div className="mx-auto px-6 sm:px-10 lg:px-20 py-8 sm:py-10 md:py-12" style={{ background: 'linear-gradient(135deg, #0ea5e9 0%, #1d4ed8 40%, #f97316 100%)' }}>
               {/* Top row: 3 columns on large screens */}
               <div className="grid grid-cols-1 lg:grid-cols-[70%_30%] gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
                 {/* Left column: avatar + main info + company + QR */}

@@ -187,9 +187,9 @@ const FeaturedProperties = () => {
   return (
     <section
       id="properties"
-      className="border-t-0 relative min-h-[50vh] sm:min-h-[60vh] flex px-3 xs:px-4 sm:px-6 md:px-10 lg:px-[150px] flex-col justify-center py-6 sm:py-12 pb-4 bg-[#F5F9FF] before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-gray-200 before:to-transparent after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-gray-200 after:to-transparent"
+      className="border-t-0 relative page-x py-10 sm:py-14 pb-6 bg-[#F5F9FF] before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-gray-200 before:to-transparent after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-gray-200 after:to-transparent"
     >
-      <div className="w-full">
+      <div className="max-w-6xl mx-auto w-full">
         {/* Header: BROWSE HOT OFFERS label, title + subtitle, category buttons */}
         <FadeInOnView
           className="relative flex flex-col gap-4 mb-6 sm:mb-8 pb-4"
@@ -245,7 +245,6 @@ const FeaturedProperties = () => {
             </div>
           </div>
         </FadeInOnView>
-      </div>
 
       {/* Location chips */}
       <FadeInOnView as="div" delayMs={120} className="mb-4 sm:mb-6 relative">
@@ -366,6 +365,7 @@ const FeaturedProperties = () => {
           View All Properties
         </Link>
       </FadeInOnView>
+      </div>
     </section>
   )
 }

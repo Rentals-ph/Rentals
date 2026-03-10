@@ -771,7 +771,8 @@ function PropertiesContent() {
         </div>
       </section>
 
-      <main className="properties-main-layout flex flex-col lg:flex-row gap-4 sm:gap-6 px-4 sm:px-6 md:px-10 lg:px-[150px] pb-4 sm:py-2 pt-6 sm:pt-8 max-w-[1920px] relative z-10">
+      <div className="w-full page-x">
+      <main className="properties-main-layout page-w flex flex-col lg:flex-row gap-4 sm:gap-6 pb-4 sm:py-2 pt-6 sm:pt-8 relative z-10">
         
         {/* Desktop Filters Sidebar - Left side */}
         <div className="properties-sidebar w-full lg:w-[320px] flex-shrink-0 hidden lg:block lg:order-1">
@@ -1390,6 +1391,7 @@ function PropertiesContent() {
           </div>
         </div>
       </main>
+      </div>
       
       {/* Mobile Sticky Back to Filters Button */}
       <button

@@ -8,6 +8,7 @@ import { EmptyState, EmptyStateAction } from '@/components/common'
 import { blogsApi } from '@/api'
 import type { Blog } from '@/types'
 import { ASSETS } from '@/utils/assets'
+import { FiHeart, FiMessageCircle, FiShare2 } from 'react-icons/fi'
 
 export default function BlogDetailsPage() {
   const params = useParams()
@@ -16,19 +17,15 @@ export default function BlogDetailsPage() {
   const [blogPost, setBlogPost] = useState<Blog | null>(null)
   const [relatedArticles, setRelatedArticles] = useState<Blog[]>([])
   const [loading, setLoading] = useState(true)
-  const [isPortraitImage, setIsPortraitImage] = useState(false)
   const [commentName, setCommentName] = useState('')
   const [commentEmail, setCommentEmail] = useState('')
   const [commentText, setCommentText] = useState('')
 
   useEffect(() => {
     if (!id) return
-
     const fetchBlog = async () => {
       try {
         setLoading(true)
-        setIsPortraitImage(false)
-
         let data: Blog
         try {
           data = await blogsApi.getById(id)
@@ -42,13 +39,11 @@ export default function BlogDetailsPage() {
             throw err
           }
         }
-
         setBlogPost(data)
-
         const allBlogs = await blogsApi.getAll()
         const related = allBlogs
-          .filter((b) => b.id !== data.id && b.category === data.category)
-          .slice(0, 5)
+          .filter((b) => b.id !== data.id)
+          .slice(0, 8)
         setRelatedArticles(related)
       } catch (err) {
         console.error('Error fetching blog:', err)
@@ -57,7 +52,6 @@ export default function BlogDetailsPage() {
         setLoading(false)
       }
     }
-
     fetchBlog()
   }, [id])
 
@@ -66,8 +60,6 @@ export default function BlogDetailsPage() {
     const d = new Date(value)
     return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
   }
-
-  const formatReadTime = (minutes: number): string => `${minutes} min read`
 
   const getImageUrl = (image: string | null): string => {
     if (!image) return ASSETS.BLOG_IMAGE_1
@@ -78,12 +70,7 @@ export default function BlogDetailsPage() {
     return image
   }
 
-  const handleImageLoad = (e: any) => {
-    const img = e.currentTarget as HTMLImageElement
-    setIsPortraitImage(img.naturalHeight > img.naturalWidth)
-  }
-
-  const handleCommentSubmit = (e: any) => {
+  const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!commentName || !commentEmail || !commentText) return
     setCommentName('')
@@ -91,14 +78,32 @@ export default function BlogDetailsPage() {
     setCommentText('')
   }
 
-  const paragraphs = blogPost?.content ? blogPost.content.split('\n\n') : []
+  const paragraphs = blogPost?.content ? blogPost.content.split('\n\n').filter(Boolean) : []
+
+  // Derived tags from category or static fallback
+  const tags = blogPost?.category
+    ? blogPost.category.split(',').map(t => t.trim()).filter(Boolean)
+    : ['Pets', 'Property', 'Safety', 'Cleanliness']
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <main className="w-full px-4 sm:px-6 md:px-10 lg:px-[150px] py-6 sm:py-8 md:py-12">
+      <main className="w-full page-x py-6 sm:py-8">
+        <div className="page-w">
         {loading ? (
-          <div className="flex items-center justify-center min-h-[200px]">
-            <p className="text-sm sm:text-base text-gray-600">Loading blog post...</p>
+          <div className="flex flex-col gap-6 animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-64" />
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8">
+              <div className="flex flex-col gap-4">
+                <div className="aspect-[16/9] bg-gray-200 rounded" />
+                <div className="h-8 bg-gray-200 rounded w-3/4" />
+                <div className="space-y-3">
+                  {[...Array(5)].map((_, i) => <div key={i} className="h-4 bg-gray-100 rounded" />)}
+                </div>
+              </div>
+              <div className="flex flex-col gap-3">
+                {[...Array(4)].map((_, i) => <div key={i} className="h-24 bg-gray-100 rounded" />)}
+              </div>
+            </div>
           </div>
         ) : !blogPost ? (
           <EmptyState
@@ -112,246 +117,258 @@ export default function BlogDetailsPage() {
             }
           />
         ) : (
-          <div className="mx-auto w-full max-w-[1200px]">
-            {/* Breadcrumb */}
-            <nav
-              className="pb-3 sm:pb-4 flex items-center gap-2 text-xs sm:text-sm flex-wrap"
-              aria-label="Breadcrumb"
-            >
-              <Link href="/" className="text-blue-600 hover:text-blue-800">
-                Home
-              </Link>
-              <span className="text-gray-400">&gt;</span>
-              <Link href="/blog" className="text-blue-600 hover:text-blue-800">
+          <>
+            {/* ── Breadcrumb ── */}
+            <nav className="flex items-center gap-2 text-sm mb-6 flex-wrap">
+              <Link href="/blog" className="text-gray-500 hover:text-[#205ED7] font-outfit transition-colors">
                 Blog
               </Link>
-              <span className="text-gray-400">&gt;</span>
-              <span
-                className="text-gray-600 truncate max-w-[180px] sm:max-w-none"
-                title={blogPost.title}
-              >
+              <span className="text-gray-400">›</span>
+              <span className="text-[#205ED7] font-outfit truncate max-w-xs sm:max-w-none">
                 {blogPost.title}
               </span>
             </nav>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2.4fr)_minmax(260px,1fr)] gap-6 lg:gap-10 items-start">
-              {/* Left: main article */}
-              <section className="flex flex-col gap-5 sm:gap-6 md:gap-7">
-                {/* Title + meta */}
-                <header className="flex flex-col gap-3 sm:gap-4">
-                  <h1 className="font-outfit text-lg xs:text-xl sm:text-3xl md:text-4xl font-bold text-black leading-tight">
-                    {blogPost.title}
-                  </h1>
-                  <div className="flex flex-wrap gap-3 sm:gap-5 items-center text-xs sm:text-sm text-gray-600 font-outfit">
-                    <span>{blogPost.author}</span>
-                    <span className="w-1 h-1 rounded-full bg-gray-400" />
-                    <span>{formatDate(blogPost.published_at)}</span>
-                    <span className="w-1 h-1 rounded-full bg-gray-400" />
-                    <span>{formatReadTime(blogPost.read_time)}</span>
-                  </div>
-                </header>
+            {/* ── Two-column layout ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8 lg:gap-10 items-start">
 
-                {/* Hero image */}
-                <div
-                  className={
-                    isPortraitImage
-                      ? 'w-full max-w-full rounded overflow-hidden border border-gray-200 bg-black/5 flex items-center justify-center'
-                      : 'w-full max-w-full rounded overflow-hidden h-[220px] xs:h-[260px] sm:h-[300px] md:h-[360px] lg:h-[420px] border border-gray-200 bg-black/5'
-                  }
-                >
+              {/* ══ LEFT: main article ══ */}
+              <section className="flex flex-col gap-0">
+
+                {/* Hero image with engagement icons */}
+                <div className="relative w-full aspect-[16/9] overflow-hidden bg-gray-100">
                   <img
                     src={getImageUrl(blogPost.image)}
                     alt={blogPost.title}
-                    onLoad={handleImageLoad}
-                    className={
-                      isPortraitImage
-                        ? 'max-h-[420px] w-auto object-contain'
-                        : 'w-full h-full object-cover'
-                    }
+                    className="w-full h-full object-cover"
                   />
+                  {/* Engagement icons — bottom left */}
+                  <div className="absolute bottom-4 left-4 flex items-center gap-3 z-10">
+                    <button className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-semibold text-gray-700 hover:bg-white transition-colors">
+                      <FiHeart className="w-4 h-4 text-red-500" />
+                      <span>{blogPost.likes ?? 374}</span>
+                    </button>
+                    <button className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-semibold text-gray-700 hover:bg-white transition-colors">
+                      <FiMessageCircle className="w-4 h-4 text-blue-500" />
+                      <span>{blogPost.comments ?? 23}</span>
+                    </button>
+                    <button className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-semibold text-gray-700 hover:bg-white transition-colors">
+                      <FiShare2 className="w-4 h-4 text-gray-600" />
+                    </button>
+                  </div>
                 </div>
 
-                {/* Body */}
-                <article className="space-y-4 sm:space-y-5">
-                  {paragraphs.map((paragraph, idx) => (
-                    <p
-                      key={idx}
-                      className="font-outfit text-sm sm:text-base leading-relaxed text-gray-800 text-left sm:text-justify"
-                    >
-                      {paragraph}
+                {/* Title + author */}
+                <div className="mt-5 mb-4 flex flex-col gap-3">
+                  <h1 className="font-outfit text-2xl sm:text-3xl font-bold text-gray-900 leading-tight m-0">
+                    {blogPost.title}
+                  </h1>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                      <span className="text-gray-500 font-semibold text-xs">
+                        {blogPost.author?.charAt(0) || 'A'}
+                      </span>
+                    </div>
+                    <span className="text-sm text-gray-600 font-outfit">
+                      By {blogPost.author || 'Anonymous'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Article body */}
+                <article className="flex flex-col gap-4">
+                  {paragraphs.length > 0 ? (
+                    paragraphs.map((paragraph, idx) => (
+                      <p
+                        key={idx}
+                        className="font-outfit text-sm sm:text-base leading-relaxed text-gray-700 text-justify m-0"
+                      >
+                        {paragraph}
+                      </p>
+                    ))
+                  ) : (
+                    <p className="font-outfit text-sm sm:text-base leading-relaxed text-gray-700 text-justify m-0">
+                      {blogPost.excerpt || 'No content available for this article.'}
                     </p>
-                  ))}
+                  )}
                 </article>
 
-                {/* Comments list */}
-                <section className="mt-4 sm:mt-6 pt-4 border-t-2 border-gray-200">
-                  <h2 className="font-outfit text-lg sm:text-xl md:text-2xl font-bold text-black mb-3 sm:mb-5">
-                    Comments
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2 mt-6">
+                  {tags.map(tag => (
+                    <Link
+                      key={tag}
+                      href={`/blog/category/${tag.toLowerCase()}`}
+                      className="px-4 py-1.5 text-sm font-outfit text-gray-600 hover:bg-gray-100 transition-colors"
+                      style={{ border: '1px solid #D1D5DB' }}
+                    >
+                      {tag}
+                    </Link>
+                  ))}
+                </div>
+
+                {/* ── Comments ── */}
+                <section className="mt-8 pt-6" style={{ borderTop: '2px solid #E5E7EB' }}>
+                  <h2 className="font-outfit text-lg sm:text-xl font-bold text-gray-900 mb-5 m-0">
+                    Comments{' '}
+                    <span className="text-[#205ED7]">{blogPost.comments ?? 2}</span>
                   </h2>
-                  <div className="flex flex-col gap-3 sm:gap-4">
-                    <div className="flex gap-3 sm:gap-4 items-start">
-                      <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-gray-200" />
-                      <div className="flex-1 space-y-1">
-                        <div className="font-outfit text-sm sm:text-base font-semibold text-black">
-                          Pat M.
+
+                  {/* Static demo comments */}
+                  <div className="flex flex-col gap-6">
+                    {[
+                      { name: 'Isaac Lacaylocay', text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis mollis et sem sed sollicitudin. Donec non odio neque. Aliquam hendrerit sollicitudin purus, quis rutrum mi accumsan nec. Quisque bibendum orci ac nibh facilisis, at malesuada orci congue. Nullam tempus sollicitudin cursus. Ut et adipiscing erat. Curabitur this is a text link libero tempus congue......' },
+                      { name: 'Isaac Lacaylocay', text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis mollis et sem sed sollicitudin. Donec non odio neque. Aliquam hendrerit sollicitudin purus, quis rutrum mi accumsan nec. Quisque bibendum orci ac nibh facilisis, at malesuada orci congue. Nullam tempus sollicitudin cursus. Ut et adipiscing erat. Curabitur this is a text link libero tempus congue......' },
+                    ].map((comment, i) => (
+                      <div key={i} className="flex gap-4 items-start">
+                        <div className="w-11 h-11 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
+                          <img
+                            src={ASSETS.PLACEHOLDER_PROFILE}
+                            alt={comment.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+                          />
                         </div>
-                        <p className="font-outfit text-xs sm:text-sm text-gray-600 leading-relaxed">
-                          Great article! The tip about screening tenants is especially important. I
-                          learned this the hard way in my first year of property management.
-                        </p>
+                        <div className="flex flex-col flex-1 gap-1">
+                          <span className="font-outfit text-sm font-bold text-gray-900">{comment.name}</span>
+                          <p className="font-outfit text-sm text-gray-600 leading-relaxed m-0">{comment.text}</p>
+                        </div>
                       </div>
-                    </div>
+                    ))}
                   </div>
                 </section>
 
-                {/* Comment form */}
-                <section className="mt-5 sm:mt-8 pt-5 sm:pt-8 border-t-2 border-gray-200">
-                  <h2 className="font-outfit text-lg sm:text-xl md:text-2xl font-bold text-black mb-3 sm:mb-4">
+                {/* ── Comment form ── */}
+                <section className="mt-8 pt-6" style={{ borderTop: '2px solid #E5E7EB' }}>
+                  <h2 className="font-outfit text-lg sm:text-xl font-bold text-gray-900 mb-5 m-0">
                     Submit a Comment
                   </h2>
-                  <form
-                    onSubmit={handleCommentSubmit}
-                    className="space-y-3 sm:space-y-4 max-w-[720px]"
-                  >
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                      <div className="flex flex-col gap-1">
-                        <label className="font-outfit text-xs sm:text-sm font-medium text-gray-700">
-                          Your Name
-                        </label>
+                  <form onSubmit={handleCommentSubmit} className="flex flex-col gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="font-outfit text-sm text-gray-700">Your name</label>
                         <input
                           type="text"
                           value={commentName}
                           onChange={(e) => setCommentName(e.target.value)}
-                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                          placeholder="Enter your name"
+                          placeholder="Isaac Lacaylocay"
                           required
+                          className="w-full px-4 py-3 text-sm text-gray-900 font-outfit bg-white outline-none focus:ring-2 focus:ring-[#266FFD]"
+                          style={{ border: '1px solid #D1D5DB' }}
                         />
                       </div>
-                      <div className="flex flex-col gap-1">
-                        <label className="font-outfit text-xs sm:text-sm font-medium text-gray-700">
-                          Your Email
-                        </label>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="font-outfit text-sm text-gray-700">Your email</label>
                         <input
                           type="email"
                           value={commentEmail}
                           onChange={(e) => setCommentEmail(e.target.value)}
-                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                          placeholder="you@example.com"
+                          placeholder="Isaaclocaylocay@gmail.com"
                           required
+                          className="w-full px-4 py-3 text-sm text-gray-900 font-outfit bg-white outline-none focus:ring-2 focus:ring-[#266FFD]"
+                          style={{ border: '1px solid #D1D5DB' }}
                         />
                       </div>
                     </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="font-outfit text-xs sm:text-sm font-medium text-gray-700">
-                        Your Message
-                      </label>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-outfit text-sm text-gray-700">Your Review</label>
                       <textarea
                         value={commentText}
                         onChange={(e) => setCommentText(e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 min-h-[120px] resize-vertical"
-                        placeholder="Share your thoughts about this article..."
+                        placeholder="This property I recommend to everyone"
                         required
+                        rows={5}
+                        className="w-full px-4 py-3 text-sm text-gray-900 font-outfit bg-white outline-none focus:ring-2 focus:ring-[#266FFD] resize-vertical"
+                        style={{ border: '1px solid #D1D5DB' }}
                       />
                     </div>
                     <button
                       type="submit"
-                      className="w-full sm:w-auto px-6 sm:px-10 py-3 sm:py-3.5 bg-blue-600 text-white font-outfit font-semibold text-sm sm:text-base rounded-lg shadow-md hover:bg-blue-700 transition-colors"
+                      className="w-full py-3.5 bg-[#266FFD] text-white font-outfit font-semibold text-sm hover:bg-[#1a5dd8] transition-colors"
                     >
                       Submit Review
                     </button>
                   </form>
                 </section>
 
-                {/* Related (mobile / tablet) */}
-                <section className="mt-6 sm:mt-8 pt-5 sm:pt-6 border-t-2 border-gray-200 lg:hidden">
-                  <h2 className="font-outfit text-lg sm:text-xl md:text-2xl font-bold text-black mb-3 sm:mb-5">
-                    Related Articles
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    {relatedArticles.length ? (
-                      relatedArticles.map((article) => (
-                        <Link
-                          key={article.id}
-                          href={`/blog/${article.id}`}
-                          className="flex flex-col bg-white rounded overflow-hidden shadow-sm border border-gray-200 hover:-translate-y-1 hover:shadow-md transition-all"
-                        >
-                          <div className="w-full h-36 xs:h-40 sm:h-44 overflow-hidden">
-                            <img
-                              src={getImageUrl(article.image)}
-                              alt={article.title}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <div className="p-3 sm:p-4 flex flex-col gap-1.5">
-                            <div className="flex gap-2 items-center text-xs text-gray-600">
-                              <span className="font-outfit font-medium text-green-600">
-                                {article.category}
-                              </span>
-                              <span>{formatReadTime(article.read_time)}</span>
-                            </div>
-                            <h3 className="font-outfit text-sm sm:text-base font-semibold text-black line-clamp-2">
-                              {article.title}
-                            </h3>
-                          </div>
-                        </Link>
-                      ))
-                    ) : (
-                      <EmptyState
-                        variant="empty"
-                        title="No related articles"
-                        description="We couldn't find other articles in this category yet."
-                        compact
-                      />
-                    )}
-                  </div>
-                </section>
               </section>
 
-              {/* Right: sidebar related list (desktop) */}
-              <aside className="hidden lg:flex flex-col gap-4 pt-1">
-                <h2 className="font-outfit text-lg md:text-xl font-bold text-black">Related Articles</h2>
-                <div className="flex flex-col gap-3">
-                  {relatedArticles.length ? (
-                    relatedArticles.map((article) => (
-                      <Link
-                        key={article.id}
-                        href={`/blog/${article.id}`}
-                        className="flex bg-white rounded border border-gray-200 shadow-sm overflow-hidden hover:-translate-y-1 hover:shadow-md transition-all min-h-[88px]"
-                      >
-                        <div className="w-[120px] xl:w-[140px] h-full flex-shrink-0">
-                          <img
-                            src={getImageUrl(article.image)}
-                            alt={article.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex-1 px-3 py-2.5 flex flex-col justify-center gap-1 min-w-0">
-                          <span className="font-outfit text-[11px] text-gray-500 line-clamp-1">
-                            {formatReadTime(article.read_time)}
-                          </span>
-                          <h3 className="font-outfit text-xs md:text-sm font-semibold text-black leading-snug line-clamp-2">
-                            {article.title}
-                          </h3>
-                        </div>
-                      </Link>
-                    ))
-                  ) : (
-                    <EmptyState
-                      variant="empty"
-                      title="No related articles"
-                      description="We couldn't find other articles in this category yet."
-                      compact
-                    />
-                  )}
-                </div>
+              {/* ══ RIGHT: related articles sidebar ══ */}
+              <aside className="hidden lg:flex flex-col gap-3">
+                {relatedArticles.length > 0 ? (
+                  relatedArticles.map((article) => (
+                    <Link
+                      key={article.id}
+                      href={`/blog/${article.id}`}
+                      className="flex gap-0 bg-white overflow-hidden hover:shadow-md transition-shadow group"
+                      style={{ border: '1px solid #E5E7EB' }}
+                    >
+                      {/* Thumbnail */}
+                      <div className="w-[110px] flex-shrink-0 overflow-hidden">
+                        <img
+                          src={getImageUrl(article.image)}
+                          alt={article.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          style={{ minHeight: '90px' }}
+                        />
+                      </div>
+                      {/* Text */}
+                      <div className="flex-1 p-3 flex flex-col gap-1.5 justify-center min-w-0">
+                        <h3 className="font-outfit text-xs font-bold text-gray-900 leading-snug line-clamp-2 m-0">
+                          {article.title}
+                        </h3>
+                        <p className="font-outfit text-[11px] text-gray-500 leading-relaxed line-clamp-3 m-0">
+                          {article.excerpt || article.content?.substring(0, 80) + '...'}
+                        </p>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <EmptyState
+                    variant="empty"
+                    title="No related articles"
+                    description="We couldn't find other articles yet."
+                    compact
+                  />
+                )}
               </aside>
+
             </div>
-          </div>
+
+            {/* Mobile related articles */}
+            <section className="mt-8 pt-6 lg:hidden" style={{ borderTop: '2px solid #E5E7EB' }}>
+              <h2 className="font-outfit text-lg font-bold text-gray-900 mb-4 m-0">Related Articles</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {relatedArticles.slice(0, 4).map(article => (
+                  <Link
+                    key={article.id}
+                    href={`/blog/${article.id}`}
+                    className="flex gap-0 bg-white overflow-hidden hover:shadow-md transition-shadow group"
+                    style={{ border: '1px solid #E5E7EB' }}
+                  >
+                    <div className="w-24 flex-shrink-0 overflow-hidden">
+                      <img
+                        src={getImageUrl(article.image)}
+                        alt={article.title}
+                        className="w-full h-full object-cover"
+                        style={{ minHeight: '80px' }}
+                      />
+                    </div>
+                    <div className="flex-1 p-3 flex flex-col gap-1 justify-center min-w-0">
+                      <h3 className="font-outfit text-xs font-bold text-gray-900 leading-snug line-clamp-2 m-0">
+                        {article.title}
+                      </h3>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          </>
         )}
+        </div>
       </main>
 
       <Footer />
     </div>
   )
 }
-

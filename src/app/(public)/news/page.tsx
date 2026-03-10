@@ -6,11 +6,13 @@ import Footer from '@/components/layout/Footer'
 import { newsApi } from '@/api'
 import type { News } from '@/api/endpoints/news'
 import { ASSETS } from '@/utils/assets'
-import { NewsArticleSkeleton } from '@/components/common/NewsArticleSkeleton'
+import { FiSearch, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 
 export default function NewsPage() {
   const [news, setNews] = useState<News[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeCategory, setActiveCategory] = useState('All')
+  const [featuredIndex, setFeaturedIndex] = useState(0)
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -23,479 +25,523 @@ export default function NewsPage() {
         setLoading(false)
       }
     }
-
     fetchNews()
   }, [])
-
-  // Category colors mapping
-  const categoryColors: { [key: string]: string } = {
-    'Business': '#4A90E2',
-    'Economy': '#50C878',
-    'Technology': '#FF69B4',
-    'Politics': '#E74C3C',
-    'Health': '#50C878',
-    'Sports': '#E74C3C',
-    'Entertainment': '#E91E63',
-    'Science': '#00BCD4',
-    'Legal': '#E74C3C',
-    'Property Management': '#4A90E2',
-    'Environment': '#50C878',
-    'Finance': '#4A90E2',
-    'Real Estate': '#FF8C00',
-    'Travel': '#000000',
-    'Life': '#000000'
-  }
-
-  const getCategoryColor = (category: string) => {
-    return categoryColors[category] || '#999999'
-  }
-
-  const formatDate = (dateString: string | null): string => {
-    if (!dateString) return 'January 15, 2026'
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  }
 
   const formatDateShort = (dateString: string | null): string => {
     if (!dateString) return 'January 15, 2026'
     const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
   }
 
   const getImageUrl = (image: string | null): string => {
     if (!image) return ASSETS.PLACEHOLDER_PROPERTY_MAIN
-    if (image.startsWith('http://') || image.startsWith('https://')) {
-      return image
-    }
+    if (image.startsWith('http://') || image.startsWith('https://')) return image
     if (image.startsWith('storage/') || image.startsWith('/storage/')) {
       return `/api/${image.startsWith('/') ? image.slice(1) : image}`
     }
     return image
   }
 
-  // Organize news into sections based on the photo
-  const featureMain = news[0] || null
-  const featureRight = news.slice(1, 4)
-  const trendingNews = news.slice(4, 8)
-  const carouselNews = news.slice(8, 11)
-  const videoNews = news.slice(11, 14)
-  const mainNewsList = news.slice(14, 18)
-  const mostPopular = [...news].sort((a, b) => (b.id - a.id)).slice(0, 4)
-  const displayTags = ['Business', 'Technology', 'Sport', 'Art', 'Lifestyle', 'Three', 'Photography', 'Education', 'Social']
-  const headlineNews = news.slice(0, 5)
+  // Categories
+  const staticCategories = ['All', 'Politics', 'Business', 'Technology', 'Health', 'Travel', 'Sports']
+  const dynamicCategories = Array.from(new Set(news.map(n => n.category).filter(Boolean)))
+  const displayCategories = dynamicCategories.length > 0 ? ['All', ...dynamicCategories] : staticCategories
+
+  // Flash news headlines
+  const flashHeadlines = news.length > 0
+    ? news.slice(0, 8).map(n => n.title)
+    : [
+        'Rental Payment Platforms Simplify Transactions',
+        'Student Housing Market Expands Near Universities',
+        'Makati CBD Office Space Demand Reaches New High',
+        'Property Values Rise in Key Metro Areas',
+        'New Rental Regulations Announced for 2026',
+      ]
+
+  // Featured slider: 4 articles per "view"
+  const totalSlides = Math.max(1, news.length - 3)
+  const nextFeatured = () => setFeaturedIndex(prev => (prev + 1 >= totalSlides ? 0 : prev + 1))
+  const prevFeatured = () => setFeaturedIndex(prev => (prev - 1 < 0 ? totalSlides - 1 : prev - 1))
+
+  // Section slices
+  const spotlightNews = news.slice(0, 6)
+  const healthNews = news.slice(6, 10)
+  const latestNews = news.slice(0, 3)
+
+  // Overlay gradient (bottom-heavy dark)
+  const overlayGradient = 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0) 100%)'
+
+  // Placeholder for loading/empty state
+  const placeholder = (i: number): News => ({
+    id: i,
+    title: 'POPULAR TOURIST DESTINATION IMPLEMENTS NEW ENTRY RULES',
+    content: '',
+    excerpt: 'NEW ENTRY RULES',
+    category: 'Travel',
+    author: 'Lorem ipsum',
+    image: null,
+    published_at: '2026-01-15',
+  })
+
+  const getFeatured = (offset: number): News =>
+    news[featuredIndex + offset] ?? placeholder(offset)
 
   return (
-    <div className="flex min-h-screen flex-col bg-white overflow-x-hidden">
-      {/* Redesigned News Header */}
-      <header className="w-full">
-        {/* Top Red Bar */}
-        <div className="bg-red-600 w-full px-4 sm:px-6 md:px-10 lg:px-[150px] py-6 sm:py-8 lg:py-10">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-10">
-            {/* Logo and Subtitle */}
-            <div className="text-white text-center lg:text-left">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black italic font-serif leading-none tracking-tight">
-                Welcome to Rentals News
-              </h1>
-              <p className="mt-1 text-xs sm:text-sm md:text-base font-medium opacity-90 font-outfit">
-                News & Lifestyle Magazine Template
-              </p>
-            </div>
+    <div className="flex min-h-screen flex-col bg-[#F2F2F2] overflow-x-hidden">
 
-            {/* Right Side: Auth and Search */}
-            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 w-full lg:w-auto">
+      {/* Ticker keyframe */}
+      <style>{`
+        @keyframes newsTicker {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .news-ticker-track {
+          display: flex;
+          width: max-content;
+          animation: newsTicker 35s linear infinite;
+        }
+        .news-ticker-track:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
 
-
-              <div className="relative w-full sm:w-[300px] md:w-[400px]">
-                <input
-                  type="text"
-                  placeholder="Search"
-                  className="w-full bg-white border border-white/40 rounded-md py-2 px-4 pr-10 text-gray-500 placeholder:text-gray-500/60 focus:outline-none focus:border-white transition-colors font-outfit"
-                />
-                <button className="absolute right-3 top-2 text-gray-500">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </button>
-              </div>
+      {/* ══════════════════════════════════════
+          1. RED HERO HEADER
+      ══════════════════════════════════════ */}
+      <section style={{ background: '#CC1A1A' }} className="w-full px-6 sm:px-10 lg:px-20 py-8">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-8 flex-wrap">
+          {/* Left: title + subtitle */}
+          <div>
+            <h1
+              style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontStyle: 'italic', fontWeight: 700 }}
+              className="text-white text-3xl sm:text-4xl lg:text-5xl leading-tight m-0"
+            >
+              Welcome To Rentals News
+            </h1>
+            <p className="text-white/80 text-sm mt-2 m-0 font-outfit">
+              Get the latest news and updates delivered to you
+            </p>
+          </div>
+          {/* Right: Search */}
+          <div className="flex-shrink-0 w-56 sm:w-64">
+            <div className="relative">
+              <FiSearch className="absolute left-3 top-3 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search"
+                className="w-full pl-9 pr-4 py-2.5 bg-white text-sm text-gray-700 outline-none font-outfit"
+              />
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Category Navigation Bar (White) */}
-        <nav className="w-full bg-white border-b border-gray-200 overflow-x-auto">
-          <div className="mx-auto px-4 sm:px-6 md:px-10 lg:px-[150px] flex items-center gap-6 sm:gap-8 py-4 whitespace-nowrap scrollbar-hide">
-            <Link href="/news" className="text-gray-900 font-bold hover:text-red-600 transition-colors font-outfit text-sm sm:text-base">Home</Link>
-            <div className="flex items-center gap-1 group cursor-pointer">
-              <span className="text-gray-900 font-medium hover:text-red-600 transition-colors font-outfit text-sm sm:text-base">Pages</span>
-              <svg className="w-4 h-4 text-gray-400 group-hover:text-red-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+      {/* ══════════════════════════════════════
+          2. CATEGORY TABS
+      ══════════════════════════════════════ */}
+      <section className="w-full bg-white px-6 sm:px-10 lg:px-20" style={{ borderBottom: '1px solid #E5E7EB' }}>
+        <div className="max-w-6xl mx-auto flex items-center gap-6 overflow-x-auto py-3 scrollbar-hide">
+          {displayCategories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className="whitespace-nowrap font-outfit text-sm transition-colors flex-shrink-0 bg-transparent"
+              style={{
+                fontWeight: activeCategory === cat ? 700 : 400,
+                color: activeCategory === cat ? '#111' : '#6B7280',
+                borderBottom: activeCategory === cat ? '2px solid #111' : '2px solid transparent',
+                paddingBottom: '4px',
+                border: 'none',
+                borderBottomWidth: '2px',
+                borderBottomStyle: 'solid',
+                borderBottomColor: activeCategory === cat ? '#111' : 'transparent',
+                cursor: 'pointer',
+              }}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════
+          3. FLASH NEWS TICKER
+      ══════════════════════════════════════ */}
+      <section className="w-full bg-white px-6 sm:px-10 lg:px-20 py-2" style={{ borderBottom: '1px solid #E5E7EB' }}>
+        <div className="max-w-6xl mx-auto flex items-center gap-0 overflow-hidden">
+          <span
+            className="flex-shrink-0 text-white text-xs font-bold px-3 py-1.5 uppercase tracking-wide mr-3 font-outfit"
+            style={{ background: '#CC1A1A' }}
+          >
+            FLASH NEWS
+          </span>
+          <div className="overflow-hidden flex-1">
+            <div className="news-ticker-track">
+              {[...flashHeadlines, ...flashHeadlines].map((headline, i) => (
+                <span key={i} className="text-xs text-gray-700 flex-shrink-0 font-outfit pr-8">
+                  {headline}
+                  <span className="ml-4" style={{ color: '#CC1A1A' }}>•</span>
+                </span>
+              ))}
             </div>
-            <div className="flex items-center gap-1 group cursor-pointer">
-              <span className="text-gray-900 font-medium hover:text-red-600 transition-colors font-outfit text-sm sm:text-base">Mega Menu</span>
-              <svg className="w-4 h-4 text-gray-400 group-hover:text-red-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-            <Link href="/news/category/politics" className="text-gray-900 font-medium hover:text-red-600 transition-colors font-outfit text-sm sm:text-base">Politics</Link>
-            <Link href="/news/category/breaking" className="text-gray-500 font-medium hover:text-red-600 transition-colors font-outfit text-sm sm:text-base">Breaking News</Link>
-            <Link href="/news/category/business" className="text-gray-500 font-medium hover:text-red-600 transition-colors font-outfit text-sm sm:text-base">Business</Link>
-            <Link href="/news/category/technology" className="text-gray-500 font-medium hover:text-red-600 transition-colors font-outfit text-sm sm:text-base">Technology</Link>
-            <Link href="/news/category/health" className="text-gray-500 font-medium hover:text-red-600 transition-colors font-outfit text-sm sm:text-base">Health</Link>
-            <Link href="/news/category/travel" className="text-gray-500 font-medium hover:text-red-600 transition-colors font-outfit text-sm sm:text-base">Travel</Link>
-            <Link href="/news/category/sports" className="text-gray-500 font-medium hover:text-red-600 transition-colors font-outfit text-sm sm:text-base">Sports</Link>
-            <Link href="/contact" className="text-gray-500 font-medium hover:text-red-600 transition-colors font-outfit text-sm sm:text-base">Contact</Link>
           </div>
-        </nav>
+        </div>
+      </section>
 
-        {/* Headline Ticker Section */}
-        {headlineNews.length > 0 && (
-          <div className="w-full bg-gray-50 border-b border-gray-100 py-2 sm:py-3 relative overflow-hidden flex items-center pr-4 sm:pr-6 md:pr-10 lg:pr-[150px]">
-            {/* Ticker Title Tag */}
-            <div className="bg-red-600 text-white font-outfit font-bold text-[10px] sm:text-xs uppercase px-3 py-1 ml-4 sm:ml-6 md:ml-10 lg:ml-[150px] rounded shrink-0 z-10 shadow-sm">
-              Flash News
-            </div>
-
-            <div className="flex-1 overflow-hidden ml-4">
-              <div
-                className="flex whitespace-nowrap"
-                style={{
-                  animation: 'scrollTicker 60s linear infinite'
-                }}
-              >
-                {[...Array(3)].map((_, loopIndex) => (
-                  <div key={loopIndex} className="flex items-center gap-6 sm:gap-10 px-4">
-                    {headlineNews.map((article, index) => (
-                      <Link
-                        key={`${loopIndex}-${index}`}
-                        href={`/news/${article.id}`}
-                        className="flex items-center gap-2 group"
-                      >
-                        <span className="text-gray-700 font-outfit text-xs sm:text-sm font-medium hover:text-red-600 transition-colors">
-                          {article.title}
-                        </span>
-                        <span className="text-gray-300 text-sm sm:text-lg select-none">•</span>
-                      </Link>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <style dangerouslySetInnerHTML={{
-              __html: `
-                @keyframes scrollTicker {
-                  0% {
-                    transform: translateX(0);
-                  }
-                  100% {
-                    transform: translateX(-33.333%);
-                  }
-                }
-              `
-            }} />
-          </div>
-        )}
-      </header>
-
-      {/* Main Content Area with Background Texture */}
-      <div
-        className="relative w-full"
-      /*style={{
-        backgroundImage: `url(${ASSETS.BG_NEWS})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}*/
-      >
-        <div className="absolute inset-0 bg-white/90"></div>
-
-        <main className="relative z-10 mx-auto w-full px-4 sm:px-6 md:px-10 lg:px-[150px] py-8 sm:py-12">
+      {/* ══════════════════════════════════════
+          4. FEATURED ARTICLES SLIDER
+      ══════════════════════════════════════ */}
+      <section className="w-full bg-[#F2F2F2] px-6 sm:px-10 lg:px-20 pt-6 pb-2">
+        <div className="max-w-6xl mx-auto">
           {loading ? (
-            <div className="flex flex-col gap-10">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {Array.from({ length: 4 }).map((_, i) => <NewsArticleSkeleton key={i} variant="card" />)}
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {Array.from({ length: 3 }).map((_, i) => <NewsArticleSkeleton key={i} variant="card" />)}
+            <div className="grid grid-cols-1 lg:grid-cols-[56%_44%] gap-2">
+              <div className="aspect-[4/3] lg:h-80 bg-gray-300 animate-pulse" />
+              <div className="flex flex-col gap-2">
+                <div className="h-40 bg-gray-300 animate-pulse" />
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="h-36 bg-gray-300 animate-pulse" />
+                  <div className="h-36 bg-gray-300 animate-pulse" />
+                </div>
               </div>
             </div>
           ) : (
-            <div className="flex flex-col gap-12 sm:gap-16">
+            <>
+              <div className="grid grid-cols-1 lg:grid-cols-[56%_44%] gap-2">
 
-              {/* Combined Featured & News Block */}
-              <div className="flex flex-col gap-8 sm:gap-10">
-                {/* 0. Feature Grid Section */}
-                <section className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-4 lg:h-250">
-                  {/* Left: Big Feature */}
-                  <div className="lg:col-span-7 h-[200px] sm:h-[300px] lg:h-[700px]">
-                    {featureMain && (
-                      <Link href={`/news/${featureMain.id}`} className="group relative block w-full h-full overflow-hidden rounded-xl bg-gray-100 shadow-sm">
-                        <img
-                          src={getImageUrl(featureMain.image)}
-                          alt={featureMain.title}
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
-                        <div className="absolute bottom-0 p-6 md:p-8 w-full">
-                          <span className="inline-block px-3 py-1 bg-black text-white text-[10px] md:text-xs font-bold font-outfit uppercase mb-3 rounded">
-                            {featureMain.category || 'ECONOMY'}
-                          </span>
-                          <h2 className="text-white font-outfit text-xl md:text-2xl lg:text-3xl font-extrabold line-clamp-2 mb-2 leading-tight">
-                            {featureMain.title}
-                          </h2>
-                          <div className="text-white/80 text-xs md:text-sm font-outfit font-medium">
-                            Lorem ipsum • {formatDate(featureMain.published_at)}
-                          </div>
-                        </div>
-                      </Link>
-                    )}
-                  </div>
-
-                  {/* Right: 3 Smaller Features */}
-                  <div className="lg:col-span-5 flex flex-col gap-3 md:gap-4 h-[700px]">
-                    {/* Top wide in right col */}
-                    {featureRight[0] && (
-                      <Link href={`/news/${featureRight[0].id}`} className="group relative block w-full flex-1 overflow-hidden rounded-xl bg-gray-100 shadow-sm">
-                        <img
-                          src={getImageUrl(featureRight[0].image)}
-                          alt={featureRight[0].title}
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-                        <div className="absolute bottom-0 p-4 md:p-5">
-                          <span className="inline-block px-2 py-0.5 bg-black text-white text-[10px] font-bold font-outfit uppercase mb-2 rounded">
-                            {featureRight[0].category || 'TECHNOLOGY'}
-                          </span>
-                          <h3 className="text-white font-outfit text-sm md:text-base lg:text-lg font-bold line-clamp-2 leading-tight">
-                            {featureRight[0].title}
-                          </h3>
-                          <div className="text-white/80 text-[10px] md:text-xs font-outfit mt-1">
-                            Lorem ipsum • {formatDateShort(featureRight[0].published_at)}
-                          </div>
-                        </div>
-                      </Link>
-                    )}
-
-                    {/* Bottom two side by side in right col */}
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                      {featureRight.slice(1, 3).map((article, idx) => (
-                        <Link key={article.id} href={`/news/${article.id}`} className="group relative block w-full h-full min-h-[160px] overflow-hidden rounded-xl bg-gray-100 shadow-sm">
-                          <img
-                            src={getImageUrl(article.image)}
-                            alt={article.title}
-                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
-                          <div className="absolute bottom-0 p-4">
-                            <span className="inline-block px-2 py-0.5 bg-black text-white text-[10px] font-bold font-outfit uppercase mb-2 rounded">
-                              {article.category || (idx === 0 ? 'EDUCATION' : 'ECONOMY')}
-                            </span>
-                            <h3 className="text-white font-outfit text-xs md:text-sm lg:text-[15px] font-bold line-clamp-2 leading-tight">
-                              {article.title}
-                            </h3>
-                            <div className="text-white/80 text-[10px] font-outfit mt-1">
-                              Lorem ipsum • {formatDateShort(article.published_at)}
-                            </div>
-                          </div>
-                        </Link>
-                      ))}
+                {/* Left: large featured */}
+                <Link href={`/news/${getFeatured(0).id}`} className="block relative overflow-hidden group">
+                  <div className="lg:h-80 aspect-[4/3] lg:aspect-auto relative overflow-hidden">
+                    <img
+                      src={getImageUrl(getFeatured(0).image)}
+                      alt={getFeatured(0).title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div style={{ background: overlayGradient }} className="absolute inset-0" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <span
+                        className="inline-block text-white text-xs px-2 py-0.5 mb-2 font-outfit"
+                        style={{ background: 'rgba(0,0,0,0.65)' }}
+                      >
+                        {getFeatured(0).category || 'Travel'}
+                      </span>
+                      <h2 className="text-white font-bold text-base sm:text-lg leading-tight m-0 font-outfit uppercase">
+                        {getFeatured(0).title}
+                      </h2>
+                      <p className="font-bold text-sm mt-0.5 m-0 font-outfit uppercase" style={{ color: '#FF4444' }}>
+                        {getFeatured(0).excerpt?.substring(0, 45) || 'NEW ENTRY RULES'}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-white/75 text-xs font-outfit">{getFeatured(0).author || 'Lorem ipsum'}</span>
+                        <span className="text-white/50 text-xs">•</span>
+                        <span className="text-white/75 text-xs font-outfit">{formatDateShort(getFeatured(0).published_at)}</span>
+                      </div>
                     </div>
                   </div>
-                </section>
+                </Link>
 
-                {/* 2. News (Carousel) Section */}
-                <section>
-                  <div className="flex justify-between items-center border-b-2 border-gray-100 mb-6">
-                    <h2 className="text-xl sm:text-2xl font-bold font-outfit text-gray-900 pb-2">News</h2>
-                    <div className="flex gap-1">
-                      <button className="p-1 px-2 bg-gray-100 hover:bg-gray-200 text-gray-400 rounded transition-colors">‹</button>
-                      <button className="p-1 px-2 bg-gray-100 hover:bg-gray-200 text-gray-400 rounded transition-colors">›</button>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
-                    {carouselNews.map((article) => (
-                      <Link key={article.id} href={`/news/${article.id}`} className="group flex flex-col gap-3">
-                        <div className="aspect-[16/10] overflow-hidden rounded-md bg-gray-100">
-                          <img
-                            src={getImageUrl(article.image)}
-                            alt={article.title}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        </div>
-                        <div>
-                          <h3 className="text-gray-900 font-outfit text-sm sm:text-base font-bold line-clamp-2 leading-tight group-hover:text-red-600">
-                            {article.title}
-                          </h3>
-                          <div className="text-gray-500 text-[10px] sm:text-xs font-outfit mt-1 uppercase">
-                            🕒 {formatDateShort(article.published_at)}
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </section>
-              </div>
-
-
-
-              {/* 4. Main Body: News + Sidebar */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 mb-6 sm:mb-10 lg:mb-12 items-stretch">
-                {/* Left Column: News List */}
-                <div className="flex flex-col gap-8">
-                  <div className="border-b-2 border-gray-100 mb-2">
-                    <h2 className="text-xl sm:text-2xl font-bold font-outfit text-gray-900 pb-2">News</h2>
-                  </div>
-                  <div className="flex flex-col gap-6 sm:gap-10">
-                    {mainNewsList.map((article) => (
-                      <Link key={article.id} href={`/news/${article.id}`} className="group flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
-                        <div className="w-full sm:w-[240px] md:w-[280px] aspect-[4/3] flex-shrink-0 overflow-hidden rounded-md bg-gray-100">
-                          <img
-                            src={getImageUrl(article.image)}
-                            alt={article.title}
-                            className="h-full w-full object-cover group-hover:scale-105 transition-transform"
-                          />
-                        </div>
-                        <div className="flex-1 flex flex-col gap-2">
-                          <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 font-outfit leading-tight group-hover:text-red-600 transition-colors">
-                            {article.title}
-                          </h3>
-                          <div className="text-xs sm:text-sm text-gray-500 font-outfit uppercase">
-                            Lorem Ipsum • {formatDateShort(article.published_at)}
-                          </div>
-                          <p className="text-xs sm:text-sm text-gray-600 font-outfit line-clamp-3 leading-relaxed">
-                            {article.content || "Magna aliqua ut enim ad minim veniam quis nostrud quis xercitation ullamco. Thomson Smith - April 18, 2018 Amet consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation."}
-                          </p>
-                          <ul className="hidden md:block list-disc ml-4 text-[10px] sm:text-xs text-gray-500">
-                            <li>Why 2017 Might Just Be the Worst Year for Gaming</li>
-                            <li>Ghost Racer Wants to be the Most Ambitious Car Game</li>
-                          </ul>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-
-                  {/* Pagination placeholder */}
-                  <div className="flex justify-center items-center gap-2 mt-4 sm:mt-8">
-                    <button className="px-3 py-1 bg-gray-100 text-gray-400 text-xs sm:text-sm font-bold rounded">← PREVIOUS</button>
-                    <button className="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-400 text-xs sm:text-sm font-bold rounded">1</button>
-                    <button className="w-8 h-8 flex items-center justify-center bg-gray-200 text-gray-900 text-xs sm:text-sm font-bold rounded">2</button>
-                    <button className="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-400 text-xs sm:text-sm font-bold rounded">3</button>
-                    <button className="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-400 text-xs sm:text-sm font-bold rounded">...</button>
-                    <button className="px-3 py-1 bg-gray-100 text-gray-400 text-xs sm:text-sm font-bold rounded">NEXT →</button>
-                  </div>
-                </div>
-
-                {/* Right Column: Sidebar */}
-                <div className="flex flex-col gap-10">
-                  {/* Tags */}
-                  <section>
-                    <div className="border-b-2 border-gray-100 mb-6">
-                      <h2 className="text-xl sm:text-2xl font-bold font-outfit text-gray-900 pb-2">Tags</h2>
-                    </div>
-                    <div className="flex flex-wrap gap-2 sm:gap-4">
-                      {displayTags.map(tag => (
-                        <span key={tag} className="px-5 py-3 bg-gray-100 text-gray-600 text-sm sm:text-base md:text-lg font-bold font-outfit rounded-lg hover:bg-red-600 hover:text-white cursor-pointer transition-colors shadow-sm">
-                          {tag}
+                {/* Right: 1 medium + 2 small */}
+                <div className="flex flex-col gap-2">
+                  {/* Top medium */}
+                  <Link href={`/news/${getFeatured(1).id}`} className="block relative overflow-hidden group">
+                    <div className="h-40 relative overflow-hidden">
+                      <img
+                        src={getImageUrl(getFeatured(1).image)}
+                        alt={getFeatured(1).title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div style={{ background: overlayGradient }} className="absolute inset-0" />
+                      <div className="absolute bottom-0 left-0 right-0 p-3">
+                        <span
+                          className="inline-block text-white text-xs px-2 py-0.5 mb-1 font-outfit"
+                          style={{ background: 'rgba(0,0,0,0.65)' }}
+                        >
+                          {getFeatured(1).category || 'Travel'}
                         </span>
-                      ))}
+                        <h3 className="text-white font-bold text-sm leading-tight m-0 font-outfit uppercase">
+                          {getFeatured(1).title}
+                        </h3>
+                        <p className="font-bold text-xs mt-0.5 m-0 font-outfit uppercase line-clamp-1" style={{ color: '#FF4444' }}>
+                          {getFeatured(1).excerpt?.substring(0, 35) || 'NEW ENTRY RULES'}
+                        </p>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <span className="text-white/70 text-xs font-outfit">{getFeatured(1).author || 'Lorem ipsum'}</span>
+                          <span className="text-white/50 text-xs">•</span>
+                          <span className="text-white/70 text-xs font-outfit">{formatDateShort(getFeatured(1).published_at)}</span>
+                        </div>
+                      </div>
                     </div>
-                  </section>
+                  </Link>
 
-                  {/* Most Popular */}
-                  <section>
-                    <div className="border-b-2 border-gray-100 mb-8">
-                      <h2 className="text-2xl sm:text-3xl font-bold font-outfit text-gray-900 pb-2">Most Popular</h2>
-                    </div>
-                    <div className="flex flex-col gap-8">
-                      {mostPopular.map(article => (
-                        <Link key={article.id} href={`/news/${article.id}`} className="group flex gap-5 sm:gap-8 items-start">
-                          <div className="w-28 h-20 sm:w-40 sm:h-28 md:w-56 md:h-36 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 shadow-md">
-                            <img src={getImageUrl(article.image)} alt={article.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                          </div>
-                          <div className="flex-1 flex flex-col gap-2 sm:gap-3">
-                            <h4 className="text-base sm:text-lg md:text-xl font-extrabold text-gray-900 font-outfit line-clamp-2 leading-tight group-hover:text-red-600 transition-colors">
+                  {/* Bottom 2 small */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {([getFeatured(2), getFeatured(3)] as News[]).map((article, i) => (
+                      <Link key={article.id + '-f-' + i} href={`/news/${article.id}`} className="block relative overflow-hidden group">
+                        <div className="h-36 relative overflow-hidden">
+                          <img
+                            src={getImageUrl(article.image)}
+                            alt={article.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                          <div style={{ background: overlayGradient }} className="absolute inset-0" />
+                          <div className="absolute bottom-0 left-0 right-0 p-2">
+                            <span
+                              className="inline-block text-white text-[10px] px-1.5 py-0.5 mb-1 font-outfit"
+                              style={{ background: 'rgba(0,0,0,0.65)' }}
+                            >
+                              {article.category || 'Travel'}
+                            </span>
+                            <h4 className="text-white font-bold text-[11px] leading-tight m-0 font-outfit uppercase line-clamp-2">
                               {article.title}
                             </h4>
-                            <div className="text-xs sm:text-sm md:text-base text-gray-500 font-outfit uppercase font-semibold">
-                              🕒 {formatDateShort(article.published_at)}
+                            <p className="font-bold text-[10px] mt-0.5 m-0 font-outfit uppercase line-clamp-1" style={{ color: '#FF4444' }}>
+                              {article.excerpt?.substring(0, 22) || 'NEW ENTRY RULES'}
+                            </p>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <span className="text-white/65 text-[10px] font-outfit">{article.author || 'Lorem ipsum'}</span>
                             </div>
                           </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </section>
-                </div>
-              </div>
-              {/* 3. Video/Media Section */}
-              <section>
-                <div className="flex justify-between items-center border-b-2 border-gray-100 mb-6 pb-2">
-                  <div className="flex gap-1 h-1 bg-gray-100 w-full mb-[-1.5rem]"></div>
-                  <div className="flex gap-1 ml-auto">
-                    <button className="p-1 px-2 bg-gray-100 hover:bg-gray-200 text-gray-400 rounded transition-colors">‹</button>
-                    <button className="p-1 px-2 bg-gray-100 hover:bg-gray-200 text-gray-400 rounded transition-colors">›</button>
+                        </div>
+                      </Link>
+                    ))}
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
-                  {videoNews.map((article) => (
-                    <Link key={article.id} href={`/news/${article.id}`} className="group flex flex-col gap-2">
-                      <div className="relative aspect-[16/10] overflow-hidden rounded-md bg-gray-100">
+              </div>
+
+              {/* Slider dots + arrows */}
+              {totalSlides > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-4">
+                  <button
+                    onClick={prevFeatured}
+                    className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-800 transition-colors"
+                  >
+                    <FiChevronLeft className="w-4 h-4" />
+                  </button>
+                  {Array.from({ length: Math.min(totalSlides, 6) }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setFeaturedIndex(i)}
+                      style={{
+                        width: featuredIndex === i ? 24 : 8,
+                        height: 8,
+                        borderRadius: featuredIndex === i ? 4 : '50%',
+                        background: featuredIndex === i ? '#1a56db' : '#D1D5DB',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 0,
+                        transition: 'all 0.3s',
+                      }}
+                    />
+                  ))}
+                  <button
+                    onClick={nextFeatured}
+                    className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-800 transition-colors"
+                  >
+                    <FiChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════
+          5. MAIN CONTENT  (left grid + right sidebar)
+      ══════════════════════════════════════ */}
+      <section className="w-full bg-[#F2F2F2] px-6 sm:px-10 lg:px-20 py-6">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[60%_40%] gap-6">
+
+          {/* ── LEFT COLUMN ── */}
+          <div className="flex flex-col gap-6">
+
+            {/* Community Spotlight */}
+            <div>
+              <div
+                className="flex items-center px-4 py-2.5 mb-4"
+                style={{ borderLeft: '4px solid #CC1A1A', background: '#1C1C1C' }}
+              >
+                <span className="text-white font-bold text-sm tracking-widest uppercase font-outfit">
+                  COMMUNITY SPOTLIGHT
+                </span>
+              </div>
+
+              {loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="bg-gray-200 animate-pulse aspect-[4/3]" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {(spotlightNews.length > 0
+                    ? spotlightNews
+                    : Array.from({ length: 6 }, (_, i) => placeholder(i))
+                  ).map((article, i) => (
+                    <Link key={article.id + '-sp-' + i} href={`/news/${article.id}`} className="block group">
+                      <article className="flex flex-col bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                        <div className="relative aspect-[4/3] overflow-hidden">
+                          <img
+                            src={getImageUrl(article.image)}
+                            alt={article.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <span
+                            className="absolute bottom-2 left-2 text-white text-[10px] px-1.5 py-0.5 font-outfit"
+                            style={{ background: 'rgba(0,0,0,0.7)' }}
+                          >
+                            {article.category || 'Travel'}
+                          </span>
+                        </div>
+                        <div className="p-3">
+                          <h3 className="text-xs font-bold text-gray-900 leading-snug line-clamp-2 uppercase m-0 font-outfit">
+                            {article.title}
+                          </h3>
+                          <p className="text-xs font-bold mt-0.5 line-clamp-1 m-0 font-outfit uppercase" style={{ color: '#CC1A1A' }}>
+                            {article.excerpt?.substring(0, 30) || 'NEW ENTRY RULES'}
+                          </p>
+                          <div className="flex items-center gap-1 mt-1.5">
+                            <span className="text-[10px] text-gray-500 font-outfit">{article.author || 'Lorem ipsum'}</span>
+                            <span className="text-[10px] text-gray-400 mx-0.5">•</span>
+                            <span className="text-[10px] text-gray-500 font-outfit">{formatDateShort(article.published_at)}</span>
+                          </div>
+                        </div>
+                      </article>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Health & Wellness */}
+            <div>
+              <div
+                className="flex items-center px-4 py-2.5 mb-4"
+                style={{ borderLeft: '4px solid #CC1A1A', background: '#1C1C1C' }}
+              >
+                <span className="text-white font-bold text-sm tracking-widest uppercase font-outfit">
+                  HEALTH &amp; WELLNESS
+                </span>
+              </div>
+
+              {loading ? (
+                <div className="flex flex-col gap-3">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="h-24 bg-gray-200 animate-pulse" />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {(healthNews.length > 0
+                    ? healthNews
+                    : Array.from({ length: 3 }, (_, i) => placeholder(i + 10))
+                  ).map((article, i) => (
+                    <Link key={article.id + '-hw-' + i} href={`/news/${article.id}`} className="block group">
+                      <article className="flex gap-4 bg-white p-3 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex-shrink-0 w-28 h-24 overflow-hidden">
+                          <img
+                            src={getImageUrl(article.image)}
+                            alt={article.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                        <div className="flex flex-col justify-center flex-1 min-w-0">
+                          <h3 className="text-xs font-bold text-gray-900 leading-snug line-clamp-2 uppercase m-0 font-outfit">
+                            {article.title}
+                          </h3>
+                          <p className="text-xs font-bold mt-0.5 line-clamp-1 m-0 font-outfit uppercase" style={{ color: '#CC1A1A' }}>
+                            {article.excerpt?.substring(0, 30) || 'NEW ENTRY RULES'}
+                          </p>
+                          <div className="mt-1.5">
+                            <span
+                              className="text-[10px] text-white px-2 py-0.5 font-outfit inline-block"
+                              style={{ background: '#1C1C1C' }}
+                            >
+                              {article.category || 'Travel'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1 mt-1">
+                            <span className="text-[10px] text-gray-500 font-outfit">{article.author || 'Lorem ipsum'}</span>
+                            <span className="text-[10px] text-gray-400 mx-0.5">•</span>
+                            <span className="text-[10px] text-gray-500 font-outfit">{formatDateShort(article.published_at)}</span>
+                          </div>
+                        </div>
+                      </article>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+          </div>
+
+          {/* ── RIGHT COLUMN: Latest News ── */}
+          <div className="lg:pl-4">
+            <div className="mb-4">
+              <h2 className="text-xl font-bold m-0 font-outfit">
+                <span className="text-gray-900">Latest </span>
+                <span style={{ color: '#CC1A1A' }}>News</span>
+              </h2>
+            </div>
+
+            {loading ? (
+              <div className="flex flex-col gap-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="flex gap-3">
+                    <div className="w-24 h-20 bg-gray-200 animate-pulse flex-shrink-0" />
+                    <div className="flex-1 flex flex-col gap-2">
+                      <div className="h-3 bg-gray-200 animate-pulse rounded" />
+                      <div className="h-3 bg-gray-200 animate-pulse rounded w-3/4" />
+                      <div className="h-3 bg-gray-200 animate-pulse rounded w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {(latestNews.length > 0
+                  ? latestNews
+                  : Array.from({ length: 3 }, (_, i) => placeholder(i + 20))
+                ).map((article, i) => (
+                  <Link key={article.id + '-ln-' + i} href={`/news/${article.id}`} className="block group">
+                    <article className="flex gap-3">
+                      <div className="flex-shrink-0 w-24 h-20 overflow-hidden bg-gray-200">
                         <img
                           src={getImageUrl(article.image)}
                           alt={article.title}
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-500/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                            <span className="text-white ml-1">▶</span>
-                          </div>
-                        </div>
                       </div>
-                      <div className="text-gray-400 text-[10px] sm:text-xs font-outfit uppercase">
-                        🕒 {formatDateShort(article.published_at)}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-              {/* 1. Trending Section */}
-              <section>
-                <div className="border-b-2 border-gray-100 mb-6">
-                  <h2 className="text-xl sm:text-2xl font-bold font-outfit text-gray-900 pb-2">Trending</h2>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                  {trendingNews.map((article) => (
-                    <Link key={article.id} href={`/news/${article.id}`} className="group relative aspect-[4/3] overflow-hidden rounded-md bg-gray-200">
-                      <img
-                        src={getImageUrl(article.image)}
-                        alt={article.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                      <div className="absolute bottom-0 p-4">
-                        <h3 className="text-white font-outfit text-sm font-bold line-clamp-2 mb-1 group-hover:underline">
-                          {article.title}
+                      <div className="flex flex-col flex-1 min-w-0">
+                        <h3 className="text-xs font-bold text-gray-900 leading-snug m-0 font-outfit uppercase">
+                          {article.title}{' '}
+                          <span style={{ color: '#CC1A1A' }}>
+                            {article.excerpt?.substring(0, 20) || 'NEW ENTRY RULES'}
+                          </span>
                         </h3>
-                        <div className="text-white/70 text-[10px] sm:text-xs font-outfit uppercase">
-                          Lorem Ipsum • {formatDateShort(article.published_at)}
+                        <div className="flex items-center gap-1 mt-1">
+                          <span className="text-[10px] text-gray-500 font-outfit">{article.author || 'Lorem ipsum'}</span>
+                          <span className="text-[10px] text-gray-400">•</span>
+                          <span className="text-[10px] text-gray-500 font-outfit">{formatDateShort(article.published_at)}</span>
+                        </div>
+                        <div className="mt-1.5">
+                          <span
+                            className="text-[10px] text-white px-2 py-0.5 font-outfit inline-block"
+                            style={{ background: '#1C1C1C' }}
+                          >
+                            {article.category || 'Travel'}
+                          </span>
                         </div>
                       </div>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            </div>
-          )}
-        </main>
-      </div>
+                    </article>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+        </div>
+      </section>
 
       <Footer />
     </div>

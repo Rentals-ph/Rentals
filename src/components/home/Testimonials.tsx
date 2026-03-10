@@ -56,7 +56,8 @@ const Testimonials = () => {
           className="relative flex flex-col gap-4 mb-6 sm:mb-8 pb-4"
           as="div"
         >
-          <div className="text-center px-3 xs:px-4 sm:px-6 md:px-10 lg:px-[150px] min-w-0">
+          <div className="page-x w-full min-w-0">
+            <div className="page-w text-center">
             <p className="text-[#205ED7] font-outfit text-[17px] font-medium leading-[1.26] mb-2 uppercase tracking-wide">
               TESTIMONIALS
             </p>
@@ -66,6 +67,7 @@ const Testimonials = () => {
             <p className="text-[#374151] font-outfit text-[17px] font-medium leading-[1.5] mt-2 mb-0 max-w-2xl mx-auto">
               Discover Why The Most Successful Property Managers In The Philippines Rely On Rentals.Ph To Streamline Their Operations, Verify Quality Tenants, And Maximize Their Portfolio's Reach.
             </p>
+            </div>
           </div>
         </FadeInOnView>
 
@@ -102,12 +104,14 @@ const Testimonials = () => {
               </div>
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="mt-8 sm:mt-10 px-3 xs:px-4 sm:px-6 md:px-10 lg:px-[150px]">
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
-                  />
+                <div className="page-x mt-8 sm:mt-10 w-full">
+                  <div className="page-w">
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={setCurrentPage}
+                    />
+                  </div>
                 </div>
               )}
             </>

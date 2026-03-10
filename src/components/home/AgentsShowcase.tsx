@@ -109,8 +109,8 @@ function AgentsShowcase() {
   }
 
   return (
-    <section className="bg-white px-3 xs:px-4 sm:px-6 md:px-10 lg:px-[150px] w-full py-8 sm:py-10 md:py-14">
-      <div className="w-full mx-auto">
+    <section className="bg-white page-x w-full py-8 sm:py-10 md:py-14">
+      <div className="page-w">
         {/* Header: Centered Label, title + subtitle */}
         <FadeInOnView
           className="relative flex flex-col gap-4 mb-6 sm:mb-8 pb-4"

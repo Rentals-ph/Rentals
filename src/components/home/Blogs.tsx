@@ -92,7 +92,7 @@ const Blogs = () => {
   }
 
   return (
-    <section id="blog" className="bg-white w-full mt-0 flex flex-col justify-center py-6 sm:py-8">
+    <section id="blog" className="bg-white w-full mt-0 flex flex-col justify-center ">
       <div className="w-full overflow-visible">
         <FadeInOnView
           as="div"

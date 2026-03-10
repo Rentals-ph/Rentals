@@ -112,8 +112,8 @@ export default function PopularSearches() {
   const INITIAL_VISIBLE = 5
 
   return (
-    <section className="bg-white min-h-[40vh] sm:min-h-[50vh] flex px-4 sm:px-6 md:px-10 lg:px-[150px] py-8 sm:py-12 flex-col justify-center">
-      <div className="w-full mx-auto">
+    <section className="bg-white min-h-[40vh] sm:min-h-[50vh] flex page-x py-8 sm:py-12 flex-col justify-center">
+      <div className="page-w">
         <h2 className="text-center font-outfit text-xl sm:text-2xl md:text-4xl font-bold text-gray-900 px-2">
           Popular Real Estate Searches
         </h2>

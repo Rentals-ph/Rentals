@@ -44,7 +44,7 @@ export default function ContactUsPage() {
           />
         </div>
 
-        <div className="relative z-[3] max-w-[var(--page-max-width)] mx-auto py-10 sm:py-14 md:py-16 w-full flex items-center justify-start flex-1 px-4 sm:px-6 md:px-10 lg:px-0">
+        <div className="relative z-[3] max-w-6xl mx-auto py-10 sm:py-14 md:py-16 w-full flex items-center justify-start flex-1 px-4 sm:px-6 md:px-10 lg:px-0">
           <div className="text-left flex flex-col items-start justify-center max-w-2xl">
             <h1 className="font-outfit font-extrabold text-white tracking-tight leading-tight m-0 text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl">
               CONTACT US
@@ -58,8 +58,8 @@ export default function ContactUsPage() {
       </section>
 
       {/* Main content area: contact cards + form, following reference layout */}
-      <section className="w-full bg-[#F5F9FF] py-10 sm:py-14 md:py-16">
-        <div className="px-4 sm:px-6 md:px-10 lg:px-[150px] mx-auto max-w-[var(--page-max-width)]">
+      <section className="w-full bg-[#F5F9FF] page-x py-10 sm:py-14 md:py-16">
+        <div className="page-w">
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] gap-6 sm:gap-8 lg:gap-10 items-start">
             {/* Left column - stacked contact info cards */}
             <div className="flex flex-col gap-4 sm:gap-5">
