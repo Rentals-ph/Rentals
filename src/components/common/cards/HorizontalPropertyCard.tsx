@@ -142,11 +142,11 @@ function HorizontalPropertyCard({
     <article
       onClick={handleCardClick}
       style={{ cursor: id ? 'pointer' : 'default' }}
-      className="w-full max-w-[726px] bg-white border border-black/20 rounded-[5px] overflow-hidden flex flex-row items-stretch shadow-sm hover:shadow-md transition-all duration-200 h-[222px]"
+      className="w-full bg-white border border-black/20 rounded-[5px] overflow-hidden flex flex-row items-stretch shadow-sm hover:shadow-md transition-all duration-200 h-[280px] sm:h-[320px]"
     >
       {/* Left: Property image */}
       <div
-        className="relative w-[304px] h-full flex-shrink-0 overflow-hidden rounded-l-[5px] bg-gray-100"
+        className="relative w-[380px] sm:w-[420px] h-full flex-shrink-0 overflow-hidden rounded-l-[5px] bg-gray-100"
         onMouseEnter={handleImageAreaMouseEnter}
         onMouseLeave={handleImageAreaMouseLeave}
       >
@@ -182,8 +182,8 @@ function HorizontalPropertyCard({
         
         {/* Property type badge - top left */}
         <div className="absolute top-0 left-0 m-0">
-          <div className="bg-[#266FFD] rounded-tl-[5px] rounded-br-[5px] px-[18px] py-[7.99px]">
-            <span className="text-white text-[10px] font-semibold leading-[1.26] uppercase tracking-wide">
+          <div className="bg-[#266FFD] rounded-tl-[5px] rounded-br-[5px] px-[20px] py-[9px]">
+            <span className="text-white text-[11px] sm:text-[12px] font-semibold leading-[1.26] uppercase tracking-wide">
               {propertyType}
             </span>
           </div>
@@ -193,29 +193,29 @@ function HorizontalPropertyCard({
         <button
           type="button"
           onClick={(e) => e.stopPropagation()}
-          className="absolute top-[8px] right-[8px] w-[25px] h-[25px] rounded-[5px] bg-white flex items-center justify-center hover:bg-gray-50 transition-colors z-10"
+          className="absolute top-[10px] right-[10px] w-[28px] h-[28px] rounded-[5px] bg-white flex items-center justify-center hover:bg-gray-50 transition-colors z-10"
           aria-label="Add to favorites"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-[11px] h-[11px] text-[#6B7280]">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-[13px] h-[13px] text-[#6B7280]">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
         </button>
 
         {/* Location overlay - bottom left */}
         {locationLine && (
-          <div className="absolute bottom-[6px] left-[18px] flex items-center gap-[2px]">
-            <FiMapPin className="w-[16px] h-[16px] text-white" aria-hidden />
-            <span className="text-white text-[10px] font-semibold leading-[1.26]">{locationLine}</span>
+          <div className="absolute bottom-[8px] left-[20px] flex items-center gap-[4px]">
+            <FiMapPin className="w-[18px] h-[18px] text-white" aria-hidden />
+            <span className="text-white text-[11px] sm:text-[12px] font-semibold leading-[1.26]">{locationLine}</span>
           </div>
         )}
 
         {/* Image count indicator - bottom right */}
         {hasMultipleImages && (
-          <div className="absolute bottom-[4px] right-[18px] flex items-center gap-[4px]">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-[14px] h-[14px] text-white">
+          <div className="absolute bottom-[6px] right-[20px] flex items-center gap-[5px]">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-[16px] h-[16px] text-white">
               <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
             </svg>
-            <span className="text-white text-[10px] font-semibold leading-[1.26]">{displayImages.length}</span>
+            <span className="text-white text-[11px] sm:text-[12px] font-semibold leading-[1.26]">{displayImages.length}</span>
           </div>
         )}
 
@@ -242,18 +242,19 @@ function HorizontalPropertyCard({
       </div>
 
       {/* Right: Content */}
-      <div className="flex flex-col flex-1 w-[422px] p-[14px] gap-[4px] min-w-0 overflow-hidden">
+      <div className="flex flex-col flex-1 p-[18px] sm:p-[22px] gap-[6px] min-w-0 overflow-hidden">
         {/* Title with Email, WhatsApp, Share buttons */}
-        <div className="flex items-center gap-[4px]">
-          <h3 className="text-black text-[9px] font-medium leading-[1.26] line-clamp-1 flex-1 min-w-0">
+        <div className="flex items-center gap-[6px]">
+          <h3 className="text-black text-[11px] sm:text-[13px] font-medium leading-[1.4] line-clamp-2 flex-1 min-w-0">
             {title}
           </h3>
-          <div className="flex items-center gap-[4px] flex-shrink-0">
+          <div className="flex items-center gap-[6px] flex-shrink-0">
             {rentManagerEmail && (
               <a
                 href={`mailto:${rentManagerEmail}`}
                 onClick={(e) => e.stopPropagation()}
-                className="px-[12px] py-[4px] rounded-[5px] border border-[#205ED7] text-[#205ED7] text-[9px] font-medium leading-[1.26] hover:bg-blue-50 transition-colors whitespace-nowrap"
+                className="px-[14px] py-[6px] rounded-[5px] text-[#205ED7] text-[10px] sm:text-[11px] font-medium leading-[1.26] hover:bg-blue-50 transition-colors whitespace-nowrap"
+                style={{ border: '1px solid #205ED7' }}
               >
                 Email
               </a>
@@ -264,7 +265,8 @@ function HorizontalPropertyCard({
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                className="px-[11.02px] py-[4.13px] rounded-[5px] border border-[#22C55E] text-[#22C55E] text-[9px] font-medium leading-[1.26] hover:bg-green-50 transition-colors whitespace-nowrap"
+                className="px-[13px] py-[6px] rounded-[5px] text-[#22C55E] text-[10px] sm:text-[11px] font-medium leading-[1.26] hover:bg-green-50 transition-colors whitespace-nowrap"
+                style={{ border: '1px solid #22C55E' }}
               >
                 WhatsApp
               </a>
@@ -274,7 +276,8 @@ function HorizontalPropertyCard({
                 <a
                   href="#"
                   onClick={(e) => e.stopPropagation()}
-                  className="px-[12px] py-[4px] rounded-[5px] border border-[#205ED7] text-[#205ED7] text-[9px] font-medium leading-[1.26] hover:bg-blue-50 transition-colors whitespace-nowrap"
+                  className="px-[14px] py-[6px] rounded-[5px] text-[#205ED7] text-[10px] sm:text-[11px] font-medium leading-[1.26] hover:bg-blue-50 transition-colors whitespace-nowrap"
+                  style={{ border: '1px solid #205ED7' }}
                 >
                   Email
                 </a>
@@ -283,7 +286,8 @@ function HorizontalPropertyCard({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="px-[11.02px] py-[4.13px] rounded-[5px] border border-[#22C55E] text-[#22C55E] text-[9px] font-medium leading-[1.26] hover:bg-green-50 transition-colors whitespace-nowrap"
+                  className="px-[13px] py-[6px] rounded-[5px] text-[#22C55E] text-[10px] sm:text-[11px] font-medium leading-[1.26] hover:bg-green-50 transition-colors whitespace-nowrap"
+                  style={{ border: '1px solid #22C55E' }}
                 >
                   WhatsApp
                 </a>
@@ -296,7 +300,7 @@ function HorizontalPropertyCard({
                   e.stopPropagation()
                   setShowSharePopup(!showSharePopup)
                 }}
-                className="w-[15px] h-[15px] flex items-center justify-center text-white hover:opacity-80 transition-opacity"
+                className="w-[15px] h-[15px] sm:w-[16px] sm:h-[16px] flex items-center justify-center text-[#374151] hover:opacity-80 transition-opacity"
                 aria-label="Share"
               >
                 <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
@@ -315,22 +319,22 @@ function HorizontalPropertyCard({
         </div>
 
         {/* Price */}
-        <div className="flex items-baseline gap-[6px]">
-          <p className="text-[#387CFF] text-[20px] font-medium leading-[1.26]">{price}</p>
-          <span className="text-[#FE8E0A] text-[15px] font-medium leading-[1.26]">{priceUnit}</span>
+        <div className="flex items-baseline gap-[8px]">
+          <p className="text-[#387CFF] text-[24px] sm:text-[28px] font-medium leading-[1.26]">{price}</p>
+          <span className="text-[#FE8E0A] text-[16px] sm:text-[18px] font-medium leading-[1.26]">{priceUnit}</span>
         </div>
 
         {/* Description */}
         {description && (
-          <p className="text-[#999999] text-[9px] font-medium leading-[1.26] line-clamp-3">
+          <p className="text-[#999999] text-[11px] sm:text-[12px] font-medium leading-[1.5] line-clamp-3">
             {description}
           </p>
         )}
 
         {/* Property details: Bed, Bath, Size */}
-        <div className="flex items-center gap-[20px] text-[#374151] text-[9px] font-medium leading-[1.26]">
-          <span className="flex items-center gap-[4px]">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-[16px] h-[11px] flex-shrink-0">
+        <div className="flex items-center gap-[24px] text-[#374151] text-[11px] sm:text-[12px] font-medium leading-[1.26]">
+          <span className="flex items-center gap-[6px]">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[13px] flex-shrink-0">
               <rect x="3" y="10" width="18" height="7" rx="2" />
               <rect x="7" y="7" width="4" height="3" rx="1" />
               <rect x="13" y="7" width="4" height="3" rx="1" />
@@ -338,8 +342,8 @@ function HorizontalPropertyCard({
             </svg>
             {bedrooms}
           </span>
-          <span className="flex items-center gap-[4px]">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-[16px] h-[11px] flex-shrink-0">
+          <span className="flex items-center gap-[6px]">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[13px] flex-shrink-0">
               <rect x="3" y="10" width="18" height="8" rx="2" />
               <rect x="5" y="18" width="2" height="2" rx="1" />
               <rect x="17" y="18" width="2" height="2" rx="1" />
@@ -347,8 +351,8 @@ function HorizontalPropertyCard({
             </svg>
             {bathrooms}
           </span>
-          <span className="flex items-center gap-[4px]">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-[16px] h-[11px] flex-shrink-0">
+          <span className="flex items-center gap-[6px]">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[13px] flex-shrink-0">
               <rect x="2" y="17" width="20" height="4" rx="1" />
               <rect x="2" y="3" width="20" height="4" rx="1" />
               <rect x="2" y="10" width="20" height="4" rx="1" />
@@ -358,25 +362,25 @@ function HorizontalPropertyCard({
         </div>
 
         {/* Divider */}
-        <div className="h-[1px] bg-black/10" />
+        <div className="h-[1px] bg-black/10 my-1" />
 
         {/* Agent section */}
-        <div className="flex items-center gap-[8px]">
+        <div className="flex items-center gap-[10px]">
           <img
             src={rentManagerImage || ASSETS.PLACEHOLDER_PROFILE}
             alt={rentManagerName}
-            className="w-[41.47px] h-[41.47px] rounded-full object-cover flex-shrink-0"
+            className="w-[48px] h-[48px] sm:w-[52px] sm:h-[52px] rounded-full object-cover flex-shrink-0"
             onError={(e) => {
               e.currentTarget.src = ASSETS.PLACEHOLDER_PROFILE
             }}
           />
           <div className="flex-1 min-w-0">
-            <p className="text-black text-[11px] font-medium leading-[1.26] truncate">
+            <p className="text-black text-[12px] sm:text-[13px] font-medium leading-[1.26] truncate">
               By {rentManagerName}
             </p>
           </div>
           {/* Company image placeholder */}
-          <div className="w-[86.76px] h-[50px] rounded-[5px] bg-gray-100 border border-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
+          <div className="w-[100px] h-[56px] sm:w-[110px] sm:h-[60px] rounded-[5px] bg-gray-100 border border-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
             {companyImage ? (
               <img
                 src={companyImage}

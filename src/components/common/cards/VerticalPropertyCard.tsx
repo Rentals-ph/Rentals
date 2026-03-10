@@ -174,7 +174,8 @@ function VerticalPropertyCard({
               <a
                 href={`mailto:${rentManagerEmail}`}
                 onClick={(e) => e.stopPropagation()}
-                className="px-[12px] py-[4px] rounded-[5px] border border-[#205ED7] text-[#205ED7] text-[9px] font-medium leading-[1.26] hover:bg-blue-50 transition-colors whitespace-nowrap"
+                className="px-[12px] py-[4px] rounded-[5px] text-[#205ED7] text-[9px] font-medium leading-[1.26] hover:bg-blue-50 transition-colors whitespace-nowrap"
+                style={{ border: '1px solid #205ED7' }}
               >
                 Email
               </a>
@@ -185,7 +186,8 @@ function VerticalPropertyCard({
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                className="px-[11.02px] py-[4.13px] rounded-[5px] border border-[#22C55E] text-[#22C55E] text-[9px] font-medium leading-[1.26] hover:bg-green-50 transition-colors whitespace-nowrap"
+                className="px-[11.02px] py-[4.13px] rounded-[5px] text-[#22C55E] text-[9px] font-medium leading-[1.26] hover:bg-green-50 transition-colors whitespace-nowrap"
+                style={{ border: '1px solid #22C55E' }}
               >
                 WhatsApp
               </a>
@@ -195,7 +197,8 @@ function VerticalPropertyCard({
                 <a
                   href="#"
                   onClick={(e) => e.stopPropagation()}
-                  className="px-[12px] py-[4px] rounded-[5px] border border-[#205ED7] text-[#205ED7] text-[9px] font-medium leading-[1.26] hover:bg-blue-50 transition-colors whitespace-nowrap"
+                  className="px-[12px] py-[4px] rounded-[5px] text-[#205ED7] text-[9px] font-medium leading-[1.26] hover:bg-blue-50 transition-colors whitespace-nowrap"
+                  style={{ border: '1px solid #205ED7' }}
                 >
                   Email
                 </a>
@@ -204,7 +207,8 @@ function VerticalPropertyCard({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="px-[11.02px] py-[4.13px] rounded-[5px] border border-[#22C55E] text-[#22C55E] text-[9px] font-medium leading-[1.26] hover:bg-green-50 transition-colors whitespace-nowrap"
+                  className="px-[11.02px] py-[4.13px] rounded-[5px] text-[#22C55E] text-[9px] font-medium leading-[1.26] hover:bg-green-50 transition-colors whitespace-nowrap"
+                  style={{ border: '1px solid #22C55E' }}
                 >
                   WhatsApp
                 </a>

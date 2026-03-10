@@ -36,11 +36,13 @@ function PropertiesContent() {
   const [priceMin, setPriceMin] = useState('')
   const [priceMax, setPriceMax] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [areaSize, setAreaSize] = useState('')
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([])
   const [sortBy, setSortBy] = useState('newest')
   const [sortByPrice, setSortByPrice] = useState('')
   const [subCategory, setSubCategory] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
-  const [viewMode, setViewMode] = useState<'horizontal' | 'vertical' | 'map'>('horizontal')
+  const [viewMode, setViewMode] = useState<'horizontal' | 'vertical'>('horizontal')
   const [properties, setProperties] = useState<Property[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -98,6 +100,11 @@ function PropertiesContent() {
   const locations = ['Metro Manila', 'Makati City', 'BGC', 'Quezon City', 'Mandaluyong', 'Pasig', 'Cebu City', 'Davao City', 'Lapulapu', 'Manila']
   const bathOptions = ['1', '2', '3', '4+']
   const bedOptions = ['1', '2', '3', '4+']
+  const amenitiesOptions = [
+    'Elevator in building', 'Swimming Pool', 'Gym/Fitness Center', 'Parking', 
+    'Air Conditioning', 'Furnished', 'Wi-Fi', 'Security', 'Balcony', 
+    'Garden', 'Pet Friendly', 'Near Public Transport'
+  ]
 
   // Fetch all properties for accurate category counts
   useEffect(() => {
@@ -262,15 +269,6 @@ function PropertiesContent() {
     
     // Start with all properties and apply the same filters as the main query
     let filtered = [...allPropertiesForCount]
-    
-    // In map view, only include properties with valid coordinates
-    if (viewMode === 'map') {
-      filtered = filtered.filter(property => {
-        return property.latitude && property.longitude && 
-               !isNaN(parseFloat(property.latitude)) && 
-               !isNaN(parseFloat(property.longitude))
-      })
-    }
     
     // Apply API-level filters (type, location, search) - same as what's sent to API
     if (selectedType && selectedType !== 'All Types') {
@@ -503,250 +501,516 @@ function PropertiesContent() {
 
   return (
     <div className="properties-for-rent-page flex flex-col min-h-screen">
-      {/* Advance Search: right-side sidebar (Navbar layout ref); outside content wrapper so it stays fixed */}
+      {/* Search Filters: Mobile sidebar (right side) */}
       <aside
-        className={`fixed top-0 right-0 h-screen h-[100dvh] w-[240px] sm:w-[264px] shadow-2xl z-[50] overflow-y-auto transition-transform duration-300 ease-in-out flex flex-col ${!isSidebarOpen ? 'pointer-events-none' : ''}`}
+        className={`fixed top-0 right-0 h-screen h-[100dvh] w-[320px] sm:w-[360px] shadow-2xl z-[50] overflow-y-auto transition-transform duration-300 ease-in-out flex flex-col bg-white ${!isSidebarOpen ? 'pointer-events-none' : ''}`}
         style={{ transform: isSidebarOpen ? 'translateX(0)' : 'translateX(100%)' }}
         onClick={(e) => e.stopPropagation()}
         aria-hidden={!isSidebarOpen}
-        aria-label="Advance Search filters"
+        aria-label="Search Filters"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-rental-blue-50 via-white to-rental-orange-50/30" aria-hidden />
-        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
-          <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-rental-blue-500/10 blur-2xl" />
-          <div className="absolute top-1/3 -left-8 w-24 h-24 rounded-full bg-rental-orange-500/15 blur-xl" />
-          <div className="absolute bottom-20 -right-6 w-32 h-32 rounded-full bg-rental-blue-400/10 blur-2xl" />
-          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(-45deg, transparent, transparent 20px, #205ED7 20px, #205ED7 21px)' }} />
-          <svg className="absolute bottom-0 left-0 w-full h-24 text-rental-blue-500/20" viewBox="0 0 320 96" fill="currentColor" preserveAspectRatio="none">
-            <path d="M0 96V48c40 24 80 24 120 24s80 0 120-24 80-24 120-24 80 24 120 24v48H0z" />
+        {/* Header */}
+        <div className="flex items-center gap-3 px-4 py-4 bg-gray-800 border-b border-gray-700">
+          <svg className="w-6 h-6 text-blue-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6" />
+            <circle cx="4" cy="6" r="2" />
+            <line x1="4" y1="12" x2="20" y2="12" />
+            <circle cx="4" cy="12" r="2" />
+            <line x1="4" y1="18" x2="20" y2="18" />
+            <circle cx="4" cy="18" r="2" />
           </svg>
+          <h2 className="text-white font-outfit text-base font-medium flex-1">Search Filters</h2>
+          <button type="button" className="p-2 rounded-lg hover:bg-gray-700 text-white transition-colors" onClick={() => setIsSidebarOpen(false)} aria-label="Close filters">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6L18 18" /></svg>
+          </button>
         </div>
-        <div className="relative flex flex-col flex-1 min-h-0">
-          <div className="flex items-center justify-between p-4 sm:p-5 border-b border-rental-blue-200/50">
-            <span className="text-xs font-outfit font-semibold uppercase tracking-widest text-rental-blue-600/80">Filters</span>
-            <button type="button" className="p-2 rounded-xl hover:bg-white/80 text-gray-600 hover:text-rental-blue-700 transition-colors" onClick={() => setIsSidebarOpen(false)} aria-label="Close filters">
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6L18 18" /></svg>
-            </button>
+        
+        {/* Filter Content */}
+        <div className="flex flex-col flex-1 py-4 px-4 overflow-y-auto bg-white">
+          {/* Search */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2 font-outfit">Search</label>
+            <input
+              type="text"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter Keywords"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
-          <div className="flex flex-col flex-1 py-2 px-3 sm:px-4 overflow-y-auto">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-rental-blue-700 font-outfit">Location</label>
-                <select className="filter-select w-full px-4 py-2.5 border border-rental-blue-200/60 rounded-xl bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-rental-blue-500 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-10" style={{ backgroundPosition: 'right 0.75rem center' }} value={selectedLocation} onChange={(e) => setSelectedLocation(e.target.value)}>
-                  <option value="">Location</option>
-                  {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-rental-blue-700 font-outfit">Property Type</label>
-                <select className="filter-select w-full px-4 py-2.5 border border-rental-blue-200/60 rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-rental-blue-500 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-10" style={{ backgroundPosition: 'right 0.75rem center' }} value={selectedType} onChange={(e) => setSelectedType(e.target.value)}>
-                  {propertyTypes.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-rental-blue-700 font-outfit">Min. Baths</label>
-                <select className="filter-select w-full px-4 py-2.5 border border-rental-blue-200/60 rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-rental-blue-500 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-10" style={{ backgroundPosition: 'right 0.75rem center' }} value={minBaths} onChange={(e) => setMinBaths(e.target.value)}>
-                  <option value="">Min. Baths</option>
-                  {bathOptions.map(b => <option key={b} value={b}>{b}+</option>)}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-rental-blue-700 font-outfit">Min. Beds</label>
-                <select className="filter-select w-full px-4 py-2.5 border border-rental-blue-200/60 rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-rental-blue-500 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-10" style={{ backgroundPosition: 'right 0.75rem center' }} value={minBeds} onChange={(e) => setMinBeds(e.target.value)}>
-                  <option value="">Min. Beds</option>
-                  {bedOptions.map(b => <option key={b} value={b}>{b}+</option>)}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-rental-blue-700 font-outfit">Price Range</label>
-                <div className="flex items-center gap-2">
-                  <input type="number" className="flex-1 min-w-0 px-3 py-2.5 border border-rental-blue-200/60 rounded-xl bg-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rental-blue-500" placeholder="Min" value={priceMin} onChange={(e) => setPriceMin(e.target.value)} min={0} />
-                  <span className="text-gray-500 text-sm">To</span>
-                  <input type="number" className="flex-1 min-w-0 px-3 py-2.5 border border-rental-blue-200/60 rounded-xl bg-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rental-blue-500" placeholder="Max" value={priceMax} onChange={(e) => setPriceMax(e.target.value)} min={0} />
-                </div>
-                <input type="range" min={0} max={200000} step={1000} value={priceMin || 0} onChange={(e) => setPriceMin(e.target.value)} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-rental-blue-600" aria-label="Min price" />
-                <input type="range" min={0} max={200000} step={1000} value={priceMax || 200000} onChange={(e) => setPriceMax(e.target.value)} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-rental-blue-600" aria-label="Max price" />
-              </div>
-              {activeFilterCount > 0 && (
-                <button type="button" className="w-full mt-2 px-4 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium font-outfit hover:bg-red-100 transition-colors" onClick={() => { clearAllFilters(); setIsSidebarOpen(false) }}>Clear All Filters</button>
-              )}
+
+          {/* City and Type - Side by side */}
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 font-outfit">City</label>
+              <select 
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-8"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%23205ED7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.5rem center' }}
+                value={selectedLocation || 'All Cities'}
+                onChange={(e) => setSelectedLocation(e.target.value === 'All Cities' ? '' : e.target.value)}
+              >
+                <option value="All Cities">All Cities</option>
+                {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+              </select>
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 font-outfit">Type</label>
+              <select 
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-8"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%23205ED7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.5rem center' }}
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+              >
+                {propertyTypes.map(type => <option key={type} value={type}>{type}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Area */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2 font-outfit">Area</label>
+            <input
+              type="text"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter Area Size"
+              value={areaSize}
+              onChange={(e) => setAreaSize(e.target.value)}
+            />
+          </div>
+
+          {/* Beds and Baths - Side by side */}
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 font-outfit">Beds</label>
+              <select 
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-8"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%23205ED7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.5rem center' }}
+                value={minBeds || '1'}
+                onChange={(e) => setMinBeds(e.target.value === '1' ? '' : e.target.value)}
+              >
+                <option value="1">1</option>
+                {bedOptions.filter(b => b !== '1').map(bed => <option key={bed} value={bed}>{bed}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 font-outfit">Baths</label>
+              <select 
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-8"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%23205ED7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.5rem center' }}
+                value={minBaths || '1'}
+                onChange={(e) => setMinBaths(e.target.value === '1' ? '' : e.target.value)}
+              >
+                <option value="1">1</option>
+                {bathOptions.filter(b => b !== '1').map(bath => <option key={bath} value={bath}>{bath}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Price Range Slider */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2 font-outfit">Price</label>
+            <div className="relative">
+              <input
+                type="range"
+                min={0}
+                max={200000}
+                step={1000}
+                value={Number(priceMin) || 0}
+                onChange={(e) => setPriceMin(e.target.value)}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                style={{ background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${((Number(priceMin) || 0) / 200000) * 100}%, #E5E7EB ${((Number(priceMin) || 0) / 200000) * 100}%, #E5E7EB 100%)` }}
+              />
+              <div className="flex justify-between mt-2">
+                <span className="text-xs text-gray-500">${Number(priceMin) || 0}</span>
+                <span className="text-xs text-gray-500">${Number(priceMax) || 200000}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Amenities */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2 font-outfit">Amenities</label>
+            <div className="grid grid-cols-2 gap-2">
+              {amenitiesOptions.map((amenity) => (
+                <label key={amenity} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 border-gray-300 rounded text-blue-600 focus:ring-blue-500"
+                    checked={selectedAmenities.includes(amenity)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedAmenities([...selectedAmenities, amenity])
+                      } else {
+                        setSelectedAmenities(selectedAmenities.filter(a => a !== amenity))
+                      }
+                    }}
+                  />
+                  <span className="text-sm text-gray-700">{amenity}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-3 mb-4">
+            <button
+              type="button"
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 transition-colors"
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              Search
+            </button>
+            <button
+              type="button"
+              className="flex items-center gap-2 px-4 py-2 text-gray-700 rounded-lg font-medium text-sm hover:bg-gray-100 transition-colors"
+              onClick={() => {
+                clearAllFilters()
+                setAreaSize('')
+                setSelectedAmenities([])
+              }}
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                <path d="M21 3v5h-5" />
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                <path d="M3 21v-5h5" />
+              </svg>
+              Reset Filters
+            </button>
           </div>
         </div>
       </aside>
 
-      {/* Content wrapper: shifts left when advance search (right sidebar) is open */}
-      <div
-        className="flex flex-col flex-1 min-w-0 transition-transform duration-300 ease-in-out lg:transition-none"
-        style={isSidebarOpen ? { transform: `translateX(-${ADVANCE_SEARCH_WIDTH_SM}px)` } : undefined}
-      >
-        <div className="top-search-bar-container sticky z-30 bg-white p-3 sm:pt-5 px-4 sm:px-6 md:px-10 lg:px-[150px] top-16 sm:top-20 lg:top-0 shadow-sm">
-          <div className="top-search-bar flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full border-b border-gray-200 pb-3 sm:pb-5" style={{ borderBottomWidth: '2px', borderBottomStyle: 'solid', borderBottomColor: '#E5E7EB' }}>
-            {/* Search input with filter icon at end (flex-end) - h-12 sets row height for all controls */}
-            <div className="search-input-container h-12 flex-1 w-full sm:min-w-[200px] flex items-center gap-2 border border-gray-300 rounded-lg bg-white focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent"
-            style={{ border: '2px solid #E5E7EB' }}>
-              <svg className="search-icon ml-3 sm:ml-4 w-4 h-4 sm:w-5 sm:h-5 text-gray-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
-                <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-              <input
-                type="text"
-                className="main-search-input flex-1 min-w-0 h-full py-0 pr-2 border-0 bg-transparent text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0"
-                placeholder="Search here..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <button
-                type="button"
-                className="filter-toggle-btn md:hidden flex items-center justify-center self-stretch aspect-square max-h-full rounded-md text-gray-500 hover:text-rental-blue-600 hover:bg-rental-blue-50 transition-colors flex-shrink-0 mr-1 sm:mr-2 min-w-[2.5rem]"
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                aria-label={isSidebarOpen ? 'Close filters' : 'Open filters'}
-                title="Filters"
-              >
-                <span className="relative inline-flex">
-                  <svg className="w-5 h-5 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="4" y1="21" x2="4" y2="14" />
-                    <line x1="4" y1="10" x2="4" y2="3" />
-                    <line x1="12" y1="21" x2="12" y2="12" />
-                    <line x1="12" y1="8" x2="12" y2="3" />
-                    <line x1="20" y1="21" x2="20" y2="16" />
-                    <line x1="20" y1="12" x2="20" y2="3" />
-                    <line x1="1" y1="14" x2="7" y2="14" />
-                    <line x1="9" y1="8" x2="15" y2="8" />
-                    <line x1="17" y1="16" x2="23" y2="16" />
-                  </svg>
-                  {activeFilterCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-rental-blue-600 text-white text-[10px] font-semibold">
-                      {activeFilterCount}
-                    </span>
-                  )}
-                </span>
-              </button>
+      {/* Content wrapper */}
+      <div className="flex flex-col flex-1 min-w-0">
+
+      {/* Hero Section with Map */}
+      <section className="w-full h-[400px] sm:h-[450px] md:h-[500px] relative overflow-hidden">
+        <div className="absolute inset-0 w-full h-full z-0">
+          <PublicPropertiesMap
+            ref={mapRef}
+            properties={paginatedProperties.length > 0 ? paginatedProperties : properties}
+          />
+        </div>
+        {/* Properties scroll container on the right */}
+        <div className="absolute top-4 right-4 bottom-4 z-[100] w-full max-w-[320px] sm:max-w-[360px] hidden md:flex flex-col rounded-xl overflow-hidden shadow-2xl"
+          style={{ backgroundColor: 'rgba(31, 41, 55, 0.95)', backdropFilter: 'blur(10px)' }}
+        >
+          <div className="flex-shrink-0 px-4 py-3 border-b border-white/20 flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-white uppercase tracking-wide">
+                PROPERTIES ON MAP
+              </h3>
+              <p className="text-xs text-white/80 mt-0.5">
+                {paginatedProperties.length > 0 ? paginatedProperties.length : properties.length} Listing{paginatedProperties.length !== 1 && properties.length !== 1 ? 's' : ''}
+              </p>
             </div>
-            <div className="top-search-bar-controls h-12 flex flex-wrap items-stretch gap-2 sm:gap-3 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={() => {}}
+              className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+              aria-label="Close"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-3 space-y-3">
+            {(paginatedProperties.length > 0 ? paginatedProperties : properties).map((prop) => {
+              const mainImg = prop.image_url || prop.image || ASSETS.PLACEHOLDER_PROPERTY_MAIN
+              const locationLine = [prop.street_address, prop.city, prop.state_province].filter(Boolean).join(', ') || prop.location || prop.city || '—'
+              return (
+                <button
+                  key={prop.id}
+                  type="button"
+                  onClick={() => mapRef.current?.flyToProperty(prop)}
+                  className="w-full text-left rounded-lg overflow-hidden flex gap-3 p-3 transition-colors hover:bg-white/10 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/40 bg-white/5"
+                >
+                  <div
+                    className="flex-shrink-0 w-20 h-20 rounded-md bg-gray-700 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${mainImg})` }}
+                  />
+                  <div className="min-w-0 flex-1 py-0.5">
+                    <p className="text-sm font-medium text-white line-clamp-2 mb-1">
+                      {prop.title}
+                    </p>
+                    <p className="text-xs text-white/70 truncate mb-1">
+                      {locationLine}
+                    </p>
+                    <p className="text-sm font-semibold text-white">
+                      {formatPrice(prop.price)}
+                    </p>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      <main className="properties-main-layout flex flex-col lg:flex-row gap-4 sm:gap-6 px-4 sm:px-6 md:px-10 lg:px-[150px] pb-4 sm:py-2 pt-6 sm:pt-8 max-w-[1920px] relative z-10">
+        
+        {/* Desktop Filters Sidebar - Left side */}
+        <div className="properties-sidebar w-full lg:w-[320px] flex-shrink-0 hidden lg:block lg:order-1">
+          <div className="flex items-center gap-3 px-4 py-4 rounded-t-lg border-b border-gray-200 bg-white">
+              <svg className="w-6 h-6 text-blue-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="4" y1="6" x2="20" y2="6" />
+                <circle cx="4" cy="6" r="2" />
+                <line x1="4" y1="12" x2="20" y2="12" />
+                <circle cx="4" cy="12" r="2" />
+                <line x1="4" y1="18" x2="20" y2="18" />
+                <circle cx="4" cy="18" r="2" />
+              </svg>
+              <h2 className="text-gray-900 font-outfit text-base font-medium flex-1">Search Filters</h2>
+            </div>
+          <div className="bg-white rounded-lg shadow-sm" style={{ border: '1px solid #E5E7EB' }}>
+            {/* Header */}
+            
+            
+            {/* Filter Content */}
+            <div className="p-4">
+              {/* Search */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2 font-outfit">Search</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter Keywords"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+
+              {/* City and Type - Side by side */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2 font-outfit">City</label>
+                  <select 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-8"
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%23205ED7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.5rem center' }}
+                    value={selectedLocation || 'All Cities'}
+                    onChange={(e) => setSelectedLocation(e.target.value === 'All Cities' ? '' : e.target.value)}
+                  >
+                    <option value="All Cities">All Cities</option>
+                    {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2 font-outfit">Type</label>
+                  <select 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-8"
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%23205ED7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.5rem center' }}
+                    value={selectedType}
+                    onChange={(e) => setSelectedType(e.target.value)}
+                  >
+                    {propertyTypes.map(type => <option key={type} value={type}>{type}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              {/* Area */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2 font-outfit">Area</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter Area Size"
+                  value={areaSize}
+                  onChange={(e) => setAreaSize(e.target.value)}
+                />
+              </div>
+
+              {/* Beds and Baths - Side by side */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2 font-outfit">Beds</label>
+                  <select 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-8"
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%23205ED7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.5rem center' }}
+                    value={minBeds || '1'}
+                    onChange={(e) => setMinBeds(e.target.value === '1' ? '' : e.target.value)}
+                  >
+                    <option value="1">1</option>
+                    {bedOptions.filter(b => b !== '1').map(bed => <option key={bed} value={bed}>{bed}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2 font-outfit">Baths</label>
+                  <select 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-8"
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%23205ED7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.5rem center' }}
+                    value={minBaths || '1'}
+                    onChange={(e) => setMinBaths(e.target.value === '1' ? '' : e.target.value)}
+                  >
+                    <option value="1">1</option>
+                    {bathOptions.filter(b => b !== '1').map(bath => <option key={bath} value={bath}>{bath}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              {/* Price Range Slider */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2 font-outfit">Price</label>
+                <div className="relative">
+                  <input
+                    type="range"
+                    min={0}
+                    max={200000}
+                    step={1000}
+                    value={Number(priceMin) || 0}
+                    onChange={(e) => setPriceMin(e.target.value)}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                    style={{ background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${((Number(priceMin) || 0) / 200000) * 100}%, #E5E7EB ${((Number(priceMin) || 0) / 200000) * 100}%, #E5E7EB 100%)` }}
+                  />
+                  <div className="flex justify-between mt-2">
+                    <span className="text-xs text-gray-500">{formatPrice(Number(priceMin) || 0)}</span>
+                    <span className="text-xs text-gray-500">{formatPrice(Number(priceMax) || 200000)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Amenities */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2 font-outfit">Amenities</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {amenitiesOptions.map((amenity) => (
+                    <label key={amenity} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 border-gray-300 rounded text-blue-600 focus:ring-blue-500"
+                        checked={selectedAmenities.includes(amenity)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedAmenities([...selectedAmenities, amenity])
+                          } else {
+                            setSelectedAmenities(selectedAmenities.filter(a => a !== amenity))
+                          }
+                        }}
+                      />
+                      <span className="text-sm text-gray-700">{amenity}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 transition-colors"
+                >
+                  Search
+                </button>
+                <button
+                  type="button"
+                  className="flex items-center gap-2 px-4 py-2 text-gray-700 rounded-lg font-medium text-sm hover:bg-gray-100 transition-colors"
+                  onClick={() => {
+                    clearAllFilters()
+                    setAreaSize('')
+                    setSelectedAmenities([])
+                  }}
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                    <path d="M21 3v5h-5" />
+                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                    <path d="M3 21v-5h5" />
+                  </svg>
+                  Reset Filters
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Desktop Back to Filters Button */}
+          <button
+            type="button"
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+            }}
+            className="hidden sticky top-5 lg:block w-full bg-blue-600 text-white px-4 py-3 flex items-center justify-center gap-2 font-medium text-sm hover:bg-blue-700 transition-colors shadow-lg mt-4 rounded-lg"
+            aria-label="Back to Filters"
+          >
+            <span>Back to Filters</span>
+            <svg className="w-5 h-5 relative top-1 left-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 15l-6-6-6 6" />
+            </svg>
+          </button>
+        </div>
+        
+        <div className="properties-main-content flex-1 min-w-0 lg:order-2">
+          {/* Mobile Filter Toggle Button */}
+          <div className="lg:hidden mb-4 flex items-center justify-between">
+            <button
+              type="button"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 transition-colors"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="4" y1="6" x2="20" y="6" />
+                <circle cx="4" cy="6" r="2" />
+                <line x1="4" y1="12" x2="20" y2="12" />
+                <circle cx="4" cy="12" r="2" />
+                <line x1="4" y1="18" x2="20" y2="18" />
+                <circle cx="4" cy="18" r="2" />
+              </svg>
+              <span>Filters</span>
+              {activeFilterCount > 0 && (
+                <span className="ml-1 px-2 py-0.5 bg-white text-blue-600 rounded-full text-xs font-semibold">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+            {/* Sort and View Mode Controls */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-600 font-outfit hidden xs:inline">Sort by</span>
               <select
-                className="sort-dropdown-btn sort-by-relevance h-full min-h-0 px-3 sm:px-4 md:px-6 border border-gray-300 rounded-lg bg-white text-gray-700 text-xs sm:text-sm font-medium cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent flex-1 sm:flex-none min-w-0 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-10"
-                style={{ paddingRight: '2.5rem', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.75rem center' }}
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-8"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%23205ED7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.5rem center' }}
+                value={sortByPrice || sortBy}
+                onChange={(e) => {
+                  if (e.target.value === 'newest' || e.target.value === 'oldest') {
+                    setSortBy(e.target.value)
+                    setSortByPrice('')
+                  } else {
+                    setSortByPrice(e.target.value)
+                    setSortBy('newest')
+                  }
+                }}
               >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-              </select>
-              <select
-                className="sort-dropdown-btn sort-by-price h-full min-h-0 px-3 sm:px-4 border border-gray-300 rounded-lg bg-white text-gray-700 text-xs sm:text-sm font-medium cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent flex-1 sm:flex-none min-w-0 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-10"
-                style={{ paddingRight: '2.5rem', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.75rem center' }}
-                value={sortByPrice}
-                onChange={(e) => setSortByPrice(e.target.value)}
-              >
-                <option value="">Sort by Price</option>
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
                 <option value="price-low">Price: Low to High</option>
                 <option value="price-high">Price: High to Low</option>
               </select>
-              <div className="h-full flex rounded-lg border border-gray-200 p-1"
-              style={{ border: '2px solid #E5E7EB' }}>
+              <div className="flex rounded-lg border border-gray-200 p-1 bg-white">
                 <button
-                  className={`hamburger-menu-btn h-full min-h-0 px-3 sm:px-4 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex-1 sm:flex-none ${viewMode === 'horizontal' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'}`}
-                  aria-label="List View"
-                  onClick={() => setViewMode('horizontal')}
-                >
-                  <span className="hidden sm:inline">List view</span>
-                  <span className="sm:hidden">List</span>
-                </button>
-                <button
-                  className={`grid-view-btn h-full min-h-0 px-3 sm:px-4 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex-1 sm:flex-none ${viewMode === 'vertical' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'}`}
-                  aria-label="Grid View"
+                  className={`px-3 py-1.5 rounded-lg transition-all ${viewMode === 'vertical' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-600'}`}
                   onClick={() => setViewMode('vertical')}
+                  aria-label="Grid view"
                 >
-                  <span className="hidden sm:inline">Grid view</span>
-                  <span className="sm:hidden">Grid</span>
+                  <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="2" width="5" height="5" rx="1"/>
+                    <rect x="9" y="2" width="5" height="5" rx="1"/>
+                    <rect x="2" y="9" width="5" height="5" rx="1"/>
+                    <rect x="9" y="9" width="5" height="5" rx="1"/>
+                  </svg>
                 </button>
                 <button
-                  className={`map-view-btn h-full min-h-0 px-3 sm:px-4 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex-1 sm:flex-none ${viewMode === 'map' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'}`}
-                  aria-label="Map View"
-                  onClick={() => setViewMode('map')}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${viewMode === 'horizontal' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-600'}`}
+                  onClick={() => setViewMode('horizontal')}
+                  aria-label="List view"
                 >
-                  <span className="hidden sm:inline">Map view</span>
-                  <span className="sm:hidden">Map</span>
+                  <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="2" y1="4" x2="14" y2="4"/>
+                    <line x1="2" y1="8" x2="14" y2="8"/>
+                    <line x1="2" y1="12" x2="14" y2="12"/>
+                  </svg>
                 </button>
               </div>
             </div>
           </div>
-        </div>
-
-      <main className="properties-main-layout flex flex-col lg:flex-row gap-4 sm:gap-6 px-4 sm:px-6 md:px-10 lg:px-[150px] pb-4 sm:py-2 max-w-[1920px]">
-        
-        {/* Desktop Sidebar - Hidden on mobile/tablet, same style as advance search overlay */}
-        <div className="properties-sidebar w-[250px] flex-shrink-0 hidden lg:block lg:order-2">
-          <div className="advance-search-section relative rounded-xl border border-rental-blue-200/50 overflow-hidden mb-6 shadow-sm w-full bg-gradient-to-br from-rental-blue-50/80 via-white to-rental-orange-50/20">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-rental-blue-500/10 blur-xl" />
-              <div className="absolute bottom-0 -left-4 w-16 h-16 rounded-full bg-rental-orange-500/10 blur-lg" />
-            </div>
-            <div className="relative p-4">
-              <h2 className="section-title text-xl font-semibold text-rental-blue-800 mb-4 font-outfit">Advance Search</h2>
-              <div className="filter-group mb-4">
-                <select className="filter-select w-full px-4 py-2.5 border border-rental-blue-200/60 rounded-xl bg-white text-gray-700 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-rental-blue-500 focus:border-transparent appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-10" style={{ backgroundPosition: 'right 0.75rem center' }} value={selectedLocation} onChange={(e) => setSelectedLocation(e.target.value)}>
-                  <option value="">Location</option>
-                  {locations.map(location => (<option key={location} value={location}>{location}</option>))}
-                </select>
-              </div>
-              <div className="filter-group mb-4">
-                <select className="filter-select w-full px-4 py-2.5 border border-rental-blue-200/60 rounded-xl bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-rental-blue-500 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-10" style={{ backgroundPosition: 'right 0.75rem center' }} value={selectedType} onChange={(e) => setSelectedType(e.target.value)}>
-                  {propertyTypes.map(type => (<option key={type} value={type}>{type}</option>))}
-                </select>
-              </div>
-              <div className="filter-group mb-4">
-                <select className="filter-select w-full px-4 py-2.5 border border-rental-blue-200/60 rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-rental-blue-500 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-10" style={{ backgroundPosition: 'right 0.75rem center' }} value={minBaths} onChange={(e) => setMinBaths(e.target.value)}>
-                  <option value="">Min. Baths</option>
-                  {bathOptions.map(bath => (<option key={bath} value={bath}>{bath}+</option>))}
-                </select>
-              </div>
-              <div className="filter-group mb-4">
-                <select className="filter-select w-full px-4 py-2.5 border border-rental-blue-200/60 rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-rental-blue-500 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-10" style={{ backgroundPosition: 'right 0.75rem center' }} value={minBeds} onChange={(e) => setMinBeds(e.target.value)}>
-                  <option value="">Min. Beds</option>
-                  {bedOptions.map(bed => (<option key={bed} value={bed}>{bed}+</option>))}
-                </select>
-              </div>
-              <div className="filter-group price-range-group mb-4 w-full">
-                <label className="price-range-label block text-sm font-medium text-rental-blue-700 mb-2 font-outfit">Price Range</label>
-                <div className="price-range-inputs flex items-center gap-2 mb-2">
-                  <input type="number" className="price-input flex-1 min-w-0 px-3 py-2 border border-rental-blue-200/60 rounded-xl bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-rental-blue-500" placeholder="Min" value={priceMin} onChange={(e) => setPriceMin(e.target.value)} min={0} />
-                  <span className="text-gray-500 text-sm flex-shrink-0">To</span>
-                  <input type="number" className="price-input flex-1 min-w-0 px-3 py-2 border border-rental-blue-200/60 rounded-xl bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-rental-blue-500" placeholder="Max" value={priceMax} onChange={(e) => setPriceMax(e.target.value)} min={0} />
-                </div>
-                <div className="price-range-sliders space-y-3">
-                  <div>
-                    <input type="range" min={0} max={Number(priceMax) || 200000} step={1000} value={Math.min(Number(priceMin) || 0, Number(priceMax) || 200000)} onChange={(e) => { const v = e.target.value; setPriceMin(v); if (Number(priceMax) && Number(v) > Number(priceMax)) setPriceMax(v) }} className="price-range-slider w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-rental-blue-600" aria-label="Minimum price" />
-                    <p className="text-xs text-rental-blue-700/80 mt-1 font-medium">Min: {formatPrice(Number(priceMin) || 0)}</p>
-                  </div>
-                  <div>
-                    <input type="range" min={Number(priceMin) || 0} max={200000} step={1000} value={Math.max(Number(priceMax) || 200000, Number(priceMin) || 0)} onChange={(e) => { const v = e.target.value; setPriceMax(v); if (Number(priceMin) > Number(v)) setPriceMin(v) }} className="price-range-slider w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-rental-blue-600" aria-label="Maximum price" />
-                    <p className="text-xs text-rental-blue-700/80 mt-1 font-medium">Max: {formatPrice(Number(priceMax) || 200000)}</p>
-                  </div>
-                </div>
-              </div>
-              {activeFilterCount > 0 && (
-                <button className="clear-filters-btn w-full px-4 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium font-outfit hover:bg-red-100 transition-colors duration-200" onClick={clearAllFilters}>Clear All Filters</button>
-              )}
-            </div>
-          </div>
-          <div className="top-searches-section relative rounded-xl border border-rental-blue-200/50 overflow-hidden shadow-sm bg-white/90 backdrop-blur-sm">
-            <div className="p-4">
-              <h2 className="section-title text-lg font-semibold text-rental-blue-800 mb-4 font-outfit">Top Searches</h2>
-              <ul className="top-searches-list flex flex-col gap-2">
-                {topSearches.map((search, index) => (
-                  <li key={index} className="search-item flex items-center gap-2 text-sm text-rental-blue-700 hover:text-rental-orange-500 cursor-pointer transition-colors duration-200 font-outfit">
-                    <svg className="w-4 h-4 text-rental-blue-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" strokeLinecap="round" /></svg>
-                    <span className="flex-1">{search}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-        
-        <div className="properties-main-content flex-1 min-w-0 lg:order-1">
 
           {/* Banner when showing AI chat results */}
           {chatResults !== null && (
@@ -769,63 +1033,116 @@ function PropertiesContent() {
           {!loading && paginatedProperties.length > 0 && (
             <div className="results-header mb-4 sm:mb-6">
               <div className="results-header-top flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
-                <div className="results-count text-sm sm:text-base text-gray-700 font-outfit">
-                  <strong className="font-semibold text-gray-900">{chatResults !== null ? chatResults.length : totalProperties}</strong> properties available
+                {/* Results for location */}
+                <div className="results-count text-sm sm:text-base font-outfit">
+                  <span className="text-gray-600">Results for : </span>
+                  <span className="text-blue-600 font-medium">{selectedLocation || 'All Locations'}</span>
                 </div>
-                <div className="subcategory-row flex items-center gap-2 flex-wrap rounded-lg border border-gray-200" role="group" aria-label="Filter by category">
-                  <button
-                    className={`subcategory-chip px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
-                      subCategory === 'all' 
-                        ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                    }`}
-                    onClick={() => {
-                      setSubCategory('all')
-                      setCurrentPage(1)
+                {/* Desktop Sort and View Controls */}
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-gray-600 font-outfit hidden sm:inline">Sort by</span>
+                  <select
+                    className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-8"
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%23205ED7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.5rem center' }}
+                    value={sortByPrice || sortBy}
+                    onChange={(e) => {
+                      if (e.target.value === 'newest' || e.target.value === 'oldest') {
+                        setSortBy(e.target.value)
+                        setSortByPrice('')
+                      } else {
+                        setSortByPrice(e.target.value)
+                        setSortBy('newest')
+                      }
                     }}
                   >
-                    All
-                  </button>
-                  <button
-                    className={`subcategory-chip px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
-                      subCategory === 'featured' 
-                        ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                    }`}
-                    onClick={() => {
-                      setSubCategory('featured')
-                      setCurrentPage(1)
-                    }}
-                  >
-                    Featured
-                  </button>
-                  <button
-                    className={`subcategory-chip px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
-                      subCategory === 'top' 
-                        ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                    }`}
-                    onClick={() => {
-                      setSubCategory('top')
-                      setCurrentPage(1)
-                    }}
-                  >
-                    Top
-                  </button>
-                  <button
-                    className={`subcategory-chip px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
-                      subCategory === 'most-viewed' 
-                        ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                    }`}
-                    onClick={() => {
-                      setSubCategory('most-viewed')
-                      setCurrentPage(1)
-                    }}
-                  >
-                    Most Viewed
-                  </button>
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                  </select>
+                  <div className="flex rounded-lg border border-gray-200 p-1 bg-white">
+                    <button
+                      className={`px-3 py-1.5 rounded-lg transition-all ${viewMode === 'vertical' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-600'}`}
+                      onClick={() => setViewMode('vertical')}
+                      aria-label="Grid view"
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="2" width="5" height="5" rx="1"/>
+                        <rect x="9" y="2" width="5" height="5" rx="1"/>
+                        <rect x="2" y="9" width="5" height="5" rx="1"/>
+                        <rect x="9" y="9" width="5" height="5" rx="1"/>
+                      </svg>
+                    </button>
+                    <button
+                      className={`px-3 py-1.5 rounded-lg transition-all ${viewMode === 'horizontal' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-600'}`}
+                      onClick={() => setViewMode('horizontal')}
+                      aria-label="List view"
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="2" y1="4" x2="14" y2="4"/>
+                        <line x1="2" y1="8" x2="14" y2="8"/>
+                        <line x1="2" y1="12" x2="14" y2="12"/>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
+                {/* Subcategory buttons hidden for now */}
+                {false && (
+                  <div className="subcategory-row flex items-center gap-2 flex-wrap rounded-lg border border-gray-200" role="group" aria-label="Filter by category">
+                    <button
+                      className={`subcategory-chip px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
+                        subCategory === 'all' 
+                          ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                      }`}
+                      onClick={() => {
+                        setSubCategory('all')
+                        setCurrentPage(1)
+                      }}
+                    >
+                      All
+                    </button>
+                    <button
+                      className={`subcategory-chip px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
+                        subCategory === 'featured' 
+                          ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                      }`}
+                      onClick={() => {
+                        setSubCategory('featured')
+                        setCurrentPage(1)
+                      }}
+                    >
+                      Featured
+                    </button>
+                    <button
+                      className={`subcategory-chip px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
+                        subCategory === 'top' 
+                          ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                      }`}
+                      onClick={() => {
+                        setSubCategory('top')
+                        setCurrentPage(1)
+                      }}
+                    >
+                      Top
+                    </button>
+                    <button
+                      className={`subcategory-chip px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
+                        subCategory === 'most-viewed' 
+                          ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                      }`}
+                      onClick={() => {
+                        setSubCategory('most-viewed')
+                        setCurrentPage(1)
+                      }}
+                    >
+                      Most Viewed
+                    </button>
+                  </div>
+                )}
                 {activeFilterCount > 0 && (
                   <div className="active-filters flex items-center gap-2 flex-wrap w-full mt-2">
                     {selectedLocation && (
@@ -907,24 +1224,27 @@ function PropertiesContent() {
                   </div>
                 )}
               </div>
-              <div className="categories-row flex items-center gap-2 sm:gap-3 overflow-x-auto pb-2 sm:pb-0 -mx-1 px-1 sm:mx-0 sm:px-0 flex-wrap sm:flex-nowrap scrollbar-thin" style={{ scrollbarWidth: 'thin' }}>
-                {categories.map((category) => (
-                  <button
-                    key={category.name}
-                    className={`category-chip flex-shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-50 text-gray-700 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                      selectedType === category.name 
-                        ? 'bg-blue-600 text-white hover:bg-blue-700 border border-blue-600' 
-                        : 'bg-gray-200 text-gray-700 border border-gray-300 hover:bg-gray-200'
-                    }`}
-                    onClick={() => {
-                      setSelectedType(category.name)
-                      setCurrentPage(1)
-                    }}
-                  >
-                    {category.name} ({category.count})
-                  </button>
-                ))}
-              </div>
+              {/* Categories row hidden for now */}
+              {false && (
+                <div className="categories-row flex items-center gap-2 sm:gap-3 overflow-x-auto pb-2 sm:pb-0 -mx-1 px-1 sm:mx-0 sm:px-0 flex-wrap sm:flex-nowrap scrollbar-thin" style={{ scrollbarWidth: 'thin' }}>
+                  {categories.map((category) => (
+                    <button
+                      key={category.name}
+                      className={`category-chip flex-shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-50 text-gray-700 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                        selectedType === category.name 
+                          ? 'bg-blue-600 text-white hover:bg-blue-700 border border-blue-600' 
+                          : 'bg-gray-200 text-gray-700 border border-gray-300 hover:bg-gray-200'
+                      }`}
+                      onClick={() => {
+                        setSelectedType(category.name)
+                        setCurrentPage(1)
+                      }}
+                    >
+                      {category.name} ({category.count})
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -956,154 +1276,6 @@ function PropertiesContent() {
               />
             ) : paginatedProperties.length > 0 ? (
               <>
-                {viewMode === 'map' ? (
-                  <div className="properties-map-wrapper relative w-full h-[min(calc(100vh-220px),70vh)] min-h-[320px] sm:min-h-[420px] md:min-h-[500px] lg:min-h-[600px] rounded-lg overflow-hidden border border-gray-200">
-                    <div className="absolute inset-0 z-0">
-                      <PublicPropertiesMap
-                        ref={mapRef}
-                        properties={paginatedProperties}
-                      />
-                    </div>
-                    {/* Desktop/tablet: right overlay panel (reduced height: top/bottom inset) */}
-                    <div
-                      className="absolute top-14 right-2 bottom-8 sm:top-16 sm:right-4 sm:bottom-10 z-10 w-[calc(90%-1rem)] max-w-[240px] sm:max-w-[280px] max-h-[calc(100%-6rem)] hidden md:flex flex-col rounded-xl overflow-hidden"
-                      style={{ backgroundColor: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)' }}
-                    >
-                      <div className="flex-shrink-0 px-4 py-3 border-b border-white/20">
-                        <h3 className="text-sm font-semibold text-white uppercase tracking-wide">
-                          Properties on map
-                        </h3>
-                        <p className="text-xs text-white/80 mt-0.5">
-                          {paginatedProperties.length} listing{paginatedProperties.length !== 1 ? 's' : ''}
-                        </p>
-                      </div>
-                      <div className="flex-1 overflow-y-auto p-3 space-y-2">
-                        {paginatedProperties.map((prop) => {
-                          const mainImg = prop.image_url || prop.image || ASSETS.PLACEHOLDER_PROPERTY_MAIN
-                          return (
-                            <button
-                              key={prop.id}
-                              type="button"
-                              onClick={() => mapRef.current?.flyToProperty(prop)}
-                              className="w-full text-left rounded-lg overflow-hidden flex gap-3 p-2.5 transition-colors hover:bg-white/15 focus:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/40"
-                            >
-                              <div
-                                className="flex-shrink-0 w-16 h-16 rounded-md bg-gray-700 bg-cover bg-center"
-                                style={{ backgroundImage: `url(${mainImg})` }}
-                              />
-                              <div className="min-w-0 flex-1 py-0.5">
-                                <p className="text-sm font-medium text-white truncate">
-                                  {prop.title}
-                                </p>
-                                <p className="text-xs text-white/80 mt-0.5 truncate">
-                                  {prop.location || prop.city || '—'}
-                                </p>
-                                <p className="text-sm font-semibold text-white mt-1">
-                                  {formatPrice(prop.price)}
-                                </p>
-                              </div>
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </div>
-                    {/* Mobile: floating button to open list */}
-                    <button
-                      type="button"
-                      onClick={() => setMapListSheetOpen(true)}
-                      className="md:hidden absolute bottom-4 left-4 right-4 z-20 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold text-white bg-black/70 backdrop-blur-md border border-white/20 shadow-lg active:scale-[0.98]"
-                      aria-label={`Show ${paginatedProperties.length} properties list`}
-                    >
-                      <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="3" width="7" height="7" rx="1" />
-                        <rect x="14" y="3" width="7" height="7" rx="1" />
-                        <rect x="3" y="14" width="7" height="7" rx="1" />
-                        <rect x="14" y="14" width="7" height="7" rx="1" />
-                      </svg>
-                      <span>List ({paginatedProperties.length})</span>
-                    </button>
-                    {/* Mobile: bottom sheet with property cards (full-screen overlay when open) */}
-                    <div
-                      className="md:hidden fixed inset-0 z-30"
-                      style={{ pointerEvents: mapListSheetOpen ? 'auto' : 'none' }}
-                      aria-hidden={!mapListSheetOpen}
-                    >
-                      <button
-                        type="button"
-                        className="absolute inset-0 bg-black/45 transition-opacity duration-300"
-                        style={{ opacity: mapListSheetOpen ? 1 : 0 }}
-                        onClick={() => setMapListSheetOpen(false)}
-                        aria-label="Close list"
-                      />
-                      <div
-                        className="absolute inset-x-0 bottom-0 rounded-t-2xl overflow-hidden shadow-2xl max-h-[70vh] flex flex-col transition-transform duration-300 ease-out"
-                        style={{
-                          transform: mapListSheetOpen ? 'translateY(0)' : 'translateY(100%)',
-                          backgroundColor: 'rgba(15,23,42,0.98)',
-                          backdropFilter: 'blur(12px)',
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-white/20">
-                          <div>
-                            <h3 className="text-sm font-semibold text-white uppercase tracking-wide">
-                              Properties on map
-                            </h3>
-                            <p className="text-xs text-white/70 mt-0.5">
-                              {paginatedProperties.length} listing{paginatedProperties.length !== 1 ? 's' : ''} — tap to locate
-                            </p>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setMapListSheetOpen(false)}
-                            className="p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
-                            aria-label="Close list"
-                          >
-                            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M18 6L6 18M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto overscroll-contain p-3 space-y-2 pb-6">
-                          {paginatedProperties.map((prop) => {
-                            const mainImg = prop.image_url || prop.image || ASSETS.PLACEHOLDER_PROPERTY_MAIN
-                            return (
-                              <button
-                                key={prop.id}
-                                type="button"
-                                onClick={() => {
-                                  setMapListSheetOpen(false)
-                                  // Fly to property after sheet closes so the map is visible and has correct size (Leaflet needs visible container)
-                                  setTimeout(() => {
-                                    mapRef.current?.flyToProperty(prop)
-                                  }, 350)
-                                }}
-                                className="w-full text-left rounded-xl overflow-hidden flex gap-3 p-3 transition-colors hover:bg-white/15 active:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 bg-white/5"
-                              >
-                                <div
-                                  className="flex-shrink-0 w-[72px] h-[72px] rounded-lg bg-gray-700 bg-cover bg-center"
-                                  style={{ backgroundImage: `url(${mainImg})` }}
-                                />
-                                <div className="min-w-0 flex-1 py-0.5">
-                                  <p className="text-sm font-medium text-white line-clamp-2">
-                                    {prop.title}
-                                  </p>
-                                  <p className="text-xs text-white/70 mt-0.5 truncate">
-                                    {prop.location || prop.city || '—'}
-                                  </p>
-                                  <p className="text-sm font-semibold text-white mt-1">
-                                    {formatPrice(prop.price)}
-                                  </p>
-                                </div>
-                              </button>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <>
                     <div className={viewMode === 'horizontal' 
                       ? 'properties-list flex flex-col gap-4 sm:gap-6' 
                       : 'properties-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-4 sm:gap-6'}>
@@ -1154,7 +1326,9 @@ function PropertiesContent() {
                         }
 
                         return viewMode === 'horizontal' ? (
-                          <HorizontalPropertyCard key={property.id} {...cardProps} />
+                          <div key={property.id} className="w-full min-w-0 [&>article]:w-full [&>article]:min-w-0 [&>article]:max-w-full">
+                            <HorizontalPropertyCard {...cardProps} />
+                          </div>
                         ) : (
                           <div key={property.id} className="w-full min-w-0 [&>article]:w-full [&>article]:min-w-0 [&>article]:max-w-full [&>article]:h-full">
                             <VerticalPropertyCard {...cardProps} />
@@ -1170,8 +1344,6 @@ function PropertiesContent() {
                       </div>
                     )}
                   </>
-                )}
-              </>
             ) : (
               <EmptyState
                 variant="empty"
@@ -1196,6 +1368,23 @@ function PropertiesContent() {
           </div>
         </div>
       </main>
+      
+      {/* Mobile Sticky Back to Filters Button */}
+      <button
+        type="button"
+        onClick={() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+          setIsSidebarOpen(true)
+        }}
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-blue-600 text-white px-4 py-3 flex items-center justify-center gap-2 font-medium text-sm hover:bg-blue-700 transition-colors shadow-lg"
+        aria-label="Back to Filters"
+      >
+        <span>Back to Filters</span>
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 15l-6-6-6 6" />
+        </svg>
+      </button>
+      
       <PopularSearches />
       <Footer />
 
