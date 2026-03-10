@@ -1,18 +1,21 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ASSETS } from '@/utils/assets'
-import { FiChevronLeft, FiChevronRight, FiMail, FiHeart, FiMapPin } from 'react-icons/fi'
+import { FiMail, FiMapPin } from 'react-icons/fi'
+import SharePopup, { type SharePlatform } from '../misc/SharePopup'
 
 interface VerticalPropertyCardProps {
   id?: number | string
   propertyType?: string
   priceType?: string
   price?: string
+  priceUnit?: string
   /** Display string for when the property was listed (e.g. "Jan 5, 2026") */
   dateListed?: string
   title?: string
+  description?: string
   image?: string
   images?: string[]
   rentManagerName?: string
@@ -20,6 +23,7 @@ interface VerticalPropertyCardProps {
   rentManagerImage?: string
   rentManagerEmail?: string
   rentManagerWhatsApp?: string
+  companyImage?: string
   bedrooms?: number
   bathrooms?: number
   parking?: number
@@ -33,83 +37,37 @@ interface VerticalPropertyCardProps {
 
 function VerticalPropertyCard({
   id,
-  propertyType = 'Commercial Spaces',
+  propertyType = 'Apartment',
   priceType,
-  price = '₱1,200',
+  price = '$ 25000.00',
+  priceUnit = '/monthly',
   dateListed,
   title = 'Azure Residences - 2BR Corner Suite',
+  description = 'Beautiful corner suite with modern amenities, floor-to-ceiling windows, and stunning city views. Located in the heart of IT Park with easy access to shopping, dining, and transportation....',
   image = ASSETS.PLACEHOLDER_PROPERTY_MAIN,
   images: imagesProp,
-  rentManagerName = 'Rental.Ph Official',
+  rentManagerName = 'Isaac Locaylocay',
   rentManagerRole = 'Rent Manager',
   rentManagerImage,
   rentManagerEmail,
   rentManagerWhatsApp,
+  companyImage,
   bedrooms = 4,
   bathrooms = 2,
   parking: _parking = 2,
-  propertySize = '24 sqm',
+  propertySize = '2sqm',
   location,
   city,
   streetAddress,
   stateProvince,
 }: VerticalPropertyCardProps) {
-  const locationLine = [streetAddress, city].filter(Boolean).join(' ') || location
-  const fullAddress = [streetAddress, city, stateProvince].filter(Boolean).join(', ') || location || locationLine
+  const locationLine = [streetAddress, city, stateProvince].filter(Boolean).join(', ') || location
   const router = useRouter()
   const [showSharePopup, setShowSharePopup] = useState(false)
-  const [imageHovered, setImageHovered] = useState(false)
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const shareButtonRef = useRef<HTMLButtonElement>(null)
-  const sharePopupRef = useRef<HTMLDivElement>(null)
-  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const hoverIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const displayImages = imagesProp?.length ? imagesProp : [image]
-  const currentImage = displayImages[currentImageIndex] ?? image
   const hasMultipleImages = displayImages.length > 1
-
-  const HOVER_DELAY_MS = 1500 // 1.5s before first auto-advance, then every 1.5s
-
-  const clearHoverTimers = () => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current)
-      hoverTimeoutRef.current = null
-    }
-    if (hoverIntervalRef.current) {
-      clearInterval(hoverIntervalRef.current)
-      hoverIntervalRef.current = null
-    }
-  }
-
-  const goPrev = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setCurrentImageIndex((i) => (i - 1 + displayImages.length) % displayImages.length)
-  }
-  const goNext = (e?: React.MouseEvent) => {
-    e?.stopPropagation()
-    setCurrentImageIndex((i) => (i + 1) % displayImages.length)
-  }
-
-  const handleImageAreaMouseEnter = () => {
-    setImageHovered(true)
-    if (!hasMultipleImages) return
-    clearHoverTimers()
-    hoverTimeoutRef.current = setTimeout(() => {
-      hoverTimeoutRef.current = null
-      goNext()
-      hoverIntervalRef.current = setInterval(goNext, HOVER_DELAY_MS)
-    }, HOVER_DELAY_MS)
-  }
-
-  const handleImageAreaMouseLeave = () => {
-    setImageHovered(false)
-    clearHoverTimers()
-  }
-
-  useEffect(() => {
-    return () => clearHoverTimers()
-  }, [])
+  const mainImage = displayImages[0] || image
 
   const handleCardClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a') || (e.target as HTMLElement).closest('svg')) {
@@ -120,17 +78,7 @@ function VerticalPropertyCard({
     }
   }
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node
-      if (shareButtonRef.current?.contains(target) || sharePopupRef.current?.contains(target)) return
-      setShowSharePopup(false)
-    }
-    if (showSharePopup) document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [showSharePopup])
-
-  const handleShare = (platform: 'facebook' | 'whatsapp' | 'gmail') => {
+  const handleShare = (platform: SharePlatform) => {
     const propertyUrl = id ? `${window.location.origin}/property/${id}` : window.location.href
     const shareText = `${title}${locationLine ? `, ${locationLine}` : ''} - ${price}`
     switch (platform) {
@@ -143,297 +91,228 @@ function VerticalPropertyCard({
       case 'gmail':
         window.open(`mailto:?subject=${encodeURIComponent(shareText)}&body=${encodeURIComponent(propertyUrl)}`, '_blank')
         break
+      default:
+        break
     }
-    setShowSharePopup(false)
   }
 
   return (
     <article
-      className="group bg-white rounded-lg sm:rounded-xl border border-gray-200 overflow-hidden flex flex-col w-full max-w-[550px] h-full shadow-sm hover:shadow-md transition-all duration-200"
       onClick={handleCardClick}
-      style={{ cursor: id ? 'pointer' : 'default', borderWidth: '1px', borderStyle: 'solid', borderColor: 'rgb(229, 231, 235)' }}
+      style={{ cursor: id ? 'pointer' : 'default' }}
+      className="w-full max-w-[345px] bg-white border border-black/20 rounded-[5px] overflow-hidden flex flex-col shadow-sm hover:shadow-md transition-all duration-200"
     >
-      {/* Property image with hover arrows */}
-      <div
-        className="relative w-full aspect-[4/2] min-h-[140px] sm:min-h-0 overflow-hidden rounded-t-lg sm:rounded-t-xl bg-gray-100"
-        onMouseEnter={handleImageAreaMouseEnter}
-        onMouseLeave={handleImageAreaMouseLeave}
-      >
-        <div
-          className="flex h-full transition-transform duration-300 ease-out group-hover:scale-[1.02] origin-center"
-          style={{
-            width: `${displayImages.length * 100}%`,
-            transform: `translateX(-${currentImageIndex * (100 / displayImages.length)}%)`,
+      {/* Image Section */}
+      <div className="relative w-full h-[202.86px] overflow-hidden bg-gray-100">
+        <img
+          src={mainImage}
+          alt={title}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            e.currentTarget.src = ASSETS.PLACEHOLDER_PROPERTY_MAIN
           }}
-        >
-          {displayImages.map((src, i) => (
-            <div key={i} className="flex-shrink-0 w-full h-full" style={{ width: `${100 / displayImages.length}%` }}>
-              <img
-                src={src}
-                alt={`${title} ${i + 1}`}
-                className="w-full h-full object-cover object-center"
-                onError={(e) => {
-                  e.currentTarget.src = ASSETS.PLACEHOLDER_PROPERTY_MAIN
-                }}
-              />
-            </div>
-          ))}
+        />
+        
+        {/* Gradient overlay at bottom */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent pointer-events-none" />
+        
+        {/* Property type badge - top left */}
+        <div className="absolute top-0 left-0 m-0">
+          <div className="bg-[#266FFD] rounded-tl-[5px] rounded-br-[5px] px-[18px] py-[7.99px]">
+            <span className="text-white text-[10px] font-semibold leading-[1.26] uppercase tracking-wide">
+              {propertyType}
+            </span>
+          </div>
         </div>
-        {hasMultipleImages && imageHovered && (
-          <>
-            <button
-              type="button"
-              onClick={goPrev}
-              className="absolute left-1.5 sm:left-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-9 sm:h-9 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center text-gray-700 transition-all z-10 touch-manipulation"
-              aria-label="Previous image"
-            >
-              <FiChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              type="button"
-              onClick={goNext}
-              className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-9 sm:h-9 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center text-gray-700 transition-all z-10 touch-manipulation"
-              aria-label="Next image"
-            >
-              <FiChevronRight className="w-5 h-5" />
-            </button>
-          </>
+
+        {/* Heart icon - top right */}
+        <button
+          type="button"
+          onClick={(e) => e.stopPropagation()}
+          className="absolute top-[12.99px] right-[12.99px] w-[24.99px] h-[24.99px] rounded-[5px] bg-white flex items-center justify-center hover:bg-gray-50 transition-colors z-10"
+          aria-label="Add to favorites"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-[11px] h-[11px] text-[#6B7280]">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+        </button>
+
+        {/* Location overlay - bottom left */}
+        {locationLine && (
+          <div className="absolute bottom-[10px] left-[19px] flex items-center gap-[4px]">
+            <FiMapPin className="w-[15.99px] h-[15.99px] text-white" aria-hidden />
+            <span className="text-white text-[10px] font-semibold leading-[1.26]">{locationLine}</span>
+          </div>
+        )}
+
+        {/* Image count indicator - bottom right */}
+        {hasMultipleImages && (
+          <div className="absolute bottom-[10px] right-[19px] flex items-center gap-[4px]">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-[14px] h-[14px] text-white">
+              <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+            </svg>
+            <span className="text-white text-[10px] font-semibold leading-[1.26]">{displayImages.length}</span>
+          </div>
         )}
       </div>
 
-      {/* Content */}
-      <div className="flex flex-col flex-1 px-4 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 gap-1.5 sm:gap-2 overflow-hidden">
-        <div className="flex justify-between items-center gap-2">
-          <span className="text-blue-600 text-[10px] sm:text-xs font-semibold uppercase tracking-wide truncate">{propertyType}</span>
-          {dateListed && (
-            <span className="text-[10px] sm:text-[11px] text-gray-400 font-medium whitespace-nowrap flex-shrink-0">
-              {dateListed}
-            </span>
-          )}
-        </div>
-        <div className="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
-          <p className="text-blue-600 text-xl sm:text-2xl md:text-4xl font-bold leading-tight">{price}</p>
-          {priceType && (
-            <span className="text-orange-500 text-xs sm:text-base font-medium">/{priceType}</span>
-          )}
-        </div>
-        <div className="min-w-0">
-          <h3 className="text-gray-900 text-base sm:text-xl font-semibold leading-snug line-clamp-2">
+      {/* Content Section */}
+      <div className="flex flex-col flex-1 p-[19px] gap-[10px]">
+        {/* Title with Email, WhatsApp, Share buttons */}
+        <div className="flex items-center gap-[4px]">
+          <h3 className="text-black text-[9px] font-medium leading-[1.26] line-clamp-1 flex-1 min-w-0">
             {title}
           </h3>
-          {locationLine ? (
-            <div
-              className="flex items-center gap-1.5 text-gray-500 font-normal min-w-0"
-              title={fullAddress}
-            >
-           
-              <span className="truncate" title={fullAddress}>{locationLine}</span>
+          <div className="flex items-center gap-[4px] flex-shrink-0">
+            {rentManagerEmail && (
+              <a
+                href={`mailto:${rentManagerEmail}`}
+                onClick={(e) => e.stopPropagation()}
+                className="px-[12px] py-[4px] rounded-[5px] border border-[#205ED7] text-[#205ED7] text-[9px] font-medium leading-[1.26] hover:bg-blue-50 transition-colors whitespace-nowrap"
+              >
+                Email
+              </a>
+            )}
+            {rentManagerWhatsApp && (
+              <a
+                href={`https://wa.me/${rentManagerWhatsApp.replace(/\D/g, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="px-[11.02px] py-[4.13px] rounded-[5px] border border-[#22C55E] text-[#22C55E] text-[9px] font-medium leading-[1.26] hover:bg-green-50 transition-colors whitespace-nowrap"
+              >
+                WhatsApp
+              </a>
+            )}
+            {!rentManagerEmail && !rentManagerWhatsApp && (
+              <>
+                <a
+                  href="#"
+                  onClick={(e) => e.stopPropagation()}
+                  className="px-[12px] py-[4px] rounded-[5px] border border-[#205ED7] text-[#205ED7] text-[9px] font-medium leading-[1.26] hover:bg-blue-50 transition-colors whitespace-nowrap"
+                >
+                  Email
+                </a>
+                <a
+                  href="https://wa.me/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="px-[11.02px] py-[4.13px] rounded-[5px] border border-[#22C55E] text-[#22C55E] text-[9px] font-medium leading-[1.26] hover:bg-green-50 transition-colors whitespace-nowrap"
+                >
+                  WhatsApp
+                </a>
+              </>
+            )}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowSharePopup(!showSharePopup)
+                }}
+                className="w-[14.99px] h-[14.99px] flex items-center justify-center text-[#374151] hover:opacity-80 transition-opacity"
+                aria-label="Share"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+                  <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z" />
+                </svg>
+              </button>
+              <SharePopup
+                isOpen={showSharePopup}
+                onClose={() => setShowSharePopup(false)}
+                onShare={handleShare}
+                position="top"
+                align="right"
+              />
             </div>
-          ) : null}
+          </div>
         </div>
 
-        {/* Bed, bath, size */}
-        <div className="flex items-center gap-2 sm:gap-4 text-gray-600 text-xs sm:text-sm flex-wrap">
-          <span className="flex items-center gap-1 sm:gap-1.5">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0">
+        {/* Price */}
+        <div className="flex items-baseline gap-[6px]">
+          <p className="text-[#387CFF] text-[20px] font-medium leading-[1.26]">{price}</p>
+          <span className="text-[#FE8E0A] text-[15px] font-medium leading-[1.26]">{priceUnit || (priceType ? `/${priceType}` : '')}</span>
+        </div>
+
+        {/* Description */}
+        {description && (
+          <p className="text-[#999999] text-[9px] font-medium leading-[1.26] line-clamp-3">
+            {description}
+          </p>
+        )}
+
+        {/* Property details: Bed, Bath, Size */}
+        <div className="flex items-center gap-[20px] text-[#374151] text-[9px] font-medium leading-[1.26]">
+          <span className="flex items-center gap-[4px]">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-[16px] h-[10.99px] flex-shrink-0">
               <rect x="3" y="10" width="18" height="7" rx="2" />
               <rect x="7" y="7" width="4" height="3" rx="1" />
               <rect x="13" y="7" width="4" height="3" rx="1" />
               <path d="M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2" />
             </svg>
             {bedrooms}
-            <span className="text-gray-500 font-normal">Bed</span>
           </span>
-          <span className="flex items-center gap-1 sm:gap-1.5">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0">
+          <span className="flex items-center gap-[4px]">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-[15.99px] h-[10.99px] flex-shrink-0">
               <rect x="3" y="10" width="18" height="8" rx="2" />
               <rect x="5" y="18" width="2" height="2" rx="1" />
               <rect x="17" y="18" width="2" height="2" rx="1" />
               <path d="M3 18h18" />
             </svg>
             {bathrooms}
-            <span className="text-gray-500 font-normal">Bath</span>
           </span>
-          <span className="flex items-center gap-1 sm:gap-1.5">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0">
+          <span className="flex items-center gap-[4px]">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-[16px] h-[10.99px] flex-shrink-0">
               <rect x="2" y="17" width="20" height="4" rx="1" />
               <rect x="2" y="3" width="20" height="4" rx="1" />
               <rect x="2" y="10" width="20" height="4" rx="1" />
             </svg>
-            {propertySize}
-            <span className="text-gray-500 font-normal">Size</span>
+            <span className="font-semibold">{propertySize}</span>
           </span>
         </div>
 
-        {/* Agent strip */}
-        <div className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-gray-50 !border !border-gray-200" style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: '#E5E7EB' }}>
+        {/* Divider */}
+        <div className="h-[1px] bg-black/10" />
+
+        {/* Agent section */}
+        <div className="flex items-center gap-[8px]">
           <img
             src={rentManagerImage || ASSETS.PLACEHOLDER_PROFILE}
             alt={rentManagerName}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover flex-shrink-0 border border-gray-200"
+            className="w-[36.99px] h-[36.99px] rounded-full object-cover flex-shrink-0"
             onError={(e) => {
               e.currentTarget.src = ASSETS.PLACEHOLDER_PROFILE
             }}
           />
-          <div className="flex-1 min-w-0 flex flex-col justify-center">
-            <h3 className="text-blue-600 text-xs sm:text-sm font-semibold m-0 truncate">{rentManagerName}</h3>
-            <p className="text-gray-500 text-[10px] sm:text-xs uppercase tracking-wide m-0 truncate">{rentManagerRole}</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-black text-[11px] font-medium leading-[1.26] truncate">
+              By {rentManagerName}
+            </p>
           </div>
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            {/* Small width: icon-only buttons */}
-            <div className="flex items-center gap-1.5 md:hidden">
-              {rentManagerEmail && (
-                <a
-                  href={`mailto:${rentManagerEmail}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 hover:bg-blue-200 transition-colors"
-                  aria-label="Email"
-                >
-                  <FiMail className="w-4 h-4" />
-                </a>
-              )}
-              {rentManagerWhatsApp && (
-                <a
-                  href={`https://wa.me/${rentManagerWhatsApp.replace(/\D/g, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 hover:bg-green-200 transition-colors"
-                  aria-label="WhatsApp"
-                >
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                  </svg>
-                </a>
-              )}
-              {!rentManagerEmail && !rentManagerWhatsApp && (
-                <>
-                  <a
-                    href="#"
-                    onClick={(e) => e.stopPropagation()}
-                    className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 hover:bg-blue-200 transition-colors"
-                    aria-label="Email"
-                  >
-                    <FiMail className="w-4 h-4" />
-                  </a>
-                  <a
-                    href="https://wa.me/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 hover:bg-green-200 transition-colors"
-                    aria-label="WhatsApp"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                    </svg>
-                  </a>
-                </>
-              )}
-            </div>
-
-            {/* Larger width: text labels instead of icons */}
-            <div className="hidden md:flex items-center gap-2">
-              {rentManagerEmail && (
-                <a
-                  href={`mailto:${rentManagerEmail}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="px-3 py-1.5 rounded-full bg-blue-100 text-blue-700 text-xs font-medium hover:bg-blue-200 transition-colors"
-                >
-                  Email
-                </a>
-              )}
-              {rentManagerWhatsApp && (
-                <a
-                  href={`https://wa.me/${rentManagerWhatsApp.replace(/\D/g, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="px-3 py-1.5 rounded-full bg-green-100 text-green-700 text-xs font-medium hover:bg-green-200 transition-colors"
-                >
-                  WhatsApp
-                </a>
-              )}
-              {!rentManagerEmail && !rentManagerWhatsApp && (
-                <>
-                  <a
-                    href="#"
-                    onClick={(e) => e.stopPropagation()}
-                    className="px-3 py-1.5 rounded-full bg-blue-100 text-blue-700 text-xs font-medium hover:bg-blue-200 transition-colors"
-                  >
-                    Email
-                  </a>
-                  <a
-                    href="https://wa.me/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="px-3 py-1.5 rounded-full bg-green-100 text-green-700 text-xs font-medium hover:bg-green-200 transition-colors"
-                  >
-                    WhatsApp
-                  </a>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Action buttons: Details, Heart, Share */}
-        <div className="flex items-center gap-1.5 sm:gap-2  pt-1">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              if (id) router.push(`/property/${id}`)
-            }}
-            className="flex-1 min-h-[44px] py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg bg-blue-600 text-white font-semibold text-xs sm:text-sm hover:bg-blue-700 transition-colors touch-manipulation"
-          >
-            Details
-          </button>
-          <button
-            type="button"
-            onClick={(e) => e.stopPropagation()}
-            className="w-10 h-10 min-h-[44px] min-w-[44px] rounded-lg border border-gray-200 bg-white flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors touch-manipulation"
-            style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: '#E5E7EB' }}
-            aria-label="Add to favorites"
-          >
-            <FiHeart className="w-5 h-5" />
-          </button>
-          <div className="relative">
-            <button
-              ref={shareButtonRef}
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                setShowSharePopup(!showSharePopup)
-              }}
-              className="w-10 h-10 min-h-[44px] min-w-[44px] rounded-lg border border-gray-200 bg-white flex items-center justify-center text-gray-700 hover:bg-gray-50 transition-colors touch-manipulation"
-              style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: '#E5E7EB' }}
-              aria-label="Share"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
-                <circle cx="18" cy="5" r="3" />
-                <circle cx="6" cy="12" r="3" />
-                <circle cx="18" cy="19" r="3" />
-                <path d="M8.59 13.51L15.42 17.49M15.41 6.51L8.59 10.49" />
+          {/* Company image placeholder */}
+          <div className="w-[79.88px] h-[46.03px] rounded-[5px] bg-gray-100 border border-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {companyImage ? (
+              <img
+                src={companyImage}
+                alt="Company"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.currentTarget
+                  target.style.display = 'none'
+                  const placeholder = target.parentElement?.querySelector('.company-placeholder')
+                  if (placeholder) {
+                    (placeholder as HTMLElement).style.display = 'flex'
+                  }
+                }}
+              />
+            ) : null}
+            <div className={`company-placeholder w-full h-full flex items-center justify-center ${companyImage ? 'hidden' : 'flex'}`}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6 text-gray-400">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M3 9h18M9 3v18" />
               </svg>
-            </button>
-            {showSharePopup && (
-              <div
-                ref={sharePopupRef}
-                className="absolute bottom-full left-0 mb-1 bg-white rounded-xl shadow-lg border border-gray-200 p-1.5 z-[1000] min-w-[140px] flex flex-col gap-0.5"
-              >
-                <button type="button" className="flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-gray-100 text-left text-sm font-medium text-gray-700" onClick={(e) => { e.stopPropagation(); handleShare('facebook') }}>
-                  <span className="text-[#1877F2]">Facebook</span>
-                </button>
-                <button type="button" className="flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-gray-100 text-left text-sm font-medium text-gray-700" onClick={(e) => { e.stopPropagation(); handleShare('whatsapp') }}>
-                  <span className="text-[#25D366]">WhatsApp</span>
-                </button>
-                <button type="button" className="flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-gray-100 text-left text-sm font-medium text-gray-700" onClick={(e) => { e.stopPropagation(); handleShare('gmail') }}>
-                  <span className="text-[#EA4335]">Gmail</span>
-                </button>
-              </div>
-            )}
+            </div>
           </div>
         </div>
       </div>

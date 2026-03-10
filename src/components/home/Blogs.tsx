@@ -2,23 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Pagination from '../common/Pagination'
 import { BlogCardSkeleton } from '../common/BlogCardSkeleton'
 import { blogsApi } from '../../api'
 import type { Blog } from '../../types'
 import { ASSETS } from '@/utils/assets'
 import FadeInOnView from '@/components/common/FadeInOnView'
-import { BlogCard } from '@/components/common'
+import { resolveAgentAvatar } from '@/utils/imageResolver'
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState<Blog[]>([])
   const [loading, setLoading] = useState(true)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [selectedCategory, setSelectedCategory] = useState<string>('All Categories')
-
-  // Number of cards per row based on screen size
-  // Small screens: 1 column, Medium: 2-3 columns, Large: 4 columns
-  const cardsPerPage = 4 // Maximum cards per row on large screens
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -34,51 +27,9 @@ const Blogs = () => {
     fetchBlogs()
   }, [])
 
-  // Derive unique categories for chips
-  const categories = ['All Categories', ...Array.from(new Set(blogs.map((b) => b.category).filter(Boolean)))]
-
-  // Filter blogs by selected category (if any)
-  const filteredBlogs =
-    selectedCategory === 'All Categories'
-      ? blogs
-      : blogs.filter((b) => b.category === selectedCategory)
-
-  const effectiveBlogs = filteredBlogs.length > 0 ? filteredBlogs : blogs
-
-  // Calculate pagination
-  const totalPages = Math.ceil(effectiveBlogs.length / cardsPerPage)
-  const startIndex = (currentPage - 1) * cardsPerPage
-  const endIndex = startIndex + cardsPerPage
-  const currentPageBlogs = effectiveBlogs.slice(startIndex, endIndex)
-
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage)
-    // Scroll to top of blog section when page changes
-    const blogSection = document.getElementById('blog')
-    if (blogSection) {
-      blogSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
-  }
-
-  // Reset to page 1 when category changes
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category)
-    setCurrentPage(1)
-  }
-
-  const formatDate = (dateString: string | null): string => {
-    if (!dateString) return ''
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  }
-
-  const formatReadTime = (minutes: number): string => {
-    return `${minutes} min read`
-  }
+  // Get first blog for featured card image, and first 3 blogs for right side cards
+  const featuredBlog = blogs[0] || null
+  const displayedBlogs = blogs.slice(0, 3) // Show first 3 blogs on the right
 
   const getImageUrl = (image: string | null): string => {
     if (!image) return ASSETS.BLOG_IMAGE_MAIN
@@ -91,134 +42,133 @@ const Blogs = () => {
     return image
   }
 
+  const getAuthorImage = (authorName: string): string => {
+    // Try to resolve author image, fallback to placeholder
+    return ASSETS.PLACEHOLDER_PROFILE
+  }
+
   return (
-    <section id="blog" className="bg-[#F9FAFB] px-4 sm:px-6 md:px-10 lg:px-[150px] w-full mt-0 min-h-[40vh] sm:min-h-[60vh] flex flex-col justify-center py-6 sm:py-8">
-      <div className="w-full mx-auto overflow-visible py-4 sm:py-5">
-        {/* Header: stack on mobile, row on larger screens */}
-        <FadeInOnView className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 sm:mb-8" as="div">
-          <div className="text-center sm:text-left max-w-xl">
-            <h2 className="text-gray-900 font-outfit text-2xl sm:text-3xl md:text-4xl font-bold leading-tight tracking-tight m-0 mb-2">
-              Blogs
-            </h2>
-            <p className="text-gray-600 font-outfit text-sm sm:text-base md:text-lg leading-relaxed m-0">
-              Find the latest news and insights from the rentals.ph team.
-            </p>
-          </div>
-          <div className="flex justify-center sm:justify-end">
-            <Link
-              href="/blog"
-              className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-full border-2 border-rental-blue-500 text-rental-blue-600 font-outfit text-sm sm:text-base font-semibold bg-white hover:bg-blue-50 transition-colors"
-            >
-              Visit Blogs
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="flex-shrink-0"
+    <section id="blog" className="bg-white w-full mt-0 flex flex-col justify-center py-6 sm:py-8">
+      <div className="w-full overflow-visible">
+        <FadeInOnView
+          as="div"
+          delayMs={100}
+          className="flex flex-col lg:flex-row gap-0 lg:gap-0 items-stretch"
+        >
+          {/* Left: Featured Blog Header Card */}
+          <div className="w-full lg:w-[428px] lg:flex-shrink-0 relative overflow-hidden">
+            {loading ? (
+              <div className="w-full h-[492px] bg-gray-200 animate-pulse" />
+            ) : (
+              <div
+                className="relative w-full h-[300px] sm:h-[400px] lg:h-[492px] bg-cover bg-center"
+                style={{
+                  backgroundImage: featuredBlog
+                    ? `url(${getImageUrl(featuredBlog.image)})`
+                    : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                }}
               >
-                <path
-                  d="M7 4L13 10L7 16"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </Link>
+                {/* Dark overlay */}
+                <div className="absolute inset-0 bg-[rgba(0,64,188,0.89)]" />
+                
+                {/* Content */}
+                <div className="relative z-10 h-full flex flex-col justify-start px-[58px] sm:px-[60px] pt-[76px] pb-6">
+                  <h2 className="text-white font-outfit text-[40px] font-bold leading-[1em] tracking-[-0.0125em] m-0 mb-4">
+                    Blogs
+                  </h2>
+                  <p className="text-white font-outfit text-[24px] font-medium leading-[1.26] m-0 max-w-[315px]">
+                    Find the latest blogs and insights from the rentals.ph team.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right: Three Blog Cards */}
+          <div className="flex-1 flex flex-col lg:flex-row gap-0 lg:gap-0 mt-4 lg:mt-0">
+            {loading ? (
+              <>
+                {Array.from({ length: 3 }).map((_, idx) => (
+                  <div key={idx} className="flex-1 min-w-0">
+                    <BlogCardSkeleton className="w-full h-[492px]" />
+                  </div>
+                ))}
+              </>
+            ) : displayedBlogs.length > 0 ? (
+              displayedBlogs.map((blog, index) => {
+                const cardWidth = index === 1 ? 'w-full lg:w-[345px]' : 'w-full lg:w-[333px]'
+                return (
+                  <FadeInOnView
+                    key={blog.id}
+                    as="div"
+                    delayMs={120 + index * 50}
+                    className={`${cardWidth} flex-shrink-0`}
+                  >
+                    <Link href={`/blog/${blog.id}`} className="block w-full h-full">
+                      <article className="relative w-full h-[300px] sm:h-[400px] lg:h-[492px] overflow-hidden group">
+                        {/* Image with darker overlay */}
+                        <div
+                          className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
+                          style={{
+                            backgroundImage: `url(${getImageUrl(blog.image)})`,
+                          }}
+                        >
+                          {/* Darker overlay for better text visibility */}
+                          <div className="absolute inset-0 bg-black/60" />
+                          {/* Additional gradient overlay at bottom for better text contrast */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/40" />
+                        </div>
+
+                        {/* Content */}
+                        <div className="absolute bottom-0 left-0 right-0 p-[21.72px] sm:p-[30px]">
+                          <div className="space-y-4">
+                            {/* Title and Excerpt */}
+                            <div className="space-y-4">
+                              <h3 className="text-white font-outfit text-[18px] font-bold leading-[1.56] tracking-[0.0167em] m-0 line-clamp-2">
+                                {blog.title}
+                              </h3>
+                              <p className="text-white font-poppins text-[16px] font-normal leading-[1.625] tracking-[0.01875em] m-0 line-clamp-3">
+                                {blog.excerpt}
+                              </p>
+                            </div>
+
+                            {/* Author and Read More */}
+                            <div className="flex items-center justify-between gap-4 pt-4">
+                              <div className="flex items-center gap-[18.28px]">
+                                <img
+                                  src={getAuthorImage(blog.author)}
+                                  alt={blog.author}
+                                  className="w-[37.9px] h-[37.9px] rounded-full object-cover flex-shrink-0"
+                                  onError={(e) => {
+                                    e.currentTarget.src = ASSETS.PLACEHOLDER_PROFILE
+                                  }}
+                                />
+                                <span className="text-white font-outfit text-[11px] font-medium leading-[1.26]">
+                                  By {blog.author}
+                                </span>
+                              </div>
+                              <Link
+                                href={`/blog/${blog.id}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="px-[15px] py-[10.49px] bg-[#387CFF] rounded-[5px] text-white font-inter text-[13px] font-medium leading-[1.21] hover:bg-[#266FFD] transition-colors whitespace-nowrap"
+                              >
+                                Read More
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      </article>
+                    </Link>
+                  </FadeInOnView>
+                )
+              })
+            ) : (
+              <div className="flex-1 flex items-center justify-center p-8">
+                <p className="text-gray-600">No blog posts available</p>
+              </div>
+            )}
           </div>
         </FadeInOnView>
-
-        {/* Blog categories chips */}
-        {blogs.length > 0 && (
-          <div className="flex flex-col gap-2 sm:gap-3 mb-3">
-            <div className="flex items-center justify-between gap-2 px-1 sm:px-0">
-              <p className="text-gray-700 font-outfit text-xs sm:text-sm md:text-base font-medium m-0">
-                Browse blog posts by category
-              </p>
-            </div>
-            <div className="subcategory-row flex items-center gap-1.5 sm:gap-2 overflow-x-auto overflow-y-hidden flex-nowrap sm:flex-wrap justify-start sm:justify-start p-1.5 sm:p-2 rounded-full sm:rounded-2xl bg-white shadow-[0_1px_4px_rgba(148,163,184,0.25)] w-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  className={`flex-shrink-0 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 touch-manipulation min-h-[32px] sm:min-h-[36px] ${
-                    selectedCategory === cat
-                      ? 'bg-rental-blue-600 text-white shadow-[0_4px_12px_rgba(37,99,235,0.35)]'
-                      : 'bg-transparent text-gray-700 border border-gray-200 hover:bg-blue-50 hover:border-blue-300'
-                  }`}
-                  onClick={() => handleCategoryChange(cat)}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {loading ? (
-          <FadeInOnView
-            as="div"
-            delayMs={120}
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 items-stretch w-full overflow-visible"
-          >
-            {Array.from({ length: cardsPerPage }).map((_, idx) => (
-              <div key={idx} className="flex justify-center">
-                <BlogCardSkeleton size="small" className="w-full" />
-              </div>
-            ))}
-          </FadeInOnView>
-        ) : currentPageBlogs.length > 0 ? (
-          <FadeInOnView
-            as="div"
-            delayMs={120}
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 items-stretch w-full overflow-visible"
-          >
-            {currentPageBlogs.map((blog, index) => (
-              <div key={blog.id} className="flex justify-center">
-                <FadeInOnView
-                  as="div"
-                  delayMs={160 + index * 50}
-                  className="w-full"
-                >
-                  <BlogCard
-                    image={getImageUrl(blog.image)}
-                    category={blog.category}
-                    title={blog.title}
-                    excerpt={blog.excerpt}
-                    author={blog.author}
-                    date={formatDate(blog.published_at)}
-                    readTime={formatReadTime(blog.read_time)}
-                    link={`/blog/${blog.id}`}
-                  />
-                </FadeInOnView>
-              </div>
-            ))}
-          </FadeInOnView>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-gray-600 font-outfit text-base mb-4">No blog posts found in this category.</p>
-            <button
-              onClick={() => handleCategoryChange('All Categories')}
-              className="px-4 py-2 rounded-full border-2 border-rental-blue-500 text-rental-blue-600 font-outfit text-sm font-semibold bg-white hover:bg-blue-50 transition-colors"
-            >
-              View All Categories
-            </button>
-          </div>
-        )}
-
-        {/* Pagination */}
-        {totalPages > 1 && effectiveBlogs.length > 0 && (
-          <div className="flex justify-center mt-8 sm:mt-12 overflow-x-auto px-2">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-              className="blogs-pagination"
-            />
-          </div>
-        )}
       </div>
     </section>
   )

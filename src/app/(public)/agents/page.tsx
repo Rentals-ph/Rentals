@@ -6,28 +6,11 @@ import Link from 'next/link'
 import Footer from '@/components/layout/Footer'
 import PopularRentManagers from '@/components/rent-managers/PopularRentManagers'
 import { RentManagerCardSkeleton } from '@/components/common/RentManagerCardSkeleton'
+import { AgentCard } from '@/components/common/cards'
 import { EmptyState, EmptyStateAction } from '@/components/common'
 import { agentsApi, propertiesApi } from '@/api'
 import { ASSETS } from '@/utils/assets'
-import { resolveAgentAvatar } from '@/utils/imageResolver'
 import type { Property } from '@/types'
-
-const getAgentImageUrl = (imagePath: string | null | undefined, agentId?: number): string => {
-  return resolveAgentAvatar(imagePath, agentId)
-}
-
-const getInitials = (name: string) => {
-  const parts = name.trim().split(' ')
-  if (parts.length >= 2) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
-  return name.substring(0, 2).toUpperCase()
-}
-
-/** Normalize phone/whatsapp for wa.me: digits only, ensure PH country code 63 */
-const toWhatsAppHref = (value: string): string => {
-  const digits = value.replace(/\D/g, '')
-  const withCountry = digits.startsWith('63') ? digits : digits.startsWith('0') ? '63' + digits.slice(1) : '63' + digits
-  return `https://wa.me/${withCountry}`
-}
 
 interface AgentInfo {
   id: number
@@ -39,6 +22,9 @@ interface AgentInfo {
   phone?: string
   whatsapp?: string
   image?: string | null
+  companyImage?: string | null
+  companyName?: string | null
+  description?: string | null
 }
 
 export default function AgentsPage() {
@@ -92,6 +78,9 @@ export default function AgentsPage() {
             phone: a.phone || undefined,
             whatsapp: a.whatsapp || undefined,
             image: a.profile_image || a.image || a.avatar || a.image_path || null,
+            companyImage: (a as any).company_image || (a as any).agency_image || (a as any).company_logo || null,
+            companyName: a.agency_name || null,
+            description: (a as any).description || null,
           } as AgentInfo
         })
         setManagers(mapped)
@@ -214,194 +203,24 @@ export default function AgentsPage() {
               ) : filteredManagers.length > 0 ? (
                 <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6' : 'flex flex-col gap-4'}>
                   {filteredManagers.map((manager) => (
-                    <div
+                    <AgentCard
                       key={manager.id}
-                      className="bg-white overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-200 rounded-2xl border border-gray-200 shadow-sm min-w-0"
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => router.push(`/agents/${manager.id}`)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault()
-                          router.push(`/agents/${manager.id}`)
-                        }
-                      }}
-                    >
-                      {viewMode === 'grid' ? (
-                        <>
-                      <div className="w-full pt-0 pb-4">
-                        <div className="relative overflow-hidden w-full aspect-square rounded-t-2xl bg-white">
-                          <img
-                            src={getAgentImageUrl(manager.image, manager.id)}
-                            alt={manager.name}
-                            className="absolute inset-0 w-full h-full object-cover"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement
-                              target.style.display = 'none'
-                              const fallback = target.nextElementSibling as HTMLElement
-                              if (fallback) fallback.style.display = 'flex'
-                            }}
-                          />
-                          <div
-                            className="absolute inset-0 flex items-center justify-center text-white font-bold text-xl sm:text-2xl md:text-3xl bg-blue-600"
-                            style={{ display: manager.image ? 'none' : 'flex' }}
-                          >
-                            {getInitials(manager.name)}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="px-3 sm:px-5 md:px-6 pb-4">
-                        <div className="flex items-center justify-between gap-2 mb-1 min-w-0">
-                          <h3 className="font-bold truncate flex-1 text-sm sm:text-base md:text-lg text-gray-700">
-                            {manager.name}
-                          </h3>
-                          <span className="font-medium flex-shrink-0 text-xs sm:text-sm text-[#2563EB]">
-                            {manager.listings} Listings
-                          </span>
-                        </div>
-                        <p className="mb-3 text-xs sm:text-sm text-[#2563EB]">{manager.role}</p>
-                        <div className="border-t border-gray-200 mb-3" />
-                        <div className="flex flex-col gap-2 mb-3">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <svg width="16" height="16" className="flex-shrink-0 text-[#2563EB]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                              <rect width="20" height="16" x="2" y="4" rx="2" />
-                              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                            </svg>
-                            <span className="text-xs sm:text-sm text-gray-500 shrink-0">Email:</span>
-                            <span className="truncate text-xs sm:text-sm text-gray-600">{manager.email}</span>
-                          </div>
-                          {manager.phone && (
-                            <div className="flex items-center gap-2 min-w-0">
-                              <svg width="16" height="16" className="flex-shrink-0 text-[#2563EB]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                              </svg>
-                              <span className="text-xs sm:text-sm text-gray-500 shrink-0">Phone:</span>
-                              <span className="truncate text-xs sm:text-sm text-gray-600">{manager.phone}</span>
-                            </div>
-                          )}
-                          {manager.whatsapp && (
-                            <a
-                              href={toWhatsAppHref(manager.whatsapp)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-2 min-w-0 text-[#25D366] hover:underline"
-                              onClick={(e) => e.stopPropagation()}
-                              title="Chat on WhatsApp"
-                            >
-                              <svg width="16" height="16" className="flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                              </svg>
-                              <span className="text-xs sm:text-sm shrink-0">WhatsApp:</span>
-                              <span className="truncate text-xs sm:text-sm">Chat with agent</span>
-                            </a>
-                          )}
-                        </div>
-                        <button
-                          className="w-full py-2.5 sm:py-3 px-3 rounded-lg bg-[#1D4ED8] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors duration-200 min-h-[44px] touch-manipulation"
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            router.push(`/agents/${manager.id}`)
-                          }}
-                        >
-                          <span className="hidden sm:inline">View Listings</span>
-                          <span className="sm:hidden">View</span>
-                          <svg width="14" height="14" className="flex-shrink-0" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex flex-col sm:flex-row min-w-0">
-                        <div className="w-full sm:w-40 md:w-48 flex-shrink-0">
-                          <div className="relative w-full aspect-square overflow-hidden">
-                            <img
-                              src={getAgentImageUrl(manager.image, manager.id)}
-                              alt={manager.name}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement
-                                target.style.display = 'none'
-                                const fallback = target.nextElementSibling as HTMLElement
-                                if (fallback) fallback.style.display = 'flex'
-                              }}
-                            />
-                            <div
-                              className="absolute inset-0 flex items-center justify-center bg-blue-600 text-white text-xl sm:text-2xl md:text-3xl font-bold"
-                              style={{ display: manager.image ? 'none' : 'flex' }}
-                            >
-                              {getInitials(manager.name)}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex-1 p-4 sm:p-5 md:p-6 min-w-0">
-                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-bold truncate text-base sm:text-lg md:text-xl text-gray-700">
-                                {manager.name}
-                              </h3>
-                              <p className="text-xs sm:text-sm text-[#2563EB]">{manager.role}</p>
-                            </div>
-                            <span className="font-medium text-xs sm:text-sm text-[#2563EB] flex-shrink-0">
-                              {manager.listings} Listings
-                            </span>
-                          </div>
-                          <div className="border-t border-gray-200 mb-3" />
-                          <div className="flex flex-col gap-2">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <svg width="16" height="16" className="flex-shrink-0 text-[#2563EB]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                                <rect width="20" height="16" x="2" y="4" rx="2" />
-                                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                              </svg>
-                              <span className="text-xs sm:text-sm text-gray-500 shrink-0">Email:</span>
-                              <span className="truncate text-xs sm:text-sm text-gray-600">{manager.email}</span>
-                            </div>
-                            {manager.phone && (
-                              <div className="flex items-center gap-2 min-w-0">
-                                <svg width="16" height="16" className="flex-shrink-0 text-[#2563EB]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                                </svg>
-                                <span className="text-xs sm:text-sm text-gray-500 shrink-0">Phone:</span>
-                                <span className="truncate text-xs sm:text-sm text-gray-600">{manager.phone}</span>
-                              </div>
-                            )}
-                            {manager.whatsapp && (
-                              <a
-                                href={toWhatsAppHref(manager.whatsapp)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 min-w-0 text-[#25D366] hover:underline"
-                                onClick={(e) => e.stopPropagation()}
-                                title="Chat on WhatsApp"
-                              >
-                                <svg width="16" height="16" className="flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                                </svg>
-                                <span className="text-xs sm:text-sm shrink-0">WhatsApp:</span>
-                                <span className="truncate text-xs sm:text-sm">Chat with agent</span>
-                              </a>
-                            )}
-                            <div className="mt-2">
-                              <Link
-                                href={`/agents/${manager.id}`}
-                                className="inline-flex items-center gap-2 font-medium text-[#2563EB] text-xs sm:text-sm transition-colors duration-200 py-1 -mx-1 rounded hover:bg-blue-50 touch-manipulation"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <span className="hidden sm:inline">View Listings</span>
-                                <span className="sm:hidden">View</span>
-                                <svg width="14" height="14" className="flex-shrink-0" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                              </Link>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                    </div>
+                      id={manager.id}
+                      name={manager.name}
+                      role={manager.role}
+                      location={manager.location}
+                      listings={manager.listings}
+                      email={manager.email}
+                      phone={manager.phone}
+                      whatsapp={manager.whatsapp}
+                      image={manager.image}
+                      companyImage={manager.companyImage}
+                      companyName={manager.companyName}
+                      description={manager.description}
+                      viewMode={viewMode}
+                      linkUrl={`/agents/${manager.id}`}
+                      ctaText="View Details"
+                    />
                   ))}
                 </div>
               ) : (
