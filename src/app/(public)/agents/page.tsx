@@ -108,6 +108,8 @@ export default function AgentsPage() {
     return true
   })
 
+  const featuredAgents = filteredManagers.slice(0, 3)
+
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
       {/* Hero - match About hero height & left-aligned content */}
@@ -172,14 +174,14 @@ export default function AgentsPage() {
       {/* Results header below hero - styled like properties page */}
       <section className="px-4 sm:px-6 md:px-10 lg:px-[150px] pt-6 sm:pt-8 pb-2">
         <div className="mx-auto max-w-[var(--page-max-width)]">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-sm sm:text-base font-outfit">
-              <span className="text-gray-600">Results for : </span>
-              <span className="text-blue-600 font-medium">Agents</span>
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(320px,1.2fr)] gap-3 sm:gap-4 items-start lg:items-center">
+            {/* Left column: results + sort + view mode controls (aligned with agents grid) */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
+              <div className="text-sm sm:text-base font-outfit">
+                <span className="text-gray-600">Results for : </span>
+                <span className="text-blue-600 font-medium">Agents</span>
+              </div>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 justify-end">
-              {/* Sort + view controls (reuse properties styles) */}
               <div className="flex items-center gap-3">
                 <span className="text-sm text-gray-600 font-outfit hidden sm:inline">Sort by</span>
                 <select
@@ -190,7 +192,7 @@ export default function AgentsPage() {
                   <option value="newest">Newest</option>
                   <option value="oldest">Oldest</option>
                 </select>
-                <div className="flex rounded-lg border border-gray-200 p-1 bg-white">
+                <div className="flex rounded-lg border border-gray-200 p-1 bg-white max-w-max">
                   <button
                     type="button"
                     className={`px-3 py-1.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-600'}`}
@@ -218,12 +220,11 @@ export default function AgentsPage() {
                   </button>
                 </div>
               </div>
+            </div>
 
-              {/* Search Filters button on the right */}
-              <button
-                type="button"
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-blue-600 text-blue-600 bg-white font-outfit text-sm font-medium hover:bg-blue-50 transition-colors self-end sm:self-auto"
-              >
+            {/* Right column: label for Search & Filter Agents card below */}
+            <div className="flex items-start lg:items-center justify-start lg:justify-end">
+              <div className="inline-flex items-center gap-2 text-blue-600 font-outfit text-sm font-medium">
                 <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="4" y1="6" x2="20" y2="6" />
                   <circle cx="4" cy="6" r="2" />
@@ -233,7 +234,7 @@ export default function AgentsPage() {
                   <circle cx="4" cy="18" r="2" />
                 </svg>
                 <span>Search Filters</span>
-              </button>
+              </div>
             </div>
           </div>
         </div>
@@ -241,13 +242,10 @@ export default function AgentsPage() {
 
       {/* Find agents list with right-side filters & CTA */}
       <main className="px-4 sm:px-6 md:px-10 lg:px-[150px] pb-8 sm:pb-10 md:pb-12">
-        <section className="mx-auto max-w-full">
+        <section className="mx-auto max-w-[var(--page-max-width)]">
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(320px,1.2fr)] gap-6 lg:gap-10 items-start">
             {/* Left: Agents list */}
             <div>
-              <h2 className="font-bold mb-4 sm:mb-6 md:mb-8 text-base sm:text-lg md:text-xl lg:text-2xl text-[#1A3DBF] uppercase tracking-wide text-left px-0">
-                Find an Agent
-              </h2>
 
               {loading ? (
                 <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6' : 'flex flex-col gap-4'}>
@@ -256,7 +254,7 @@ export default function AgentsPage() {
                   ))}
                 </div>
               ) : filteredManagers.length > 0 ? (
-                <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6' : 'flex flex-col gap-4'}>
+                <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6' : 'flex flex-col gap-4'}>
                   {filteredManagers.map((manager) => (
                     <AgentCard
                       key={manager.id}
@@ -288,43 +286,44 @@ export default function AgentsPage() {
               )}
             </div>
 
-            {/* Right: Search, filters, and CTA */}
-            <div className="space-y-6 lg:space-y-8 mt-[60px]">
-              {/* Search & filters card */}
+            {/* Right: Search, Featured Agents, and CTA */}
+            <div className="space-y-6 lg:space-y-8">
+              {/* Search & filters card (matches provided layout) */}
               <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-5 md:p-6">
-                <h3 className="text-sm sm:text-base font-semibold text-gray-800 mb-3 sm:mb-4">
-                  Search & Filter Agents
-                </h3>
-                <div className="flex flex-col gap-3 sm:gap-4 w-full max-w-full">
-                  <div className="w-full min-w-0 relative">
-                    <svg
-                      className="absolute left-3 sm:left-4 top-3.5 w-4 h-4 sm:w-5 sm:h-5 text-gray-500 pointer-events-none"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
-                      <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
-                    <input
-                      type="text"
-                      className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg bg-white text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[44px]"
-                      placeholder="Search agents..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      aria-label="Search agents"
-                    />
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700">Search</label>
+                    <div className="relative">
+                      <svg
+                        className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-500 pointer-events-none"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
+                        <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                      </svg>
+                      <input
+                        type="text"
+                        className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg bg-white text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[44px]"
+                        placeholder="Enter keywords"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        aria-label="Search agents"
+                      />
+                    </div>
                   </div>
-                  <div className="flex flex-col gap-3">
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div className="flex flex-col gap-2">
                       <label className="text-xs sm:text-sm font-medium text-gray-700">Province</label>
                       <select
-                        className="w-full px-3 sm:px-4 md:px-5 py-2.5 sm:py-3 border border-gray-300 rounded-lg bg-white text-gray-700 text-xs sm:text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg bg-white text-gray-700 text-xs sm:text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
                         value={selectedProvince}
                         onChange={(e) => setSelectedProvince(e.target.value)}
                         aria-label="Filter by province"
                       >
-                        <option value="">All provinces</option>
+                        <option value="">All Provinces</option>
                         {uniqueLocations.map(location => (
                           <option key={location} value={location}>{location}</option>
                         ))}
@@ -338,44 +337,131 @@ export default function AgentsPage() {
                         onChange={(e) => setSelectedCity(e.target.value)}
                         aria-label="Filter by city"
                       >
-                        <option value="">All cities</option>
+                        <option value="">All Cities</option>
                         {uniqueLocations.map(location => (
                           <option key={location} value={location}>{location}</option>
                         ))}
                       </select>
                     </div>
                   </div>
-                  <div className="pt-2 border-t border-gray-100 mt-1">
-                    <span className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
-                      View mode
-                    </span>
-                    <div className="flex gap-2">
-                      <button
-                        className={`flex-1 min-w-0 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 min-h-[40px] touch-manipulation ${
-                          viewMode === 'list'
-                            ? 'bg-blue-600 text-white shadow-sm'
-                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                        }`}
-                        aria-label="List view"
-                        onClick={() => setViewMode('list')}
-                      >
-                        List view
-                      </button>
-                      <button
-                        className={`flex-1 min-w-0 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 min-h-[40px] touch-manipulation ${
-                          viewMode === 'grid'
-                            ? 'bg-blue-600 text-white shadow-sm'
-                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                        }`}
-                        aria-label="Grid view"
-                        onClick={() => setViewMode('grid')}
-                      >
-                        Grid view
-                      </button>
-                    </div>
+
+                  <div className="flex items-center gap-3 pt-1">
+                    <button
+                      type="button"
+                      className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[#205ED7] text-white font-outfit text-sm font-semibold shadow-sm hover:bg-[#1D4ED8] transition-colors min-w-[110px]"
+                    >
+                      Search
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-2 text-xs sm:text-sm text-gray-600 hover:text-gray-800"
+                      onClick={() => {
+                        setSelectedProvince('')
+                        setSelectedCity('')
+                        setSearchQuery('')
+                      }}
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                        <path d="M21 3v5h-5" />
+                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                        <path d="M3 21v-5h5" />
+                      </svg>
+                      <span>Reset Filters</span>
+                    </button>
                   </div>
                 </div>
               </div>
+
+              {/* Featured Agents list */}
+              {featuredAgents.length > 0 && (
+                <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-5 md:p-6">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
+                    Featured Agents
+                  </h3>
+                  <div className="space-y-3">
+                    {featuredAgents.map((agent) => (
+                      <div
+                        key={agent.id}
+                        className="flex items-center gap-3 sm:gap-4 py-2 border-b last:border-b-0 border-gray-100"
+                      >
+                        <div className="w-16 h-16 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
+                          {agent.image ? (
+                            <img
+                              src={agent.image}
+                              alt={agent.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">
+                              No image
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm sm:text-base font-semibold text-gray-900 truncate">
+                            {agent.name}
+                          </p>
+                          <p className="text-xs sm:text-sm text-gray-500">
+                            <span className="text-[#205ED7] font-semibold">{agent.listings}</span>{' '}
+                            Property Listings
+                          </p>
+                        </div>
+                        <div className="flex flex-col items-end gap-2 text-[#205ED7]">
+                          {agent.whatsapp && (
+                            <a
+                              href={`https://wa.me/${agent.whatsapp.replace(/\D/g, '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-8 h-8 flex items-center justify-center rounded-full bg-[#E0EDFF] hover:bg-[#d0e2ff] transition-colors"
+                            >
+                              <svg
+                                className="w-4 h-4"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M20.52 3.48A11.84 11.84 0 0 0 12.02 0C5.8 0 .78 5.04.78 11.29a11.2 11.2 0 0 0 1.53 5.7L0 24l7.2-2.31a11.93 11.93 0 0 0 4.8 1.03h.01c6.23 0 11.25-5.04 11.25-11.29 0-3.01-1.18-5.84-3.24-7.95Z"
+                                  fill="currentColor"
+                                />
+                              </svg>
+                            </a>
+                          )}
+                          {agent.email && (
+                            <a
+                              href={`mailto:${agent.email}`}
+                              className="w-8 h-8 flex items-center justify-center rounded-full border border-[#205ED7] text-[#205ED7] hover:bg-[#E0EDFF] transition-colors"
+                            >
+                              <svg
+                                className="w-4 h-4"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                                <path
+                                  d="m22 6-10 7L2 6"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Work with Our Agents CTA */}
               <div className="relative overflow-hidden rounded-2xl shadow-xl min-h-[260px] sm:min-h-[300px]">

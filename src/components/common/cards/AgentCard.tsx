@@ -81,7 +81,7 @@ export default function AgentCard({
   if (viewMode === 'list') {
     return (
       <div
-        className="flex flex-col sm:flex-row bg-white rounded-2xl border border-gray-200 shadow-[0_6px_18px_rgba(15,23,42,0.07)] hover:shadow-[0_10px_24px_rgba(15,23,42,0.14)] transition-all cursor-pointer"
+        className="flex flex-col md:flex-row bg-white rounded-2xl border border-gray-200 shadow-[0_6px_18px_rgba(15,23,42,0.07)] hover:shadow-[0_10px_24px_rgba(15,23,42,0.14)] transition-all cursor-pointer overflow-hidden"
         onClick={handleCardClick}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -92,8 +92,9 @@ export default function AgentCard({
         tabIndex={0}
         role="button"
       >
-        <div className="w-full sm:w-48 flex-shrink-0">
-          <div className="relative w-full aspect-square overflow-hidden rounded-t-2xl sm:rounded-l-2xl sm:rounded-tr-none">
+        {/* Left: Agent photo with listings badge (matches property card look) */}
+        <div className="w-full md:w-[290px] lg:w-[320px] flex-shrink-0">
+          <div className="relative w-full h-full min-h-[190px] md:h-[220px] lg:h-[240px] overflow-hidden">
             <img
               src={getAgentImageUrl(image, id)}
               alt={name}
@@ -105,6 +106,7 @@ export default function AgentCard({
                 if (fallback) fallback.style.display = 'flex'
               }}
             />
+            {/* Fallback initials when no image */}
             <div
               className="absolute inset-0 flex items-center justify-center text-white font-bold bg-rental-blue-600"
               style={{
@@ -114,101 +116,143 @@ export default function AgentCard({
             >
               <span>{getInitials(name)}</span>
             </div>
+
+            {/* Listings badge in the top-left (blue ribbon) */}
+            {showListings && listings !== undefined && (
+              <div className="absolute top-0 left-0 m-0 z-10">
+                <div
+                  className="rounded-tl-[5px] rounded-br-[5px]"
+                  style={{
+                    backgroundColor: '#266FFD',
+                    padding: '7.99px 18px',
+                  }}
+                >
+                  <span
+                    className="text-white font-semibold uppercase tracking-wide"
+                    style={{
+                      fontSize: '10px',
+                      lineHeight: '1.26',
+                    }}
+                  >
+                    {listings} Listings
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-        <div className="flex-1 p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-2 gap-2">
+        {/* Right: Text content and actions (layout inspired by design screenshot) */}
+        <div className="flex-1 px-4 py-4 md:px-6 md:py-5 flex flex-col gap-3 md:gap-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
               <h3
-                className="font-bold truncate flex-1"
+                className="font-outfit font-semibold truncate"
                 style={{
-                  fontSize: 'clamp(16px, 4vw, 20px)',
-                  color: '#374151',
+                  fontSize: 'clamp(18px, 3.6vw, 22px)',
+                  color: '#205ED7',
                 }}
               >
                 {name}
               </h3>
-              {showListings && listings !== undefined && (
-                <span
-                  className="font-medium flex-shrink-0 ml-2"
+              {companyName && (
+                <p
+                  className="mt-0.5 font-outfit text-gray-900"
                   style={{
-                    fontSize: 'clamp(12px, 3vw, 16px)',
-                    color: '#2563EB',
+                    fontSize: 'clamp(12px, 2.6vw, 14px)',
+                    fontWeight: 500,
                   }}
                 >
-                  {listings} Listings
-                </span>
+                  {companyName}
+                </p>
               )}
+              <p
+                className="mt-1 font-outfit text-gray-600 line-clamp-3"
+                style={{
+                  fontSize: 'clamp(12px, 2.6vw, 13px)',
+                }}
+              >
+                {description ||
+                  `${role}${location ? ` • ${location}` : ''}`}
+              </p>
             </div>
-            <p
-              className="mb-2"
-              style={{
-                fontSize: 'clamp(12px, 3vw, 14px)',
-                color: '#2563EB',
-              }}
-            >
-              {role}
-            </p>
-            {showContactInfo && (email || whatsapp) && (
-              <div className="flex items-center gap-2 mb-2">
-                {email && (
-                  <a
-                    href={`mailto:${email}`}
+
+            {/* Company logo on the far right (like Filipino Homes logo) */}
+            {companyImage && (
+              <div className="ml-2 flex-shrink-0">
+                <div className="w-[88px] h-[40px] md:w-[100px] md:h-[44px] rounded-[5px] bg-white border border-gray-200 flex items-center justify-center overflow-hidden">
+                  <img
+                    src={companyImage}
+                    alt={companyName || 'Company'}
+                    className="w-full h-full object-contain"
                     onClick={(e) => e.stopPropagation()}
-                    className="rounded-[5px] text-[#205ED7] hover:bg-blue-50 transition-colors whitespace-nowrap flex-shrink-0 flex items-center justify-center"
-                    style={{
-                      padding: '10px 12px',
-                      border: '1px solid #205ED7',
-                      fontSize: '9px',
-                      fontWeight: 500,
-                      lineHeight: '1.26',
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none'
                     }}
-                  >
-                    Email
-                  </a>
-                )}
-                {whatsapp && (
-                  <a
-                    href={toWhatsAppHref(whatsapp)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="rounded-[5px] text-[#22C55E] hover:bg-green-50 transition-colors whitespace-nowrap flex-shrink-0 flex items-center justify-center"
-                    style={{
-                      padding: '10px 12px',
-                      border: '1px solid #22C55E',
-                      fontSize: '9px',
-                      fontWeight: 500,
-                      lineHeight: '1.26',
-                    }}
-                  >
-                    WhatsApp
-                  </a>
-                )}
+                  />
+                </div>
               </div>
             )}
           </div>
-          {showCTA && (
-            <button
-              className="sm:w-auto w-full text-white font-bold flex items-center justify-center gap-2 transition-colors duration-200"
-              style={{
-                backgroundColor: '#1D4ED8',
-                borderRadius: '8px',
-                padding: '10px 12px',
-                fontSize: 'clamp(12px, 3vw, 14px)',
-              }}
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleCardClick()
-              }}
-            >
-              <span>{ctaText || 'View Details'}</span>
-              <svg width="14" height="14" className="sm:w-4 sm:h-4" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          )}
+
+          {/* Action row: View Details (primary), Email, WhatsApp */}
+          <div className="mt-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+            {showCTA && (
+              <button
+                className="sm:w-auto w-full text-white font-semibold flex items-center justify-center gap-2 transition-colors duration-200"
+                style={{
+                  backgroundColor: '#205ED7',
+                  borderRadius: '8px',
+                  padding: '10px 16px',
+                  fontSize: 'clamp(12px, 3vw, 14px)',
+                }}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleCardClick()
+                }}
+              >
+                <span>{ctaText || 'View Details'}</span>
+                <svg width="14" height="14" className="sm:w-4 sm:h-4" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            )}
+
+            {showContactInfo && email && (
+              <a
+                href={`mailto:${email}`}
+                onClick={(e) => e.stopPropagation()}
+                className="rounded-[5px] text-[#205ED7] hover:bg-blue-50 transition-colors whitespace-nowrap flex-shrink-0 flex items-center justify-center"
+                style={{
+                  padding: '10px 16px',
+                  border: '1px solid #205ED7',
+                  fontSize: '11px',
+                  fontWeight: 500,
+                  lineHeight: '1.26',
+                }}
+              >
+                Email
+              </a>
+            )}
+            {showContactInfo && whatsapp && (
+              <a
+                href={toWhatsAppHref(whatsapp)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="rounded-[5px] text-[#22C55E] hover:bg-green-50 transition-colors whitespace-nowrap flex-shrink-0 flex items-center justify-center"
+                style={{
+                  padding: '10px 16px',
+                  border: '1px solid #22C55E',
+                  fontSize: '11px',
+                  fontWeight: 500,
+                  lineHeight: '1.26',
+                }}
+              >
+                WhatsApp
+              </a>
+            )}
+          </div>
         </div>
       </div>
     )

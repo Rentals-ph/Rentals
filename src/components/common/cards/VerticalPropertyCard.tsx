@@ -100,10 +100,10 @@ function VerticalPropertyCard({
     <article
       onClick={handleCardClick}
       style={{ cursor: id ? 'pointer' : 'default' }}
-      className="w-full max-w-[345px] bg-white border border-black/20 rounded-[5px] overflow-hidden flex flex-col shadow-sm hover:shadow-md transition-all duration-200"
+      className="w-full bg-white border border-black/20 rounded-[5px] overflow-hidden flex flex-col shadow-sm hover:shadow-md transition-all duration-200"
     >
       {/* Image Section */}
-      <div className="relative w-full h-[202.86px] overflow-hidden bg-gray-100">
+      <div className="relative w-full h-[210px] sm:h-[230px] lg:h-[260px] xl:h-[280px] overflow-hidden bg-gray-100">
         <img
           src={mainImage}
           alt={title}
@@ -163,10 +163,10 @@ function VerticalPropertyCard({
       </div>
 
       {/* Content Section */}
-      <div className="flex flex-col flex-1 p-[19px] gap-[10px]">
+      <div className="flex flex-col flex-1 p-[19px] sm:p-[20px] lg:p-[22px] gap-[10px]">
         {/* Title with Email, WhatsApp, Share buttons */}
         <div className="flex items-center gap-[4px]">
-          <h3 className="text-black text-[9px] font-medium leading-[1.26] line-clamp-1 flex-1 min-w-0">
+          <h3 className="text-black text-[10px] sm:text-[11px] lg:text-[12px] font-medium leading-[1.26] line-clamp-1 flex-1 min-w-0">
             {title}
           </h3>
           <div className="flex items-center gap-[4px] flex-shrink-0">
@@ -174,7 +174,7 @@ function VerticalPropertyCard({
               <a
                 href={`mailto:${rentManagerEmail}`}
                 onClick={(e) => e.stopPropagation()}
-                className="px-[12px] py-[4px] rounded-[5px] text-[#205ED7] text-[9px] font-medium leading-[1.26] hover:bg-blue-50 transition-colors whitespace-nowrap"
+                className="px-[12px] py-[4px] rounded-[5px] text-[#205ED7] text-[9px] sm:text-[10px] font-medium leading-[1.26] hover:bg-blue-50 transition-colors whitespace-nowrap"
                 style={{ border: '1px solid #205ED7' }}
               >
                 Email
@@ -186,7 +186,7 @@ function VerticalPropertyCard({
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                className="px-[11.02px] py-[4.13px] rounded-[5px] text-[#22C55E] text-[9px] font-medium leading-[1.26] hover:bg-green-50 transition-colors whitespace-nowrap"
+                className="px-[11.02px] py-[4.13px] rounded-[5px] text-[#22C55E] text-[9px] sm:text-[10px] font-medium leading-[1.26] hover:bg-green-50 transition-colors whitespace-nowrap"
                 style={{ border: '1px solid #22C55E' }}
               >
                 WhatsApp
@@ -197,7 +197,7 @@ function VerticalPropertyCard({
                 <a
                   href="#"
                   onClick={(e) => e.stopPropagation()}
-                  className="px-[12px] py-[4px] rounded-[5px] text-[#205ED7] text-[9px] font-medium leading-[1.26] hover:bg-blue-50 transition-colors whitespace-nowrap"
+                  className="px-[12px] py-[4px] rounded-[5px] text-[#205ED7] text-[9px] sm:text-[10px] font-medium leading-[1.26] hover:bg-blue-50 transition-colors whitespace-nowrap"
                   style={{ border: '1px solid #205ED7' }}
                 >
                   Email
@@ -207,7 +207,7 @@ function VerticalPropertyCard({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="px-[11.02px] py-[4.13px] rounded-[5px] text-[#22C55E] text-[9px] font-medium leading-[1.26] hover:bg-green-50 transition-colors whitespace-nowrap"
+                  className="px-[11.02px] py-[4.13px] rounded-[5px] text-[#22C55E] text-[9px] sm:text-[10px] font-medium leading-[1.26] hover:bg-green-50 transition-colors whitespace-nowrap"
                   style={{ border: '1px solid #22C55E' }}
                 >
                   WhatsApp
@@ -241,19 +241,19 @@ function VerticalPropertyCard({
 
         {/* Price */}
         <div className="flex items-baseline gap-[6px]">
-          <p className="text-[#387CFF] text-[20px] font-medium leading-[1.26]">{price}</p>
-          <span className="text-[#FE8E0A] text-[15px] font-medium leading-[1.26]">{priceUnit || (priceType ? `/${priceType}` : '')}</span>
+          <p className="text-[#387CFF] text-[20px] sm:text-[22px] lg:text-[24px] font-medium leading-[1.26]">{price}</p>
+          <span className="text-[#FE8E0A] text-[14px] sm:text-[15px] lg:text-[16px] font-medium leading-[1.26]">{priceUnit || (priceType ? `/${priceType}` : '')}</span>
         </div>
 
         {/* Description */}
         {description && (
-          <p className="text-[#999999] text-[9px] font-medium leading-[1.26] line-clamp-3">
+          <p className="text-[#999999] text-[10px] sm:text-[11px] font-medium leading-[1.4] line-clamp-3">
             {description}
           </p>
         )}
 
         {/* Property details: Bed, Bath, Size */}
-        <div className="flex items-center gap-[20px] text-[#374151] text-[9px] font-medium leading-[1.26]">
+      <div className="flex items-center gap-[20px] text-[#374151] text-[10px] sm:text-[11px] font-medium leading-[1.26]">
           <span className="flex items-center gap-[4px]">
             <svg viewBox="0 0 24 24" fill="currentColor" className="w-[16px] h-[10.99px] flex-shrink-0">
               <rect x="3" y="10" width="18" height="7" rx="2" />
@@ -296,7 +296,7 @@ function VerticalPropertyCard({
             }}
           />
           <div className="flex-1 min-w-0">
-            <p className="text-black text-[11px] font-medium leading-[1.26] truncate">
+            <p className="text-black text-[12px] sm:text-[13px] font-medium leading-[1.26] truncate">
               By {rentManagerName}
             </p>
           </div>
