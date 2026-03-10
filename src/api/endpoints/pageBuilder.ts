@@ -55,23 +55,20 @@ export interface PageBuilderData {
   profile_card_image?: string
   
   // Layout fields
-  section_visibility?: {
-    hero?: boolean
-    propertyDescription?: boolean
-    propertyImages?: boolean
-    propertyDetails?: boolean
-    amenities?: boolean
-    contact?: boolean
-    experience?: boolean
-    featured?: boolean
-    testimonialsSection?: boolean
-    readyToView?: boolean
-    profileCard?: boolean
-  }
+  unified_sections?: Array<{
+    id: string
+    name: string
+    visible: boolean
+    type?: string
+    content?: string
+  }>
+  section_visibility?: Record<string, boolean>
   layout_sections?: Array<{
     id: string
     name: string
     visible: boolean
+    type?: string
+    content?: string
   }>
   profile_layout_sections?: Array<{
     id: string
@@ -83,14 +80,37 @@ export interface PageBuilderData {
   selected_brand_color?: string
   selected_corner_radius?: string
   global_design?: {
+    // Core tokens (from theme)
+    colorPrimary?: string
+    colorBackground?: string
+    colorText?: string
+    colorAccent?: string
+    fontHeading?: string
+    fontBody?: string
+    fontSizeBase?: number
+    borderRadius?: number
+    spacingScale?: string
+    buttonVariant?: string
+    // Legacy / alias fields
     fontFamily?: string
     fontSize?: string
     spacing?: string
     borderStyle?: string
     shadow?: string
+    [key: string]: any
   }
   section_styles?: Record<string, {
     layoutTemplate?: string
+    minHeight?: string
+    customHeight?: number
+    paddingSize?: string
+    maxWidth?: string
+    columns?: number
+    columnGap?: string
+    imageHeight?: string
+    imageFit?: string
+    imageAspectRatio?: string
+    imageRadius?: string
     fontFamily?: string
     fontSize?: string
     textColor?: string
@@ -100,6 +120,13 @@ export interface PageBuilderData {
     borderColor?: string
     shadow?: string
   }>
+
+  // Extra content fields
+  experience_heading?: string
+  experience_body?: string
+  ready_to_view_heading?: string
+  ready_to_view_subtext?: string
+  contact_form_message?: string
   
   // Additional fields
   featured_listings?: any[]

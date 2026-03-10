@@ -63,7 +63,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body suppressHydrationWarning>
         <Suspense fallback={<PublicPageLoading message="Loading..." />}>
           {children}
         </Suspense>

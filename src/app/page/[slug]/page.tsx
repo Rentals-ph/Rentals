@@ -7,16 +7,25 @@ import { EmptyState, EmptyStateAction } from '@/components/common'
 import { pageBuilderApi } from '@/api'
 import type { PageBuilderData } from '@/api'
 import { ASSETS } from '@/utils/assets'
-import { 
-  FiMail,
-  FiPhone,
-  FiMessageCircle,
-  FiGlobe,
-  FiStar,
-  FiHeart
+import {
+  FiMail, FiPhone, FiMessageCircle, FiGlobe, FiStar, FiHeart,
 } from 'react-icons/fi'
-// import '../../agent/page-builder/page.css' // Removed - file doesn't exist
 
+// ─── STYLE LOOKUP MAPS (mirrors PageBuilder.tsx) ──────────────────────────────
+const PADDING_VALUES: Record<string, string> = {
+  none: '0px', xs: '6px', sm: '10px', md: '16px', lg: '28px', xl: '48px',
+}
+const IMG_HEIGHT_VALUES: Record<string, string> = {
+  auto: 'auto', xs: '64px', sm: '110px', md: '160px', lg: '240px', xl: '340px',
+}
+const IMG_RADIUS_VALUES: Record<string, string> = {
+  none: '0px', sm: '4px', md: '8px', lg: '16px', xl: '24px', full: '9999px',
+}
+const GRID_GAP_VALUES: Record<string, string> = {
+  xs: '4px', sm: '8px', md: '14px', lg: '22px', xl: '32px',
+}
+
+// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function PublicPageBuilderPage() {
   const params = useParams()
   const slug = params?.slug as string
@@ -28,67 +37,27 @@ export default function PublicPageBuilderPage() {
   const [contactFormMessage, setContactFormMessage] = useState('')
 
   useEffect(() => {
-    const fetchPage = async () => {
-      if (!slug) return
-      
+    if (!slug) return
+    ;(async () => {
       try {
-        setLoading(true)
-        setError(null)
-        console.log('Fetching page with slug:', slug)
+        setLoading(true); setError(null)
         const data = await pageBuilderApi.getBySlug(slug)
-        console.log('Page data received:', data)
         setPageData(data)
       } catch (err: any) {
-        console.error('Error fetching page:', err)
-        console.error('Error details:', {
-          message: err.message,
-          response: err.response?.data,
-          status: err.response?.status,
-          url: err.config?.url
-        })
         setError(err.response?.data?.message || err.message || 'Page not found')
       } finally {
         setLoading(false)
       }
-    }
-    
-    fetchPage()
+    })()
   }, [slug])
 
   const handleContactFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    try {
-      if (!contactFormName || !contactFormEmail || !contactFormMessage) {
-        alert('Please fill in all fields')
-        return
-      }
-      
-      // TODO: Implement actual API call to submit inquiry
-      console.log('Contact form submission:', {
-        name: contactFormName,
-        email: contactFormEmail,
-        message: contactFormMessage,
-        pageId: pageData?.id,
-        pageType: pageData?.page_type
-      })
-      
-      alert('Thank you for your inquiry! We will get back to you soon.')
-      setContactFormName('')
-      setContactFormEmail('')
-      setContactFormMessage('')
-    } catch (error) {
-      console.error('Error submitting contact form:', error)
-      alert('Failed to send inquiry. Please try again.')
+    if (!contactFormName || !contactFormEmail || !contactFormMessage) {
+      alert('Please fill in all fields'); return
     }
-  }
-
-  const getCornerRadiusClass = (cornerRadius?: string) => {
-    switch (cornerRadius) {
-      case 'sharp': return '0px'
-      case 'regular': return '8px'
-      case 'soft': return '16px'
-      default: return '16px'
-    }
+    alert('Thank you for your inquiry! We will get back to you soon.')
+    setContactFormName(''); setContactFormEmail(''); setContactFormMessage('')
   }
 
   const formatPropertyPrice = (property: any) => {
@@ -98,22 +67,16 @@ export default function PublicPageBuilderPage() {
 
   const formatPropertyDate = (property: any) => {
     if (property?.published_at) {
-      const date = new Date(property.published_at)
-      return date.toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })
+      return new Date(property.published_at).toLocaleDateString('en-US', {
+        weekday: 'short', day: '2-digit', month: 'short', year: 'numeric',
+      })
     }
     return 'Recently'
   }
 
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        minHeight: '100vh',
-        fontSize: '18px',
-        color: '#6B7280'
-      }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', fontSize: '18px', color: '#6B7280' }}>
         Loading page...
       </div>
     )
@@ -127,7 +90,7 @@ export default function PublicPageBuilderPage() {
             <EmptyState
               variant="notFound"
               title="Page not found"
-              description={error || 'The page you\'re looking for doesn\'t exist or isn\'t published.'}
+              description={error || "The page you're looking for doesn't exist or isn't published."}
               action={
                 <>
                   <EmptyStateAction href="/" primary>Go to homepage</EmptyStateAction>
@@ -142,834 +105,778 @@ export default function PublicPageBuilderPage() {
     )
   }
 
-  // Profile page: default block order when profile_layout_sections not saved
-  const DEFAULT_PROFILE_LAYOUT = [
-    { id: 'profileHero', name: 'Hero Banner', visible: true },
-    { id: 'profileContactInfo', name: 'Contact Info', visible: true },
-    { id: 'profileBioAbout', name: 'Bio/About', visible: true },
-    { id: 'profileStatsBar', name: 'Stats Bar', visible: true },
-    { id: 'profileActiveListings', name: 'Active Listings', visible: true },
-    { id: 'profileClientReviews', name: 'Client Reviews', visible: true },
-    { id: 'profileSocialLinks', name: 'Social Links', visible: true }
-  ]
+  // ─── EXTRACT DESIGN TOKENS ─────────────────────────────────────────────────
+  const raw = pageData as any
+  const gd = raw.global_design || {}
 
-  // Profile Page
-  if (pageData.page_type === 'profile') {
-    const profileSections = (pageData.profile_layout_sections && pageData.profile_layout_sections.length > 0)
-      ? pageData.profile_layout_sections
-      : DEFAULT_PROFILE_LAYOUT
+  const colorPrimary    = gd.colorPrimary    || '#2563EB'
+  const colorBackground = gd.colorBackground || '#FFFFFF'
+  const colorText       = gd.colorText       || '#111827'
+  const colorAccent     = gd.colorAccent     || '#F97316'
+  const fontHeading     = gd.fontHeading     || gd.fontFamily || 'Inter, system-ui, sans-serif'
+  const fontBody        = gd.fontBody        || gd.fontFamily || 'Inter, system-ui, sans-serif'
+  const borderRadius    = typeof gd.borderRadius === 'number' ? `${gd.borderRadius}px` : '12px'
+  const buttonVariant   = gd.buttonVariant   || 'filled'
 
+  const sectionVisibility: Record<string, boolean> = raw.section_visibility || pageData.section_visibility || {}
+  const sectionStyles: Record<string, any>         = raw.section_styles     || pageData.section_styles     || {}
+
+  // Check for new custom sections format (page_data.sections) first
+  // Then fall back to unified_sections → layout_sections / profile_layout_sections (legacy)
+  let sections: any[] = []
+  
+  // Try to get custom sections from page_data
+  if (raw.page_data?.sections && Array.isArray(raw.page_data.sections)) {
+    sections = raw.page_data.sections
+  } else if (raw.unified_sections && Array.isArray(raw.unified_sections)) {
+    // Check if unified_sections contain custom sections (type: 'custom' with JSON content)
+    const customSections = raw.unified_sections
+      .filter((s: any) => s.type === 'custom' && s.content)
+      .map((s: any) => {
+        try {
+          return JSON.parse(s.content)
+        } catch {
+          return null
+        }
+      })
+      .filter(Boolean)
+    
+    if (customSections.length > 0) {
+      sections = customSections
+    } else {
+      sections = raw.unified_sections
+    }
+  } else {
+    sections = pageData.layout_sections || pageData.profile_layout_sections || []
+  }
+
+  // ─── PER-SECTION STYLE HELPERS ─────────────────────────────────────────────
+  const getSectionContainerStyle = (sectionId: string): React.CSSProperties => {
+    const ss = sectionStyles[sectionId] || {}
+    return {
+      padding:         PADDING_VALUES[ss.paddingSize || 'md'],
+      fontFamily:      ss.fontFamily || fontBody,
+      fontSize:        ss.fontSize || undefined,
+      color:           ss.textColor && ss.textColor !== '#1F2937' ? ss.textColor : colorText,
+      backgroundColor: ss.backgroundColor && ss.backgroundColor !== 'transparent' ? ss.backgroundColor : undefined,
+    }
+  }
+
+  const getImgStyle = (sectionId: string): React.CSSProperties => {
+    const ss = sectionStyles[sectionId] || {}
+    return {
+      width:        '100%',
+      objectFit:    (ss.imageFit as any) || 'cover',
+      borderRadius: IMG_RADIUS_VALUES[ss.imageRadius || 'md'],
+      ...(ss.imageAspectRatio && ss.imageAspectRatio !== 'auto'
+        ? { aspectRatio: ss.imageAspectRatio, height: 'auto' }
+        : { height: IMG_HEIGHT_VALUES[ss.imageHeight || 'md'] }),
+    }
+  }
+
+  const getGridStyle = (sectionId: string, defaultCols = 1): React.CSSProperties => {
+    const ss = sectionStyles[sectionId] || {}
+    const cols = ss.columns && ss.columns > 1 ? ss.columns : defaultCols
+    const gap  = GRID_GAP_VALUES[ss.columnGap || 'md'] || '14px'
+    return { display: 'grid', gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap }
+  }
+
+  // ─── PRIMARY BUTTON STYLE ──────────────────────────────────────────────────
+  const primaryBtn: React.CSSProperties =
+    buttonVariant === 'outlined'
+      ? { border: `2px solid ${colorPrimary}`, color: colorPrimary, background: 'transparent', padding: '10px 24px', borderRadius, fontWeight: 600, cursor: 'pointer' }
+      : { background: colorPrimary, color: '#fff', border: 'none', padding: '10px 24px', borderRadius, fontWeight: 600, cursor: 'pointer' }
+
+  // ─── CUSTOM ELEMENT RENDERER (for new page builder format) ─────────────────
+  const renderCustomElement = (el: any) => {
+    const p = el.props || {}
+    const alignStyle: React.CSSProperties = {
+      textAlign: p.align === 'center' ? 'center' : p.align === 'right' ? 'right' : 'left',
+    }
+    
+    switch (el.type) {
+      case 'heading': {
+        const Tag = (p.tag || 'h2') as keyof JSX.IntrinsicElements
+        return (
+          <Tag style={{
+            ...alignStyle,
+            fontSize: `${p.fontSize || 32}px`,
+            color: p.color || colorText,
+            fontWeight: p.fontWeight || '700',
+            letterSpacing: `${p.letterSpacing || 0}px`,
+            lineHeight: 1.2,
+            margin: '0 0 12px',
+          }}>
+            {p.text || ''}
+          </Tag>
+        )
+      }
+      case 'text':
+        return (
+          <p style={{
+            ...alignStyle,
+            fontSize: `${p.fontSize || 16}px`,
+            color: p.color || colorText,
+            lineHeight: p.lineHeight || 1.7,
+            margin: '0 0 12px',
+          }}>
+            {p.text || ''}
+          </p>
+        )
+      case 'image':
+        return (
+          <div style={alignStyle}>
+            <img
+              src={p.src || ''}
+              alt={p.alt || ''}
+              style={{
+                borderRadius: `${p.borderRadius || 8}px`,
+                width: `${p.width || 100}%`,
+                maxWidth: '100%',
+                height: 'auto',
+                display: 'block',
+                margin: '0 auto 12px',
+              }}
+            />
+          </div>
+        )
+      case 'button':
+        return (
+          <div style={alignStyle}>
+            <a
+              href={p.href || '#'}
+              style={{
+                display: 'inline-block',
+                background: p.bg || colorPrimary,
+                color: p.color || '#fff',
+                fontSize: `${p.fontSize || 15}px`,
+                borderRadius: `${p.borderRadius || 8}px`,
+                padding: `${p.paddingY || 12}px ${p.paddingX || 28}px`,
+                textDecoration: 'none',
+                fontWeight: 600,
+                margin: '0 0 12px',
+                transition: 'opacity 0.2s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+            >
+              {p.text || 'Click Me'}
+            </a>
+          </div>
+        )
+      case 'divider':
+        return (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: p.align === 'center' ? 'center' : p.align === 'right' ? 'flex-end' : 'flex-start',
+            margin: '12px 0',
+          }}>
+            <hr style={{
+              borderStyle: p.style || 'solid',
+              borderColor: p.color || '#e2e8f0',
+              borderTopWidth: `${p.height || 1}px`,
+              borderLeft: 'none',
+              borderRight: 'none',
+              borderBottom: 'none',
+              width: `${p.width || 100}%`,
+              margin: 0,
+            }} />
+          </div>
+        )
+      case 'spacer':
+        return <div style={{ height: `${p.height || 40}px` }} />
+      case 'video':
+        return (
+          <div style={{
+            aspectRatio: p.aspectRatio || '16/9',
+            width: '100%',
+            borderRadius: '8px',
+            overflow: 'hidden',
+            backgroundColor: '#000',
+            margin: '0 0 12px',
+          }}>
+            <iframe
+              src={p.url || ''}
+              style={{ width: '100%', height: '100%', border: 'none' }}
+              allowFullScreen
+              title="video"
+            />
+          </div>
+        )
+      case 'icon':
+        return (
+          <div style={{
+            ...alignStyle,
+            fontSize: `${p.size || 40}px`,
+            color: p.color || colorPrimary,
+            margin: '0 0 12px',
+          }}>
+            {p.icon || '★'}
+          </div>
+        )
+      case 'html':
+        return (
+          <div
+            dangerouslySetInnerHTML={{ __html: p.code || '' }}
+            style={{ margin: '0 0 12px' }}
+          />
+        )
+      case 'hero':
+        return (
+          <div style={{
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+            background: p.bg || colorPrimary,
+            color: p.color || '#fff',
+            padding: `${p.paddingY || 80}px 32px`,
+            textAlign: p.align || 'center',
+            margin: '0 0 12px',
+          }}>
+            <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '0 0 12px' }}>{p.title || ''}</h1>
+            <p style={{ fontSize: '1.125rem', opacity: 0.8, margin: 0 }}>{p.subtitle || ''}</p>
+          </div>
+        )
+      default:
+        return null
+    }
+  }
+
+  // ─── CUSTOM SECTION RENDERER (for new page builder format) ──────────────────
+  const renderCustomSection = (section: any) => {
+    const s = section.settings || {}
     return (
-      <div style={{
-        minHeight: '100vh',
-        backgroundColor: pageData.selected_theme === 'dark' ? '#1F2937' :
-          pageData.selected_theme === 'orange' ? '#F97316' :
-            pageData.selected_theme === 'blue' ? '#3B82F6' : '#FFFFFF',
-        padding: '40px 0'
-      }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
-          {profileSections.map((section: { id: string; name: string; visible: boolean }) => {
-            if (!section.visible) return null
-            const ci = pageData.contact_info
-            switch (section.id) {
-              case 'profileHero':
-                return (
-                  <div key={section.id} className="full-preview-profile-section" style={{ marginBottom: '40px' }}>
-                    <div
-                      className="full-preview-profile-header"
-                      style={{
-                        backgroundImage: (pageData.profile_card_image || pageData.profile_image) ? `url(${pageData.profile_card_image || pageData.profile_image})` : 'none',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        minHeight: '200px'
-                      }}
-                    >
-                      <div className="full-preview-profile-image-wrapper">
-                        <img src={pageData.profile_card_image || pageData.profile_image || ASSETS.PLACEHOLDER_PROFILE} alt="Profile" className="full-preview-profile-image" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                        <div className="full-preview-profile-fallback">{pageData.profile_card_name?.[0] || 'A'}{pageData.profile_card_name?.split(' ').pop()?.[0] || 'G'}</div>
-                      </div>
-                      <div className="full-preview-profile-info">
-                        <h2 className="full-preview-name">{pageData.profile_card_name || 'Agent Name'}</h2>
-                        <p className="full-preview-tagline">{pageData.profile_card_role || (pageData.profile_card_bio || pageData.bio)?.slice(0, 80) || ''}</p>
-                      </div>
-                    </div>
+      <div
+        key={section.id}
+        style={{
+          background: s.bg || colorBackground,
+          padding: `${s.paddingY || 40}px ${s.paddingX || 20}px`,
+          marginBottom: '24px',
+          borderRadius: '12px',
+        }}
+      >
+        <div style={{ display: 'flex', gap: '12px' }}>
+          {section.columns?.map((col: any) => (
+            <div key={col.id} style={{ flex: col.width || 1 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {col.elements?.map((el: any) => (
+                  <div key={el.id}>
+                    {renderCustomElement(el)}
                   </div>
-                )
-              case 'profileContactInfo':
-                return (
-                  <div key={section.id} className="full-preview-profile-section" style={{ marginBottom: '40px' }}>
-                    <h3 className="full-preview-section-title">Contact</h3>
-                    <div className="full-preview-contact-icons">
-                      {ci?.email && <a href={`mailto:${ci.email}`} className="full-preview-contact-icon" title={ci.email}><FiMail /></a>}
-                      {pageData.show_contact_number && ci?.phone && <a href={`tel:${ci.phone}`} className="full-preview-contact-icon" title={ci.phone}><FiPhone /></a>}
-                      {ci?.website && <a href={ci.website} target="_blank" rel="noopener noreferrer" className="full-preview-contact-icon" title={ci.website}><FiGlobe /></a>}
-                    </div>
-                  </div>
-                )
-              case 'profileBioAbout':
-                return (
-                  <div key={section.id} className="full-preview-profile-section" style={{ marginBottom: '40px' }}>
-                    <h3 className="full-preview-section-title">About</h3>
-                    <p className="full-preview-tagline" style={{ whiteSpace: 'pre-wrap' }}>{(pageData.profile_card_bio || pageData.bio) || ''}</p>
-                  </div>
-                )
-              case 'profileStatsBar':
-                return (
-                  <div key={section.id} className="full-preview-profile-section" style={{ marginBottom: '40px' }}>
-                    {pageData.show_experience_stats && pageData.experience_stats && pageData.experience_stats.length > 0 && (
-                      <div className="full-preview-experience-stats">
-                        {pageData.experience_stats.map((stat: any, index: number) => (
-                          <div key={index} className="full-preview-stat-item">
-                            <div className="full-preview-stat-value">{stat.value}</div>
-                            <div className="full-preview-stat-label">{stat.label}</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )
-              case 'profileActiveListings':
-                return (
-                  <div key={section.id} style={{ marginBottom: '40px' }}>
-                    {pageData.show_featured_listings && pageData.featured_listings && pageData.featured_listings.length > 0 && (
-                      <div className="full-preview-featured-section">
-                        <h3 className="full-preview-section-title">Active Listings</h3>
-                        <div className="full-preview-listings-grid">
-                          {pageData.featured_listings.map((listing: any) => (
-                            <div key={listing.id} className="full-preview-listing-card">
-                              <div className="full-preview-listing-badge"><FiStar className="full-preview-star-icon" /><span>Featured</span></div>
-                              <div className="full-preview-listing-image-wrapper">
-                                <img src={listing.image || ASSETS.PLACEHOLDER_PROPERTY} alt={listing.title} />
-                              </div>
-                              <div className="full-preview-listing-info">
-                                <div className="full-preview-listing-info-header">
-                                  <div className="full-preview-listing-price">{formatPropertyPrice(listing)}</div>
-                                  <button type="button" className="full-preview-listing-heart" aria-label="Favorite"><FiHeart /></button>
-                                </div>
-                                <div className="full-preview-listing-title">{listing.title}</div>
-                                <div className="full-preview-listing-category">{listing.type || listing.category}</div>
-                                <div className="full-preview-listing-info-footer">
-                                  <div className="full-preview-listing-date">{formatPropertyDate(listing)}</div>
-                                  <div className="full-preview-listing-view-count"><span>1</span></div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )
-              case 'profileClientReviews':
-                return (
-                  <div key={section.id} style={{ marginBottom: '40px' }}>
-                    {pageData.show_testimonials && pageData.testimonials && pageData.testimonials.length > 0 && (
-                      <div className="full-preview-testimonials-section">
-                        <h3 className="full-preview-section-title">Client Reviews</h3>
-                        <div className="full-preview-testimonials-grid">
-                          {pageData.testimonials.map((testimonial: any) => (
-                            <div key={testimonial.id} className="full-preview-testimonial-card">
-                              <div className="full-preview-testimonial-header">
-                                <img src={testimonial.avatar || ASSETS.PLACEHOLDER_PROFILE} alt={testimonial.name} className="full-preview-testimonial-avatar" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                                <div className="full-preview-testimonial-avatar-fallback">{testimonial.name?.split(' ').map((n: string) => n[0]).join('') || 'TC'}</div>
-                                <div className="full-preview-testimonial-name">{testimonial.name}</div>
-                              </div>
-                              <p className="full-preview-testimonial-quote">"{testimonial.content}"</p>
-                              {testimonial.role && <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '8px' }}>{testimonial.role}</div>}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )
-              case 'profileSocialLinks':
-                return (
-                  <div key={section.id} className="full-preview-profile-section" style={{ marginBottom: '40px' }}>
-                    <h3 className="full-preview-section-title">Connect</h3>
-                    <div className="full-preview-contact-icons">
-                      {ci?.website && <a href={ci.website} target="_blank" rel="noopener noreferrer" className="full-preview-contact-icon" title="Website"><FiGlobe /></a>}
-                      {ci?.email && <a href={`mailto:${ci.email}`} className="full-preview-contact-icon" title="Email"><FiMail /></a>}
-                    </div>
-                  </div>
-                )
-              default:
-                return null
-            }
-          })}
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     )
   }
 
-  // Property Page
-  if (pageData.page_type === 'property') {
-    const layoutSections = pageData.layout_sections || []
-    const sectionVisibility = pageData.section_visibility || {}
+  // ─── SECTION RENDERER ──────────────────────────────────────────────────────
+  const renderSection = (section: any) => {
+    // Check if this is a custom section (new format with columns and elements)
+    if (section.columns && Array.isArray(section.columns) && section.settings) {
+      return renderCustomSection(section)
+    }
+    
+    const ci   = pageData.contact_info || {}
+    const ctnr = getSectionContainerStyle(section.id)
 
-    // Theme tokens from page builder (if present)
-    const globalDesign = (pageData as any).global_design || {}
-    const colorBackground = globalDesign.colorBackground || '#FFFFFF'
-    const colorText = globalDesign.colorText || '#111827'
-    const colorPrimary = globalDesign.colorPrimary || '#2563EB'
-    const fontBody = globalDesign.fontBody || 'Inter, system-ui, sans-serif'
-    const fontHeading = globalDesign.fontHeading || fontBody
-    const cornerRadius =
-      typeof globalDesign.borderRadius === 'number'
-        ? `${globalDesign.borderRadius}px`
-        : getCornerRadiusClass(pageData.selected_corner_radius)
-  
-    return (
-      <div
-        className="min-h-screen"
-        style={{
-          backgroundColor: colorBackground,
-          color: colorText,
-          fontFamily: fontBody,
-        }}
-      >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-10 py-8">
-          {/* Render sections in the order specified by layoutSections */}
-          {layoutSections.map((section: any) => {
-            const isVisibleFlag = (sectionVisibility as any)[section.id]
-            if (!section.visible || (isVisibleFlag === false)) return null
-            
-            switch (section.id) {
-              case 'hero':
-                return (
-                  <div key={section.id} className="mb-6">
-                    <div 
-                      className="relative w-full h-96 rounded-2xl overflow-hidden"
-                      style={{
-                        backgroundImage: pageData.hero_image ? `url(${pageData.hero_image})` : 'none',
-                        backgroundColor: pageData.hero_image ? 'transparent' : colorPrimary,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        filter: `brightness(${100 - (pageData.overall_darkness || 30)}%)`,
-                        borderRadius: cornerRadius,
-                      }}
-                    >
-                      <div
-                        className="absolute inset-0 flex flex-col items-center justify-center text-center px-6"
-                        style={{
-                          background:
-                            'linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.65))',
-                        }}
-                      >
-                        <h1
-                          className="text-4xl md:text-5xl font-bold text-white mb-4"
-                          style={{ fontFamily: fontHeading }}
-                        >
-                          {pageData.main_heading}
-                        </h1>
-                        <p className="text-lg md:text-xl text-white/90 mb-6">
-                          {pageData.tagline}
-                        </p>
-                        {pageData.property_price && (
-                          <button
-                            className="px-6 py-3 font-semibold rounded-xl transition-colors"
-                            style={{
-                              backgroundColor: colorPrimary,
-                              color: '#FFFFFF',
-                            }}
-                          >
-                            Starts at {pageData.property_price} /mo
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )
-              
-              case 'propertyDescription':
-                return (
-                  <div key={section.id} className="mb-6 sm:mb-8">
-                    <h2
-                      className="text-lg sm:text-xl font-bold mb-3 sm:mb-4"
-                      style={{ color: colorText, fontFamily: fontHeading }}
-                    >
-                      Property Overview
-                    </h2>
-                    <p className="text-gray-600 text-base sm:text-xl leading-relaxed m-0 whitespace-pre-wrap">
-                      {pageData.property_description}
-                    </p>
-                  </div>
-                )
-              
-              case 'propertyImages':
-                return (
-                  <div key={section.id} className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">What's Inside?</h2>
-                    <div className="grid grid-cols-3 gap-4">
-                      {(pageData.property_images || []).length > 0 ? (
-                        (pageData.property_images || []).map((image: string, index: number) => (
-                          <div 
-                            key={index} 
-                            className="aspect-square rounded-lg overflow-hidden bg-gray-200"
-                            style={{ borderRadius: cornerRadius }}
-                          >
-                            <img src={image} alt={`Interior ${index + 1}`} className="w-full h-full object-cover" />
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-gray-500 italic col-span-3">Property images will appear here...</p>
-                      )}
-                    </div>
-                  </div>
-                )
-              
-              case 'propertyDetails': {
-                const bedrooms = (pageData as any).property_bedrooms ?? 0
-                const bathrooms = (pageData as any).property_bathrooms ?? 0
-                const garage = (pageData as any).property_garage ?? 0
-                const area = (pageData as any).property_area
-                return (
-                  <div key={section.id} className="mb-6 sm:mb-8">
-                    <h2
-                      className="text-lg sm:text-2xl font-bold mb-3 sm:mb-4"
-                      style={{ color: colorText, fontFamily: fontHeading }}
-                    >
-                      Property Details
-                    </h2>
-                    <div className="flex flex-wrap gap-4 sm:gap-6 md:gap-10 text-base sm:text-xl">
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <svg className="w-6 h-6 text-gray-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
-                        <span>{bedrooms} Bedrooms</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <svg className="w-6 h-6 text-gray-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 17h14v-5H5v5zM5 7V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2" /></svg>
-                        <span>{garage} Garage</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <svg className="w-6 h-6 text-gray-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z" /><path d="M12 4v2M8 4v1M16 4v1" /></svg>
-                        <span>{bathrooms} Bathrooms</span>
-                      </div>
-                      {area && (
-                        <div className="flex items-center gap-2 text-gray-700">
-                          <span className="font-medium">{area}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )
-              }
-              
-              case 'amenities': {
-                const amenities = (pageData as any).property_amenities || []
-                return (
-                  <div key={section.id} className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-3">Amenities</h2>
-                    <div className="flex flex-wrap gap-2">
-                      {amenities.length > 0 ? (
-                        amenities.map((amenity: string, index: number) => (
-                          <span key={index} className="rounded-full border-2 border-orange-500 px-4 py-2 bg-gray-100 text-sm font-medium text-gray-700">
-                            {amenity}
-                          </span>
-                        ))
-                      ) : null}
-                    </div>
-                  </div>
-                )
-              }
-              
-              case 'profileCard':
-                return (
-                  <div 
-                    key={section.id}
-                    className="p-6 mb-6 text-white"
-                    style={{
-                      backgroundColor: pageData.selected_brand_color === 'white' ? '#3B82F6' : 
-                                     pageData.selected_brand_color === 'dark' ? '#1F2937' :
-                                     pageData.selected_brand_color === 'orange' ? '#F97316' :
-                                     pageData.selected_brand_color === 'blue' ? '#3B82F6' : '#3B82F6',
-                      borderRadius: getCornerRadiusClass(pageData.selected_corner_radius)
-                    }}
-                  >
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0">
-                        <div className="w-20 h-20 rounded-full overflow-hidden bg-white/20 border-2 border-white/30">
-                          <img 
-                            src={pageData.profile_card_image || ASSETS.PLACEHOLDER_PROFILE} 
-                            alt={pageData.profile_card_name || 'Agent'} 
-                            className="w-full h-full object-cover" 
-                          />
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-xl font-bold text-white mb-1">{pageData.profile_card_name}</h3>
-                        <p className="text-sm text-white/80 mb-3">{pageData.profile_card_role}</p>
-                        <p className="text-sm text-white/90 mb-4">{pageData.profile_card_bio}</p>
-                        <div className="flex items-center gap-3">
-                          {pageData.contact_email && (
-                            <a 
-                              href={`mailto:${pageData.contact_email}`}
-                              className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-colors flex items-center justify-center"
-                            >
-                              <FiMail className="w-4 h-4" />
-                            </a>
-                          )}
-                          {pageData.contact_phone && (
-                            <a 
-                              href={`tel:${pageData.contact_phone}`}
-                              className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-colors flex items-center justify-center"
-                            >
-                              <FiPhone className="w-4 h-4" />
-                            </a>
-                          )}
-                          {pageData.contact_info?.message && (
-                            <a 
-                              href={pageData.contact_info.message}
-                              className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-colors flex items-center justify-center"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <FiMessageCircle className="w-4 h-4" />
-                            </a>
-                          )}
-                          {pageData.contact_info?.website && (
-                            <a 
-                              href={pageData.contact_info.website}
-                              className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-colors flex items-center justify-center"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <FiGlobe className="w-4 h-4" />
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )
+    switch (section.id) {
 
-              case 'contact': {
-                if (!(pageData.show_contact_number && pageData.contact_info && (pageData.contact_info.email || pageData.contact_info.phone || pageData.contact_info.website || pageData.contact_info.message))) {
-                  return null
-                }
-                return (
-                  <div key={section.id} className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Contact Information</h2>
-                    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {pageData.contact_info.phone && (
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                              <FiPhone className="w-5 h-5 text-blue-600" />
-                            </div>
-                            <div>
-                              <div className="text-xs text-gray-500 mb-1">Phone</div>
-                              <a href={`tel:${pageData.contact_info.phone}`} className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
-                                {pageData.contact_info.phone}
-                              </a>
-                            </div>
-                          </div>
-                        )}
-                        {pageData.contact_info.email && (
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                              <FiMail className="w-5 h-5 text-blue-600" />
-                            </div>
-                            <div>
-                              <div className="text-xs text-gray-500 mb-1">Email</div>
-                              <a href={`mailto:${pageData.contact_info.email}`} className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
-                                {pageData.contact_info.email}
-                              </a>
-                            </div>
-                          </div>
-                        )}
-                        {pageData.contact_info.website && (
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                              <FiGlobe className="w-5 h-5 text-blue-600" />
-                            </div>
-                            <div>
-                              <div className="text-xs text-gray-500 mb-1">Website</div>
-                              <a href={pageData.contact_info.website} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
-                                Visit Website
-                              </a>
-                            </div>
-                          </div>
-                        )}
-                        {pageData.contact_info.message && (
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                              <FiMessageCircle className="w-5 h-5 text-blue-600" />
-                            </div>
-                            <div>
-                              <div className="text-xs text-gray-500 mb-1">Message</div>
-                              <a href={pageData.contact_info.message} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
-                                Send Message
-                              </a>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )
-              }
+      // ── Profile Hero ──────────────────────────────────────────────────────
+      case 'profileHero': {
+        const heroImg = raw.profile_image || pageData.profile_image
+        return (
+          <div key={section.id} style={{ marginBottom: '32px' }}>
+            <div style={{
+              position: 'relative', width: '100%', minHeight: '240px', borderRadius,
+              backgroundImage: heroImg ? `url(${heroImg})` : undefined,
+              backgroundColor: heroImg ? undefined : colorPrimary,
+              backgroundSize: 'cover', backgroundPosition: 'center', overflow: 'hidden',
+            }}>
+              <div style={{
+                position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                textAlign: 'center', padding: '32px 24px',
+              }}>
+                {(raw.profile_card_image || pageData.profile_card_image || raw.profile_image || pageData.profile_image) && (
+                  <img
+                    src={raw.profile_card_image || pageData.profile_card_image || raw.profile_image || pageData.profile_image || ASSETS.PLACEHOLDER_PROFILE}
+                    alt="Profile"
+                    style={{ width: 96, height: 96, borderRadius: '50%', objectFit: 'cover', border: '3px solid rgba(255,255,255,0.6)', marginBottom: 12 }}
+                    onError={e => { (e.target as HTMLImageElement).src = ASSETS.PLACEHOLDER_PROFILE }}
+                  />
+                )}
+                <h1 style={{ fontFamily: fontHeading, color: '#fff', fontSize: 28, fontWeight: 700, margin: '0 0 6px' }}>
+                  {raw.profile_card_name || pageData.profile_card_name || 'Agent Name'}
+                </h1>
+                <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 15, margin: 0 }}>
+                  {raw.profile_card_role || pageData.profile_card_role || ''}
+                </p>
+              </div>
+            </div>
+          </div>
+        )
+      }
 
-              case 'experience': {
-                const stats = pageData.experience_stats || []
-                if (!(pageData.show_experience_stats && stats.length > 0)) return null
-                return (
-                  <div key={section.id} className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Experience</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {stats.map((stat: any, index: number) => (
-                        <div key={index} className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 text-center">
-                          <div className="text-3xl font-bold text-blue-600 mb-1">{stat.value}</div>
-                          <div className="text-sm text-gray-600">{stat.label}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )
-              }
+      // ── Profile Contact Info ───────────────────────────────────────────────
+      case 'profileContactInfo':
+        return (
+          <div key={section.id} style={{ ...ctnr, background: ctnr.backgroundColor || '#fff', borderRadius, border: '1px solid #E5E7EB', marginBottom: 24 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Contact</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+              {ci.email && (
+                <a href={`mailto:${ci.email}`} style={{ display: 'flex', alignItems: 'center', gap: 6, color: colorText, fontSize: 14, textDecoration: 'none' }}>
+                  <FiMail style={{ color: colorPrimary }} /> {ci.email}
+                </a>
+              )}
+              {pageData.show_contact_number && ci.phone && (
+                <a href={`tel:${ci.phone}`} style={{ display: 'flex', alignItems: 'center', gap: 6, color: colorText, fontSize: 14, textDecoration: 'none' }}>
+                  <FiPhone style={{ color: colorPrimary }} /> {ci.phone}
+                </a>
+              )}
+              {ci.website && (
+                <a href={ci.website} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, color: colorPrimary, fontSize: 14, textDecoration: 'none' }}>
+                  <FiGlobe /> Website
+                </a>
+              )}
+            </div>
+          </div>
+        )
 
-              case 'featured': {
-                const featured = pageData.featured_listings || []
-                if (!(pageData.show_featured_listings && featured.length > 0)) return null
-                return (
-                  <div key={section.id} className="mb-6">
-                    <h3 className="full-preview-section-title">Featured Listings</h3>
-                    <div className="full-preview-listings-grid">
-                      {featured.map((listing: any) => (
-                        <div key={listing.id} className="full-preview-listing-card">
-                          <div className="full-preview-listing-badge">
-                            <FiStar className="full-preview-star-icon" />
-                            <span>Featured</span>
-                          </div>
-                          <div className="full-preview-listing-image-wrapper">
-                            <img src={listing.image || ASSETS.PLACEHOLDER_PROPERTY} alt={listing.title} />
-                          </div>
-                          <div className="full-preview-listing-info">
-                            <div className="full-preview-listing-info-header">
-                              <div className="full-preview-listing-price">{formatPropertyPrice(listing)}</div>
-                              <button className="full-preview-listing-heart" aria-label="Favorite">
-                                <FiHeart />
-                              </button>
-                            </div>
-                            <div className="full-preview-listing-title">{listing.title}</div>
-                            <div className="full-preview-listing-category">{listing.type || listing.category}</div>
-                            <div className="full-preview-listing-info-footer">
-                              <div className="full-preview-listing-date">{formatPropertyDate(listing)}</div>
-                              <div className="full-preview-listing-view-count">
-                                <span>1</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )
-              }
+      // ── Bio / About ───────────────────────────────────────────────────────
+      case 'profileBioAbout': {
+        const bioText = raw.bio || pageData.bio || raw.profile_card_bio || pageData.profile_card_bio
+        return (
+          <div key={section.id} style={{ ...ctnr, background: ctnr.backgroundColor || '#fff', borderRadius, border: '1px solid #E5E7EB', marginBottom: 24 }}>
+            <h3 style={{ fontFamily: fontHeading, color: colorText, fontSize: 16, fontWeight: 700, margin: '0 0 8px' }}>About</h3>
+            <p style={{ color: colorText, fontSize: 14, lineHeight: 1.7, whiteSpace: 'pre-wrap', margin: 0 }}>
+              {bioText || 'Bio will appear here.'}
+            </p>
+          </div>
+        )
+      }
 
-              case 'testimonialsSection': {
-                const testimonials = pageData.testimonials || []
-                if (!(pageData.show_testimonials && testimonials.length > 0)) return null
-                return (
-                  <div key={section.id} className="mb-6">
-                    <h3 className="full-preview-section-title">Client Testimonials</h3>
-                    <div className="full-preview-testimonials-grid">
-                      {testimonials.map((testimonial: any) => (
-                        <div key={testimonial.id} className="full-preview-testimonial-card">
-                          <div className="full-preview-testimonial-header">
-                            <img 
-                              src={testimonial.avatar || ASSETS.PLACEHOLDER_PROFILE}
-                              alt={testimonial.name}
-                              className="full-preview-testimonial-avatar"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                              }}
-                            />
-                            <div className="full-preview-testimonial-avatar-fallback">
-                              {testimonial.name?.split(' ').map((n: string) => n[0]).join('') || 'TC'}
-                            </div>
-                            <div className="full-preview-testimonial-name">{testimonial.name}</div>
-                          </div>
-                          <p className="full-preview-testimonial-quote">"{testimonial.content}"</p>
-                          {testimonial.role && (
-                            <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '8px' }}>
-                              {testimonial.role}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )
-              }
+      // ── Stats Bar ─────────────────────────────────────────────────────────
+      case 'profileStatsBar': {
+        const stats = raw.experience_stats || pageData.experience_stats || []
+        if (!(raw.show_experience_stats || pageData.show_experience_stats) || !stats.length) return null
+        return (
+          <div key={section.id} style={{ ...ctnr, background: ctnr.backgroundColor || '#fff', borderRadius, border: '1px solid #E5E7EB', marginBottom: 24, ...getGridStyle(section.id, stats.length) }}>
+            {stats.map((s: any, i: number) => (
+              <div key={i} style={{ textAlign: 'center', padding: '8px 4px' }}>
+                <div style={{ fontSize: 26, fontWeight: 800, color: colorPrimary, fontFamily: fontHeading }}>{s.value}</div>
+                <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 2 }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        )
+      }
 
-              case 'readyToView':
-                return (
-                  <div key={section.id} className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900 mb-2">Ready To View?</h2>
-                      <p className="text-gray-600 mb-4">Schedule a tour or ask any questions about the property.</p>
-                      <div className="flex flex-col gap-3">
-                        <div className="flex items-center gap-3 text-gray-700">
-                          <FiPhone className="w-5 h-5 text-gray-500" />
-                          <span>{pageData.contact_info?.phone || 'Phone number'}</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-gray-700">
-                          <FiMail className="w-5 h-5 text-gray-500" />
-                          <span>{pageData.contact_info?.email || 'Email address'}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact {pageData.profile_card_name || 'Agent'}</h3>
-                      {/* Public page form is static; submission is handled client-side only */}
-                      <form className="space-y-3">
-                        <input
-                          type="text"
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Your name"
-                        />
-                        <input
-                          type="email"
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Your email"
-                        />
-                        <textarea
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
-                          placeholder="Your message"
-                          rows={4}
-                        />
-                        <button
-                          type="submit"
-                          className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                          <span>Send Inquiry</span>
-                          <FiMessageCircle className="w-4 h-4" />
-                        </button>
-                      </form>
-                    </div>
+      // ── Active Listings ───────────────────────────────────────────────────
+      case 'profileActiveListings': {
+        const listings = raw.featured_listings || pageData.featured_listings || []
+        if (!(raw.show_featured_listings || pageData.show_featured_listings) || !listings.length) return null
+        return (
+          <div key={section.id} style={{ ...ctnr, marginBottom: 32 }}>
+            <h3 style={{ fontFamily: fontHeading, color: colorText, fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Active Listings</h3>
+            <div style={getGridStyle(section.id, 2)}>
+              {listings.map((l: any) => (
+                <div key={l.id} style={{ background: '#fff', borderRadius, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', border: '1px solid #E5E7EB' }}>
+                  <img src={l.image || ASSETS.PLACEHOLDER_PROPERTY} alt={l.title} style={getImgStyle(section.id)} />
+                  <div style={{ padding: '12px' }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: colorPrimary }}>{formatPropertyPrice(l)}</div>
+                    <div style={{ fontSize: 12, color: colorText, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.title}</div>
                   </div>
-                )
-              
-              default:
-                return null
-            }
-          })}
-
-          {/* Contact Information Section */}
-          {pageData.show_contact_number && pageData.contact_info && (pageData.contact_info.email || pageData.contact_info.phone || pageData.contact_info.website || pageData.contact_info.message) && (
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Contact Information</h2>
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {pageData.contact_info.phone && (
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                        <FiPhone className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="text-xs text-gray-500 mb-1">Phone</div>
-                        <a href={`tel:${pageData.contact_info.phone}`} className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
-                          {pageData.contact_info.phone}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                  {pageData.contact_info.email && (
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                        <FiMail className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="text-xs text-gray-500 mb-1">Email</div>
-                        <a href={`mailto:${pageData.contact_info.email}`} className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
-                          {pageData.contact_info.email}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                  {pageData.contact_info.website && (
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                        <FiGlobe className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="text-xs text-gray-500 mb-1">Website</div>
-                        <a href={pageData.contact_info.website} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
-                          Visit Website
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                  {pageData.contact_info.message && (
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                        <FiMessageCircle className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="text-xs text-gray-500 mb-1">Message</div>
-                        <a href={pageData.contact_info.message} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
-                          Send Message
-                        </a>
-                      </div>
-                    </div>
-                  )}
                 </div>
-              </div>
+              ))}
             </div>
-          )}
+          </div>
+        )
+      }
 
-          {/* Experience Stats Section */}
-          {pageData.show_experience_stats && pageData.experience_stats && pageData.experience_stats.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Experience</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {pageData.experience_stats.map((stat: any, index: number) => (
-                  <div key={index} className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 text-center">
-                    <div className="text-3xl font-bold text-blue-600 mb-1">{stat.value}</div>
-                    <div className="text-sm text-gray-600">{stat.label}</div>
+      // ── Client Reviews ────────────────────────────────────────────────────
+      case 'profileClientReviews': {
+        const testimonials = raw.testimonials || pageData.testimonials || []
+        if (!(raw.show_testimonials || pageData.show_testimonials) || !testimonials.length) return null
+        return (
+          <div key={section.id} style={{ ...ctnr, marginBottom: 32 }}>
+            <h3 style={{ fontFamily: fontHeading, color: colorText, fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Client Reviews</h3>
+            <div style={getGridStyle(section.id, 1)}>
+              {testimonials.map((t: any) => (
+                <div key={t.id} style={{ background: '#fff', borderRadius, border: '1px solid #E5E7EB', padding: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                    <img src={t.avatar || ASSETS.PLACEHOLDER_PROFILE} alt={t.name} style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).src = ASSETS.PLACEHOLDER_PROFILE }} />
+                    <span style={{ fontSize: 14, fontWeight: 600, color: colorText }}>{t.name}</span>
                   </div>
-                ))}
-              </div>
+                  <p style={{ fontSize: 13, color: '#6B7280', fontStyle: 'italic', margin: 0 }}>"{t.content}"</p>
+                  {t.role && <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 6 }}>{t.role}</div>}
+                </div>
+              ))}
             </div>
-          )}
+          </div>
+        )
+      }
 
-          {/* Featured Listings Section */}
-          {pageData.show_featured_listings && pageData.featured_listings && pageData.featured_listings.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Featured Listings</h2>
-              <div className="flex gap-4 overflow-x-auto pb-2">
-                {pageData.featured_listings.map((listing: any) => (
-                  <div key={listing.id} className="flex-shrink-0 w-72 bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200">
-                    <div className="relative">
-                      <div className="absolute top-2 left-2 z-10 flex items-center gap-1 px-2 py-1 bg-blue-600 text-white text-xs font-semibold rounded">
-                        <FiStar className="w-3 h-3 fill-current" />
-                        <span>Featured</span>
-                      </div>
-                      <div className="w-full h-48 bg-gray-200">
-                        <img src={listing.image || ASSETS.PLACEHOLDER_PROPERTY} alt={listing.title} className="w-full h-full object-cover" />
-                      </div>
-                      <button className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition-colors shadow-sm" aria-label="Favorite">
-                        <FiHeart className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <div className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="text-lg font-bold text-blue-600">{formatPropertyPrice(listing)}</div>
-                      </div>
-                      <div className="text-sm font-semibold text-gray-900 mb-1 line-clamp-1">{listing.title}</div>
-                      <div className="text-xs text-gray-500 mb-3">{listing.type || listing.category}</div>
-                      <div className="flex items-center justify-between text-xs text-gray-500">
-                        <div>{formatPropertyDate(listing)}</div>
-                        <div className="flex items-center gap-1">
-                          <span>1</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+      // ── Social Links ──────────────────────────────────────────────────────
+      case 'profileSocialLinks':
+        return (
+          <div key={section.id} style={{ ...ctnr, background: ctnr.backgroundColor || colorPrimary, borderRadius, display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 24 }}>
+            {ci.email && (
+              <a href={`mailto:${ci.email}`} style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', textDecoration: 'none' }}>
+                <FiMail />
+              </a>
+            )}
+            {ci.phone && (
+              <a href={`tel:${ci.phone}`} style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', textDecoration: 'none' }}>
+                <FiPhone />
+              </a>
+            )}
+            {ci.website && (
+              <a href={ci.website} target="_blank" rel="noopener noreferrer" style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', textDecoration: 'none' }}>
+                <FiGlobe />
+              </a>
+            )}
+          </div>
+        )
 
-          {/* Client Testimonials Section */}
-          {pageData.show_testimonials && pageData.testimonials && pageData.testimonials.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Client Testimonials</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {pageData.testimonials.map((testimonial: any) => (
-                  <div key={testimonial.id} className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-                        <img 
-                          src={testimonial.avatar || ASSETS.PLACEHOLDER_PROFILE} 
-                          alt={testimonial.name}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = 'none';
-                          }}
-                        />
-                        <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm hidden">
-                          {testimonial.name?.split(' ').map((n: string) => n[0]).join('') || 'TC'}
-                        </div>
-                      </div>
-                      <div className="text-sm font-semibold text-gray-900">{testimonial.name}</div>
-                    </div>
-                    <p className="text-sm text-gray-700 italic mb-2">"{testimonial.content}"</p>
-                    {testimonial.role && (
-                      <div className="text-xs text-gray-500">
-                        {testimonial.role}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Ready To View? Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Ready To View?</h2>
-              <p className="text-gray-600 mb-4">Schedule a tour or ask any questions about the property.</p>
-              <div className="flex flex-col gap-3">
-                {pageData.contact_phone && (
-                  <div className="flex items-center gap-3 text-gray-700">
-                    <FiPhone className="w-5 h-5 text-gray-500" />
-                    <span>{pageData.contact_phone}</span>
-                  </div>
-                )}
-                {pageData.contact_email && (
-                  <div className="flex items-center gap-3 text-gray-700">
-                    <FiMail className="w-5 h-5 text-gray-500" />
-                    <span>{pageData.contact_email}</span>
-                  </div>
+      // ── Property Hero ─────────────────────────────────────────────────────
+      case 'hero': {
+        const heroImg = raw.hero_image || pageData.hero_image
+        const darkness = raw.overall_darkness ?? pageData.overall_darkness ?? 30
+        return (
+          <div key={section.id} style={{ marginBottom: 24 }}>
+            <div style={{
+              position: 'relative', width: '100%', height: 380, borderRadius,
+              backgroundImage: heroImg ? `url(${heroImg})` : undefined,
+              backgroundColor: heroImg ? undefined : colorPrimary,
+              backgroundSize: 'cover', backgroundPosition: 'center', overflow: 'hidden',
+            }}>
+              <div style={{ position: 'absolute', inset: 0, background: `rgba(0,0,0,${darkness / 100})` }} />
+              <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center', padding: '0 24px' }}>
+                <h1 style={{ fontFamily: fontHeading, color: '#fff', fontSize: 36, fontWeight: 700, marginBottom: 8, textShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
+                  {raw.main_heading || pageData.main_heading || 'Property Title'}
+                </h1>
+                <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 16 }}>
+                  {raw.tagline || pageData.tagline || ''}
+                </p>
+                {(raw.property_price || pageData.property_price) && (
+                  <button style={{ ...primaryBtn, marginTop: 20, fontSize: 14 }}>
+                    Starts at {raw.property_price || pageData.property_price}
+                  </button>
                 )}
               </div>
             </div>
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact {pageData.profile_card_name || 'Agent'}</h3>
-              <form onSubmit={handleContactFormSubmit} className="flex flex-col gap-3">
-                <input
-                  type="text"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Your name"
-                  value={contactFormName}
-                  onChange={(e) => setContactFormName(e.target.value)}
-                  required
-                />
-                <input
-                  type="email"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Your email"
-                  value={contactFormEmail}
-                  onChange={(e) => setContactFormEmail(e.target.value)}
-                  required
-                />
-                <textarea
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
-                  placeholder="Your message"
-                  value={contactFormMessage}
-                  onChange={(e) => setContactFormMessage(e.target.value)}
-                  rows={4}
-                  required
-                />
-                <button 
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                  type="submit"
-                >
-                  <span>Send Inquiry</span>
-                  <FiMessageCircle className="w-4 h-4" />
+          </div>
+        )
+      }
+
+      // ── Property Description ──────────────────────────────────────────────
+      case 'propertyDescription':
+        return (
+          <div key={section.id} style={{ ...ctnr, background: ctnr.backgroundColor || '#fff', borderRadius, border: '1px solid #E5E7EB', marginBottom: 24 }}>
+            <h2 style={{ fontFamily: fontHeading, color: colorText, fontSize: 20, fontWeight: 700, marginBottom: 12 }}>Property Overview</h2>
+            <p style={{ color: colorText, fontSize: 15, lineHeight: 1.7, whiteSpace: 'pre-wrap', margin: 0 }}>
+              {raw.property_description || pageData.property_description || ''}
+            </p>
+          </div>
+        )
+
+      // ── Property Images ───────────────────────────────────────────────────
+      case 'propertyImages': {
+        const imgs: string[] = raw.property_images || pageData.property_images || []
+        if (!imgs.length) return null
+        return (
+          <div key={section.id} style={{ ...ctnr, marginBottom: 24 }}>
+            <h2 style={{ fontFamily: fontHeading, color: colorText, fontSize: 20, fontWeight: 700, marginBottom: 16 }}>What&apos;s Inside?</h2>
+            <div style={getGridStyle(section.id, 3)}>
+              {imgs.map((img, i) => (
+                <img key={i} src={img} alt={`Interior ${i + 1}`} style={{ ...getImgStyle(section.id), borderRadius }} />
+              ))}
+            </div>
+          </div>
+        )
+      }
+
+      // ── Property Details ──────────────────────────────────────────────────
+      case 'propertyDetails': {
+        const bedrooms  = raw.property_bedrooms  ?? pageData.property_bedrooms  ?? 0
+        const bathrooms = raw.property_bathrooms ?? pageData.property_bathrooms ?? 0
+        const garage    = raw.property_garage    ?? pageData.property_garage    ?? 0
+        const area      = raw.property_area      || pageData.property_area
+        const price     = raw.property_price     || pageData.property_price
+        return (
+          <div key={section.id} style={{ ...ctnr, background: ctnr.backgroundColor || '#fff', borderRadius, border: '1px solid #E5E7EB', marginBottom: 24 }}>
+            <h2 style={{ fontFamily: fontHeading, color: colorText, fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Property Details</h2>
+            <div style={getGridStyle(section.id, 2)}>
+              {price && <div><span style={{ fontSize: 11, color: '#9CA3AF', display: 'block' }}>Price</span><p style={{ fontWeight: 700, color: colorPrimary, fontSize: 18, margin: '2px 0 0' }}>{price}</p></div>}
+              {bedrooms > 0 && <div><span style={{ fontSize: 11, color: '#9CA3AF', display: 'block' }}>Bedrooms</span><p style={{ fontWeight: 600, color: colorText, fontSize: 16, margin: '2px 0 0' }}>{bedrooms}</p></div>}
+              {bathrooms > 0 && <div><span style={{ fontSize: 11, color: '#9CA3AF', display: 'block' }}>Bathrooms</span><p style={{ fontWeight: 600, color: colorText, fontSize: 16, margin: '2px 0 0' }}>{bathrooms}</p></div>}
+              {garage > 0 && <div><span style={{ fontSize: 11, color: '#9CA3AF', display: 'block' }}>Garage</span><p style={{ fontWeight: 600, color: colorText, fontSize: 16, margin: '2px 0 0' }}>{garage}</p></div>}
+              {area && <div><span style={{ fontSize: 11, color: '#9CA3AF', display: 'block' }}>Area</span><p style={{ fontWeight: 600, color: colorText, fontSize: 16, margin: '2px 0 0' }}>{area}</p></div>}
+            </div>
+          </div>
+        )
+      }
+
+      // ── Amenities ─────────────────────────────────────────────────────────
+      case 'amenities': {
+        const amenities: string[] = raw.property_amenities || pageData.property_amenities || []
+        if (!amenities.length) return null
+        return (
+          <div key={section.id} style={{ ...ctnr, background: ctnr.backgroundColor || '#fff', borderRadius, border: '1px solid #E5E7EB', marginBottom: 24 }}>
+            <h2 style={{ fontFamily: fontHeading, color: colorText, fontSize: 20, fontWeight: 700, marginBottom: 12 }}>Amenities</h2>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {amenities.map((a, i) => (
+                <span key={i} style={{ padding: '6px 14px', borderRadius: 9999, border: `2px solid ${colorPrimary}`, background: colorPrimary + '12', color: colorPrimary, fontSize: 13, fontWeight: 500 }}>
+                  {a}
+                </span>
+              ))}
+            </div>
+          </div>
+        )
+      }
+
+      // ── Contact Information ────────────────────────────────────────────────
+      case 'contact': {
+        const hasContact = ci.email || ci.phone || ci.website || (pageData.contact_info as any)?.address
+        if (!hasContact) return null
+        return (
+          <div key={section.id} style={{ ...ctnr, background: ctnr.backgroundColor || '#fff', borderRadius, border: '1px solid #E5E7EB', marginBottom: 24 }}>
+            <h2 style={{ fontFamily: fontHeading, color: colorText, fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Contact Information</h2>
+            <div style={getGridStyle(section.id, 1)}>
+              {ci.phone && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: colorPrimary + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <FiPhone style={{ color: colorPrimary }} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, color: '#9CA3AF' }}>Phone</div>
+                    <a href={`tel:${ci.phone}`} style={{ fontSize: 14, fontWeight: 500, color: colorText, textDecoration: 'none' }}>{ci.phone}</a>
+                  </div>
+                </div>
+              )}
+              {ci.email && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: colorPrimary + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <FiMail style={{ color: colorPrimary }} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, color: '#9CA3AF' }}>Email</div>
+                    <a href={`mailto:${ci.email}`} style={{ fontSize: 14, fontWeight: 500, color: colorText, textDecoration: 'none' }}>{ci.email}</a>
+                  </div>
+                </div>
+              )}
+              {ci.website && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: colorPrimary + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <FiGlobe style={{ color: colorPrimary }} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, color: '#9CA3AF' }}>Website</div>
+                    <a href={ci.website} target="_blank" rel="noopener noreferrer" style={{ fontSize: 14, fontWeight: 500, color: colorPrimary, textDecoration: 'none' }}>Visit Website</a>
+                  </div>
+                </div>
+              )}
+              {(pageData.contact_info as any)?.address && (
+                <div style={{ display: 'flex', gap: 12, fontSize: 13, color: '#6B7280' }}>
+                  <div style={{ width: 40, flexShrink: 0 }} />
+                  {(pageData.contact_info as any).address}
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      }
+
+      // ── Experience ────────────────────────────────────────────────────────
+      case 'experience': {
+        const heading = raw.experience_heading || pageData.experience_heading || 'Experience'
+        const body    = raw.experience_body    || pageData.experience_body
+        const stats   = raw.experience_stats   || pageData.experience_stats || []
+        const showStats = (raw.show_experience_stats || pageData.show_experience_stats) && stats.length > 0
+        return (
+          <div key={section.id} style={{ ...ctnr, background: ctnr.backgroundColor || '#fff', borderRadius, border: '1px solid #E5E7EB', marginBottom: 24 }}>
+            <h2 style={{ fontFamily: fontHeading, color: colorText, fontSize: 20, fontWeight: 700, marginBottom: body ? 8 : 16 }}>{heading}</h2>
+            {body && <p style={{ fontSize: 14, color: colorText, lineHeight: 1.7, marginBottom: showStats ? 16 : 0 }}>{body}</p>}
+            {showStats && (
+              <div style={getGridStyle(section.id, stats.length)}>
+                {stats.map((s: any, i: number) => (
+                  <div key={i} style={{ textAlign: 'center', padding: '8px 4px' }}>
+                    <div style={{ fontSize: 24, fontWeight: 800, color: colorPrimary, fontFamily: fontHeading }}>{s.value}</div>
+                    <div style={{ fontSize: 11, color: '#6B7280', marginTop: 2 }}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      }
+
+      // ── Featured Listings ─────────────────────────────────────────────────
+      case 'featured': {
+        const featured = raw.featured_listings || pageData.featured_listings || []
+        if (!(raw.show_featured_listings || pageData.show_featured_listings) || !featured.length) return null
+        return (
+          <div key={section.id} style={{ ...ctnr, marginBottom: 32 }}>
+            <h3 style={{ fontFamily: fontHeading, color: colorText, fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Featured Listings</h3>
+            <div style={getGridStyle(section.id, 2)}>
+              {featured.map((l: any) => (
+                <div key={l.id} style={{ background: '#fff', borderRadius, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', border: '1px solid #E5E7EB' }}>
+                  <div style={{ position: 'relative' }}>
+                    <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 1, display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', background: colorPrimary, color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 4 }}>
+                      <FiStar style={{ width: 10, height: 10 }} /> Featured
+                    </div>
+                    <img src={l.image || ASSETS.PLACEHOLDER_PROPERTY} alt={l.title} style={{ ...getImgStyle(section.id), display: 'block' }} />
+                  </div>
+                  <div style={{ padding: 14 }}>
+                    <div style={{ fontSize: 16, fontWeight: 700, color: colorPrimary, marginBottom: 4 }}>{formatPropertyPrice(l)}</div>
+                    <div style={{ fontSize: 13, color: colorText, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.title}</div>
+                    <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>{l.type || l.category}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      }
+
+      // ── Testimonials ──────────────────────────────────────────────────────
+      case 'testimonialsSection': {
+        const testimonials = raw.testimonials || pageData.testimonials || []
+        if (!(raw.show_testimonials || pageData.show_testimonials) || !testimonials.length) return null
+        return (
+          <div key={section.id} style={{ ...ctnr, marginBottom: 32 }}>
+            <h3 style={{ fontFamily: fontHeading, color: colorText, fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Client Testimonials</h3>
+            <div style={getGridStyle(section.id, 1)}>
+              {testimonials.map((t: any) => (
+                <div key={t.id} style={{ background: '#fff', borderRadius, border: '1px solid #E5E7EB', padding: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                    <img src={t.avatar || ASSETS.PLACEHOLDER_PROFILE} alt={t.name} style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).src = ASSETS.PLACEHOLDER_PROFILE }} />
+                    <span style={{ fontSize: 14, fontWeight: 600, color: colorText }}>{t.name}</span>
+                  </div>
+                  <p style={{ fontSize: 13, color: '#6B7280', fontStyle: 'italic', margin: 0 }}>"{t.content}"</p>
+                  {t.role && <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 6 }}>{t.role}</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      }
+
+      // ── Ready To View ─────────────────────────────────────────────────────
+      case 'readyToView': {
+        const heading = raw.ready_to_view_heading || pageData.ready_to_view_heading || 'Ready To View?'
+        const subtext = raw.ready_to_view_subtext || pageData.ready_to_view_subtext || 'Schedule a tour or ask any questions about the property.'
+        const defaultMsg = raw.contact_form_message || pageData.contact_form_message || ''
+        return (
+          <div key={section.id} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, marginBottom: 32 }}>
+            <div style={{ ...ctnr, background: ctnr.backgroundColor || colorPrimary, borderRadius, color: '#fff' }}>
+              <h2 style={{ fontFamily: fontHeading, color: '#fff', fontSize: 22, fontWeight: 700, marginBottom: 8 }}>{heading}</h2>
+              <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 14, marginBottom: 20 }}>{subtext}</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {ci.phone && <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'rgba(255,255,255,0.9)', fontSize: 14 }}><FiPhone /> {ci.phone}</div>}
+                {ci.email && <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'rgba(255,255,255,0.9)', fontSize: 14 }}><FiMail /> {ci.email}</div>}
+              </div>
+            </div>
+            <div style={{ background: '#F9FAFB', borderRadius, padding: 24 }}>
+              <h3 style={{ fontFamily: fontHeading, color: colorText, fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
+                Contact {raw.profile_card_name || pageData.profile_card_name || 'Agent'}
+              </h3>
+              <form onSubmit={handleContactFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <input type="text" placeholder="Your name" value={contactFormName} onChange={e => setContactFormName(e.target.value)} required
+                  style={{ width: '100%', padding: '10px 14px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                <input type="email" placeholder="Your email" value={contactFormEmail} onChange={e => setContactFormEmail(e.target.value)} required
+                  style={{ width: '100%', padding: '10px 14px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                <textarea placeholder={defaultMsg || 'Your message'} value={contactFormMessage} onChange={e => setContactFormMessage(e.target.value)} rows={4} required
+                  style={{ width: '100%', padding: '10px 14px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 14, outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
+                <button type="submit" style={{ ...primaryBtn, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  Send Inquiry <FiMessageCircle />
                 </button>
               </form>
             </div>
           </div>
-        </div>
-      </div>
-    )
+        )
+      }
+
+      // ── Profile Card ──────────────────────────────────────────────────────
+      case 'profileCard': {
+        const cardImg = raw.profile_card_image || pageData.profile_card_image || raw.profile_image || pageData.profile_image
+        return (
+          <div key={section.id} style={{ ...ctnr, background: ctnr.backgroundColor || colorPrimary, borderRadius, display: 'flex', alignItems: 'center', gap: 20, marginBottom: 24 }}>
+            <img src={cardImg || ASSETS.PLACEHOLDER_PROFILE} alt={raw.profile_card_name || 'Agent'} style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', border: '3px solid rgba(255,255,255,0.4)', flexShrink: 0 }}
+              onError={e => { (e.target as HTMLImageElement).src = ASSETS.PLACEHOLDER_PROFILE }} />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#fff', fontFamily: fontHeading }}>{raw.profile_card_name || pageData.profile_card_name || 'Agent Name'}</div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>{raw.profile_card_role || pageData.profile_card_role || ''}</div>
+              {(raw.profile_card_bio || pageData.profile_card_bio) && (
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', marginTop: 6 }}>{raw.profile_card_bio || pageData.profile_card_bio}</div>
+              )}
+              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                {ci.email && <a href={`mailto:${ci.email}`} style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', textDecoration: 'none' }}><FiMail size={14} /></a>}
+                {ci.phone && <a href={`tel:${ci.phone}`} style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', textDecoration: 'none' }}><FiPhone size={14} /></a>}
+                {ci.website && <a href={ci.website} target="_blank" rel="noopener noreferrer" style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', textDecoration: 'none' }}><FiGlobe size={14} /></a>}
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+      // ── Custom Sections (image / video / text) ────────────────────────────
+      default: {
+        if (section.type === 'image' && section.content) {
+          return (
+            <div key={section.id} style={{ marginBottom: 24, borderRadius, overflow: 'hidden' }}>
+              <img src={section.content} alt={section.name} style={{ ...getImgStyle(section.id), width: '100%', display: 'block', borderRadius }} />
+            </div>
+          )
+        }
+        if (section.type === 'video' && section.content) {
+          const toEmbed = (url: string) => {
+            const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/)
+            if (yt) return `https://www.youtube.com/embed/${yt[1]}`
+            const vm = url.match(/vimeo\.com\/(\d+)/)
+            if (vm) return `https://player.vimeo.com/video/${vm[1]}`
+            return url
+          }
+          return (
+            <div key={section.id} style={{ marginBottom: 24, borderRadius, overflow: 'hidden', aspectRatio: '16/9', background: '#000' }}>
+              <iframe src={toEmbed(section.content)} style={{ width: '100%', height: '100%', border: 'none' }} allowFullScreen title={section.name} />
+            </div>
+          )
+        }
+        if (section.content || section.type === 'text' || section.type === 'custom') {
+          return (
+            <div key={section.id} style={{ ...ctnr, background: ctnr.backgroundColor || '#fff', borderRadius, border: '1px solid #E5E7EB', marginBottom: 24 }}>
+              <h3 style={{ fontFamily: fontHeading, color: colorText, fontSize: 16, fontWeight: 600, marginBottom: 8 }}>{section.name}</h3>
+              {section.content && <p style={{ fontSize: 14, color: colorText, lineHeight: 1.7, whiteSpace: 'pre-wrap', margin: 0 }}>{section.content}</p>}
+            </div>
+          )
+        }
+        return null
+      }
+    }
   }
 
-  return null
+  // ─── RENDER PAGE ──────────────────────────────────────────────────────────
+  return (
+    <div style={{ minHeight: '100vh', backgroundColor: colorBackground, color: colorText, fontFamily: fontBody }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px' }}>
+        {sections.map((section: any) => {
+          // Check visibility via both section.visible flag and sectionVisibility map
+          // For custom sections, always show unless explicitly hidden
+          const flagVisible = section.visible !== false
+          const mapVisible  = section.id ? sectionVisibility[section.id] !== false : true
+          if (!flagVisible || !mapVisible) return null
+          return renderSection(section)
+        })}
+      </div>
+      <Footer />
+    </div>
+  )
 }
-
