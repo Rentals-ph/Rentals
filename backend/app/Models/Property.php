@@ -21,6 +21,7 @@ class Property extends Model
         'description_template',
         'ai_generated_description',
         'type',
+        'listing_type',
         'price',
         'price_type',
         'bedrooms',
@@ -207,12 +208,12 @@ class Property extends Model
 
     public function isForRent(): bool
     {
-        return in_array(strtolower((string) $this->type), ['rent', 'for rent']);
+        return $this->listing_type === 'for_rent' || in_array(strtolower((string) $this->type), ['rent', 'for rent']);
     }
 
     public function isForSale(): bool
     {
-        return in_array(strtolower((string) $this->type), ['sale', 'for sale']);
+        return $this->listing_type === 'for_sale' || in_array(strtolower((string) $this->type), ['sale', 'for sale']);
     }
 
     public function isAvailable(): bool
@@ -226,12 +227,18 @@ class Property extends Model
 
     public function scopeForRent($query)
     {
-        return $query->whereIn(\DB::raw('LOWER(type)'), ['rent', 'for rent']);
+        return $query->where(function($q) {
+            $q->where('listing_type', 'for_rent')
+              ->orWhereIn(\DB::raw('LOWER(type)'), ['rent', 'for rent']);
+        });
     }
 
     public function scopeForSale($query)
     {
-        return $query->whereIn(\DB::raw('LOWER(type)'), ['sale', 'for sale']);
+        return $query->where(function($q) {
+            $q->where('listing_type', 'for_sale')
+              ->orWhereIn(\DB::raw('LOWER(type)'), ['sale', 'for sale']);
+        });
     }
 
     public function scopeAvailable($query)

@@ -31,6 +31,7 @@ function PropertiesContent() {
 
   const [selectedLocation, setSelectedLocation] = useState('')
   const [selectedType, setSelectedType] = useState('All Types')
+  const [listingTypeFilter, setListingTypeFilter] = useState<'all' | 'for_rent' | 'for_sale'>('all')
   const [minBaths, setMinBaths] = useState('')
   const [minBeds, setMinBeds] = useState('')
   const [priceMin, setPriceMin] = useState('')
@@ -310,8 +311,13 @@ function PropertiesContent() {
       })
     }
     
-    // Apply client-side filters (bathrooms, bedrooms, price, amenities)
+    // Apply client-side filters (listing_type, bathrooms, bedrooms, price, amenities)
     filtered = filtered.filter(property => {
+      // Listing type filter
+      const listingTypeMatch = listingTypeFilter === 'all' || 
+        (listingTypeFilter === 'for_rent' && (property.listing_type === 'for_rent' || (!property.listing_type && property.price_type))) ||
+        (listingTypeFilter === 'for_sale' && (property.listing_type === 'for_sale' || (!property.listing_type && !property.price_type)))
+      
       const bathMatch = !minBaths || property.bathrooms >= parseInt(minBaths)
       const bedMatch = !minBeds || property.bedrooms >= parseInt(minBeds)
 
@@ -328,7 +334,7 @@ function PropertiesContent() {
           property.amenities!.some(a => a && a.toLowerCase() === selected.toLowerCase())
         ))
 
-      return bathMatch && bedMatch && priceMatch && amenitiesMatch
+      return listingTypeMatch && bathMatch && bedMatch && priceMatch && amenitiesMatch
     })
     
     // Count by type - use actual property types from database, not predefined list
@@ -341,7 +347,7 @@ function PropertiesContent() {
       return { name: type, count }
     }).filter(category => category.count > 0) // Only show categories with properties
       .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically
-  }, [allPropertiesForCount, propertyTypes, viewMode, selectedType, selectedLocation, searchQuery, minBaths, minBeds, priceMin, priceMax])
+  }, [allPropertiesForCount, propertyTypes, viewMode, selectedType, selectedLocation, searchQuery, minBaths, minBeds, priceMin, priceMax, listingTypeFilter])
 
   // Filter by subcategory first
   const subCategoryFiltered = filteredProperties.filter(property => {
@@ -398,7 +404,7 @@ function PropertiesContent() {
     setHasMore(true)
     setProperties([])
     setChatResults(null)
-  }, [selectedLocation, selectedType, searchQuery])
+  }, [selectedLocation, selectedType, searchQuery, listingTypeFilter])
 
   // Reset when switching view modes (to start infinite scroll from beginning)
   const prevViewMode = useRef(viewMode)
@@ -987,6 +993,42 @@ function PropertiesContent() {
             </button>
             {/* Sort and View Mode Controls */}
             <div className="flex items-center gap-2">
+              {/* For Rent / For Sale Filter Buttons */}
+              <div className="flex items-center gap-1 rounded-lg border border-gray-200 p-1 bg-white">
+                <button
+                  type="button"
+                  onClick={() => setListingTypeFilter('all')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    listingTypeFilter === 'all'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-transparent text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setListingTypeFilter('for_rent')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    listingTypeFilter === 'for_rent'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-transparent text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  For Rent
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setListingTypeFilter('for_sale')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    listingTypeFilter === 'for_sale'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-transparent text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  For Sale
+                </button>
+              </div>
               <span className="text-xs text-gray-600 font-outfit hidden xs:inline">Sort by</span>
               <select
                 className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-8"
@@ -1063,6 +1105,42 @@ function PropertiesContent() {
                 </div>
                 {/* Desktop Sort and View Controls */}
                 <div className="flex items-center gap-3">
+                  {/* For Rent / For Sale Filter Buttons */}
+                  <div className="flex items-center gap-1 rounded-lg border border-gray-200 p-1 bg-white">
+                    <button
+                      type="button"
+                      onClick={() => setListingTypeFilter('all')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                        listingTypeFilter === 'all'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-transparent text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setListingTypeFilter('for_rent')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                        listingTypeFilter === 'for_rent'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-transparent text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      For Rent
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setListingTypeFilter('for_sale')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                        listingTypeFilter === 'for_sale'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-transparent text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      For Sale
+                    </button>
+                  </div>
                   <span className="text-sm text-gray-600 font-outfit hidden sm:inline">Sort by</span>
                   <select
                     className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-8"

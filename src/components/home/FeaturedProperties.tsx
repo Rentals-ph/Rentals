@@ -155,20 +155,14 @@ const FeaturedProperties = () => {
   // When "All Locations": show featured. When a city is selected: show properties in that city from API (same as properties page)
   const allProperties = selectedLocation === 'All Locations' ? featuredProperties : browseProperties
 
-  // Filter by category (price_type)
+  // Filter by category (listing_type)
   const filteredProperties = (() => {
     if (selectedCategory === 'All Categories') return allProperties
     if (selectedCategory === 'For Rent') {
-      return allProperties.filter(p => {
-        const priceType = formatPriceType(p.price_type)
-        return priceType === 'Monthly' || priceType === 'Rent' || !p.price_type
-      })
+      return allProperties.filter(p => p.listing_type === 'for_rent' || (!p.listing_type && p.price_type))
     }
     if (selectedCategory === 'For Sale') {
-      return allProperties.filter(p => {
-        const priceType = formatPriceType(p.price_type)
-        return priceType === 'Sale' || priceType === 'For Sale'
-      })
+      return allProperties.filter(p => p.listing_type === 'for_sale' || (!p.listing_type && !p.price_type))
     }
     return allProperties
   })()

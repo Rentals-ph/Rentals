@@ -3,6 +3,7 @@ export interface Property {
   title: string
   description: string
   type: string
+  listing_type?: 'for_rent' | 'for_sale' | null
   location: string
   price: number
   price_type?: string | null
