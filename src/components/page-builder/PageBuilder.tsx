@@ -67,6 +67,22 @@ interface Toast {
 
 const generateId = () => Math.random().toString(36).substr(2, 9)
 
+const slugify = (text: string): string =>
+  text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .substring(0, 80)
+
+/** Build a /page/{slug} URL from the current origin */
+const buildPageUrl = (slug: string) => {
+  if (typeof window === 'undefined') return `/${slug}`
+  return `${window.location.origin}/${slug}`
+}
+
 const toEmbedUrl = (url: string): string => {
   try {
     const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/)
@@ -107,6 +123,255 @@ const BUILT_IN_THEMES = [
   { id: 'coastal', name: 'Coastal Light', bg: '#f0f9ff', primary: '#0ea5e9', text: '#0f172a' },
   { id: 'urban', name: 'Bold Urban', bg: '#f3f4f6', primary: '#ef4444', text: '#111827' },
   { id: 'estate', name: 'Classic Estate', bg: '#fefce8', primary: '#0f766e', text: '#1f2937' },
+]
+
+// ─── PAGE TEMPLATES ───────────────────────────────────────────────────────────
+
+interface PageTemplate {
+  id: string
+  name: string
+  description: string
+  thumbnail: string
+  category: 'profile' | 'property' | 'landing'
+  buildSections: () => Section[]
+}
+
+const TEMPLATE_CATEGORIES = [
+  { id: 'profile', label: 'Agent Profile' },
+  { id: 'property', label: 'Property Listing' },
+  { id: 'landing', label: 'Landing Page' },
+]
+
+const PAGE_TEMPLATES: PageTemplate[] = [
+  {
+    id: 'agent-profile',
+    name: 'Agent Profile',
+    description: 'Full-featured agent profile with hero, about, credentials, listings, and contact sections.',
+    thumbnail: '👤',
+    category: 'profile',
+    buildSections: () => [
+      {
+        id: generateId(),
+        settings: { bg: '#1a1a2e', paddingY: '80', paddingX: '20' },
+        columns: [{ id: generateId(), width: 100, elements: [
+          { id: generateId(), type: 'hero', props: { title: 'Your Name', subtitle: 'Licensed Real Estate Agent · Your City', bg: '#1a1a2e', color: '#ffffff', align: 'center', paddingY: '80' } },
+        ] }],
+      },
+      {
+        id: generateId(),
+        settings: { bg: '#ffffff', paddingY: '60', paddingX: '40' },
+        columns: [
+          { id: generateId(), width: 40, elements: [
+            { id: generateId(), type: 'image', props: { src: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=500&q=80', alt: 'Agent photo', borderRadius: '12', width: '100' } },
+          ] },
+          { id: generateId(), width: 60, elements: [
+            { id: generateId(), type: 'heading', props: { text: 'About Me', tag: 'h2', align: 'left', fontSize: '28', fontWeight: '700', color: '#1a1a2e', letterSpacing: '0' } },
+            { id: generateId(), type: 'text', props: { text: 'With over 10 years of experience in the real estate market, I specialize in helping families find their dream homes. My approach combines deep market knowledge with personalized service to ensure every client finds the perfect property.', align: 'left', fontSize: '16', color: '#555555', lineHeight: '1.8' } },
+            { id: generateId(), type: 'button', props: { text: 'Contact Me', align: 'left', bg: '#6366f1', color: '#ffffff', fontSize: '15', borderRadius: '8', paddingX: '28', paddingY: '12', href: '#contact' } },
+          ] },
+        ],
+      },
+      {
+        id: generateId(),
+        settings: { bg: '#f8fafc', paddingY: '50', paddingX: '40' },
+        columns: [
+          { id: generateId(), width: 33, elements: [
+            { id: generateId(), type: 'icon', props: { icon: '🏆', size: '40', color: '#6366f1', align: 'center' } },
+            { id: generateId(), type: 'heading', props: { text: '150+', tag: 'h3', align: 'center', fontSize: '32', fontWeight: '800', color: '#1a1a2e', letterSpacing: '0' } },
+            { id: generateId(), type: 'text', props: { text: 'Properties Sold', align: 'center', fontSize: '14', color: '#666666', lineHeight: '1.5' } },
+          ] },
+          { id: generateId(), width: 33, elements: [
+            { id: generateId(), type: 'icon', props: { icon: '⭐', size: '40', color: '#6366f1', align: 'center' } },
+            { id: generateId(), type: 'heading', props: { text: '4.9/5', tag: 'h3', align: 'center', fontSize: '32', fontWeight: '800', color: '#1a1a2e', letterSpacing: '0' } },
+            { id: generateId(), type: 'text', props: { text: 'Client Rating', align: 'center', fontSize: '14', color: '#666666', lineHeight: '1.5' } },
+          ] },
+          { id: generateId(), width: 34, elements: [
+            { id: generateId(), type: 'icon', props: { icon: '📋', size: '40', color: '#6366f1', align: 'center' } },
+            { id: generateId(), type: 'heading', props: { text: '10+ Yrs', tag: 'h3', align: 'center', fontSize: '32', fontWeight: '800', color: '#1a1a2e', letterSpacing: '0' } },
+            { id: generateId(), type: 'text', props: { text: 'Industry Experience', align: 'center', fontSize: '14', color: '#666666', lineHeight: '1.5' } },
+          ] },
+        ],
+      },
+      {
+        id: generateId(),
+        settings: { bg: '#ffffff', paddingY: '50', paddingX: '40' },
+        columns: [{ id: generateId(), width: 100, elements: [
+          { id: generateId(), type: 'heading', props: { text: 'Get In Touch', tag: 'h2', align: 'center', fontSize: '28', fontWeight: '700', color: '#1a1a2e', letterSpacing: '0' } },
+          { id: generateId(), type: 'text', props: { text: 'Ready to find your dream home? Let\'s start the conversation.', align: 'center', fontSize: '16', color: '#555555', lineHeight: '1.7' } },
+          { id: generateId(), type: 'divider', props: { style: 'solid', color: '#e2e8f0', height: '1', width: '30', align: 'center' } },
+          { id: generateId(), type: 'text', props: { text: '📧 agent@example.com  ·  📞 (555) 123-4567  ·  📍 Your City, State', align: 'center', fontSize: '14', color: '#666666', lineHeight: '1.8' } },
+          { id: generateId(), type: 'button', props: { text: 'Schedule a Call', align: 'center', bg: '#6366f1', color: '#ffffff', fontSize: '15', borderRadius: '8', paddingX: '32', paddingY: '14', href: '#' } },
+        ] }],
+      },
+    ],
+  },
+  {
+    id: 'agent-minimal',
+    name: 'Minimal Profile',
+    description: 'Clean, single-column agent bio with a focus on simplicity.',
+    thumbnail: '✨',
+    category: 'profile',
+    buildSections: () => [
+      {
+        id: generateId(),
+        settings: { bg: '#ffffff', paddingY: '60', paddingX: '40' },
+        columns: [{ id: generateId(), width: 100, elements: [
+          { id: generateId(), type: 'image', props: { src: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=80', alt: 'Profile photo', borderRadius: '50', width: '20' } },
+          { id: generateId(), type: 'spacer', props: { height: '16' } },
+          { id: generateId(), type: 'heading', props: { text: 'Your Name', tag: 'h1', align: 'center', fontSize: '36', fontWeight: '700', color: '#111827', letterSpacing: '-1' } },
+          { id: generateId(), type: 'text', props: { text: 'Licensed Real Estate Agent · Helping families find home since 2014', align: 'center', fontSize: '16', color: '#6b7280', lineHeight: '1.6' } },
+          { id: generateId(), type: 'divider', props: { style: 'solid', color: '#e5e7eb', height: '1', width: '20', align: 'center' } },
+          { id: generateId(), type: 'text', props: { text: 'I believe in building lasting relationships with my clients. My deep knowledge of the local market, combined with a passion for matching people with their perfect property, has helped hundreds of families achieve their real estate goals.', align: 'center', fontSize: '15', color: '#374151', lineHeight: '1.8' } },
+          { id: generateId(), type: 'spacer', props: { height: '24' } },
+          { id: generateId(), type: 'button', props: { text: 'Get In Touch →', align: 'center', bg: '#111827', color: '#ffffff', fontSize: '14', borderRadius: '50', paddingX: '32', paddingY: '14', href: '#' } },
+        ] }],
+      },
+    ],
+  },
+  {
+    id: 'property-listing',
+    name: 'Property Showcase',
+    description: 'Feature a property with gallery, details, amenities, and agent contact card.',
+    thumbnail: '🏠',
+    category: 'property',
+    buildSections: () => [
+      {
+        id: generateId(),
+        settings: { bg: '#ffffff', paddingY: '0', paddingX: '0' },
+        columns: [{ id: generateId(), width: 100, elements: [
+          { id: generateId(), type: 'image', props: { src: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80', alt: 'Property hero', borderRadius: '0', width: '100' } },
+        ] }],
+      },
+      {
+        id: generateId(),
+        settings: { bg: '#ffffff', paddingY: '40', paddingX: '40' },
+        columns: [
+          { id: generateId(), width: 65, elements: [
+            { id: generateId(), type: 'heading', props: { text: 'Modern Villa with Ocean View', tag: 'h1', align: 'left', fontSize: '32', fontWeight: '700', color: '#111827', letterSpacing: '-0.5' } },
+            { id: generateId(), type: 'text', props: { text: '📍 123 Beachfront Drive, Coastal City, CA 90210', align: 'left', fontSize: '15', color: '#6b7280', lineHeight: '1.5' } },
+          ] },
+          { id: generateId(), width: 35, elements: [
+            { id: generateId(), type: 'heading', props: { text: '$1,250,000', tag: 'h2', align: 'right', fontSize: '28', fontWeight: '800', color: '#059669', letterSpacing: '0' } },
+            { id: generateId(), type: 'text', props: { text: 'Listed 3 days ago', align: 'right', fontSize: '13', color: '#9ca3af', lineHeight: '1.5' } },
+          ] },
+        ],
+      },
+      {
+        id: generateId(),
+        settings: { bg: '#f9fafb', paddingY: '30', paddingX: '40' },
+        columns: [
+          { id: generateId(), width: 25, elements: [
+            { id: generateId(), type: 'icon', props: { icon: '🛏', size: '28', color: '#6366f1', align: 'center' } },
+            { id: generateId(), type: 'heading', props: { text: '4', tag: 'h3', align: 'center', fontSize: '24', fontWeight: '700', color: '#111827', letterSpacing: '0' } },
+            { id: generateId(), type: 'text', props: { text: 'Bedrooms', align: 'center', fontSize: '13', color: '#6b7280', lineHeight: '1.4' } },
+          ] },
+          { id: generateId(), width: 25, elements: [
+            { id: generateId(), type: 'icon', props: { icon: '🚿', size: '28', color: '#6366f1', align: 'center' } },
+            { id: generateId(), type: 'heading', props: { text: '3', tag: 'h3', align: 'center', fontSize: '24', fontWeight: '700', color: '#111827', letterSpacing: '0' } },
+            { id: generateId(), type: 'text', props: { text: 'Bathrooms', align: 'center', fontSize: '13', color: '#6b7280', lineHeight: '1.4' } },
+          ] },
+          { id: generateId(), width: 25, elements: [
+            { id: generateId(), type: 'icon', props: { icon: '📐', size: '28', color: '#6366f1', align: 'center' } },
+            { id: generateId(), type: 'heading', props: { text: '2,800', tag: 'h3', align: 'center', fontSize: '24', fontWeight: '700', color: '#111827', letterSpacing: '0' } },
+            { id: generateId(), type: 'text', props: { text: 'Sq. Ft.', align: 'center', fontSize: '13', color: '#6b7280', lineHeight: '1.4' } },
+          ] },
+          { id: generateId(), width: 25, elements: [
+            { id: generateId(), type: 'icon', props: { icon: '🚗', size: '28', color: '#6366f1', align: 'center' } },
+            { id: generateId(), type: 'heading', props: { text: '2', tag: 'h3', align: 'center', fontSize: '24', fontWeight: '700', color: '#111827', letterSpacing: '0' } },
+            { id: generateId(), type: 'text', props: { text: 'Garage', align: 'center', fontSize: '13', color: '#6b7280', lineHeight: '1.4' } },
+          ] },
+        ],
+      },
+      {
+        id: generateId(),
+        settings: { bg: '#ffffff', paddingY: '40', paddingX: '40' },
+        columns: [{ id: generateId(), width: 100, elements: [
+          { id: generateId(), type: 'heading', props: { text: 'About This Property', tag: 'h2', align: 'left', fontSize: '24', fontWeight: '700', color: '#111827', letterSpacing: '0' } },
+          { id: generateId(), type: 'text', props: { text: 'Experience luxury coastal living in this stunning modern villa. Featuring floor-to-ceiling windows that frame breathtaking ocean views, an open-concept living area perfect for entertaining, and a gourmet kitchen with top-of-the-line appliances. The master suite offers a private balcony overlooking the water, while the landscaped grounds include an infinity pool and outdoor dining area.', align: 'left', fontSize: '15', color: '#374151', lineHeight: '1.8' } },
+        ] }],
+      },
+      {
+        id: generateId(),
+        settings: { bg: '#f9fafb', paddingY: '40', paddingX: '40' },
+        columns: [
+          { id: generateId(), width: 50, elements: [
+            { id: generateId(), type: 'heading', props: { text: 'Amenities', tag: 'h3', align: 'left', fontSize: '20', fontWeight: '700', color: '#111827', letterSpacing: '0' } },
+            { id: generateId(), type: 'text', props: { text: '✓ Central Air Conditioning\n✓ Hardwood Floors\n✓ Smart Home System\n✓ Infinity Pool\n✓ Ocean View Balcony\n✓ Wine Cellar', align: 'left', fontSize: '14', color: '#374151', lineHeight: '2.0' } },
+          ] },
+          { id: generateId(), width: 50, elements: [
+            { id: generateId(), type: 'heading', props: { text: 'Nearby', tag: 'h3', align: 'left', fontSize: '20', fontWeight: '700', color: '#111827', letterSpacing: '0' } },
+            { id: generateId(), type: 'text', props: { text: '✓ Beach — 0.2 miles\n✓ Marina — 1.5 miles\n✓ Shopping Center — 2 miles\n✓ Airport — 15 miles\n✓ Schools — 1 mile\n✓ Hospital — 3 miles', align: 'left', fontSize: '14', color: '#374151', lineHeight: '2.0' } },
+          ] },
+        ],
+      },
+      {
+        id: generateId(),
+        settings: { bg: '#1a1a2e', paddingY: '50', paddingX: '40' },
+        columns: [
+          { id: generateId(), width: 60, elements: [
+            { id: generateId(), type: 'heading', props: { text: 'Interested in this property?', tag: 'h2', align: 'left', fontSize: '24', fontWeight: '700', color: '#ffffff', letterSpacing: '0' } },
+            { id: generateId(), type: 'text', props: { text: 'Contact the listing agent to schedule a viewing or request more details.', align: 'left', fontSize: '15', color: '#94a3b8', lineHeight: '1.7' } },
+          ] },
+          { id: generateId(), width: 40, elements: [
+            { id: generateId(), type: 'spacer', props: { height: '12' } },
+            { id: generateId(), type: 'button', props: { text: 'Schedule Viewing', align: 'center', bg: '#6366f1', color: '#ffffff', fontSize: '15', borderRadius: '8', paddingX: '28', paddingY: '14', href: '#' } },
+            { id: generateId(), type: 'spacer', props: { height: '8' } },
+            { id: generateId(), type: 'button', props: { text: 'Call Agent', align: 'center', bg: 'transparent', color: '#ffffff', fontSize: '14', borderRadius: '8', paddingX: '28', paddingY: '12', href: 'tel:' } },
+          ] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'landing-page',
+    name: 'Landing Page',
+    description: 'A conversion-focused landing page with hero, features grid, and call-to-action.',
+    thumbnail: '🚀',
+    category: 'landing',
+    buildSections: () => [
+      {
+        id: generateId(),
+        settings: { bg: '#0f172a', paddingY: '100', paddingX: '40' },
+        columns: [{ id: generateId(), width: 100, elements: [
+          { id: generateId(), type: 'heading', props: { text: 'Find Your Dream Home', tag: 'h1', align: 'center', fontSize: '48', fontWeight: '800', color: '#ffffff', letterSpacing: '-1' } },
+          { id: generateId(), type: 'text', props: { text: 'Browse premium listings and connect with top-rated agents in your area.', align: 'center', fontSize: '18', color: '#94a3b8', lineHeight: '1.6' } },
+          { id: generateId(), type: 'spacer', props: { height: '24' } },
+          { id: generateId(), type: 'button', props: { text: 'Browse Listings', align: 'center', bg: '#6366f1', color: '#ffffff', fontSize: '16', borderRadius: '12', paddingX: '36', paddingY: '16', href: '#' } },
+        ] }],
+      },
+      {
+        id: generateId(),
+        settings: { bg: '#ffffff', paddingY: '60', paddingX: '40' },
+        columns: [
+          { id: generateId(), width: 33, elements: [
+            { id: generateId(), type: 'icon', props: { icon: '🔍', size: '36', color: '#6366f1', align: 'center' } },
+            { id: generateId(), type: 'heading', props: { text: 'Smart Search', tag: 'h3', align: 'center', fontSize: '20', fontWeight: '700', color: '#111827', letterSpacing: '0' } },
+            { id: generateId(), type: 'text', props: { text: 'Find properties that match your criteria with our AI-powered search engine.', align: 'center', fontSize: '14', color: '#6b7280', lineHeight: '1.7' } },
+          ] },
+          { id: generateId(), width: 33, elements: [
+            { id: generateId(), type: 'icon', props: { icon: '🤝', size: '36', color: '#6366f1', align: 'center' } },
+            { id: generateId(), type: 'heading', props: { text: 'Expert Agents', tag: 'h3', align: 'center', fontSize: '20', fontWeight: '700', color: '#111827', letterSpacing: '0' } },
+            { id: generateId(), type: 'text', props: { text: 'Connect with verified, experienced agents who know your local market inside out.', align: 'center', fontSize: '14', color: '#6b7280', lineHeight: '1.7' } },
+          ] },
+          { id: generateId(), width: 34, elements: [
+            { id: generateId(), type: 'icon', props: { icon: '🔒', size: '36', color: '#6366f1', align: 'center' } },
+            { id: generateId(), type: 'heading', props: { text: 'Secure Process', tag: 'h3', align: 'center', fontSize: '20', fontWeight: '700', color: '#111827', letterSpacing: '0' } },
+            { id: generateId(), type: 'text', props: { text: 'Every transaction is backed by our secure platform with verified listings and agents.', align: 'center', fontSize: '14', color: '#6b7280', lineHeight: '1.7' } },
+          ] },
+        ],
+      },
+      {
+        id: generateId(),
+        settings: { bg: '#f8fafc', paddingY: '60', paddingX: '40' },
+        columns: [{ id: generateId(), width: 100, elements: [
+          { id: generateId(), type: 'heading', props: { text: 'Ready to Get Started?', tag: 'h2', align: 'center', fontSize: '32', fontWeight: '700', color: '#111827', letterSpacing: '-0.5' } },
+          { id: generateId(), type: 'text', props: { text: 'Join thousands of homebuyers and sellers who found their perfect match.', align: 'center', fontSize: '16', color: '#6b7280', lineHeight: '1.6' } },
+          { id: generateId(), type: 'spacer', props: { height: '20' } },
+          { id: generateId(), type: 'button', props: { text: 'Create Free Account', align: 'center', bg: '#6366f1', color: '#ffffff', fontSize: '16', borderRadius: '12', paddingX: '36', paddingY: '16', href: '#' } },
+        ] }],
+      },
+    ],
+  },
 ]
 
 // ─── ELEMENT DEFAULTS ─────────────────────────────────────────────────────────
@@ -532,6 +797,8 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
   const [selected, setSelected] = useState<Selected | null>(null)
   const [preview, setPreview] = useState<PreviewMode>('desktop')
   const [activeTab, setActiveTab] = useState('widgets')
+  const [showTemplateModal, setShowTemplateModal] = useState(false)
+  const [templateCategory, setTemplateCategory] = useState<string>('all')
   const [dragSource, setDragSource] = useState<DragSource | null>(null)
   const [dragOver, setDragOver] = useState<DragOver | null>(null)
   const [showLayoutPicker, setShowLayoutPicker] = useState(false)
@@ -547,6 +814,16 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
   const [showPublishModal, setShowPublishModal] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const { show: showToast, ToastEl } = useToast()
+
+  // ── My Pages state ────────────────────────────────────────────────────────
+  const [showMyPagesModal, setShowMyPagesModal] = useState(false)
+  const [savedPages, setSavedPages] = useState<PageBuilderData[]>([])
+  const [loadingPages, setLoadingPages] = useState(false)
+  const [pageName, setPageName] = useState('Untitled Page')
+  const [renamingPageId, setRenamingPageId] = useState<number | null>(null)
+  const [renameValue, setRenameValue] = useState('')
+  const [deletingPageId, setDeletingPageId] = useState<number | null>(null)
+  const [publishingPageId, setPublishingPageId] = useState<number | null>(null)
 
   // Mark unsaved whenever sections change after initial load
   const [initialized, setInitialized] = useState(false)
@@ -567,6 +844,9 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
           setPageUrl(pageData.page_url || '')
           setPageSlug(pageData.page_slug || null)
           
+          // Load page name
+          setPageName((pageData as any).page_data?.name || pageData.page_slug || 'Untitled Page')
+
           // Load sections from page_data if available
           // Convert unified_sections format to internal Section format
           if (pageData.unified_sections && pageData.unified_sections.length > 0) {
@@ -589,6 +869,144 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
       }
     })()
   }, [userType, showToast])
+
+  // ── My Pages CRUD ─────────────────────────────────────────────────────────
+
+  const loadAllPages = useCallback(async () => {
+    try {
+      setLoadingPages(true)
+      const pages = await pageBuilderApi.getAll(userType)
+      setSavedPages(pages || [])
+    } catch (error) {
+      console.error('Failed to load pages:', error)
+      showToast('Failed to load pages', 'error')
+    } finally {
+      setLoadingPages(false)
+    }
+  }, [userType, showToast])
+
+  const handleLoadPage = useCallback(async (page: PageBuilderData) => {
+    try {
+      setPageBuilderId(page.id || null)
+      setIsPublished(page.is_published || false)
+      setPageUrl(page.page_url || '')
+      setPageSlug(page.page_slug || null)
+      setPageName((page as any).page_data?.name || page.page_slug || 'Untitled Page')
+
+      const savedSections = (page as any).page_data?.sections || []
+      setSections(savedSections)
+      setHistory([savedSections])
+      setHistIdx(0)
+      setSelected(null)
+      setSaveStatus('saved')
+      setInitialized(false)
+      setTimeout(() => setInitialized(true), 100)
+
+      setShowMyPagesModal(false)
+      showToast('Page loaded!', 'success')
+    } catch (error: any) {
+      showToast('Failed to load page: ' + (error.message || 'Unknown error'), 'error')
+    }
+  }, [showToast])
+
+  const handleNewPage = useCallback(() => {
+    setSections([])
+    setHistory([[]])
+    setHistIdx(0)
+    setSelected(null)
+    setPageBuilderId(null)
+    setPageSlug(null)
+    setPageUrl('')
+    setIsPublished(false)
+    setPageName('Untitled Page')
+    setSaveStatus('saved')
+    setInitialized(false)
+    setTimeout(() => setInitialized(true), 100)
+    setShowMyPagesModal(false)
+    showToast('New page created', 'info')
+  }, [showToast])
+
+  const handleDeletePage = useCallback(async (id: number) => {
+    try {
+      await pageBuilderApi.delete(id)
+      setSavedPages(prev => prev.filter(p => p.id !== id))
+      // If we deleted the currently loaded page, reset to new
+      if (pageBuilderId === id) {
+        handleNewPage()
+      }
+      setDeletingPageId(null)
+      showToast('Page deleted', 'success')
+    } catch (error: any) {
+      showToast('Delete failed: ' + (error.response?.data?.message || error.message || 'Unknown error'), 'error')
+    }
+  }, [pageBuilderId, handleNewPage, showToast])
+
+  const handleTogglePublishPage = useCallback(async (page: PageBuilderData) => {
+    if (!page.id) return
+    try {
+      setPublishingPageId(page.id)
+      const result = await pageBuilderApi.publish(page.id, !page.is_published)
+      // Update in savedPages list
+      setSavedPages(prev => prev.map(p => p.id === page.id ? { ...p, is_published: result.is_published, page_url: result.page_url } : p))
+      // If this is the currently loaded page, update local state too
+      if (pageBuilderId === page.id) {
+        setIsPublished(result.is_published || false)
+        if (result.page_url) setPageUrl(result.page_url)
+      }
+      showToast(result.is_published ? 'Page published!' : 'Page unpublished', result.is_published ? 'success' : 'info')
+    } catch (error: any) {
+      showToast('Publish failed: ' + (error.response?.data?.message || error.message || 'Unknown error'), 'error')
+    } finally {
+      setPublishingPageId(null)
+    }
+  }, [pageBuilderId, showToast])
+
+  const handleDuplicatePage = useCallback(async (page: PageBuilderData) => {
+    try {
+      const existingPageData = (page as any).page_data || {}
+      const existingName = existingPageData.name || page.page_slug || 'Untitled Page'
+
+      const copySlug = existingName !== 'Untitled Page'
+        ? `page/${slugify(existingName)}-copy`
+        : undefined
+
+      const saved = await pageBuilderApi.save({
+        user_type: userType,
+        page_type: (page.page_type as 'profile' | 'property') || 'profile',
+        page_data: { ...page, name: `${existingName} (Copy)`, page_data: { ...existingPageData, name: `${existingName} (Copy)` } } as any,
+        page_slug: copySlug,
+      })
+
+      setSavedPages(prev => [...prev, saved])
+      showToast('Page duplicated!', 'success')
+    } catch (error: any) {
+      showToast('Duplicate failed: ' + (error.response?.data?.message || error.message || 'Unknown error'), 'error')
+    }
+  }, [userType, showToast])
+
+  const handleRenamePage = useCallback(async (id: number, newName: string) => {
+    if (!newName.trim()) return
+    try {
+      const page = savedPages.find(p => p.id === id)
+      if (!page) return
+      const existingPageData = (page as any).page_data || {}
+      const newSlug = `page/${slugify(newName.trim())}`
+      const result = await pageBuilderApi.update(id, {
+        page_data: { ...existingPageData, name: newName.trim() } as any,
+        page_slug: newSlug,
+      })
+      setSavedPages(prev => prev.map(p => p.id === id ? { ...p, page_slug: result.page_slug || newSlug, page_url: result.page_url || buildPageUrl(newSlug), page_data: { ...existingPageData, name: newName.trim() } } as any : p))
+      if (pageBuilderId === id) {
+        setPageName(newName.trim())
+        setPageSlug(result.page_slug || newSlug)
+        setPageUrl(result.page_url || buildPageUrl(newSlug))
+      }
+      setRenamingPageId(null)
+      showToast('Page renamed', 'success')
+    } catch (error: any) {
+      showToast('Rename failed: ' + (error.response?.data?.message || error.message || 'Unknown error'), 'error')
+    }
+  }, [savedPages, pageBuilderId, showToast])
 
   // ── History ───────────────────────────────────────────────────────────────
 
@@ -623,48 +1041,100 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
 
   // ── Save ──────────────────────────────────────────────────────────────────
 
+  const buildPagePayload = useCallback(() => {
+    const pageData: Partial<PageBuilderData> = {
+      unified_sections: sections.map(s => ({
+        id: s.id,
+        name: `Section ${s.id}`,
+        visible: true,
+        type: 'custom',
+        content: JSON.stringify(s),
+      })),
+    }
+    return {
+      ...pageData,
+      page_data: { sections },
+      name: pageName,
+    } as any
+  }, [sections, pageName])
+
   const handleSave = useCallback(async () => {
     if (!initialized) return
     try {
       setSaveStatus('saving')
-      
-      // Convert sections to page_data format
-      const pageData: Partial<PageBuilderData> = {
-        unified_sections: sections.map(s => ({
-          id: s.id,
-          name: `Section ${s.id}`,
-          visible: true,
-          type: 'custom',
-          content: JSON.stringify(s), // Store full section data
-        })),
+
+      const payload = buildPagePayload()
+
+      // Derive slug from the page title
+      const derivedSlug = pageName && pageName !== 'Untitled Page'
+        ? `page/${slugify(pageName)}`
+        : pageSlug || undefined
+
+      let saved: PageBuilderData
+      if (pageBuilderId) {
+        // Update existing page
+        saved = await pageBuilderApi.update(pageBuilderId, {
+          page_data: payload,
+          page_slug: derivedSlug,
+        })
+      } else {
+        // Create new page
+        saved = await pageBuilderApi.save({
+          user_type: userType,
+          page_type: 'profile',
+          page_data: payload,
+          page_slug: derivedSlug,
+        })
       }
-      
-      // Store sections in page_data for easy retrieval (using any to allow nested structure)
-      const pageDataWithSections = {
-        ...pageData,
-        page_data: {
-          sections,
-        },
-      } as any
+
+      setPageBuilderId(saved.id || null)
+      const slug = saved.page_slug || derivedSlug
+      if (slug) setPageSlug(slug)
+      setPageUrl(saved.page_url || (slug ? buildPageUrl(slug) : ''))
+      setIsPublished(saved.is_published || false)
+      setSaveStatus('saved')
+      showToast('Changes saved!', 'success')
+      return saved
+    } catch (error: any) {
+      setSaveStatus('error')
+      showToast('Save failed: ' + (error.response?.data?.message || error.message || 'Unknown error'), 'error')
+      return null
+    }
+  }, [sections, userType, pageSlug, pageBuilderId, pageName, initialized, showToast, buildPagePayload])
+
+  const handleSaveAsNew = useCallback(async () => {
+    if (!initialized) return
+    try {
+      setSaveStatus('saving')
+      const payload = buildPagePayload()
+      payload.name = `${pageName} (Copy)`
+      payload.page_data = { ...payload.page_data, name: `${pageName} (Copy)` }
+
+      // Derive slug from page name, append -copy
+      const derivedSlug = pageName && pageName !== 'Untitled Page'
+        ? `page/${slugify(pageName)}-copy`
+        : undefined
 
       const saved = await pageBuilderApi.save({
         user_type: userType,
         page_type: 'profile',
-        page_data: pageDataWithSections,
-        page_slug: pageSlug || undefined,
+        page_data: payload,
+        page_slug: derivedSlug,
       })
 
       setPageBuilderId(saved.id || null)
-      if (saved.page_url) setPageUrl(saved.page_url)
-      if (saved.page_slug) setPageSlug(saved.page_slug)
+      const slug = saved.page_slug || derivedSlug
+      if (slug) setPageSlug(slug)
+      setPageUrl(saved.page_url || (slug ? buildPageUrl(slug) : ''))
       setIsPublished(saved.is_published || false)
+      setPageName(`${pageName} (Copy)`)
       setSaveStatus('saved')
-      showToast('Changes saved!', 'success')
+      showToast('Saved as new page!', 'success')
     } catch (error: any) {
       setSaveStatus('error')
       showToast('Save failed: ' + (error.response?.data?.message || error.message || 'Unknown error'), 'error')
     }
-  }, [sections, userType, pageSlug, initialized, showToast])
+  }, [sections, userType, pageName, initialized, showToast, buildPagePayload])
 
   // Keyboard shortcut: Ctrl+S
   useEffect(() => {
@@ -681,19 +1151,24 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
   // ── Publish ───────────────────────────────────────────────────────────────
 
   const handlePublish = async () => {
-    if (!pageSlug) {
-      // Save first to get a slug
-      await handleSave()
-      if (!pageSlug) {
+    let id = pageBuilderId
+
+    // Save first if no ID yet (new page)
+    if (!id) {
+      const saved = await handleSave()
+      if (!saved?.id) {
         showToast('Please save your page first before publishing.', 'error')
         return
       }
+      id = saved.id
     }
+
     try {
-      const result = await pageBuilderApi.publishBySlug(pageSlug)
+      const result = await pageBuilderApi.publish(id, true)
       setIsPublished(result.is_published || false)
-      if (result.page_url) setPageUrl(result.page_url)
-      if (result.page_slug) setPageSlug(result.page_slug)
+      const slug = result.page_slug || pageSlug
+      if (slug) setPageSlug(slug)
+      setPageUrl(result.page_url || (slug ? buildPageUrl(slug) : ''))
       showToast('Page published!', 'success')
       setShowPublishModal(true)
     } catch (error: any) {
@@ -702,7 +1177,7 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
   }
 
   const handleUnpublish = async () => {
-    if (!pageSlug || !pageBuilderId) return
+    if (!pageBuilderId) return
     try {
       const result = await pageBuilderApi.publish(pageBuilderId, false)
       setIsPublished(result.is_published || false)
@@ -845,7 +1320,14 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 mr-1">
               <span className="text-gray-900 font-bold text-sm tracking-tight">PageCraft</span>
-              <span className="text-gray-500 text-xs">/ My Page</span>
+              <span className="text-gray-500 text-xs">/</span>
+              <input
+                type="text"
+                value={pageName}
+                onChange={(e) => { setPageName(e.target.value); setSaveStatus('unsaved') }}
+                className="text-gray-700 text-xs bg-transparent border-none outline-none focus:text-gray-900 max-w-32 truncate hover:bg-gray-50 px-1 py-0.5 rounded transition-colors"
+                title="Click to rename page"
+              />
             </div>
             <div className="w-px h-5 bg-gray-300" />
             <button onClick={undo} disabled={histIdx === 0} className="p-1.5 rounded text-gray-500 hover:text-gray-900 hover:bg-gray-100 disabled:opacity-30 transition-colors text-sm" title="Undo (Ctrl+Z)">↩</button>
@@ -868,7 +1350,17 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
             ))}
           </div>
 
-         
+          {/* Right: My Pages + Templates buttons */}
+          <div className="flex items-center gap-2">
+            <button onClick={() => { setShowMyPagesModal(true); loadAllPages() }}
+              className="flex items-center gap-2 px-4 py-1.5 bg-gray-50 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors text-sm font-semibold">
+              <span>📄</span> My Pages
+            </button>
+            <button onClick={() => setShowTemplateModal(true)}
+              className="flex items-center gap-2 px-4 py-1.5 bg-rental-blue-50 text-rental-blue-700 border border-rental-blue-200 rounded-lg hover:bg-rental-blue-100 transition-colors text-sm font-semibold">
+              <span>⬡</span> Templates
+            </button>
+          </div>
         </header>
 
         {/* ── Main Area ── */}
@@ -963,10 +1455,18 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
                   <button onClick={handleCopyUrl} className="px-2 py-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 text-xs border border-gray-300 transition-colors">⧉</button>
                 </div>
               )}
-              <button onClick={handleSave} disabled={saveStatus === 'saving'}
-                className="w-full py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50 transition-colors border border-gray-300">
-                {saveStatus === 'saving' ? 'Saving…' : 'Save Changes'}
-              </button>
+              <div className="flex gap-1.5">
+                <button onClick={handleSave} disabled={saveStatus === 'saving'}
+                  className="flex-1 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50 transition-colors border border-gray-300">
+                  {saveStatus === 'saving' ? 'Saving…' : 'Save'}
+                </button>
+                {pageBuilderId && (
+                  <button onClick={handleSaveAsNew} disabled={saveStatus === 'saving'}
+                    className="py-1.5 px-2.5 text-xs font-semibold text-gray-500 bg-gray-50 rounded-lg hover:bg-gray-100 disabled:opacity-50 transition-colors border border-gray-300" title="Save as new page">
+                    +
+                  </button>
+                )}
+              </div>
               <button onClick={() => setShowPublishModal(true)}
                 className={`w-full py-1.5 text-xs font-semibold rounded-lg transition-colors ${isPublished ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-rental-blue-600 hover:bg-rental-blue-700 text-white'}`}>
                 {isPublished ? 'Manage Publishing' : 'Publish Page'}
@@ -1055,6 +1555,234 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
 
         </div>
       </div>
+
+      {/* ── My Pages Modal ── */}
+      {showMyPagesModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => { setShowMyPagesModal(false); setDeletingPageId(null); setRenamingPageId(null) }}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
+              <div>
+                <h3 className="text-base font-bold text-gray-900">My Pages</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Manage all your pages — each can be published independently.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={handleNewPage}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-rental-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-rental-blue-700 transition-colors">
+                  <span>+</span> New Page
+                </button>
+                <button onClick={() => { setShowMyPagesModal(false); setDeletingPageId(null); setRenamingPageId(null) }} className="text-gray-400 hover:text-gray-900 text-lg leading-none p-1">✕</button>
+              </div>
+            </div>
+
+            {/* Stats bar */}
+            {savedPages.length > 0 && (
+              <div className="flex items-center gap-4 px-6 py-2.5 bg-gray-50 border-b border-gray-100 text-xs text-gray-500 shrink-0">
+                <span>{savedPages.length} total page{savedPages.length !== 1 ? 's' : ''}</span>
+                <span>·</span>
+                <span className="text-emerald-600 font-medium">{savedPages.filter(p => p.is_published).length} published</span>
+                <span>·</span>
+                <span>{savedPages.filter(p => !p.is_published).length} draft{savedPages.filter(p => !p.is_published).length !== 1 ? 's' : ''}</span>
+              </div>
+            )}
+
+            {/* Page list */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {loadingPages ? (
+                <div className="flex items-center justify-center py-16">
+                  <div className="text-gray-500 text-sm">Loading pages...</div>
+                </div>
+              ) : savedPages.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="text-4xl mb-3 opacity-30">📄</div>
+                  <p className="text-gray-500 text-sm font-medium mb-1">No saved pages yet</p>
+                  <p className="text-gray-400 text-xs mb-4">Create a new page or apply a template to get started</p>
+                  <button onClick={handleNewPage}
+                    className="px-4 py-2 bg-rental-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-rental-blue-700 transition-colors">
+                    + Create Your First Page
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {savedPages.map((page) => {
+                    const name = (page as any).page_data?.name || page.page_slug || 'Untitled Page'
+                    const isActive = pageBuilderId === page.id
+                    const updatedAt = page.updated_at ? new Date(page.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : ''
+                    const isTogglingPublish = publishingPageId === page.id
+                    return (
+                      <div key={page.id}
+                        className={`flex items-center gap-3 p-4 rounded-xl border transition-all ${
+                          isActive ? 'border-rental-blue-300 bg-rental-blue-50/50' : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                        }`}>
+                        {/* Left icon */}
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                          page.is_published ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-500'
+                        }`}>
+                          <span className="text-lg">{page.is_published ? '🌐' : '📄'}</span>
+                        </div>
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          {renamingPageId === page.id ? (
+                            <div className="flex items-center gap-1.5">
+                              <input type="text" value={renameValue} onChange={(e) => setRenameValue(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === 'Enter') handleRenamePage(page.id!, renameValue); if (e.key === 'Escape') setRenamingPageId(null) }}
+                                className="flex-1 text-sm font-semibold text-gray-900 bg-white border border-rental-blue-400 rounded px-2 py-1 outline-none focus:ring-1 focus:ring-rental-blue-400"
+                                autoFocus />
+                              <button onClick={() => handleRenamePage(page.id!, renameValue)}
+                                className="text-xs text-rental-blue-600 hover:text-rental-blue-800 font-semibold px-1">Save</button>
+                              <button onClick={() => setRenamingPageId(null)}
+                                className="text-xs text-gray-500 hover:text-gray-700 px-1">Cancel</button>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-semibold text-gray-900 truncate">{name}</p>
+                                {isActive && <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-rental-blue-100 text-rental-blue-700">Current</span>}
+                              </div>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <p className="text-xs text-gray-500 capitalize">{page.page_type || 'profile'}</p>
+                                {updatedAt && <><span className="text-gray-300">·</span><p className="text-xs text-gray-400">{updatedAt}</p></>}
+                                {page.is_published && (page.page_url || page.page_slug) && (
+                                  <>
+                                    <span className="text-gray-300">·</span>
+                                    <a href={page.page_url || buildPageUrl(page.page_slug!)} target="_blank" rel="noopener noreferrer"
+                                      className="text-xs text-rental-blue-500 hover:text-rental-blue-700 truncate max-w-36" onClick={(e) => e.stopPropagation()}>
+                                      ↗ View live
+                                    </a>
+                                  </>
+                                )}
+                              </div>
+                            </>
+                          )}
+                        </div>
+
+                        {/* Actions */}
+                        {renamingPageId !== page.id && (
+                          <div className="flex items-center gap-1 shrink-0">
+                            {deletingPageId === page.id ? (
+                              <div className="flex items-center gap-1 bg-red-50 border border-red-200 rounded-lg px-2 py-1">
+                                <span className="text-xs text-red-600 font-medium">Delete?</span>
+                                <button onClick={() => handleDeletePage(page.id!)} className="text-xs text-red-700 font-bold hover:text-red-900 px-1">Yes</button>
+                                <button onClick={() => setDeletingPageId(null)} className="text-xs text-gray-500 hover:text-gray-700 px-1">No</button>
+                              </div>
+                            ) : (
+                              <>
+                                {/* Publish / Unpublish toggle */}
+                                <button
+                                  onClick={() => handleTogglePublishPage(page)}
+                                  disabled={isTogglingPublish}
+                                  className={`px-2.5 py-1.5 text-xs font-semibold rounded-lg transition-colors border ${
+                                    page.is_published
+                                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                                      : 'bg-gray-50 text-gray-600 border-gray-300 hover:bg-gray-100'
+                                  } ${isTogglingPublish ? 'opacity-50' : ''}`}
+                                  title={page.is_published ? 'Unpublish this page' : 'Publish this page'}>
+                                  {isTogglingPublish ? '…' : page.is_published ? '✓ Live' : 'Publish'}
+                                </button>
+                                {/* Open */}
+                                <button onClick={() => handleLoadPage(page)}
+                                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+                                    isActive ? 'bg-gray-200 text-gray-500 cursor-default' : 'bg-rental-blue-600 text-white hover:bg-rental-blue-700'
+                                  }`}
+                                  disabled={isActive}>
+                                  {isActive ? 'Loaded' : 'Open'}
+                                </button>
+                                {/* More actions */}
+                                <button onClick={() => handleDuplicatePage(page)}
+                                  className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors" title="Duplicate">
+                                  <span className="text-xs">⧉</span>
+                                </button>
+                                <button onClick={() => { setRenamingPageId(page.id!); setRenameValue(name) }}
+                                  className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors" title="Rename">
+                                  <span className="text-xs">✏️</span>
+                                </button>
+                                <button onClick={() => setDeletingPageId(page.id!)}
+                                  className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Delete">
+                                  <span className="text-xs">🗑️</span>
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-gray-200 px-6 py-3 flex items-center justify-between shrink-0">
+              <p className="text-xs text-gray-400">{savedPages.length} page{savedPages.length !== 1 ? 's' : ''} · {savedPages.filter(p => p.is_published).length} published</p>
+              <button onClick={() => loadAllPages()} className="text-xs text-rental-blue-600 hover:text-rental-blue-800 font-medium transition-colors">
+                ↻ Refresh
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Template Modal ── */}
+      {showTemplateModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => setShowTemplateModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
+              <div>
+                <h3 className="text-base font-bold text-gray-900">Choose a Template</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Pick a starting point for your page — you can customize everything after.</p>
+              </div>
+              <button onClick={() => setShowTemplateModal(false)} className="text-gray-400 hover:text-gray-900 text-lg leading-none p-1">✕</button>
+            </div>
+
+            {/* Category filters */}
+            <div className="flex items-center gap-1.5 px-6 py-3 border-b border-gray-100 shrink-0">
+              <button onClick={() => setTemplateCategory('all')}
+                className={`px-3 py-1.5 text-xs rounded-lg border font-medium transition-colors ${templateCategory === 'all' ? 'border-rental-blue-500 bg-rental-blue-50 text-rental-blue-700' : 'border-gray-300 text-gray-600 hover:border-gray-400 bg-white'}`}>
+                All
+              </button>
+              {TEMPLATE_CATEGORIES.map((cat) => (
+                <button key={cat.id} onClick={() => setTemplateCategory(cat.id)}
+                  className={`px-3 py-1.5 text-xs rounded-lg border font-medium transition-colors ${templateCategory === cat.id ? 'border-rental-blue-500 bg-rental-blue-50 text-rental-blue-700' : 'border-gray-300 text-gray-600 hover:border-gray-400 bg-white'}`}>
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Template grid */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="grid grid-cols-2 gap-4">
+                {PAGE_TEMPLATES
+                  .filter(t => templateCategory === 'all' || t.category === templateCategory)
+                  .map((template) => (
+                  <button key={template.id}
+                    onClick={() => {
+                      const newSections = template.buildSections()
+                      update(() => newSections)
+                      setSelected(null)
+                      setShowTemplateModal(false)
+                      showToast(`Applied "${template.name}" template`, 'success')
+                    }}
+                    className="text-left p-4 rounded-xl border border-gray-200 hover:border-rental-blue-500 hover:shadow-lg bg-white transition-all group">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-3xl leading-none">{template.thumbnail}</span>
+                      <p className="text-sm font-bold text-gray-900 group-hover:text-rental-blue-700 transition-colors">{template.name}</p>
+                    </div>
+                    <p className="text-xs text-gray-500 leading-relaxed">{template.description}</p>
+                    <div className="mt-3 flex items-center gap-1.5">
+                      <span className="inline-block px-2 py-0.5 text-[10px] font-medium rounded-full bg-gray-100 text-gray-600 capitalize">{template.category}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+              {sections.length > 0 && (
+                <p className="text-[11px] text-gray-400 text-center mt-4">Applying a template will replace your current page sections</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Publish Modal ── */}
       {showPublishModal && (
