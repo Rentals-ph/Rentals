@@ -334,9 +334,11 @@ class AgentController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            // Get all approved and active agents
-            $agents = User::where('role', 'agent')
-                ->where('status', 'approved')
+            // Get all approved and active agents and brokers (brokers also appear on /agents)
+            $agents = User::whereIn('role', ['agent', 'broker'])
+                ->where(function ($q) {
+                    $q->where('status', 'approved')->orWhere('role', 'broker');
+                })
                 ->where('is_active', true)
                 ->withCount('properties')
                 ->select([

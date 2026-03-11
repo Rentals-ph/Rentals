@@ -91,6 +91,12 @@ export default function AgentDetailsPage() {
     email: '',
     message: '',
   })
+  const [profileQrUrl, setProfileQrUrl] = useState<string>('')
+  useEffect(() => {
+    if (typeof window !== 'undefined' && Number.isFinite(agentId)) {
+      setProfileQrUrl(`${window.location.origin}/agents/${agentId}`)
+    }
+  }, [agentId])
 
   const formatPrice = (price: number): string => `₱${price.toLocaleString('en-US')}`
   const formatPriceType = (priceType: string | null | undefined): string | undefined => {
@@ -241,23 +247,11 @@ export default function AgentDetailsPage() {
             <div className="mx-auto px-6 sm:px-10 lg:px-20 py-8 sm:py-10 md:py-12" style={{ background: 'linear-gradient(135deg, #0ea5e9 0%, #1d4ed8 40%, #f97316 100%)' }}>
               {/* Top row: 3 columns on large screens */}
               <div className="grid grid-cols-1 lg:grid-cols-[70%_30%] gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
-                {/* Left column: avatar + main info + company + QR */}
-                <div className="relative bg-white/10 backdrop-blur-md rounded-3xl px-5 sm:px-6 md:px-7 lg:px-8 py-5 sm:py-6 md:py-7 shadow-lg">
-                  {/* Company badge in top-right */}
-                  <div className="absolute top-4 right-4 flex flex-col items-end gap-2 text-right">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white flex items-center justify-center shadow-md">
-                      <span className="text-[10px] sm:text-xs font-semibold text-blue-700">
-                        Company
-                      </span>
-                    </div>
-                    <div className="flex flex-col items-end gap-0.5">
-                      <p className="m-0 text-xs sm:text-sm font-semibold text-white">Filipino Homes</p>
-                      <p className="m-0 text-[11px] sm:text-xs text-blue-100/90">Cebu City</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4 sm:gap-5 md:gap-6">
-                    <div className="w-20 h-20 sm:w-24 sm:h-44 md:w-48 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg ring-4 ring-white/40 bg-white">
+                {/* Left column: avatar + main info + company, then buttons+QR at bottom */}
+                <div className="relative flex flex-col bg-white/10 backdrop-blur-md rounded-3xl px-5 sm:px-6 md:px-7 lg:px-8 py-5 sm:py-6 md:py-7 shadow-lg min-h-[320px] sm:min-h-[360px]">
+                  {/* Avatar + name + company row (enlarged) */}
+                  <div className="flex items-center gap-5 sm:gap-6 md:gap-8 flex-1 min-h-0">
+                    <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg ring-4 ring-white/40 bg-white">
                       <img
                         src={getAgentImageUrl(manager.image)}
                         alt={manager.name}
@@ -270,29 +264,27 @@ export default function AgentDetailsPage() {
                         }}
                       />
                       <div
-                        className="w-full h-full flex items-center justify-center text-white font-semibold text-2xl sm:text-3xl rounded-2xl hidden"
-                       
+                        className="w-full h-full flex items-center justify-center text-white font-semibold text-3xl sm:text-4xl rounded-2xl hidden"
                       >
                         {getInitials(manager.name)}
                       </div>
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <h1 className="m-0 text-xl sm:text-2xl md:text-3xl font-bold text-white truncate">
+                      <h1 className="m-0 text-2xl sm:text-3xl md:text-4xl font-bold text-white truncate">
                         {manager.name}
                       </h1>
-                      <p className="m-0 mt-1 text-xs sm:text-sm md:text-base text-blue-100 font-medium">
+                      <p className="m-0 mt-1.5 text-sm sm:text-base md:text-lg text-blue-100 font-medium">
                         Property Agent
                       </p>
-
-                      <div className="mt-3 flex items-center gap-2 text-xs sm:text-sm text-blue-50 flex-wrap">
-                        <span className="inline-flex items-center gap-1">
+                      <div className="mt-4 flex items-center gap-2.5 text-sm sm:text-base text-blue-50 flex-wrap">
+                        <span className="inline-flex items-center gap-1.5">
                           <span className="font-semibold">{roundedRating.toFixed(1)}</span>
                           <span className="flex items-center gap-0.5">
                             {[...Array(5)].map((_, i) => (
                               <svg
                                 key={i}
-                                className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${i < Math.round(overallRating) ? 'text-yellow-300' : 'text-blue-200/60'}`}
+                                className={`w-4 h-4 sm:w-5 sm:h-5 ${i < Math.round(overallRating) ? 'text-yellow-300' : 'text-blue-200/60'}`}
                                 viewBox="0 0 24 24"
                                 fill="currentColor"
                               >
@@ -304,44 +296,65 @@ export default function AgentDetailsPage() {
                         <span className="opacity-80">Top Rated Agent</span>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="mt-5 flex flex-wrap gap-3">
-                    <a
-                      href="#listings"
-                      className="inline-flex items-center justify-center rounded-full bg-white text-blue-700 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold shadow-md hover:bg-blue-50 transition-colors"
-                    >
-                      View Listings
-                    </a>
-                    <a
-                      href="#contact-manager"
-                      className="inline-flex items-center justify-center rounded-full bg-emerald-500/90 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-white shadow-md hover:bg-emerald-400 transition-colors"
-                    >
-                      WhatsApp
-                    </a>
-                    <a
-                      href="#contact-manager"
-                      className="inline-flex items-center justify-center rounded-full border border-white/60 bg-white/10 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-white/20 transition-colors"
-                    >
-                      Email
-                    </a>
-                  </div>
-
-                  {/* Bottom-right QR code */}
-                  <div className="mt-5 flex items-center justify-end gap-3">
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white flex items-center justify-center shadow-md">
-                      <div className="w-14 h-14 border-2 border-gray-900 grid grid-cols-3 grid-rows-3 gap-0.5">
-                        {[...Array(9)].map((_, i) => (
-                          <div
-                            key={i}
-                            className={i % 2 === 0 ? 'bg-gray-900' : 'bg-transparent'}
-                          />
-                        ))}
+                    {/* Company badge inside this row */}
+                    <div className="flex flex-col items-end gap-2 text-right flex-shrink-0">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white flex items-center justify-center shadow-md">
+                        <span className="text-xs sm:text-sm font-semibold text-blue-700">Company</span>
+                      </div>
+                      <div className="flex flex-col items-end gap-0.5">
+                        <p className="m-0 text-sm sm:text-base font-semibold text-white">Filipino Homes</p>
+                        <p className="m-0 text-xs sm:text-sm text-blue-100/90">Cebu City</p>
                       </div>
                     </div>
-                    <p className="m-0 text-[11px] sm:text-xs text-blue-100/90">
-                      Scan to view my profile
-                    </p>
+                  </div>
+
+                  {/* Buttons + QR at bottom of card */}
+                  <div className="mt-6 pt-5 border-t border-white/20 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+                    <div className="flex flex-wrap gap-3">
+                      <a
+                        href="#listings"
+                        className="inline-flex items-center justify-center rounded-full bg-white text-blue-700 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold shadow-md hover:bg-blue-50 transition-colors"
+                      >
+                        View Listings
+                      </a>
+                      <a
+                        href="#contact-manager"
+                        className="inline-flex items-center justify-center rounded-full bg-emerald-500/90 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-white shadow-md hover:bg-emerald-400 transition-colors"
+                      >
+                        WhatsApp
+                      </a>
+                      <a
+                        href="#contact-manager"
+                        className="inline-flex items-center justify-center rounded-full border border-white/60 bg-white/10 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-white/20 transition-colors"
+                      >
+                        Email
+                      </a>
+                    </div>
+                    {/* QR code - same as digital business card */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white p-1.5 flex items-center justify-center shadow-md flex-shrink-0">
+                        {profileQrUrl ? (
+                          <img
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(profileQrUrl)}`}
+                            alt="QR code to profile"
+                            className="w-full h-full rounded-lg object-contain"
+                          />
+                        ) : (
+                          <div className="w-14 h-14 border-2 border-gray-900 grid grid-cols-3 grid-rows-3 gap-0.5 rounded">
+                            {[...Array(9)].map((_, i) => (
+                              <div
+                                key={i}
+                                className={i % 2 === 0 ? 'bg-gray-900' : 'bg-transparent'}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <p className="m-0 text-[11px] sm:text-xs text-blue-100/90 whitespace-nowrap">
+                        Scan to view my profile
+                      </p>
+                    </div>
                   </div>
                 </div>
 
