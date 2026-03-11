@@ -142,7 +142,7 @@ export function BasicInfoStepContent({ nextStepPath, showZoom = false }: BasicIn
               </label>
               <button
                 type="button"
-                className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-purple-600 bg-gradient-to-br from-purple-600 to-purple-700 px-3.5 py-1.5 text-xs font-semibold text-white transition-all hover:from-purple-700 hover:to-purple-800 hover:-translate-y-px hover:shadow-[0_2px_8px_rgba(124,58,237,0.35)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-55"
+                className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-blue-600 bg-blue-600 px-3.5 py-1.5 text-xs font-semibold text-white transition-all hover:bg-blue-700 hover:-translate-y-px hover:shadow-[0_2px_8px_rgba(37,99,235,0.35)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-55"
                 disabled={!category || !title || isGenerating}
                 onClick={handleAiGenerate}
                 title={!category || !title ? 'Select a category and enter a title first' : 'Generate description with AI'}

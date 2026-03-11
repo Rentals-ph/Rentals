@@ -77,7 +77,7 @@ export function CreateListingStepLayout({
     : 0
 
   return (
-    <div className="flex min-h-screen bg-gray-50 font-outfit">
+    <div className="flex min-h-screen bg-gray-100 font-outfit">
       <AppSidebar />
       <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4">
         {header}

@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * UnifiedListingForm — warm editorial design
+ * UnifiedListingForm — system palette (gray-100, white, blue, gray borders)
  *
  * Three distinct AI modes:
  *   1. AI Quick Fill (Paste & Fill bar)
@@ -282,18 +282,18 @@ export interface UnifiedListingFormProps {
 
 // ─── Shared field styles ──────────────────────────────────────────────────────
 
-const FL = 'block text-[11px] font-semibold text-[#7A7268] uppercase tracking-[0.4px] mb-1.5'
-const FI = 'w-full h-9 border border-[#E2DDD4] rounded-[6px] px-2.5 text-[13px] text-[#1A1714] bg-white outline-none focus:border-[#C8622A] transition-colors'
-const FS = 'w-full h-9 border border-[#E2DDD4] rounded-[6px] px-2.5 pr-6 text-[13px] text-[#1A1714] bg-white outline-none appearance-none focus:border-[#C8622A] transition-colors'
-const FT = 'w-full border border-[#E2DDD4] rounded-[6px] px-2.5 py-2 text-[13px] text-[#1A1714] bg-white outline-none resize-none focus:border-[#C8622A] transition-colors'
+const FL = 'block text-[11px] font-semibold text-gray-500 uppercase tracking-[0.4px] mb-1.5'
+const FI = 'w-full h-9 border border-gray-300 rounded-[6px] px-2.5 text-[13px] text-gray-900 bg-white outline-none focus:border-blue-600 transition-colors'
+const FS = 'w-full h-9 border border-gray-300 rounded-[6px] px-2.5 pr-6 text-[13px] text-gray-900 bg-white outline-none appearance-none focus:border-blue-600 transition-colors'
+const FT = 'w-full border border-gray-300 rounded-[6px] px-2.5 py-2 text-[13px] text-gray-900 bg-white outline-none resize-none focus:border-blue-600 transition-colors'
 
 // ─── SectionBadge ─────────────────────────────────────────────────────────────
 
 function SectionBadge({ num, isDone, isActive }: { num: number; isDone: boolean; isActive: boolean }) {
   const base = 'w-[22px] h-[22px] rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-semibold'
-  if (isDone)   return <div className={`${base} bg-[#2D7A52] border border-[#2D7A52]`}><FiCheck className="w-2.5 h-2.5 text-white" /></div>
-  if (isActive) return <div className={`${base} bg-[#C8622A] border border-[#C8622A] text-white`}>{num}</div>
-  return             <div className={`${base} bg-[#F0EDE6] border border-[#E2DDD4] text-[#7A7268]`}>{num}</div>
+  if (isDone)   return <div className={`${base} bg-emerald-600 border border-emerald-600`}><FiCheck className="w-2.5 h-2.5 text-white" /></div>
+  if (isActive) return <div className={`${base} bg-blue-600 border border-blue-600 text-white`}>{num}</div>
+  return             <div className={`${base} bg-gray-50 border border-gray-300 text-gray-500`}>{num}</div>
 }
 
 // ─── AI Co-Pilot Panel ────────────────────────────────────────────────────────
@@ -474,30 +474,30 @@ function CoPilotPanel({
   return (
     <>
       {/* Header */}
-      <div className="flex-shrink-0 flex items-center justify-between px-[18px] py-4 border-b border-[#3A342E]">
-        <div className="flex items-center gap-2 text-[12px] font-semibold text-[#F0EDE6]">
-          <span className="inline-block w-[7px] h-[7px] rounded-full bg-[#E8996A] animate-pulse" />
+      <div className="flex-shrink-0 flex items-center justify-between px-[18px] py-4 border-b border-gray-200">
+        <div className="flex items-center gap-2 text-[12px] font-semibold text-gray-900">
+          <span className="inline-block w-[7px] h-[7px] rounded-full bg-blue-500 animate-pulse" />
           AI Co-Pilot
         </div>
-        <button onClick={onClose} className="text-[16px] text-[#8A8278] hover:text-[#F0EDE6] leading-none transition-colors">
+        <button onClick={onClose} className="text-[16px] text-gray-400 hover:text-gray-900 leading-none transition-colors">
           ‹
         </button>
       </div>
 
       {/* Field completion status */}
-      <div className="flex-shrink-0 px-[18px] py-3 border-b border-[#3A342E]">
-        <div className="text-[10px] font-semibold text-[#8A8278] uppercase tracking-[0.6px] mb-2">Field Completion</div>
+      <div className="flex-shrink-0 px-[18px] py-3 border-b border-gray-200">
+        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-[0.6px] mb-2">Field Completion</div>
         {fieldStatuses.map(({ label, value, warn }) => {
           const isDone = !!value && !warn
           const isWarn = !!value && !!warn
           return (
             <div key={label} className="flex items-center justify-between py-[5px] border-b border-white/[0.04] last:border-0">
               <div className="flex items-center gap-1.5">
-                <span className={`inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 ${isDone ? 'bg-[#2D7A52]' : isWarn ? 'bg-[#E8C22A]' : 'bg-[#3A342E]'}`} />
-                <span className="text-[12px] text-[#8A8278]">{label}</span>
+                <span className={`inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 ${isDone ? 'bg-emerald-600' : isWarn ? 'bg-amber-500' : 'bg-gray-400'}`} />
+                <span className="text-[12px] text-gray-400">{label}</span>
               </div>
               <span className={`text-[12px] font-medium max-w-[130px] overflow-hidden text-ellipsis whitespace-nowrap ${
-                isWarn ? 'text-[#E8C22A]' : isDone ? 'text-[#F0EDE6]' : 'text-[#8A8278]'
+                isWarn ? 'text-amber-500' : isDone ? 'text-gray-900' : 'text-gray-400'
               }`}>
                 {value || '—'}
               </span>
@@ -514,7 +514,7 @@ function CoPilotPanel({
           if (msg.role === 'system') {
             // System notifications for manual fills — green pill style
             return (
-              <div key={msg.id} className="text-[11px] text-[#2D7A52] bg-[#2D7A52]/10 border border-[#2D7A52]/30 rounded-lg px-3 py-2 my-0.5">
+              <div key={msg.id} className="text-[11px] text-emerald-600 bg-emerald-600/10 border border-emerald-600/30 rounded-lg px-3 py-2 my-0.5">
                 {msg.content}
               </div>
             )
@@ -525,12 +525,12 @@ function CoPilotPanel({
               {/* Bubble */}
               <div className={`flex gap-2 items-start ${msg.role === 'user' ? 'justify-end' : ''}`}>
                 {msg.role === 'assistant' && (
-                  <div className="w-[26px] h-[26px] bg-[#C8622A] rounded-md flex-shrink-0 flex items-center justify-center text-[12px] mt-[1px]">✦</div>
+                  <div className="w-[26px] h-[26px] bg-blue-600 rounded-md flex-shrink-0 flex items-center justify-center text-[12px] mt-[1px]">✦</div>
                 )}
                 <div className={`text-[12px] leading-relaxed px-3 py-2 rounded-lg max-w-[220px] ${
                   msg.role === 'user'
-                    ? 'bg-[#C8622A] text-white rounded-tr-none'
-                    : 'bg-[#2A2520] border border-[#3A342E] text-[#F0EDE6] rounded-tl-none'
+                    ? 'bg-blue-600 text-white rounded-tr-none'
+                    : 'bg-gray-50 border border-gray-200 text-gray-900 rounded-tl-none'
                 }`}>
                   {msg.content}
                 </div>
@@ -544,7 +544,7 @@ function CoPilotPanel({
                       key={btn.value}
                       onClick={() => sendMessage(btn.value)}
                       disabled={isLoading}
-                      className="text-[11px] font-medium px-2.5 py-1 bg-[#2A2520] border border-[#E8996A] text-[#E8996A] hover:bg-[#E8996A] hover:text-[#1A1714] rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="text-[11px] font-medium px-2.5 py-1 bg-gray-50 border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-gray-900 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {btn.label}
                     </button>
@@ -558,10 +558,10 @@ function CoPilotPanel({
         {/* Loading dots */}
         {isLoading && (
           <div className="flex gap-2 items-start">
-            <div className="w-[26px] h-[26px] bg-[#C8622A] rounded-md flex-shrink-0 flex items-center justify-center text-[12px]">✦</div>
-            <div className="bg-[#2A2520] border border-[#3A342E] rounded-lg rounded-tl-none px-3 py-2 flex gap-1">
+            <div className="w-[26px] h-[26px] bg-blue-600 rounded-md flex-shrink-0 flex items-center justify-center text-[12px]">✦</div>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg rounded-tl-none px-3 py-2 flex gap-1">
               {[0, 150, 300].map(d => (
-                <span key={d} className="w-1.5 h-1.5 bg-[#8A8278] rounded-full animate-bounce" style={{ animationDelay: `${d}ms` }} />
+                <span key={d} className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: `${d}ms` }} />
               ))}
             </div>
           </div>
@@ -570,18 +570,18 @@ function CoPilotPanel({
       </div>
 
       {/* Text input */}
-      <div className="flex-shrink-0 flex gap-2 px-[18px] py-3 border-t border-[#3A342E]">
+      <div className="flex-shrink-0 flex gap-2 px-[18px] py-3 border-t border-gray-200">
         <input
           value={chatInput}
           onChange={e => setChatInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(chatInput) } }}
           placeholder="Or type your answer…"
-          className="flex-1 bg-[#2A2520] border border-[#3A342E] focus:border-[#E8996A] rounded-[6px] px-2.5 py-2 text-[12px] text-[#F0EDE6] placeholder-[#8A8278] outline-none transition-colors"
+          className="flex-1 bg-gray-50 border border-gray-200 focus:border-blue-500 rounded-[6px] px-2.5 py-2 text-[12px] text-gray-900 placeholder-gray-400 outline-none transition-colors"
         />
         <button
           onClick={() => sendMessage(chatInput)}
           disabled={!chatInput.trim() || isLoading}
-          className="w-[34px] h-[34px] flex-shrink-0 bg-[#C8622A] hover:bg-[#B5561F] disabled:opacity-50 rounded-[6px] flex items-center justify-center text-white transition-colors"
+          className="w-[34px] h-[34px] flex-shrink-0 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-[6px] flex items-center justify-center text-white transition-colors"
         >
           <FiSend className="w-3.5 h-3.5" />
         </button>
@@ -641,22 +641,22 @@ function ChatView({
   }, [chatInput, conversationId, isLoading, onBulkFill])
 
   return (
-    <div className="max-w-2xl mx-auto bg-white border border-[#E2DDD4] rounded-[10px] overflow-hidden flex flex-col" style={{ minHeight: 480 }}>
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-[#E2DDD4] flex-shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-[#C8622A] flex items-center justify-center text-white text-[14px]">✦</div>
+    <div className="max-w-2xl mx-auto bg-white border border-gray-300 rounded-[10px] overflow-hidden flex flex-col" style={{ minHeight: 480 }}>
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-300 flex-shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white text-[14px]">✦</div>
         <div>
-          <p className="text-[13px] font-semibold text-[#1A1714]">AI Chat</p>
-          <p className="text-[12px] text-[#7A7268]">Describe your property, I'll fill the form</p>
+          <p className="text-[13px] font-semibold text-gray-900">AI Chat</p>
+          <p className="text-[12px] text-gray-500">Describe your property, I'll fill the form</p>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-3">
         {messages.map((msg, i) => (
           <div key={i} className={`flex gap-2 items-start ${msg.role === 'user' ? 'justify-end' : ''}`}>
             {msg.role === 'assistant' && (
-              <div className="w-[26px] h-[26px] bg-[#C8622A] rounded-md flex-shrink-0 flex items-center justify-center text-white text-[12px] mt-[2px]">✦</div>
+              <div className="w-[26px] h-[26px] bg-blue-600 rounded-md flex-shrink-0 flex items-center justify-center text-white text-[12px] mt-[2px]">✦</div>
             )}
             <div className={`text-[13px] rounded-2xl px-4 py-2.5 max-w-[80%] ${
-              msg.role === 'user' ? 'bg-[#C8622A] text-white rounded-tr-none' : 'bg-[#F0EDE6] text-[#1A1714] rounded-tl-none'
+              msg.role === 'user' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-gray-50 text-gray-900 rounded-tl-none'
             }`}>
               {msg.content}
             </div>
@@ -664,17 +664,17 @@ function ChatView({
         ))}
         {isLoading && (
           <div className="flex gap-2 items-start">
-            <div className="w-[26px] h-[26px] bg-[#C8622A] rounded-md flex-shrink-0 flex items-center justify-center text-white text-[12px]">✦</div>
-            <div className="bg-[#F0EDE6] rounded-2xl rounded-tl-none px-4 py-2.5 flex gap-1.5 items-center">
+            <div className="w-[26px] h-[26px] bg-blue-600 rounded-md flex-shrink-0 flex items-center justify-center text-white text-[12px]">✦</div>
+            <div className="bg-gray-50 rounded-2xl rounded-tl-none px-4 py-2.5 flex gap-1.5 items-center">
               {[0, 150, 300].map(d => (
-                <span key={d} className="w-2 h-2 bg-[#7A7268] rounded-full animate-bounce" style={{ animationDelay: `${d}ms` }} />
+                <span key={d} className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: `${d}ms` }} />
               ))}
             </div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
-      <div className="flex-shrink-0 p-4 border-t border-[#E2DDD4] flex gap-3">
+      <div className="flex-shrink-0 p-4 border-t border-gray-300 flex gap-3">
         <input
           type="text"
           value={chatInput}
@@ -682,12 +682,12 @@ function ChatView({
           onKeyDown={e => { if (e.key === 'Enter') sendMessage() }}
           placeholder="Describe your property…"
           disabled={isLoading}
-          className="flex-1 h-11 px-4 border border-[#E2DDD4] rounded-[10px] text-[13px] text-[#1A1714] bg-white outline-none focus:border-[#C8622A] disabled:opacity-50 transition-colors"
+          className="flex-1 h-11 px-4 border border-gray-300 rounded-[10px] text-[13px] text-gray-900 bg-white outline-none focus:border-blue-600 disabled:opacity-50 transition-colors"
         />
         <button
           onClick={sendMessage}
           disabled={!chatInput.trim() || isLoading}
-          className="w-11 h-11 rounded-full bg-[#C8622A] hover:bg-[#B5561F] text-white flex items-center justify-center disabled:opacity-50 flex-shrink-0 transition-colors"
+          className="w-11 h-11 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center disabled:opacity-50 flex-shrink-0 transition-colors"
         >
           <FiSend className="w-4 h-4" />
         </button>
@@ -771,7 +771,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
     })
 
   const aiFilled = (key: string) =>
-    recentlyFilledFields.includes(key) ? 'border-[#2D7A52] bg-[#E0F0E8] text-[#2D7A52] font-medium' : ''
+    recentlyFilledFields.includes(key) ? 'border-emerald-600 bg-emerald-50 text-emerald-600 font-medium' : ''
 
   // ── Province → cities ─────────────────────────────────────────────────────────
   useEffect(() => {
@@ -915,22 +915,22 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
 
     return (
       <div
-        className={`px-[18px] py-3.5 flex items-center justify-between cursor-pointer select-none hover:bg-[#FAFAF8] transition-colors ${isOpen ? 'border-b border-[#E2DDD4]' : ''}`}
+        className={`px-[18px] py-3.5 flex items-center justify-between cursor-pointer select-none hover:bg-gray-50 transition-colors ${isOpen ? 'border-b border-gray-300' : ''}`}
         onClick={() => toggleSection(id)}
       >
         <div className="flex items-center gap-2.5">
           <SectionBadge num={num} isDone={isDone} isActive={isOpen && !isDone} />
           <div>
-            <div className="text-[13px] font-semibold text-[#1A1714]">{label}</div>
-            {isOpen && <div className="text-[12px] text-[#7A7268]">{subtitle}</div>}
+            <div className="text-[13px] font-semibold text-gray-900">{label}</div>
+            {isOpen && <div className="text-[12px] text-gray-500">{subtitle}</div>}
           </div>
         </div>
         <div className="flex items-center gap-2.5">
-          {hasAi && <span className="text-[10px] text-[#2D7A52] font-semibold">✦ AI filled</span>}
+          {hasAi && <span className="text-[10px] text-emerald-600 font-semibold">✦ AI filled</span>}
           {extra}
-          {!isOpen && preview && <span className="text-[12px] text-[#7A7268] italic">{preview}</span>}
-          {isOpen ? <FiChevronUp className="text-[#7A7268] w-3.5 h-3.5 flex-shrink-0" />
-                  : <FiChevronDown className="text-[#7A7268] w-3.5 h-3.5 flex-shrink-0" />}
+          {!isOpen && preview && <span className="text-[12px] text-gray-500 italic">{preview}</span>}
+          {isOpen ? <FiChevronUp className="text-gray-500 w-3.5 h-3.5 flex-shrink-0" />
+                  : <FiChevronDown className="text-gray-500 w-3.5 h-3.5 flex-shrink-0" />}
         </div>
       </div>
     )
@@ -939,12 +939,12 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
   // ── Loading guard ─────────────────────────────────────────────────────────────
   if (isInitializing) {
     return (
-      <div className="flex h-screen overflow-hidden bg-[#F5F3EE]">
+      <div className="flex h-screen overflow-hidden bg-gray-100">
         <AppSidebar />
         <main className="main-with-sidebar flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
-            <div className="w-10 h-10 border-4 border-[#F5E8DF] border-t-[#C8622A] rounded-full animate-spin" />
-            <p className="text-[#7A7268] text-sm">Setting up your listing session…</p>
+            <div className="w-10 h-10 border-4 border-blue-50 border-t-blue-600 rounded-full animate-spin" />
+            <p className="text-gray-500 text-sm">Setting up your listing session…</p>
           </div>
         </main>
       </div>
@@ -953,27 +953,27 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
 
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F5F3EE]">
+    <div className="flex h-screen overflow-hidden bg-gray-100">
       <AppSidebar />
       <main className="main-with-sidebar flex-1 flex flex-col min-h-0 overflow-hidden">
 
         {/* ── Topbar ── */}
-        <nav className="flex-shrink-0 bg-white border-b border-[#E2DDD4] h-14 px-8 flex items-center justify-between z-50">
+        <nav className="flex-shrink-0 bg-gray-50/95 border-b border-gray-200 h-14 px-8 flex items-center justify-between z-50 shadow-sm">
           <div className="flex items-center gap-1.5 text-[13px]">
-            <button onClick={() => router.push(roleConfig.listingsPath)} className="text-[#7A7268] hover:text-[#C8622A] transition-colors">
+            <button onClick={() => router.push(roleConfig.listingsPath)} className="text-gray-500 hover:text-blue-600 transition-colors">
               Listings
             </button>
-            <span className="text-[#C8C0B0]">›</span>
-            <span className="text-[#1A1714] font-medium">New Listing</span>
+            <span className="text-gray-400">›</span>
+            <span className="text-gray-900 font-medium">New Listing</span>
           </div>
 
-          <div className="flex bg-[#F0EDE6] border border-[#E2DDD4] rounded-[8px] p-[3px] gap-[2px]">
+          <div className="flex bg-gray-50 border border-gray-300 rounded-[8px] p-[3px] gap-[2px]">
             {(['form', 'chat'] as const).map(mode => (
               <button
                 key={mode}
                 onClick={() => setViewMode(mode)}
                 className={`flex items-center gap-1.5 px-3.5 py-[5px] rounded-[6px] text-[12px] font-medium transition-all ${
-                  viewMode === mode ? 'bg-white text-[#1A1714] shadow-sm' : 'text-[#7A7268] hover:text-[#1A1714]'
+                  viewMode === mode ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
                 }`}
               >
                 {mode === 'form' ? <FiList className="w-3 h-3" /> : <FiMessageSquare className="w-3 h-3" />}
@@ -983,10 +983,10 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
           </div>
 
           <div className="flex items-center gap-2.5">
-            <span className="text-[11px] text-[#7A7268] bg-[#F0EDE6] border border-[#E2DDD4] px-2.5 py-[3px] rounded-full">
+            <span className="text-[11px] text-gray-500 bg-gray-50 border border-gray-300 px-2.5 py-[3px] rounded-full">
               ● Draft saved
             </span>
-            <span className="text-[11px] font-semibold text-[#C8622A] bg-[#F5E8DF] px-2.5 py-[3px] rounded-full uppercase tracking-[0.5px]">
+            <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2.5 py-[3px] rounded-full uppercase tracking-[0.5px]">
               {role}
             </span>
           </div>
@@ -1008,22 +1008,22 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
               Sends text to processMessage(text, null) — no conversationId —
               so it uses its own extraction context.
             ───────────────────────────────────────────────────────────────── */}
-            <div className="flex-shrink-0 bg-[#1A1714] border-b border-[#3A342E] px-8 py-4 flex items-center gap-4">
-              <div className="w-8 h-8 rounded-[8px] bg-[#C8622A] flex items-center justify-center text-[15px] flex-shrink-0">✨</div>
+            <div className="flex-shrink-0 bg-gray-50 border-b border-gray-200 px-8 py-4 flex items-center gap-4 shadow-sm">
+              <div className="w-8 h-8 rounded-[8px] bg-blue-600 flex items-center justify-center text-[15px] flex-shrink-0">✨</div>
               <div className="flex-1">
-                <div className="text-[11px] font-semibold text-[#8A8278] uppercase tracking-[0.6px] mb-1.5">AI Quick Fill</div>
-                <div className="flex items-center bg-[#2A2520] border border-[#3A342E] focus-within:border-[#E8996A] rounded-[6px] overflow-hidden transition-colors">
+                <div className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.6px] mb-1.5">AI Quick Fill</div>
+                <div className="flex items-center bg-gray-50 border border-gray-200 focus-within:border-blue-500 rounded-[6px] overflow-hidden transition-colors">
                   <input
                     value={pasteText}
                     onChange={e => { setPasteText(e.target.value); setExtractError(null); setLastFilledFields([]) }}
                     onKeyDown={e => { if (e.key === 'Enter') handleQuickFill() }}
                     placeholder='Paste a description — "3BR condo in BGC, ₱45k/month, fully furnished with parking"'
-                    className="flex-1 bg-transparent border-none outline-none px-3.5 py-[9px] text-[13px] text-[#F0EDE6] placeholder-[#8A8278]"
+                    className="flex-1 bg-transparent border-none outline-none px-3.5 py-[9px] text-[13px] text-gray-900 placeholder-gray-400"
                   />
                   <button
                     onClick={handleQuickFill}
                     disabled={!pasteText.trim() || isExtracting}
-                    className="bg-[#C8622A] hover:bg-[#B5561F] disabled:opacity-50 disabled:cursor-not-allowed px-4 py-[9px] text-white text-[12px] font-semibold flex items-center gap-1.5 flex-shrink-0 whitespace-nowrap transition-colors"
+                    className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-[9px] text-white text-[12px] font-semibold flex items-center gap-1.5 flex-shrink-0 whitespace-nowrap transition-colors"
                   >
                     {isExtracting
                       ? <><span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Extracting…</>
@@ -1035,15 +1035,15 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
 
               {lastFilledFields.length > 0 && (
                 <div className="flex-shrink-0 min-w-[140px]">
-                  <div className="text-[11px] font-semibold text-[#2D7A52] uppercase tracking-[0.6px] mb-1">✓ Fields filled</div>
+                  <div className="text-[11px] font-semibold text-emerald-600 uppercase tracking-[0.6px] mb-1">✓ Fields filled</div>
                   <div className="flex flex-wrap gap-1">
                     {lastFilledFields.slice(0, 5).map(f => (
-                      <span key={f} className="text-[11px] bg-[#2D7A52] text-white px-2 py-[2px] rounded-full font-medium">
+                      <span key={f} className="text-[11px] bg-emerald-600 text-white px-2 py-[2px] rounded-full font-medium">
                         ✓ {FIELD_LABELS[f] || f}
                       </span>
                     ))}
                     {lastFilledFields.length > 5 && (
-                      <span className="text-[11px] bg-[#2D7A52] text-white px-2 py-[2px] rounded-full font-medium">
+                      <span className="text-[11px] bg-emerald-600 text-white px-2 py-[2px] rounded-full font-medium">
                         +{lastFilledFields.length - 5}
                       </span>
                     )}
@@ -1060,13 +1060,13 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
 
                 {/* Progress bar */}
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="flex-1 h-1 bg-[#E2DDD4] rounded-full overflow-hidden">
+                  <div className="flex-1 h-1 bg-gray-300 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-500"
-                      style={{ width: `${completionPercent}%`, background: 'linear-gradient(90deg, #C8622A, #E8996A)' }}
+                      style={{ width: `${completionPercent}%`, background: 'linear-gradient(90deg, #2563eb, #3b82f2)' }}
                     />
                   </div>
-                  <span className="text-[12px] text-[#7A7268] whitespace-nowrap">
+                  <span className="text-[12px] text-gray-500 whitespace-nowrap">
                     {completedCount} of 7 sections · {completionPercent}% complete
                   </span>
                 </div>
@@ -1083,7 +1083,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                 <div className="space-y-3">
 
                   {/* 1. Category */}
-                  <div id="section-category" className="bg-white border border-[#E2DDD4] rounded-[10px] overflow-hidden">
+                  <div id="section-category" className="bg-white/95 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     {renderSectionHeader('category', 1, 'Category', 'Property type')}
                     {expandedSections.has('category') && (
                       <div className="px-[18px] py-4">
@@ -1093,14 +1093,14 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                             <option value="">Select a category</option>
                             {(roleConfig.allowedCategories ?? CATEGORIES).map(c => <option key={c} value={c}>{c}</option>)}
                           </select>
-                          <FiChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#7A7268] pointer-events-none w-3.5 h-3.5" />
+                          <FiChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none w-3.5 h-3.5" />
                         </div>
                       </div>
                     )}
                   </div>
 
                   {/* 2. Property Details */}
-                  <div id="section-details" className="bg-white border border-[#E2DDD4] rounded-[10px] overflow-hidden">
+                  <div id="section-details" className="bg-white/95 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     {renderSectionHeader('details', 2, 'Property Details', 'Title, description & specs')}
                     {expandedSections.has('details') && (
                       <div className="px-[18px] py-4 space-y-3">
@@ -1108,7 +1108,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                           <label className={FL}>Listing Title</label>
                           <input className={`${FI} ${aiFilled('property_name')}`} value={formData.title} onChange={e => updateField('title', e.target.value)} placeholder="e.g. Fully Furnished 3BR Condo in BGC" />
                           {recentlyFilledFields.includes('property_name') && (
-                            <div className="mt-1 text-[10px] text-[#2D7A52] font-semibold">✦ Suggested by AI</div>
+                            <div className="mt-1 text-[10px] text-emerald-600 font-semibold">✦ Suggested by AI</div>
                           )}
                         </div>
 
@@ -1117,14 +1117,14 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                           <label className={FL}>Description</label>
 
                           {/* Template picker + Generate button */}
-                          <div className="border border-[#E2DDD4] rounded-[8px] bg-[#FAFAF8] p-3 mb-2 space-y-2.5">
+                          <div className="border border-gray-300 rounded-[8px] bg-gray-50 p-3 mb-2 space-y-2.5">
                             <div className="flex items-center justify-between">
-                              <span className="text-[11px] font-semibold text-[#7A7268] uppercase tracking-[0.5px]">✨ AI Generate · Style</span>
+                              <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-[0.5px]">✨ AI Generate · Style</span>
                               <button
                                 type="button"
                                 disabled={!formData.category || !formData.title || isGeneratingDesc}
                                 onClick={() => handleGenerateDescription()}
-                                className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 bg-[#C8622A] hover:bg-[#B5561F] text-white rounded-[6px] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-[6px] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                               >
                                 {isGeneratingDesc
                                   ? <><span className="w-3 h-3 border-[1.5px] border-white/30 border-t-white rounded-full animate-spin" /> Generating…</>
@@ -1144,8 +1144,8 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                                     title={tmpl.description}
                                     className={`text-[11px] font-medium px-2.5 py-1 rounded-full border transition-all whitespace-nowrap ${
                                       isSelected
-                                        ? 'bg-[#C8622A] border-[#C8622A] text-white shadow-sm'
-                                        : 'bg-white border-[#E2DDD4] text-[#7A7268] hover:border-[#C8622A] hover:text-[#C8622A]'
+                                        ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
+                                        : 'bg-white border-gray-300 text-gray-500 hover:border-blue-600 hover:text-blue-600'
                                     }`}
                                   >
                                     {tmpl.label}
@@ -1155,7 +1155,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                             </div>
 
                             {/* Selected template description */}
-                            <p className="text-[11px] text-[#7A7268] leading-relaxed">
+                            <p className="text-[11px] text-gray-500 leading-relaxed">
                               {DESCRIPTION_TEMPLATES[selectedTemplate].description}
                             </p>
                           </div>
@@ -1169,7 +1169,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                             placeholder="Write a description or click ✨ Generate to create one with AI…"
                           />
                           {recentlyFilledFields.includes('description') && (
-                            <div className="mt-1 text-[10px] text-[#2D7A52] font-semibold">✦ Generated by AI</div>
+                            <div className="mt-1 text-[10px] text-emerald-600 font-semibold">✦ Generated by AI</div>
                           )}
                         </div>
 
@@ -1196,7 +1196,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                   </div>
 
                   {/* 3. Location */}
-                  <div id="section-location" className="bg-white border border-[#E2DDD4] rounded-[10px] overflow-hidden">
+                  <div id="section-location" className="bg-white/95 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     {renderSectionHeader('location', 3, 'Location', 'Address & map')}
                     {expandedSections.has('location') && (
                       <div className="px-[18px] py-4 space-y-3">
@@ -1208,7 +1208,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                                 <option value="">--Select--</option>
                                 {philippinesProvinces.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
                               </select>
-                              <FiChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#7A7268] pointer-events-none w-3.5 h-3.5" />
+                              <FiChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none w-3.5 h-3.5" />
                             </div>
                           </div>
                           <div>
@@ -1218,14 +1218,14 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                                 <option value="">--Select--</option>
                                 {availableCities.map(c => <option key={c} value={c}>{c}</option>)}
                               </select>
-                              <FiChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#7A7268] pointer-events-none w-3.5 h-3.5" />
+                              <FiChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none w-3.5 h-3.5" />
                             </div>
                           </div>
                         </div>
                         <div>
                           <label className={FL}>Street Address</label>
                           <input className={`${FI} ${aiFilled('address')}`} value={formData.street} onChange={e => handleStreetChange(e.target.value)} placeholder="Enter street address" />
-                          {isGeocoding && <p className="mt-1 text-[11px] text-[#2D7A52]">● Detecting location…</p>}
+                          {isGeocoding && <p className="mt-1 text-[11px] text-emerald-600">● Detecting location…</p>}
                         </div>
                         <LocationMap
                           latitude={formData.latitude || null}
@@ -1243,10 +1243,10 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                   </div>
 
                   {/* 4. Property Images */}
-                  <div id="section-images" className="bg-white border border-[#E2DDD4] rounded-[10px] overflow-hidden">
+                  <div id="section-images" className="bg-white/95 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     {renderSectionHeader(
                       'images', 4, 'Property Images', 'Min. 5 images required',
-                      <span className={`text-[12px] font-semibold ${formData.uploadedImages.length >= 5 ? 'text-[#2D7A52]' : 'text-[#C8622A]'}`}>
+                      <span className={`text-[12px] font-semibold ${formData.uploadedImages.length >= 5 ? 'text-emerald-600' : 'text-blue-600'}`}>
                         {formData.uploadedImages.length} / 5 {formData.uploadedImages.length < 5 ? '⚠' : '✓'}
                       </span>
                     )}
@@ -1257,7 +1257,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                         {formData.uploadedImages.length > 0 && (
                           <div className="grid grid-cols-5 gap-2 mb-3">
                             {formData.uploadedImages.map((img, i) => (
-                              <div key={i} className="relative aspect-square rounded-[6px] overflow-hidden border border-[#E2DDD4]">
+                              <div key={i} className="relative aspect-square rounded-[6px] overflow-hidden border border-gray-300">
                                 <img src={img.url} alt={img.original_name} className="w-full h-full object-cover" />
                                 <button type="button" onClick={() => removeUploadedImage(i)}
                                   className="absolute top-1 right-1 w-5 h-5 bg-white/80 hover:bg-red-500 hover:text-white text-gray-600 rounded-full flex items-center justify-center transition-all">
@@ -1267,7 +1267,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                             ))}
                             {formData.uploadedImages.length < 10 && (
                               <button type="button" onClick={() => fileInputRef.current?.click()}
-                                className="aspect-square rounded-[6px] border-[1.5px] border-dashed border-[#C8C0B0] flex items-center justify-center text-[#7A7268] text-sm hover:border-[#C8622A] hover:text-[#C8622A] bg-[#F0EDE6] transition-all">
+                                className="aspect-square rounded-[6px] border-[1.5px] border-dashed border-gray-400 flex items-center justify-center text-gray-500 text-sm hover:border-blue-600 hover:text-blue-600 bg-gray-50 transition-all">
                                 + Add
                               </button>
                             )}
@@ -1277,7 +1277,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                         {formData.images.length > 0 && (
                           <div className="grid grid-cols-5 gap-2 mb-3 opacity-60">
                             {formData.images.map((img, i) => (
-                              <div key={i} className="relative aspect-square rounded-[6px] overflow-hidden border border-[#E2DDD4]">
+                              <div key={i} className="relative aspect-square rounded-[6px] overflow-hidden border border-gray-300">
                                 <img src={localThumbnails[i] || URL.createObjectURL(img)} alt={`Preview ${i + 1}`} className="w-full h-full object-cover" />
                               </div>
                             ))}
@@ -1285,23 +1285,23 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                         )}
 
                         <div
-                          className="border-[1.5px] border-dashed border-[#C8C0B0] rounded-[6px] p-4 flex items-center justify-center gap-2 text-[12px] text-[#7A7268] cursor-pointer hover:border-[#C8622A] hover:bg-[#F5E8DF] hover:text-[#C8622A] bg-[#F0EDE6] transition-all"
+                          className="border-[1.5px] border-dashed border-gray-400 rounded-[6px] p-4 flex items-center justify-center gap-2 text-[12px] text-gray-500 cursor-pointer hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600 bg-gray-50 transition-all"
                           onDrop={handleDrop} onDragOver={e => { e.preventDefault(); e.stopPropagation() }}
                           onClick={() => fileInputRef.current?.click()} role="button" tabIndex={0}
                         >
                           {isUploadingImages
-                            ? <><span className="w-4 h-4 border-2 border-[#C8622A]/30 border-t-[#C8622A] rounded-full animate-spin" /> Uploading…</>
+                            ? <><span className="w-4 h-4 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin" /> Uploading…</>
                             : <><FiUploadCloud className="w-4 h-4" /> Drag & drop images here or click to browse</>}
                         </div>
 
                         <div className="mt-3">
                           <label className={FL}>Video Link (Optional)</label>
                           <div className="flex">
-                            <div className="flex items-center px-2.5 bg-[#F0EDE6] border border-[#E2DDD4] border-r-0 rounded-l-[6px]">
-                              <FiPlayCircle className="text-[#7A7268] w-4 h-4" />
+                            <div className="flex items-center px-2.5 bg-gray-50 border border-gray-300 border-r-0 rounded-l-[6px]">
+                              <FiPlayCircle className="text-gray-500 w-4 h-4" />
                             </div>
                             <input
-                              className="flex-1 h-9 border border-[#E2DDD4] rounded-r-[6px] px-2.5 text-[13px] text-[#1A1714] bg-white outline-none focus:border-[#C8622A] transition-colors"
+                              className="flex-1 h-9 border border-gray-300 rounded-r-[6px] px-2.5 text-[13px] text-gray-900 bg-white outline-none focus:border-blue-600 transition-colors"
                               placeholder="YouTube / video link"
                               value={formData.videoUrl}
                               onChange={e => updateField('videoUrl', e.target.value)}
@@ -1313,7 +1313,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                   </div>
 
                   {/* 5. Pricing */}
-                  <div id="section-pricing" className="bg-white border border-[#E2DDD4] rounded-[10px] overflow-hidden">
+                  <div id="section-pricing" className="bg-white/95 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     {renderSectionHeader('pricing', 5, 'Pricing', 'Rent amount & frequency')}
                     {expandedSections.has('pricing') && (
                       <div className="px-[18px] py-4">
@@ -1323,12 +1323,12 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                           <div className="flex gap-2">
                             <button type="button"
                               onClick={() => updateField('listingType', 'for_rent')}
-                              className={`flex-1 h-9 rounded-lg border-2 text-[12px] font-semibold transition-all ${formData.listingType === 'for_rent' ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-[#E2DDD4] text-[#7A7268] hover:border-blue-400'}`}>
+                              className={`flex-1 h-9 rounded-lg border-2 text-[12px] font-semibold transition-all ${formData.listingType === 'for_rent' ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-blue-400'}`}>
                               For Rent
                             </button>
                             <button type="button"
                               onClick={() => updateField('listingType', 'for_sale')}
-                              className={`flex-1 h-9 rounded-lg border-2 text-[12px] font-semibold transition-all ${formData.listingType === 'for_sale' ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-[#E2DDD4] text-[#7A7268] hover:border-green-400'}`}>
+                              className={`flex-1 h-9 rounded-lg border-2 text-[12px] font-semibold transition-all ${formData.listingType === 'for_sale' ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-400'}`}>
                               For Sale
                             </button>
                           </div>
@@ -1337,7 +1337,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                           <div>
                             <label className={FL}>{formData.listingType === 'for_sale' ? 'Selling Price (₱)' : 'Price (₱)'}</label>
                             <div className="relative">
-                              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[13px] text-[#7A7268]">₱</span>
+                              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[13px] text-gray-500">₱</span>
                               <input type="text" className={`${FI} pl-6 ${aiFilled('price')}`} placeholder={formData.listingType === 'for_sale' ? 'e.g. 4500000' : 'e.g. 45000'} value={formData.price} onChange={e => updateField('price', e.target.value)} />
                             </div>
                           </div>
@@ -1351,7 +1351,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                                   <option value="Daily">Daily</option>
                                   <option value="Yearly">Yearly</option>
                                 </select>
-                                <FiChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#7A7268] pointer-events-none w-3.5 h-3.5" />
+                                <FiChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none w-3.5 h-3.5" />
                               </div>
                             </div>
                           )}
@@ -1361,7 +1361,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                   </div>
 
                   {/* 6. Amenities */}
-                  <div id="section-attributes" className="bg-white border border-[#E2DDD4] rounded-[10px] overflow-hidden">
+                  <div id="section-attributes" className="bg-white/95 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     {renderSectionHeader('attributes', 6, 'Amenities & Attributes', 'Features & facilities')}
                     {expandedSections.has('attributes') && (
                       <div className="px-[18px] py-4 space-y-3">
@@ -1372,8 +1372,8 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                             <button key={a} type="button" onClick={() => handleAmenityToggle(a)}
                               className={`px-2.5 py-1 rounded-full border text-[11px] font-medium cursor-pointer transition-all ${
                                 formData.amenities.includes(a)
-                                  ? 'bg-[#C8622A] border-[#C8622A] text-white'
-                                  : 'bg-white border-[#E2DDD4] text-[#7A7268] hover:border-[#C8C0B0] hover:text-[#1A1714]'
+                                  ? 'bg-blue-600 border-blue-600 text-white'
+                                  : 'bg-white border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-900'
                               }`}>
                               {a}
                             </button>
@@ -1388,13 +1388,13 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                               .map(a => (
                                 <span
                                   key={a}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[11px] font-medium bg-[#F5E8DF] border-[#C8622A] text-[#C8622A]"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[11px] font-medium bg-blue-50 border-blue-600 text-blue-600"
                                 >
                                   {a}
                                   <button
                                     type="button"
                                     onClick={() => updateField('amenities', formData.amenities.filter(x => x !== a))}
-                                    className="w-3.5 h-3.5 flex items-center justify-center rounded-full hover:bg-[#C8622A] hover:text-white transition-colors leading-none"
+                                    className="w-3.5 h-3.5 flex items-center justify-center rounded-full hover:bg-blue-600 hover:text-white transition-colors leading-none"
                                     title={`Remove ${a}`}
                                   >
                                     <FiX className="w-2.5 h-2.5" />
@@ -1418,20 +1418,20 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                                 if (e.key === 'Escape') { setShowCustomAmenityInput(false); setCustomAmenityInput('') }
                               }}
                               placeholder="e.g. Rooftop access"
-                              className="h-8 flex-1 max-w-[200px] border border-[#C8622A] focus:border-[#C8622A] rounded-full px-3 text-[12px] text-[#1A1714] outline-none bg-white"
+                              className="h-8 flex-1 max-w-[200px] border border-blue-600 focus:border-blue-600 rounded-full px-3 text-[12px] text-gray-900 outline-none bg-white"
                             />
                             <button
                               type="button"
                               onClick={handleAddCustomAmenity}
                               disabled={!customAmenityInput.trim()}
-                              className="h-8 px-3 bg-[#C8622A] hover:bg-[#B5561F] disabled:opacity-50 text-white text-[11px] font-semibold rounded-full transition-colors"
+                              className="h-8 px-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-[11px] font-semibold rounded-full transition-colors"
                             >
                               Add
                             </button>
                             <button
                               type="button"
                               onClick={() => { setShowCustomAmenityInput(false); setCustomAmenityInput('') }}
-                              className="h-8 px-3 border border-[#E2DDD4] text-[#7A7268] hover:text-[#1A1714] text-[11px] rounded-full transition-colors"
+                              className="h-8 px-3 border border-gray-300 text-gray-500 hover:text-gray-900 text-[11px] rounded-full transition-colors"
                             >
                               Cancel
                             </button>
@@ -1443,7 +1443,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                               setShowCustomAmenityInput(true)
                               setTimeout(() => customAmenityRef.current?.focus(), 50)
                             }}
-                            className="flex items-center gap-1.5 text-[11px] font-medium text-[#7A7268] hover:text-[#C8622A] border border-dashed border-[#C8C0B0] hover:border-[#C8622A] px-2.5 py-1 rounded-full transition-all"
+                            className="flex items-center gap-1.5 text-[11px] font-medium text-gray-500 hover:text-blue-600 border border-dashed border-gray-400 hover:border-blue-600 px-2.5 py-1 rounded-full transition-all"
                           >
                             <span className="text-[14px] leading-none">+</span> Add other
                           </button>
@@ -1454,7 +1454,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                   </div>
 
                   {/* 7. Review & Publish */}
-                  <div id="section-review" className="bg-white border border-[#E2DDD4] rounded-[10px] overflow-hidden">
+                  <div id="section-review" className="bg-white/95 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     {renderSectionHeader(
                       'review', 7, 'Review & Publish', 'Final check before publishing',
                       (!sectionDone.category || !sectionDone.details || !sectionDone.pricing)
@@ -1472,16 +1472,16 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                           { label: 'Bathrooms',  value: String(formData.bathrooms), sid: 'details' },
                           { label: 'Floor Area', value: formData.floorArea ? `${formData.floorArea} ${formData.floorUnit}` : 'Not set', sid: 'details' },
                         ]).map(({ label, value, sid }) => (
-                          <div key={label} className="flex items-center justify-between py-2 border-b border-[#E2DDD4] last:border-0">
-                            <span className="text-[12px] text-[#7A7268]">{label}</span>
+                          <div key={label} className="flex items-center justify-between py-2 border-b border-gray-300 last:border-0">
+                            <span className="text-[12px] text-gray-500">{label}</span>
                             <div className="flex items-center gap-2">
-                              <span className="text-[12px] font-medium text-[#1A1714] max-w-[200px] truncate">{value}</span>
+                              <span className="text-[12px] font-medium text-gray-900 max-w-[200px] truncate">{value}</span>
                               <button type="button"
                                 onClick={() => {
                                   if (!expandedSections.has(sid)) toggleSection(sid)
                                   setTimeout(() => document.getElementById(`section-${sid}`)?.scrollIntoView({ behavior: 'smooth' }), 100)
                                 }}
-                                className="flex items-center gap-1 text-[11px] text-[#C8622A] hover:bg-[#F5E8DF] px-1.5 py-0.5 rounded transition-colors">
+                                className="flex items-center gap-1 text-[11px] text-blue-600 hover:bg-blue-50 px-1.5 py-0.5 rounded transition-colors">
                                 <FiEdit className="w-3 h-3" /> Edit
                               </button>
                             </div>
@@ -1494,22 +1494,22 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                 </div>{/* /sections */}
 
                 {/* Submit bar */}
-                <div className="mt-3 flex items-center justify-between p-4 bg-white border border-[#E2DDD4] rounded-[10px]">
-                  <div className="text-[12px] text-[#7A7268]">
+                <div className="mt-3 flex items-center justify-between p-4 bg-white/95 border border-gray-200 rounded-xl shadow-sm">
+                  <div className="text-[12px] text-gray-500">
                     {formData.uploadedImages.length < 5 ? (
-                      <><strong className="text-[#1A1714]">{5 - formData.uploadedImages.length} more image{5 - formData.uploadedImages.length !== 1 ? 's' : ''} needed</strong> to publish</>
+                      <><strong className="text-gray-900">{5 - formData.uploadedImages.length} more image{5 - formData.uploadedImages.length !== 1 ? 's' : ''} needed</strong> to publish</>
                     ) : (
-                      <strong className="text-[#2D7A52]">Ready to publish!</strong>
+                      <strong className="text-emerald-600">Ready to publish!</strong>
                     )}
                   </div>
                   <div className="flex gap-2">
                     <button type="button" onClick={() => router.push(roleConfig.listingsPath)}
-                      className="px-4 py-2 rounded-[6px] border border-[#E2DDD4] text-[13px] font-semibold text-[#7A7268] hover:border-[#C8C0B0] hover:text-[#1A1714] bg-white transition-all">
+                      className="px-4 py-2 rounded-[6px] border border-gray-300 text-[13px] font-semibold text-gray-500 hover:border-gray-400 hover:text-gray-900 bg-white transition-all">
                       Cancel
                     </button>
                     <button type="button" onClick={submit}
                       disabled={isSubmitting || !formData.price || !formData.category || !formData.title}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-[#C8622A] hover:bg-[#B5561F] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[13px] font-semibold rounded-[6px] transition-colors">
+                      className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[13px] font-semibold rounded-[6px] transition-colors">
                       {isSubmitting
                         ? <><span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Publishing…</>
                         : <>Publish Listing <FiArrowRight className="w-3.5 h-3.5" /></>}
@@ -1521,7 +1521,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
 
               {/* ── AI Co-Pilot Panel ── */}
               {coPilotOpen ? (
-                <div className="w-[340px] flex-shrink-0 bg-[#1A1714] flex flex-col min-h-0 overflow-hidden border-l border-[#3A342E]">
+                <div className="w-[340px] flex-shrink-0 bg-gray-50 flex flex-col min-h-0 overflow-hidden border-l border-gray-200 shadow-[ -4px_0_16px_rgba(0,0,0,0.06)]">
                   <CoPilotPanel
                     conversationId={conversationId}
                     formData={formData}
@@ -1533,17 +1533,17 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
               ) : (
                 <button
                   onClick={() => setCoPilotOpen(true)}
-                  className="w-10 flex-shrink-0 bg-[#1A1714] border-l border-[#3A342E] flex flex-col items-center justify-center gap-3 hover:bg-[#2A2520] transition-colors"
+                  className="w-10 flex-shrink-0 bg-gray-50 border-l border-gray-200 flex flex-col items-center justify-center gap-3 hover:bg-gray-100 transition-colors"
                   title="Open AI Co-Pilot"
                 >
-                  <span className="inline-block w-[7px] h-[7px] rounded-full bg-[#E8996A] animate-pulse" />
+                  <span className="inline-block w-[7px] h-[7px] rounded-full bg-blue-500 animate-pulse" />
                   <span
-                    className="text-[10px] text-[#8A8278] font-semibold tracking-widest"
+                    className="text-[10px] text-gray-400 font-semibold tracking-widest"
                     style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
                   >
                     AI CO-PILOT
                   </span>
-                  <FiZap className="w-3.5 h-3.5 text-[#E8996A]" />
+                  <FiZap className="w-3.5 h-3.5 text-blue-500" />
                 </button>
               )}
 
@@ -1563,16 +1563,16 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
           <div className="relative z-10 w-full max-w-[400px] bg-white rounded-[16px] shadow-2xl overflow-hidden">
 
             {/* Top accent strip */}
-            <div className="h-1.5 w-full" style={{ background: 'linear-gradient(90deg, #C8622A, #E8996A)' }} />
+            <div className="h-1.5 w-full" style={{ background: 'linear-gradient(90deg, #2563eb, #3b82f2)' }} />
 
             <div className="px-8 py-8 flex flex-col items-center text-center gap-2">
               {/* Check icon */}
-              <div className="w-16 h-16 rounded-full bg-[#E0F0E8] flex items-center justify-center mb-2">
-                <FiCheck className="w-8 h-8 text-[#2D7A52]" />
+              <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mb-2">
+                <FiCheck className="w-8 h-8 text-emerald-600" />
               </div>
 
-              <h2 className="text-[20px] font-bold text-[#1A1714]">Listing Published!</h2>
-              <p className="text-[13px] text-[#7A7268] leading-relaxed">
+              <h2 className="text-[20px] font-bold text-gray-900">Listing Published!</h2>
+              <p className="text-[13px] text-gray-500 leading-relaxed">
                 Your property listing is now live. What would you like to do next?
               </p>
             </div>
@@ -1585,7 +1585,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                   // Reload the page to reset the form for a new listing
                   window.location.href = `/${role}/create-listing`
                 }}
-                className="w-full flex items-center justify-center gap-2 h-11 bg-[#C8622A] hover:bg-[#B5561F] text-white text-[13px] font-semibold rounded-[10px] transition-colors"
+                className="w-full flex items-center justify-center gap-2 h-11 bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-semibold rounded-[10px] transition-colors"
               >
                 <span className="text-[16px] leading-none">+</span>
                 Create Another Listing
@@ -1594,9 +1594,9 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
               <button
                 type="button"
                 onClick={() => router.push(roleConfig.listingsPath)}
-                className="w-full flex items-center justify-center gap-2 h-11 bg-white border border-[#E2DDD4] hover:border-[#C8C0B0] text-[#1A1714] text-[13px] font-semibold rounded-[10px] transition-colors"
+                className="w-full flex items-center justify-center gap-2 h-11 bg-white border border-gray-300 hover:border-gray-400 text-gray-900 text-[13px] font-semibold rounded-[10px] transition-colors"
               >
-                <FiList className="w-4 h-4 text-[#7A7268]" />
+                <FiList className="w-4 h-4 text-gray-500" />
                 View My Listings
               </button>
             </div>

@@ -337,7 +337,7 @@ export function ManualListingForm() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50 font-outfit">
+    <div className="flex min-h-screen bg-gray-100 font-outfit">
       <AppSidebar />
       <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4">
         <AgentHeader title="Create Listing" subtitle="Add a new property to your portfolio." />
@@ -399,7 +399,7 @@ export function ManualListingForm() {
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className={labelClass} htmlFor="propertyDescription">Property Description</label>
-                  <button type="button" className="inline-flex items-center gap-1.5 rounded-lg border border-purple-600 bg-gradient-to-br from-purple-600 to-purple-700 px-3.5 py-1.5 text-xs font-semibold text-white hover:from-purple-700 hover:to-purple-800 disabled:opacity-55" disabled={!category || !title || isGenerating} onClick={handleAiGenerate}>
+                  <button type="button" className="inline-flex items-center gap-1.5 rounded-lg border border-blue-600 bg-blue-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-55" disabled={!category || !title || isGenerating} onClick={handleAiGenerate}>
                     {isGenerating ? <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : '✨'} {isGenerating ? 'Generating...' : 'AI Generate'}
                   </button>
                 </div>
@@ -453,7 +453,7 @@ export function ManualListingForm() {
             <h2 className="m-0 mb-4 text-2xl font-bold text-gray-900">Property Gallery</h2>
             <p className="mb-4 text-sm text-gray-600">Upload at least 5 photos. First image will be the main image.</p>
             <input type="file" ref={fileInputRef} onChange={handleFileSelect} accept="image/*" multiple className="hidden" />
-            <div className="mb-5 rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50 p-10 flex flex-col items-center text-center cursor-pointer hover:bg-sky-100 hover:border-blue-400" onDrop={handleDrop} onDragOver={(e) => { e.preventDefault(); e.stopPropagation() }} onClick={() => fileInputRef.current?.click()} role="button" tabIndex={0}>
+            <div className="mb-5 rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50 p-10 flex flex-col items-center text-center cursor-pointer hover:bg-blue-100 hover:border-blue-400" onDrop={handleDrop} onDragOver={(e) => { e.preventDefault(); e.stopPropagation() }} onClick={() => fileInputRef.current?.click()} role="button" tabIndex={0}>
               <FiUploadCloud className="text-[40px] text-blue-600 mb-2.5" />
               <p className="m-0 mb-1 text-lg font-semibold text-gray-900">Drop files here or click to upload</p>
               <p className="m-0 text-sm text-gray-600">Upload high-quality images. For best results, add at least 5 photos.</p>
