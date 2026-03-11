@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { ASSETS } from '@/utils/assets'
 import { FiMail, FiPhone } from 'react-icons/fi'
 import { FaWhatsapp } from 'react-icons/fa'
@@ -14,6 +15,8 @@ interface DigitalBusinessCardProps {
   email: string
   image: string
   initials: string
+  /** Profile path or full URL for QR code (e.g. /agents/123). When scanned, opens the agent profile. */
+  profileUrl?: string
 }
 
 function DigitalBusinessCard({
@@ -26,8 +29,15 @@ function DigitalBusinessCard({
   email,
   image,
   initials,
+  profileUrl,
 }: DigitalBusinessCardProps) {
   const displayLastName = lastName.trim()
+  const [fullProfileUrl, setFullProfileUrl] = useState<string>('')
+  useEffect(() => {
+    if (!profileUrl) return
+    const base = typeof window !== 'undefined' ? window.location.origin : ''
+    setFullProfileUrl(profileUrl.startsWith('http') ? profileUrl : `${base}${profileUrl.startsWith('/') ? '' : '/'}${profileUrl}`)
+  }, [profileUrl])
 
   return (
     <div 
@@ -100,13 +110,21 @@ function DigitalBusinessCard({
         </div>
         <div className="flex flex-col items-center gap-1.5">
           <div className="w-24 h-24 rounded-lg bg-white p-1.5 flex items-center justify-center">
-            <div 
-              className="w-full h-full rounded"
-              style={{
-                backgroundImage: 'repeating-linear-gradient(0deg, #111 0, #111 2px, transparent 2px, transparent 8px), repeating-linear-gradient(90deg, #111 0, #111 2px, transparent 2px, transparent 8px)',
-                backgroundSize: '8px 8px',
-              }}
-            />
+            {fullProfileUrl ? (
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(fullProfileUrl)}`}
+                alt="QR code to profile"
+                className="w-full h-full rounded object-contain"
+              />
+            ) : (
+              <div 
+                className="w-full h-full rounded"
+                style={{
+                  backgroundImage: 'repeating-linear-gradient(0deg, #111 0, #111 2px, transparent 2px, transparent 8px), repeating-linear-gradient(90deg, #111 0, #111 2px, transparent 2px, transparent 8px)',
+                  backgroundSize: '8px 8px',
+                }}
+              />
+            )}
           </div>
           <p className="m-0 text-white/80 text-xs font-medium">Scan to view my profile</p>
         </div>

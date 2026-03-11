@@ -98,6 +98,7 @@ export default function AgentDigitalCard() {
                 title={title}
                 sinceYear={sinceYear}
                 phone={phone}
+                profileUrl={agent?.id ? `/agents/${agent.id}` : undefined}
                 email={email}
                 image={agentImage}
                 initials={agentInitials}

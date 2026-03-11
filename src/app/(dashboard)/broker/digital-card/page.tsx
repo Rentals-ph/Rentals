@@ -6,10 +6,7 @@ import DigitalBusinessCard from '@/components/common/DigitalBusinessCard'
 import { agentsApi } from '@/api'
 import type { Agent } from '@/api/endpoints/agents'
 import { ASSETS } from '@/utils/assets'
-import { 
-  FiBell,
-  FiPlus,
-} from 'react-icons/fi'
+import { FiBell } from 'react-icons/fi'
 
 // Default profile image you provided (place your image at public/images/broker-profile.png)
 const DEFAULT_PROFILE_IMAGE = '/images/broker-profile.png'
@@ -91,19 +88,15 @@ export default function BrokerDigitalCard() {
 
       <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4 md:pt-15"> {/* broker-main */}
         {/* Broker Header */}
-        <header className="broker-header">
-          <div className="broker-header-left">
-            <h1>Digital Business Card</h1>
-            <p>Share your professional contact information.</p>
-          </div>
-          <div className="flex items-center gap-3.5 md:w-full md:justify-between md:gap-2.5">
-            <button className="w-11 h-11 rounded-xl border-0 bg-white flex items-center justify-center text-gray-600 text-xl cursor-pointer transition-all duration-200 shadow-sm hover:bg-gray-50 hover:text-blue-600">
+        <header className="broker-header flex items-center justify-between gap-4 mb-6 md:flex-col md:items-start">
+          <div className="broker-header-left flex items-center gap-3 md:w-full md:justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 m-0 mb-1">Digital Business Card</h1>
+              <p className="text-sm text-gray-400 m-0">Share your professional contact information.</p>
+            </div>
+            <button type="button" className="w-11 h-11 rounded-xl border-0 bg-white flex items-center justify-center text-gray-600 text-xl cursor-pointer transition-all duration-200 shadow-sm hover:bg-gray-50 hover:text-blue-600 flex-shrink-0" aria-label="Notifications">
               <FiBell />
             </button>
-            <a href="/broker/create-listing" className="inline-flex items-center gap-2 py-2.5 px-5 bg-blue-600 text-white text-sm font-semibold rounded-xl border-0 no-underline cursor-pointer transition-all duration-200 shadow-sm hover:bg-blue-700 active:scale-[0.98]">
-              <FiPlus />
-              Add Listing
-            </a>
           </div>
         </header>
 
@@ -122,6 +115,7 @@ export default function BrokerDigitalCard() {
                 email={email}
                 image={brokerImage}
                 initials={brokerInitials}
+                profileUrl={agent?.id ? `/agents/${agent.id}` : undefined}
               />
             </div>
           )}
