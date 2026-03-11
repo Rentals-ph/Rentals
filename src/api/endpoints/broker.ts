@@ -43,6 +43,13 @@ export interface Team {
   company_id?: number
   name: string
   description?: string
+  /**
+   * Optional visual configuration for teams.
+   * These fields are persisted if supported by the backend.
+   */
+  team_color?: string
+  team_icon?: 'home' | 'key' | 'grid' | 'star'
+  focus_area?: string
   is_active: boolean
   created_at?: string
   updated_at?: string
@@ -151,6 +158,22 @@ export const brokerApi = {
   },
 
   /**
+   * Update a team (name, description, company_id).
+   */
+  updateTeam: async (teamId: number, teamData: Partial<Team>): Promise<{ success: boolean; message: string; data: Team }> => {
+    const response = await apiClient.put<{ success: boolean; message: string; data: Team }>(`/broker/teams/${teamId}`, teamData)
+    return response.data
+  },
+
+  /**
+   * Delete a team (members are removed from the team but remain in broker's pool).
+   */
+  deleteTeam: async (teamId: number): Promise<{ success: boolean; message: string }> => {
+    const response = await apiClient.delete<{ success: boolean; message: string }>(`/broker/teams/${teamId}`)
+    return response.data
+  },
+
+  /**
    * Assign agent to team
    */
   assignAgentToTeam: async (teamId: number, agentId: number, role?: string): Promise<{ success: boolean; message: string }> => {
@@ -175,6 +198,30 @@ export const brokerApi = {
   },
 
   /**
+   * Search for registered agents (platform-wide) that can be invited to the broker's pool.
+   * Returns agents not already managed by this broker.
+   */
+  searchAgentsToInvite: async (query: string): Promise<any[]> => {
+    if (!query || query.trim().length < 2) return []
+    const response = await apiClient.get<{ success: boolean; data: any[] }>(
+      '/broker/agents/search',
+      { params: { q: query.trim() } }
+    )
+    return response.data.data ?? []
+  },
+
+  /**
+   * Invite an already-registered agent to the broker's pool (adds them to Available Agents).
+   */
+  inviteAgent: async (agentId: number): Promise<{ success: boolean; message: string; data?: any }> => {
+    const response = await apiClient.post<{ success: boolean; message: string; data?: any }>(
+      '/broker/agents/invite',
+      { agent_id: agentId }
+    )
+    return response.data
+  },
+
+  /**
    * Create a new agent account (brokers create agents directly)
    */
   createAgent: async (agentData: {
@@ -191,16 +238,21 @@ export const brokerApi = {
   },
 
   /**
-   * Get all properties for the broker (broker's own + team agents' properties)
+   * Get all properties for the broker (broker's own + all managed agents' properties).
+   * @param options.per_page - Use a high value (e.g. 1000) for team overview so counts include all listings.
    */
-  getProperties: async (): Promise<Property[] | PaginatedResponse<Property>> => {
-    const response = await apiClient.get<{ success: boolean; data: Property[] | PaginatedResponse<Property> }>('/broker/properties')
-    
-    if (Array.isArray(response.data.data)) {
-      return response.data.data
+  getProperties: async (options?: { per_page?: number }): Promise<Property[] | PaginatedResponse<Property>> => {
+    const params = options?.per_page != null ? { per_page: options.per_page } : undefined
+    const response = await apiClient.get<{ success: boolean; data: Property[] | PaginatedResponse<Property> }>('/broker/properties', { params })
+    const data = response.data.data
+    if (Array.isArray(data)) {
+      return data
     }
-    
-    return response.data.data
+    // Paginated: { data: Property[], total, current_page, ... }
+    if (data && typeof data === 'object' && Array.isArray((data as PaginatedResponse<Property>).data)) {
+      return data as PaginatedResponse<Property>
+    }
+    return data as PaginatedResponse<Property>
   },
 
   /**
@@ -210,5 +262,22 @@ export const brokerApi = {
     const response = await apiClient.put<{ success: boolean; message: string; data: Property }>(`/broker/properties/${propertyId}`, propertyData)
     return response.data
   },
+
+  /**
+   * Team productivity report: listings and inquiry counts per managed agent (and broker).
+   */
+  getTeamProductivityReport: async (): Promise<TeamProductivityRow[]> => {
+    const response = await apiClient.get<{ success: boolean; data: TeamProductivityRow[] }>('/broker/reports/team-productivity')
+    return response.data.data ?? []
+  },
+}
+
+export interface TeamProductivityRow {
+  agent_id: number
+  name: string
+  total_listings: number
+  total_inquiries: number
+  most_popular_listing: string
+  inquiry_to_listing_ratio: number
 }
 

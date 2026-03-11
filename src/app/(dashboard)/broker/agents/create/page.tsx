@@ -96,7 +96,7 @@ export default function CreateAgentPage() {
               <button
                 type="button"
                 onClick={() => setSuccess(false)}
-                className="text-sm font-medium text-emerald-700 hover:text-emerald-800"
+                className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-emerald-700 bg-emerald-100 border border-emerald-300 rounded-lg hover:bg-emerald-200 hover:text-emerald-800 hover:border-emerald-400 transition-colors"
               >
                 Create another agent
               </button>
@@ -113,7 +113,7 @@ export default function CreateAgentPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">First Name</label>
                   <div className="relative">
-                    <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <FiUser className="absolute left-3 top-[15px] -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <input
                       type="text"
                       required
@@ -127,7 +127,7 @@ export default function CreateAgentPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">Last Name</label>
                   <div className="relative">
-                    <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <FiUser className="absolute left-3 top-[15px] -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <input
                       type="text"
                       required
@@ -143,7 +143,7 @@ export default function CreateAgentPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
                 <div className="relative">
-                  <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <FiMail className="absolute left-3 top-[15px] -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
                     type="email"
                     required
@@ -158,7 +158,7 @@ export default function CreateAgentPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone (optional)</label>
                 <div className="relative">
-                  <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <FiPhone className="absolute left-3 top-[15px] -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
                     type="tel"
                     value={formData.phone}
@@ -172,7 +172,7 @@ export default function CreateAgentPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Company (optional)</label>
                 <div className="relative">
-                  <FiBriefcase className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <FiBriefcase className="absolute left-3 top-[15px] -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <select
                     value={formData.company_id}
                     onChange={(e) => setFormData({ ...formData, company_id: e.target.value })}
@@ -192,7 +192,7 @@ export default function CreateAgentPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
                 <div className="relative">
-                  <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <FiLock className="absolute left-3 top-[15px] -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
                     type="password"
                     required
@@ -208,7 +208,7 @@ export default function CreateAgentPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm Password</label>
                 <div className="relative">
-                  <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <FiLock className="absolute left-3 top-[15px] -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
                     type="password"
                     required

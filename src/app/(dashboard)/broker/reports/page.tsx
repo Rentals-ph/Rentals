@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AppSidebar from '@/components/common/AppSidebar'
 import BrokerHeader from '@/components/broker/BrokerHeader'
+import { brokerApi, type TeamProductivityRow } from '@/api'
 import {
   FiChevronDown,
   FiTrendingUp,
@@ -10,84 +11,50 @@ import {
 } from 'react-icons/fi'
 // import './page.css' // Removed - converted to Tailwind
 
-// Stats data
-const statsData = [
-  {
-    icon: 'inquiries',
-    label: 'Total Team Inquiries',
-    value: '1,842',
-    change: '↑ 15% from last month',
-    changeColor: 'green',
-    iconBg: '#DBEAFE',
-    iconColor: '#3B82F6',
-  },
-  {
-    icon: 'conversion',
-    label: 'Conversion Rate',
-    value: '12.4%',
-    change: '↑ 2% from last month',
-    changeColor: 'green',
-    iconBg: '#FEF3C7',
-    iconColor: '#F59E0B',
-  },
-  {
-    icon: 'response',
-    label: 'Average Response Time',
-    value: '14 mins',
-    change: '↓ 5 mins (Faster)',
-    changeColor: 'green',
-    iconBg: '#D1FAE5',
-    iconColor: '#10B981',
-  },
-  {
-    icon: 'channel',
-    label: 'Most Active Channel',
-    value: 'WhatsApp',
-    change: '68% of total leads',
-    changeColor: 'green',
-    iconBg: '#D1FAE5',
-    iconColor: '#10B981',
-  },
-]
-
-// Team productivity data
-const productivityData = [
-  {
-    name: 'Gabo Dela Cruz',
-    totalListings: 18,
-    totalInquiries: 245,
-    mostPopular: 'Studio Unit – Avida Towers',
-    ratio: 13.6,
-  },
-  {
-    name: 'Camille Santos',
-    totalListings: 12,
-    totalInquiries: 198,
-    mostPopular: '2BR Condo – IT Park',
-    ratio: 16.5,
-  },
-  {
-    name: 'Angelo Reyes',
-    totalListings: 25,
-    totalInquiries: 110,
-    mostPopular: '1BR Loft – Makati',
-    ratio: 4.4,
-  },
-  {
-    name: 'Sofia Mendoza',
-    totalListings: 5,
-    totalInquiries: 82,
-    mostPopular: 'Pet-Friendly Studio – BGC',
-    ratio: 16.4,
-  },
-  {
-    name: 'Marco Valdez',
-    totalListings: 14,
-    totalInquiries: 30,
-    mostPopular: 'Cheap Apartment – QC',
-    ratio: 2.1,
-  },
-]
+// Stats data (summary from report when available)
+const getStatsFromReport = (rows: TeamProductivityRow[]) => {
+  const totalInquiries = rows.reduce((s, r) => s + r.total_inquiries, 0)
+  const totalListings = rows.reduce((s, r) => s + r.total_listings, 0)
+  const ratio = totalListings > 0 ? (totalInquiries / totalListings).toFixed(1) : '0'
+  return [
+    {
+      icon: 'inquiries' as const,
+      label: 'Total Team Inquiries',
+      value: totalInquiries.toLocaleString(),
+      change: 'From your team and agents',
+      changeColor: 'green',
+      iconBg: '#DBEAFE',
+      iconColor: '#3B82F6',
+    },
+    {
+      icon: 'conversion' as const,
+      label: 'Conversion Rate',
+      value: '—',
+      change: 'Track over time',
+      changeColor: 'green',
+      iconBg: '#FEF3C7',
+      iconColor: '#F59E0B',
+    },
+    {
+      icon: 'response' as const,
+      label: 'Average Response Time',
+      value: '—',
+      change: 'Track over time',
+      changeColor: 'green',
+      iconBg: '#D1FAE5',
+      iconColor: '#10B981',
+    },
+    {
+      icon: 'channel' as const,
+      label: 'Inquiry-to-Listing Ratio',
+      value: ratio,
+      change: totalListings > 0 ? `Across ${totalListings} listings` : 'No listings yet',
+      changeColor: 'green',
+      iconBg: '#D1FAE5',
+      iconColor: '#10B981',
+    },
+  ]
+}
 
 function StatIcon({ type }: { type: string }) {
   switch (type) {
@@ -116,7 +83,22 @@ function StatIcon({ type }: { type: string }) {
 
 export default function ReportsPage() {
   const [selectedRows, setSelectedRows] = useState<number[]>([])
+  const [productivityData, setProductivityData] = useState<TeamProductivityRow[]>([])
+  const [loading, setLoading] = useState(true)
 
+  useEffect(() => {
+    let cancelled = false
+    brokerApi.getTeamProductivityReport().then((data) => {
+      if (!cancelled) setProductivityData(Array.isArray(data) ? data : [])
+    }).catch(() => {
+      if (!cancelled) setProductivityData([])
+    }).finally(() => {
+      if (!cancelled) setLoading(false)
+    })
+    return () => { cancelled = true }
+  }, [])
+
+  const statsData = getStatsFromReport(productivityData)
   const allSelected = selectedRows.length === productivityData.length && productivityData.length > 0
 
   const toggleSelectAll = () => {
@@ -191,23 +173,29 @@ export default function ReportsPage() {
                   <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">Inquiry-to-Listing Ratio</th>
                 </tr>
               </thead><tbody>
-                {productivityData.map((row, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="py-3 px-4 border-b border-gray-100 w-12"> {/* rp-td-check */}
-                      <input
-                        type="checkbox"
-                        checked={selectedRows.includes(index)}
-                        onChange={() => toggleSelect(index)}
-                        className="w-4 h-4 rounded border-gray-300 text-blue-600 cursor-pointer focus:ring-2 focus:ring-blue-500 md:w-5 md:h-5" /* rp-checkbox */
-                      />
-                    </td>
-                    <td className="py-3 px-4 border-b border-gray-100 font-semibold text-gray-900">{row.name}</td> {/* rp-td-name */}
-                    <td className="py-3 px-4 border-b border-gray-100 text-gray-700 text-center">{row.totalListings}</td> {/* rp-td-num */}
-                    <td className="py-3 px-4 border-b border-gray-100 text-gray-700 text-center">{row.totalInquiries}</td> {/* rp-td-num */}
-                    <td className="py-3 px-4 border-b border-gray-100 text-gray-600 italic">{row.mostPopular}</td> {/* rp-td-popular */}
-                    <td className="py-3 px-4 border-b border-gray-100 text-gray-700 text-center">{row.ratio}</td> {/* rp-td-num */}
-                  </tr>
-                ))}
+                {loading ? (
+                  <tr><td colSpan={6} className="py-8 text-center text-gray-500">Loading team productivity...</td></tr>
+                ) : productivityData.length === 0 ? (
+                  <tr><td colSpan={6} className="py-8 text-center text-gray-500">No agents yet. Create or invite agents in Team Management.</td></tr>
+                ) : (
+                  productivityData.map((row, index) => (
+                    <tr key={row.agent_id} className="hover:bg-gray-50">
+                      <td className="py-3 px-4 border-b border-gray-100 w-12"> {/* rp-td-check */}
+                        <input
+                          type="checkbox"
+                          checked={selectedRows.includes(index)}
+                          onChange={() => toggleSelect(index)}
+                          className="w-4 h-4 rounded border-gray-300 text-blue-600 cursor-pointer focus:ring-2 focus:ring-blue-500 md:w-5 md:h-5" /* rp-checkbox */
+                        />
+                      </td>
+                      <td className="py-3 px-4 border-b border-gray-100 font-semibold text-gray-900">{row.name}</td> {/* rp-td-name */}
+                      <td className="py-3 px-4 border-b border-gray-100 text-gray-700 text-center">{row.total_listings}</td> {/* rp-td-num */}
+                      <td className="py-3 px-4 border-b border-gray-100 text-gray-700 text-center">{row.total_inquiries}</td> {/* rp-td-num */}
+                      <td className="py-3 px-4 border-b border-gray-100 text-gray-600 italic">{row.most_popular_listing}</td> {/* rp-td-popular */}
+                      <td className="py-3 px-4 border-b border-gray-100 text-gray-700 text-center">{row.inquiry_to_listing_ratio}</td> {/* rp-td-num */}
+                    </tr>
+                  ))
+                )}
               </tbody></table>
           </div>
 
@@ -222,37 +210,43 @@ export default function ReportsPage() {
               />
               <span className="text-sm font-medium text-gray-700">Select All</span>
             </div>
-            {productivityData.map((row, index) => (
-              <div className="bg-gray-50 rounded-lg p-4 mb-3 border border-gray-200 transition-all duration-200 hover:border-blue-300 hover:shadow-sm" key={index}> {/* rp-mobile-card */}
-                <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-200"> {/* rp-mobile-card-header */}
-                  <input
-                    type="checkbox"
-                    checked={selectedRows.includes(index)}
-                    onChange={() => toggleSelect(index)}
-                    className="w-4 h-4 rounded border-gray-300 text-blue-600 cursor-pointer focus:ring-2 focus:ring-blue-500 md:w-5 md:h-5" /* rp-checkbox */
-                  />
-                  <h4 className="text-base font-bold text-gray-900 m-0">{row.name}</h4> {/* rp-mobile-card-name */}
+            {loading ? (
+              <div className="py-8 text-center text-gray-500">Loading team productivity...</div>
+            ) : productivityData.length === 0 ? (
+              <div className="py-8 text-center text-gray-500">No agents yet. Create or invite agents in Team Management.</div>
+            ) : (
+              productivityData.map((row, index) => (
+                <div className="bg-gray-50 rounded-lg p-4 mb-3 border border-gray-200 transition-all duration-200 hover:border-blue-300 hover:shadow-sm" key={row.agent_id}> {/* rp-mobile-card */}
+                  <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-200"> {/* rp-mobile-card-header */}
+                    <input
+                      type="checkbox"
+                      checked={selectedRows.includes(index)}
+                      onChange={() => toggleSelect(index)}
+                      className="w-4 h-4 rounded border-gray-300 text-blue-600 cursor-pointer focus:ring-2 focus:ring-blue-500 md:w-5 md:h-5" /* rp-checkbox */
+                    />
+                    <h4 className="text-base font-bold text-gray-900 m-0">{row.name}</h4> {/* rp-mobile-card-name */}
+                  </div>
+                  <div className="flex flex-col gap-2.5"> {/* rp-mobile-card-body */}
+                    <div className="flex items-center justify-between"> {/* rp-mobile-card-row */}
+                      <span className="text-xs font-medium text-gray-500 uppercase">Total Listings</span> {/* rp-mobile-label */}
+                      <span className="text-sm font-semibold text-gray-900">{row.total_listings}</span> {/* rp-mobile-value */}
+                    </div>
+                    <div className="flex items-center justify-between"> {/* rp-mobile-card-row */}
+                      <span className="text-xs font-medium text-gray-500 uppercase">Total Inquiries</span> {/* rp-mobile-label */}
+                      <span className="text-sm font-semibold text-gray-900">{row.total_inquiries}</span> {/* rp-mobile-value */}
+                    </div>
+                    <div className="flex items-center justify-between"> {/* rp-mobile-card-row */}
+                      <span className="text-xs font-medium text-gray-500 uppercase">Most Popular Listing</span> {/* rp-mobile-label */}
+                      <span className="text-sm text-gray-600 italic text-right">{row.most_popular_listing}</span> {/* rp-mobile-value-popular */}
+                    </div>
+                    <div className="flex items-center justify-between"> {/* rp-mobile-card-row */}
+                      <span className="text-xs font-medium text-gray-500 uppercase">Inquiry-to-Listing Ratio</span> {/* rp-mobile-label */}
+                      <span className="text-sm font-semibold text-gray-900">{row.inquiry_to_listing_ratio}</span> {/* rp-mobile-value */}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-2.5"> {/* rp-mobile-card-body */}
-                  <div className="flex items-center justify-between"> {/* rp-mobile-card-row */}
-                    <span className="text-xs font-medium text-gray-500 uppercase">Total Listings</span> {/* rp-mobile-label */}
-                    <span className="text-sm font-semibold text-gray-900">{row.totalListings}</span> {/* rp-mobile-value */}
-                  </div>
-                  <div className="flex items-center justify-between"> {/* rp-mobile-card-row */}
-                    <span className="text-xs font-medium text-gray-500 uppercase">Total Inquiries</span> {/* rp-mobile-label */}
-                    <span className="text-sm font-semibold text-gray-900">{row.totalInquiries}</span> {/* rp-mobile-value */}
-                  </div>
-                  <div className="flex items-center justify-between"> {/* rp-mobile-card-row */}
-                    <span className="text-xs font-medium text-gray-500 uppercase">Most Popular Listing</span> {/* rp-mobile-label */}
-                    <span className="text-sm text-gray-600 italic text-right">{row.mostPopular}</span> {/* rp-mobile-value-popular */}
-                  </div>
-                  <div className="flex items-center justify-between"> {/* rp-mobile-card-row */}
-                    <span className="text-xs font-medium text-gray-500 uppercase">Inquiry-to-Listing Ratio</span> {/* rp-mobile-label */}
-                    <span className="text-sm font-semibold text-gray-900">{row.ratio}</span> {/* rp-mobile-value */}
-                  </div>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 

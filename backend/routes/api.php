@@ -141,16 +141,23 @@ Route::middleware('auth:sanctum')->prefix('broker')->group(function () {
     // Team management
     Route::post('/teams', [BrokerController::class, 'createTeam']);
     Route::get('/teams', [BrokerController::class, 'getTeams']);
+    Route::put('/teams/{teamId}', [BrokerController::class, 'updateTeam']);
+    Route::delete('/teams/{teamId}', [BrokerController::class, 'deleteTeam']);
     Route::post('/teams/{teamId}/agents/{agentId}', [BrokerController::class, 'assignAgentToTeam']);
     Route::delete('/teams/{teamId}/agents/{agentId}', [BrokerController::class, 'removeAgentFromTeam']);
     
     // Agent management (brokers create agents directly; no approval flow)
+    Route::get('/agents/search', [BrokerController::class, 'searchAgentsToInvite']);
+    Route::post('/agents/invite', [BrokerController::class, 'inviteAgent']);
     Route::get('/agents', [BrokerController::class, 'getAgents']);
     Route::post('/agents', [BrokerController::class, 'createAgent']);
     
     // Property management
     Route::get('/properties', [BrokerController::class, 'getProperties']);
     Route::put('/properties/{id}', [BrokerController::class, 'updateProperty']);
+
+    // Reports
+    Route::get('/reports/team-productivity', [BrokerController::class, 'teamProductivityReport']);
     
     // Subscription management
     Route::post('/subscribe', [BrokerController::class, 'subscribeToPlan']);

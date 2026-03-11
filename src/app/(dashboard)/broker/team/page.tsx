@@ -29,6 +29,7 @@ import {
   FiGrid,
   FiStar,
   FiUser,
+  FiUserPlus,
   FiAlertCircle,
   FiX,
   FiCheck,
@@ -36,6 +37,7 @@ import {
   FiArrowDown,
   FiFilter,
   FiLayers,
+  FiSearch,
 } from 'react-icons/fi'
 
 interface TeamMemberDisplay {
@@ -59,6 +61,7 @@ interface AvailableAgent {
   joinDateRaw?: string
   email?: string
   listings: number
+  teamName?: string | null
 }
 
 type SortField = 'name' | 'joinDate' | 'role' | 'status'
@@ -135,6 +138,10 @@ function DraggableAgent({ agent }: { agent: AvailableAgent }) {
               }`}>
                 {agent.status}
               </span>
+              <span>•</span>
+              <span className="text-gray-500">
+                {agent.teamName ? `Team: ${agent.teamName}` : 'Unassigned'}
+              </span>
             </div>
           </div>
         </div>
@@ -180,6 +187,13 @@ export default function TeamManagementPage() {
   const [activeId, setActiveId] = useState<string | null>(null)
   const [sortField, setSortField] = useState<SortField>('name')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+  const [showInviteModal, setShowInviteModal] = useState(false)
+  const [inviteSearchQuery, setInviteSearchQuery] = useState('')
+  const [inviteSearchResults, setInviteSearchResults] = useState<any[]>([])
+  const [inviteSearching, setInviteSearching] = useState(false)
+  const [inviteError, setInviteError] = useState<string | null>(null)
+  const [invitingId, setInvitingId] = useState<number | null>(null)
+  const inviteSearchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [newTeam, setNewTeam] = useState({
     name: '',
     description: '',
@@ -190,6 +204,11 @@ export default function TeamManagementPage() {
     teamColor: '#2563EB',
     teamIcon: 'home' as 'home' | 'key' | 'grid' | 'star',
   })
+  const [editingTeamId, setEditingTeamId] = useState<number | null>(null)
+  const [editTeamForm, setEditTeamForm] = useState({ name: '', description: '' })
+  const [editTeamSaving, setEditTeamSaving] = useState(false)
+  const [editTeamError, setEditTeamError] = useState<string | null>(null)
+  const [deletingTeamId, setDeletingTeamId] = useState<number | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -249,7 +268,7 @@ export default function TeamManagementPage() {
     const fetchProperties = async () => {
       try {
         setLoadingListings(true)
-        const res = await brokerApi.getProperties()
+        const res = await brokerApi.getProperties({ per_page: 2000 })
         const list = Array.isArray(res) ? res : (res as any)?.data ?? []
         setProperties(list)
       } catch (e) {
@@ -260,6 +279,49 @@ export default function TeamManagementPage() {
     }
     fetchProperties()
   }, [])
+
+  // Debounced search for invite-agent modal
+  useEffect(() => {
+    if (!showInviteModal) return
+    const q = inviteSearchQuery.trim()
+    if (q.length < 2) {
+      setInviteSearchResults([])
+      return
+    }
+    if (inviteSearchTimeoutRef.current) clearTimeout(inviteSearchTimeoutRef.current)
+    inviteSearchTimeoutRef.current = setTimeout(async () => {
+      setInviteSearching(true)
+      setInviteError(null)
+      try {
+        const data = await brokerApi.searchAgentsToInvite(q)
+        setInviteSearchResults(Array.isArray(data) ? data : [])
+      } catch (err: any) {
+        setInviteSearchResults([])
+        setInviteError(err?.message || 'Search failed.')
+      } finally {
+        setInviteSearching(false)
+      }
+    }, 300)
+    return () => {
+      if (inviteSearchTimeoutRef.current) clearTimeout(inviteSearchTimeoutRef.current)
+    }
+  }, [showInviteModal, inviteSearchQuery])
+
+  const handleInviteAgent = async (agentId: number) => {
+    setInviteError(null)
+    setInvitingId(agentId)
+    try {
+      await brokerApi.inviteAgent(agentId)
+      const agentsData = await brokerApi.getAgents()
+      setAgents(agentsData)
+      setInviteSearchResults(prev => prev.filter(a => a.id !== agentId))
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || 'Failed to invite agent.'
+      setInviteError(msg)
+    } finally {
+      setInvitingId(null)
+    }
+  }
 
   const listingCountByAgentId = useMemo(() => {
     const map: Record<number, number> = {}
@@ -276,17 +338,20 @@ export default function TeamManagementPage() {
     0
   )
 
-  // Get assigned agent IDs
-  const assignedAgentIds = useMemo(() => {
-    return new Set(
-      teams.flatMap(team => (team.members || []).map((member: TeamMember) => member.agent_id))
-    )
+  // Map each agent ID to the team they belong to (if any)
+  const agentTeamMap = useMemo(() => {
+    const map: Record<number, { teamId: number; teamName: string }> = {}
+    teams.forEach(team => {
+      ;(team.members || []).forEach((member: TeamMember) => {
+        map[member.agent_id] = { teamId: team.id, teamName: team.name }
+      })
+    })
+    return map
   }, [teams])
 
-  // Filter available agents (not assigned to any team) with listing counts
+  // Available agents list (all agents) with listing counts and team info
   const availableAgents = useMemo(() => {
     return agents
-      .filter((agent: any) => !assignedAgentIds.has(agent.id))
       .map((agent: any): AvailableAgent => ({
         id: agent.id,
         name: `${agent.first_name || ''} ${agent.last_name || ''}`.trim() || 'Unknown',
@@ -296,8 +361,9 @@ export default function TeamManagementPage() {
         joinDateRaw: agent.created_at || new Date().toISOString(),
         email: agent.email,
         listings: listingCountByAgentId[agent.id] ?? 0,
+        teamName: agentTeamMap[agent.id]?.teamName ?? null,
       }))
-  }, [agents, assignedAgentIds, listingCountByAgentId])
+  }, [agents, agentTeamMap, listingCountByAgentId])
 
   // Sort available agents
   const sortedAvailableAgents = useMemo(() => {
@@ -424,6 +490,9 @@ export default function TeamManagementPage() {
         name: newTeam.name,
         description: newTeam.description,
         company_id: newTeam.company_id || undefined,
+        team_color: newTeam.teamColor,
+        team_icon: newTeam.teamIcon,
+        focus_area: newTeam.focusArea,
       }
       
       const result = await brokerApi.createTeam(teamData)
@@ -486,6 +555,43 @@ export default function TeamManagementPage() {
     } catch (error: any) {
       console.error('Error creating team:', error)
       alert('Failed to create team. Please try again.')
+    }
+  }
+
+  const handleOpenEditTeam = (team: Team) => {
+    setEditingTeamId(team.id)
+    setEditTeamForm({ name: team.name, description: (team.description ?? '') || '' })
+    setEditTeamError(null)
+  }
+
+  const handleSaveEditTeam = async () => {
+    if (editingTeamId == null) return
+    setEditTeamSaving(true)
+    setEditTeamError(null)
+    try {
+      const result = await brokerApi.updateTeam(editingTeamId, {
+        name: editTeamForm.name,
+        description: editTeamForm.description || undefined,
+      })
+      setTeams(prev => prev.map(t => t.id === editingTeamId ? (result.data ?? t) : t))
+      setEditingTeamId(null)
+    } catch (err: any) {
+      setEditTeamError(err?.response?.data?.message || err?.message || 'Failed to update team.')
+    } finally {
+      setEditTeamSaving(false)
+    }
+  }
+
+  const handleDeleteTeam = async (teamId: number, teamName: string) => {
+    if (!confirm(`Delete team "${teamName}"? Members will be removed from the team but remain in your agent pool.`)) return
+    setDeletingTeamId(teamId)
+    try {
+      await brokerApi.deleteTeam(teamId)
+      setTeams(prev => prev.filter(t => t.id !== teamId))
+    } catch (err: any) {
+      alert(err?.response?.data?.message || err?.message || 'Failed to delete team.')
+    } finally {
+      setDeletingTeamId(null)
     }
   }
 
@@ -611,7 +717,129 @@ export default function TeamManagementPage() {
                     <p className="text-xs text-gray-500 m-0 mt-0.5">{sortedAvailableAgents.length} available agents</p>
                   </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowInviteModal(true)
+                    setInviteSearchQuery('')
+                    setInviteSearchResults([])
+                    setInviteError(null)
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg border-0 cursor-pointer transition-colors hover:bg-blue-700"
+                >
+                  <FiUserPlus className="w-4 h-4" />
+                  Invite agent
+                </button>
               </div>
+
+              {/* Invite Agent Modal */}
+              {showInviteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setShowInviteModal(false)}>
+                  <div className="bg-white rounded-xl shadow-xl border border-gray-200 w-full max-w-md max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                    <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                      <h4 className="text-lg font-bold text-gray-900 m-0">Invite agent</h4>
+                      <button type="button" onClick={() => setShowInviteModal(false)} className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
+                        <FiX className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <div className="p-4 border-b border-gray-100">
+                      <p className="text-sm text-gray-600 mb-3">Search for an already registered agent by name or email to add them to Available Agents.</p>
+                      <div className="relative">
+                        <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                          type="text"
+                          value={inviteSearchQuery}
+                          onChange={e => setInviteSearchQuery(e.target.value)}
+                          placeholder="Search by name or email..."
+                          className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none"
+                          autoFocus
+                        />
+                      </div>
+                      {inviteError && (
+                        <p className="mt-2 text-sm text-red-600">{inviteError}</p>
+                      )}
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-4">
+                      {inviteSearching ? (
+                        <div className="py-6 text-center text-gray-500 text-sm">Searching...</div>
+                      ) : inviteSearchQuery.trim().length < 2 ? (
+                        <div className="py-6 text-center text-gray-500 text-sm">Type at least 2 characters to search.</div>
+                      ) : inviteSearchResults.length === 0 ? (
+                        <div className="py-6 text-center text-gray-500 text-sm">No agents found. Try a different search.</div>
+                      ) : (
+                        <ul className="space-y-2">
+                          {inviteSearchResults.map((person: any) => {
+                            const name = [person.first_name, person.last_name].filter(Boolean).join(' ') || 'Unknown'
+                            const email = person.email || ''
+                            const isAlready = agents.some((a: any) => a.id === person.id)
+                            return (
+                              <li key={person.id} className="flex items-center justify-between gap-3 p-3 rounded-lg border border-gray-200 bg-gray-50/50">
+                                <div className="min-w-0">
+                                  <div className="font-medium text-gray-900 truncate">{name}</div>
+                                  {email && <div className="text-xs text-gray-500 truncate">{email}</div>}
+                                </div>
+                                <button
+                                  type="button"
+                                  disabled={isAlready || invitingId === person.id}
+                                  onClick={() => handleInviteAgent(person.id)}
+                                  className="shrink-0 px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-lg border-0 cursor-pointer transition-colors hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  {isAlready ? 'Added' : invitingId === person.id ? 'Adding...' : 'Add'}
+                                </button>
+                              </li>
+                            )
+                          })}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Edit Team Modal */}
+              {editingTeamId != null && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setEditingTeamId(null)}>
+                  <div className="bg-white rounded-xl shadow-xl border border-gray-200 w-full max-w-md" onClick={e => e.stopPropagation()}>
+                    <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                      <h4 className="text-lg font-bold text-gray-900 m-0">Edit team</h4>
+                      <button type="button" onClick={() => setEditingTeamId(null)} className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
+                        <FiX className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <div className="p-4 space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Team name</label>
+                        <input
+                          type="text"
+                          value={editTeamForm.name}
+                          onChange={e => setEditTeamForm(f => ({ ...f, name: e.target.value }))}
+                          placeholder="Enter team name"
+                          className="w-full py-2.5 px-4 border border-gray-300 rounded-lg text-sm text-gray-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
+                        <textarea
+                          value={editTeamForm.description}
+                          onChange={e => setEditTeamForm(f => ({ ...f, description: e.target.value }))}
+                          placeholder="Team description"
+                          className="w-full py-2.5 px-4 border border-gray-300 rounded-lg text-sm text-gray-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                          rows={3}
+                        />
+                      </div>
+                      {editTeamError && <p className="text-sm text-red-600">{editTeamError}</p>}
+                    </div>
+                    <div className="flex justify-end gap-2 p-4 border-t border-gray-100">
+                      <button type="button" onClick={() => setEditingTeamId(null)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                        Cancel
+                      </button>
+                      <button type="button" onClick={handleSaveEditTeam} disabled={editTeamSaving || !editTeamForm.name.trim()} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                        {editTeamSaving ? 'Saving...' : 'Save'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Sorting Controls */}
               <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
@@ -648,10 +876,7 @@ export default function TeamManagementPage() {
                 {loading ? (
                   <div className="py-8 text-center text-gray-500">Loading available agents...</div>
                 ) : sortedAvailableAgents.length === 0 ? (
-                  <div className="py-8 text-center text-gray-500">
-                    <p className="mb-2">All agents are assigned to teams.</p>
-                    <p className="text-sm text-gray-400">Create a new team or remove agents from existing teams to see them here.</p>
-                  </div>
+                  <div className="py-8 text-center text-gray-500">No agents found.</div>
                 ) : (
                   sortedAvailableAgents.map((agent) => (
                     <DraggableAgent key={agent.id} agent={agent} />
@@ -836,17 +1061,43 @@ export default function TeamManagementPage() {
                 return (
                   <DroppableTeam key={team.id} team={team}>
                     <div className="bg-white rounded-[14px] p-6 shadow-sm border border-gray-200">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl text-blue-600">
-                          {getTeamIcon('home')}
+                    <div className="flex items-start justify-between gap-4 mb-4">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className={`w-12 h-12 shrink-0 rounded-lg flex items-center justify-center text-2xl text-white ${getTeamColorClasses((team as any).team_color || '#2563EB')}`}>
+                          {getTeamIcon((team as any).team_icon || 'home')}
                         </div>
-                        <div>
-                          <div className="text-lg font-bold text-gray-900">{team.name}</div>
-                          <div className="text-sm text-gray-600">{team.description || 'No description'}</div>
+                        <div className="min-w-0">
+                          <div className="text-lg font-bold text-gray-900 truncate">{team.name}</div>
+                          <div className="text-sm text-gray-600">
+                            {team.description || 'No description'}
+                            {(team as any).focus_area && (
+                              <span className="block text-xs text-gray-500 mt-0.5">
+                                Focus: {(team as any).focus_area}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      <span className="text-xs font-semibold bg-emerald-100 text-emerald-700 px-2 py-1 rounded">Active</span>
+                      <div className="shrink-0 flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEditTeam(team)}
+                          className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Edit team"
+                        >
+                          <FiEdit className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteTeam(team.id, team.name)}
+                          disabled={deletingTeamId === team.id}
+                          className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                          title="Delete team"
+                        >
+                          <FiTrash2 className="w-4 h-4" />
+                        </button>
+                        <span className="text-xs font-semibold bg-emerald-100 text-emerald-700 px-2 py-1 rounded">Active</span>
+                      </div>
                     </div>
                     
                     <div className="mb-4">

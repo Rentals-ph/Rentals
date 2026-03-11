@@ -17,6 +17,7 @@ export { messagesApi } from './endpoints/messages'
 export { pageBuilderApi } from './endpoints/pageBuilder'
 export { listingAssistantApi } from './endpoints/listingAssistant'
 export { brokerApi } from './endpoints/broker'
+export type { TeamProductivityRow } from './endpoints/broker'
 
 // Export types from endpoints
 export type { GetPropertiesParams } from './endpoints/properties'

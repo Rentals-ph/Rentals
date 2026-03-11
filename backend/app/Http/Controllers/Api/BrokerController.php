@@ -9,6 +9,7 @@ use App\Models\Team;
 use App\Models\TeamMember;
 use App\Models\User;
 use App\Models\Property;
+use App\Models\Message;
 use App\Models\BrokerPlan;
 use App\Models\BrokerSubscription;
 use Illuminate\Http\Request;
@@ -234,6 +235,70 @@ class BrokerController extends Controller
     }
 
     /**
+     * Update a team (name, description, company_id).
+     */
+    public function updateTeam(Request $request, $teamId): JsonResponse
+    {
+        $broker = $this->ensureBroker($request);
+
+        $team = Team::where('id', $teamId)->where('broker_id', $broker->id)->firstOrFail();
+
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'description' => 'nullable|string',
+            'company_id' => 'nullable|exists:companies,id',
+        ]);
+
+        if (isset($validated['company_id'])) {
+            $company = Company::where('id', $validated['company_id'])->where('broker_id', $broker->id)->first();
+            if (!$company) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Company not found or access denied.',
+                ], 404);
+            }
+        }
+
+        $team->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Team updated successfully',
+            'data' => $team->fresh(['company', 'members.agent']),
+        ]);
+    }
+
+    /**
+     * Delete a team (removes team and its memberships; agents remain in broker's pool).
+     */
+    public function deleteTeam(Request $request, $teamId): JsonResponse
+    {
+        $broker = $this->ensureBroker($request);
+
+        $team = Team::where('id', $teamId)->where('broker_id', $broker->id)->firstOrFail();
+
+        DB::beginTransaction();
+        try {
+            TeamMember::where('team_id', $team->id)->delete();
+            $team->delete();
+            $broker->activeSubscription?->decrement('teams_used');
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Team deleted successfully',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error deleting team: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete team',
+                'error' => config('app.debug') ? $e->getMessage() : 'An error occurred',
+            ], 500);
+        }
+    }
+
+    /**
      * Assign an agent to a team.
      */
     public function assignAgentToTeam(Request $request, $teamId, $agentId): JsonResponse
@@ -447,6 +512,86 @@ class BrokerController extends Controller
     }
 
     /**
+     * Search for registered agents (platform-wide) that can be invited to the broker's pool.
+     * Returns agents matching the query who are not already managed by this broker.
+     */
+    public function searchAgentsToInvite(Request $request): JsonResponse
+    {
+        $broker = $this->ensureBroker($request);
+
+        $q = $request->input('q', '');
+        $q = is_string($q) ? trim($q) : '';
+        if (strlen($q) < 2) {
+            return response()->json([
+                'success' => true,
+                'data' => [],
+            ]);
+        }
+
+        $managedIds = $broker->managedAgents()->pluck('id')->all();
+
+        $query = User::where('role', 'agent');
+        if (!empty($managedIds)) {
+            $query->whereNotIn('id', $managedIds);
+        }
+        $agents = $query
+            ->where(function ($query) use ($q) {
+                $query->where('first_name', 'like', '%' . $q . '%')
+                    ->orWhere('last_name', 'like', '%' . $q . '%')
+                    ->orWhere('email', 'like', '%' . $q . '%')
+                    ->orWhereRaw("CONCAT(COALESCE(first_name,''), ' ', COALESCE(last_name,'')) LIKE ?", ['%' . $q . '%']);
+            })
+            ->orderBy('first_name')
+            ->limit(20)
+            ->get(['id', 'first_name', 'last_name', 'email', 'created_at', 'status']);
+
+        return response()->json([
+            'success' => true,
+            'data' => $agents,
+        ]);
+    }
+
+    /**
+     * Invite an already-registered agent to the broker's pool (adds them to Available Agents).
+     */
+    public function inviteAgent(Request $request): JsonResponse
+    {
+        $broker = $this->ensureBroker($request);
+
+        $subscription = $broker->activeSubscription;
+        if (!$subscription || !$subscription->canAddAgent()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Agent limit reached. Please upgrade your plan.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'agent_id' => 'required|integer|exists:users,id',
+        ]);
+
+        $agent = User::where('id', $validated['agent_id'])->where('role', 'agent')->firstOrFail();
+
+        if ($broker->managedAgents()->where('users.id', $agent->id)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This agent is already in your pool.',
+            ], 422);
+        }
+
+        $agent->created_by_broker_id = $broker->id;
+        $agent->save();
+
+        $subscription->increment('agents_used');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Agent added to your pool.',
+            'data' => $agent,
+        ]);
+    }
+
+    /**
      * Get all agents managed by this broker (created by broker or in broker's teams).
      */
     public function getAgents(Request $request): JsonResponse
@@ -466,20 +611,22 @@ class BrokerController extends Controller
 
     /**
      * Get all properties for the broker.
+     * Includes broker's own listings + all managed agents (created by broker or in broker's teams).
+     * Supports per_page query param for team overview (e.g. per_page=1000 to get counts right).
      */
     public function getProperties(Request $request): JsonResponse
     {
         $broker = $this->ensureBroker($request);
 
-        // Get properties created by broker or by agents in broker's teams
-        $agentIds = TeamMember::whereHas('team', function($query) use ($broker) {
-            $query->where('broker_id', $broker->id);
-        })->pluck('agent_id')->push($broker->id);
+        $agentIds = $broker->managedAgents()->pluck('id')->push($broker->id)->unique()->values()->all();
+
+        $perPage = (int) $request->input('per_page', 12);
+        $perPage = min(max(1, $perPage), 2000);
 
         $properties = Property::whereIn('agent_id', $agentIds)
             ->with('agent')
             ->latest()
-            ->paginate(12);
+            ->paginate($perPage);
 
         return response()->json([
             'success' => true,
@@ -488,16 +635,13 @@ class BrokerController extends Controller
     }
 
     /**
-     * Update a property (broker can modify any property from their teams).
+     * Update a property (broker can modify any property from them or their managed agents).
      */
     public function updateProperty(Request $request, $propertyId): JsonResponse
     {
         $broker = $this->ensureBroker($request);
 
-        // Verify property belongs to broker or broker's agents
-        $agentIds = TeamMember::whereHas('team', function($query) use ($broker) {
-            $query->where('broker_id', $broker->id);
-        })->pluck('agent_id')->push($broker->id);
+        $agentIds = $broker->managedAgents()->pluck('id')->push($broker->id)->unique()->values()->all();
 
         $property = Property::whereIn('agent_id', $agentIds)
             ->findOrFail($propertyId);
@@ -582,5 +726,67 @@ class BrokerController extends Controller
             'message' => 'Subscribed to plan successfully',
             'data' => $subscription->load('plan'),
         ], 201);
+    }
+
+    /**
+     * Team productivity report: listings and inquiry counts per managed agent (and broker).
+     */
+    public function teamProductivityReport(Request $request): JsonResponse
+    {
+        $broker = $this->ensureBroker($request);
+
+        $agentIds = $broker->managedAgents()->pluck('id')->push($broker->id)->unique()->values()->all();
+
+        $users = User::whereIn('id', $agentIds)->get()->keyBy('id');
+        $listingCounts = Property::whereIn('agent_id', $agentIds)->selectRaw('agent_id, count(*) as total')->groupBy('agent_id')->pluck('total', 'agent_id');
+        $inquiryCounts = Message::whereIn('recipient_id', $agentIds)->selectRaw('recipient_id, count(*) as total')->groupBy('recipient_id')->pluck('total', 'recipient_id');
+
+        $propertyIdsByAgent = Property::whereIn('agent_id', $agentIds)->get()->groupBy('agent_id')->map(fn ($props) => $props->pluck('id')->all());
+        $allPropertyIds = Property::whereIn('agent_id', $agentIds)->pluck('id')->all();
+        $inquiriesByProperty = empty($allPropertyIds) ? collect() : Message::whereIn('property_id', $allPropertyIds)->selectRaw('property_id, count(*) as total')->groupBy('property_id')->pluck('total', 'property_id');
+
+        $mostPopularByAgent = [];
+        foreach ($agentIds as $aid) {
+            $pids = $propertyIdsByAgent->get($aid, []);
+            $best = null;
+            $bestCount = 0;
+            foreach ($pids as $pid) {
+                $cnt = $inquiriesByProperty->get($pid, 0);
+                if ($cnt > $bestCount) {
+                    $bestCount = $cnt;
+                    $best = $pid;
+                }
+            }
+            $mostPopularByAgent[$aid] = $best;
+        }
+        $popularTitles = $mostPopularByAgent ? Property::whereIn('id', array_filter(array_values($mostPopularByAgent)))->pluck('title', 'id') : collect();
+
+        $rows = [];
+        foreach ($agentIds as $agentId) {
+            $user = $users->get($agentId);
+            $name = $user ? trim($user->first_name . ' ' . $user->last_name) : 'Unknown';
+            if ($user && $user->role === 'broker') {
+                $name = $name ?: 'You';
+            }
+            $totalListings = (int) $listingCounts->get($agentId, 0);
+            $totalInquiries = (int) $inquiryCounts->get($agentId, 0);
+            $popularId = $mostPopularByAgent[$agentId] ?? null;
+            $mostPopular = $popularId ? ($popularTitles->get($popularId) ?? '—') : '—';
+            $ratio = $totalListings > 0 ? round($totalInquiries / $totalListings, 1) : 0;
+
+            $rows[] = [
+                'agent_id' => $agentId,
+                'name' => $name,
+                'total_listings' => $totalListings,
+                'total_inquiries' => $totalInquiries,
+                'most_popular_listing' => $mostPopular,
+                'inquiry_to_listing_ratio' => $ratio,
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $rows,
+        ]);
     }
 }
