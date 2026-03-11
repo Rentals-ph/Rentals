@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react'
 import AppSidebar from '@/components/common/AppSidebar'
 import AgentHeader from '@/components/agent/AgentHeader'
-import DigitalBusinessCard from '@/components/common/DigitalBusinessCard'
+import FlippableBusinessCard from '@/components/common/digital/FlippableBusinessCard'
 import { agentsApi } from '@/api'
 import type { Agent } from '@/api/endpoints/agents'
 import { ASSETS } from '@/utils/assets'
+
 // import './page.css' // Removed - converted to Tailwind
 
 export default function AgentDigitalCard() {
@@ -71,6 +72,10 @@ export default function AgentDigitalCard() {
   const email = agent?.email || 'your@email.com'
   const agentImage = agent?.image || agent?.avatar || agent?.profile_image || ASSETS.PLACEHOLDER_PROFILE
   const agentInitials = fullName.split(' ').map(n => n[0]).join('').toUpperCase() || 'A'
+  const companyName = agent?.company_name || agent?.agency_name || ''
+  const companyImage = agent?.company_image || null
+  const officeAddress = agent?.office_address || ''
+  const licenseNumber = agent?.prc_license_number || ''
 
   return (
     <div className="flex min-h-screen bg-gray-100 font-outfit"> {/* agent-dashboard */}
@@ -91,7 +96,7 @@ export default function AgentDigitalCard() {
             <div className="p-8 text-center text-gray-500">Loading card...</div>
           ) : (
             <div className="flex justify-center items-start py-5">
-              <DigitalBusinessCard
+              <FlippableBusinessCard
                 firstName={firstName}
                 lastName={lastName}
                 fullName={fullName}
@@ -102,6 +107,10 @@ export default function AgentDigitalCard() {
                 email={email}
                 image={agentImage}
                 initials={agentInitials}
+                companyName={companyName}
+                companyImage={companyImage}
+                officeAddress={officeAddress}
+                licenseNumber={licenseNumber}
               />
             </div>
           )}

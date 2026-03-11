@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import AppSidebar from '@/components/common/AppSidebar'
-import DigitalBusinessCard from '@/components/common/DigitalBusinessCard'
+import FlippableBusinessCard from '@/components/common/digital/FlippableBusinessCard'
 import { agentsApi } from '@/api'
 import type { Agent } from '@/api/endpoints/agents'
 import { ASSETS } from '@/utils/assets'
@@ -81,6 +81,10 @@ export default function BrokerDigitalCard() {
   // Use your photo first; fallback to agent image from API if set
   const brokerImage = agent?.image || agent?.avatar || agent?.profile_image || DEFAULT_PROFILE_IMAGE
   const brokerInitials = fullName.split(' ').map(n => n[0]).join('').toUpperCase() || 'B'
+  const companyName = agent?.company_name || agent?.agency_name || ''
+  const companyImage = agent?.company_image || null
+  const officeAddress = agent?.office_address || ''
+  const licenseNumber = agent?.prc_license_number || ''
 
   return (
     <div className="flex min-h-screen bg-gray-100 font-outfit">
@@ -105,7 +109,7 @@ export default function BrokerDigitalCard() {
             <div className="p-8 text-center text-gray-500">Loading card...</div>
           ) : (
             <div className="flex justify-center items-start">
-              <DigitalBusinessCard
+              <FlippableBusinessCard
                 firstName={firstName}
                 lastName={lastName}
                 fullName={fullName}
@@ -116,6 +120,10 @@ export default function BrokerDigitalCard() {
                 image={brokerImage}
                 initials={brokerInitials}
                 profileUrl={agent?.id ? `/agents/${agent.id}` : undefined}
+                companyName={companyName}
+                companyImage={companyImage}
+                officeAddress={officeAddress}
+                licenseNumber={licenseNumber}
               />
             </div>
           )}
