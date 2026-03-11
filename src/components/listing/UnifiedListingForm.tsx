@@ -1145,7 +1145,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                                     className={`text-[11px] font-medium px-2.5 py-1 rounded-full border transition-all whitespace-nowrap ${
                                       isSelected
                                         ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
-                                        : 'bg-white border-gray-300 text-gray-500 hover:border-blue-600 hover:text-blue-600'
+                                        : 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300'
                                     }`}
                                   >
                                     {tmpl.label}
@@ -1323,12 +1323,12 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                           <div className="flex gap-2">
                             <button type="button"
                               onClick={() => updateField('listingType', 'for_rent')}
-                              className={`flex-1 h-9 rounded-lg border-2 text-[12px] font-semibold transition-all ${formData.listingType === 'for_rent' ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-blue-400'}`}>
+                              className={`flex-1 h-9 rounded-lg border-2 text-[12px] font-semibold transition-all ${formData.listingType === 'for_rent' ? 'bg-blue-600 border-blue-600 text-white' : 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300'}`}>
                               For Rent
                             </button>
                             <button type="button"
                               onClick={() => updateField('listingType', 'for_sale')}
-                              className={`flex-1 h-9 rounded-lg border-2 text-[12px] font-semibold transition-all ${formData.listingType === 'for_sale' ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-gray-300 text-gray-500 hover:border-green-400'}`}>
+                              className={`flex-1 h-9 rounded-lg border-2 text-[12px] font-semibold transition-all ${formData.listingType === 'for_sale' ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300'}`}>
                               For Sale
                             </button>
                           </div>
@@ -1373,7 +1373,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                               className={`px-2.5 py-1 rounded-full border text-[11px] font-medium cursor-pointer transition-all ${
                                 formData.amenities.includes(a)
                                   ? 'bg-blue-600 border-blue-600 text-white'
-                                  : 'bg-white border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-900'
+                                  : 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300'
                               }`}>
                               {a}
                             </button>
@@ -1504,7 +1504,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                   </div>
                   <div className="flex gap-2">
                     <button type="button" onClick={() => router.push(roleConfig.listingsPath)}
-                      className="px-4 py-2 rounded-[6px] border border-gray-300 text-[13px] font-semibold text-gray-500 hover:border-gray-400 hover:text-gray-900 bg-white transition-all">
+                      className="px-4 py-2 rounded-[6px] border border-blue-200 text-[13px] font-semibold text-blue-700 hover:bg-blue-100 hover:border-blue-300 bg-blue-50 transition-all">
                       Cancel
                     </button>
                     <button type="button" onClick={submit}
@@ -1594,9 +1594,9 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
               <button
                 type="button"
                 onClick={() => router.push(roleConfig.listingsPath)}
-                className="w-full flex items-center justify-center gap-2 h-11 bg-white border border-gray-300 hover:border-gray-400 text-gray-900 text-[13px] font-semibold rounded-[10px] transition-colors"
+                className="w-full flex items-center justify-center gap-2 h-11 bg-blue-50 border border-blue-200 hover:bg-blue-100 hover:border-blue-300 text-blue-700 text-[13px] font-semibold rounded-[10px] transition-colors"
               >
-                <FiList className="w-4 h-4 text-gray-500" />
+                <FiList className="w-4 h-4 text-blue-700" />
                 View My Listings
               </button>
             </div>
