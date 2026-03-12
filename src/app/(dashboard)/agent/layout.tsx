@@ -18,7 +18,7 @@ export default function AgentLayout({
         <AppHeader />
         <div className="flex flex-1 min-h-0">
           <AppSidebar />
-          <main className="main-with-sidebar flex-1 min-h-screen ">
+          <main className="main-with-sidebar flex-1 p-5 min-h-screen ">
             {children}
           </main>
         </div>

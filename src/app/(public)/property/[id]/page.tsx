@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import Footer from '../../../../components/layout/Footer'
+import FloatingInquiryChat from '@/components/public/FloatingInquiryChat'
 import VerticalPropertyCard from '../../../../components/common/cards/VerticalPropertyCard'
 import SharePopup, { type SharePlatform, type ShareOption } from '../../../../components/common/misc/SharePopup'
 import PropertyLocationMap from '../../../../components/common/maps/PropertyLocationMap'
@@ -895,6 +896,8 @@ export default function PropertyDetailsPage() {
       )}
 
       <Footer />
+
+      {property && <FloatingInquiryChat property={property} />}
 
       {/* ════════════════════════════════════════════════════ */}
       {/* GALLERY MODAL                                       */}

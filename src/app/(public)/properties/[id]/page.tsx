@@ -702,65 +702,69 @@ export default function PropertyDetailsPage() {
                     ? getRentManagerRole((agent as { verified?: boolean }).verified)
                     : getRentManagerRole(rentManager?.is_official)
                   const agentId = property.agent_id || agent?.id || rentManager?.id
-                  const isVerified = agent ? (agent as { verified?: boolean }).verified : rentManager?.is_official
+
+                  const phone = property.agent?.phone || property.rent_manager?.id ? undefined : undefined
+
                   return (
-                    <div className="rounded-xl overflow-hidden mb-4 bg-white shadow-sm" style={{ border: '1px solid #e5e7eb' }}>
-                      <div className="p-5">
-                        <div className="flex items-center gap-3 mb-4">
-                          {/* Avatar */}
-                          <div className="relative w-16 h-16 rounded-full bg-[#205ed7] flex items-center justify-center text-white text-xl font-bold flex-shrink-0 overflow-hidden">
-                            {agentId ? (
-                              <>
-                                <img
-                                  src={resolveAgentAvatar(agentId.toString(), agentId)}
-                                  alt={displayName}
-                                  className="absolute inset-0 w-full h-full object-cover"
-                                  onError={e => {
-                                    e.currentTarget.style.display = 'none'
-                                    const fallback = e.currentTarget.nextElementSibling as HTMLElement
-                                    if (fallback) fallback.classList.remove('hidden')
-                                  }}
-                                />
-                                <span className="hidden absolute inset-0 flex items-center justify-center bg-[#205ed7] text-white text-xl font-bold">
-                                  {displayName.charAt(0).toUpperCase()}
-                                </span>
-                              </>
-                            ) : (
-                              <span>{displayName.charAt(0).toUpperCase()}</span>
-                            )}
-                          </div>
-                          {/* Name + role */}
+                    <div className="mb-4 overflow-hidden rounded-xl bg-white shadow-[0_10px_30px_rgba(15,23,42,0.12)]">
+                      {/* Top image row */}
+                      <div className="flex items-stretch border-b border-gray-200">
+                        <div className="h-[88px] w-[96px] flex-shrink-0 overflow-hidden bg-gray-200">
+                          <img
+                            src={agentId ? resolveAgentAvatar(agentId.toString(), agentId) : ASSETS.PLACEHOLDER_PROPERTY_MAIN}
+                            alt={displayName}
+                            className="h-full w-full object-cover"
+                            onError={e => { e.currentTarget.src = ASSETS.PLACEHOLDER_PROPERTY_MAIN }}
+                          />
+                        </div>
+                        <div className="flex flex-1 items-center justify-between px-4">
                           <div className="min-w-0">
-                            <p className="font-bold text-gray-900 flex items-center gap-1.5 flex-wrap text-sm">
+                            <p className="truncate text-sm font-semibold text-gray-900">
                               {displayName}
-                              {isVerified && (
-                                <svg className="w-4 h-4 text-[#205ed7] flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                                </svg>
-                              )}
                             </p>
-                            <p className="text-xs text-gray-500">{role}</p>
+                            <p className="mt-0.5 text-xs text-gray-500">{role}</p>
+                          </div>
+                          <div className="hidden h-10 w-28 flex-shrink-0 items-center justify-center rounded-md bg-white px-2 text-[10px] font-semibold text-gray-600 shadow-sm md:flex">
+                            <span className="block truncate text-center">FilipinoHomes.com</span>
                           </div>
                         </div>
+                      </div>
 
-                        {/* Agent action buttons */}
-                        {agentId && (
-                          <div className="flex gap-2">
-                            <Link
-                              href={`/agents/${agentId}`}
-                              className="flex-1 text-center py-2 text-sm font-semibold border-2 border-[#205ed7] text-[#205ed7] rounded-lg hover:bg-[#205ed7] hover:text-white transition-colors"
-                            >
-                              View All Properties
-                            </Link>
-                            <Link
-                              href={`/agents/${agentId}`}
-                              className="flex-1 text-center py-2 text-sm font-semibold border-2 border-[#205ed7] text-[#205ed7] rounded-lg hover:bg-[#205ed7] hover:text-white transition-colors"
-                            >
-                              Listings
-                            </Link>
+                      {/* Contact rows */}
+                      <div className="grid grid-cols-1 gap-2 border-b border-gray-200 px-4 py-3 text-xs text-gray-700">
+                        {property.agent?.phone && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-500">Phone</span>
+                            <span className="font-semibold text-gray-800">{property.agent.phone}</span>
+                          </div>
+                        )}
+                        {property.agent?.email && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-500">Email</span>
+                            <span className="truncate text-right text-[11px] font-semibold text-[#2563eb]">
+                              {property.agent.email}
+                            </span>
                           </div>
                         )}
                       </div>
+
+                      {/* Bottom buttons */}
+                      {agentId && (
+                        <div className="grid grid-cols-2 gap-0">
+                          <Link
+                            href={`/agents/${agentId}`}
+                            className="flex items-center justify-center border-r border-gray-200 bg-[#2563eb] px-3 py-2.5 text-center text-[11px] font-semibold text-white hover:bg-[#1d4ed8]"
+                          >
+                            View All Properties
+                          </Link>
+                          <Link
+                            href={`/agents/${agentId}`}
+                            className="flex items-center justify-center bg-[#2563eb] px-3 py-2.5 text-center text-[11px] font-semibold text-white hover:bg-[#1d4ed8]"
+                          >
+                            22 Listings
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   )
                 })()}
