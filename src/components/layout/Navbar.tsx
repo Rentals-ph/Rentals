@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { FiUser, FiLogOut, FiChevronDown, FiHome, FiMenu, FiX, FiInfo, FiLayers, FiUsers, FiBook, FiRss, FiMail, FiMessageCircle } from 'react-icons/fi'
+import { FiUser, FiLogOut, FiChevronDown, FiHome, FiMenu, FiX, FiInfo, FiLayers, FiUsers, FiBook, FiRss, FiMail, FiMessageCircle, FiHeart } from 'react-icons/fi'
 import { ASSETS } from '@/utils/assets'
 import { agentsApi, messagesApi } from '@/api'
 import { resolveAgentAvatar } from '@/utils/imageResolver'
@@ -38,6 +38,7 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
   const [userId, setUserId] = useState<number | null>(null)
   const [hasInquiries, setHasInquiries] = useState(false)
   const [inquiriesUnreadCount, setInquiriesUnreadCount] = useState(0)
+  const [hasSavedProperties, setHasSavedProperties] = useState(false)
   const [isSticky, setIsSticky] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
@@ -182,6 +183,53 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
     
     return () => clearInterval(interval)
   }, [isUserLoggedIn, pathname])
+
+  // Check for saved properties
+  useEffect(() => {
+    const checkSavedProperties = () => {
+      if (typeof window === 'undefined') return
+
+      try {
+        const stored = localStorage.getItem('rental_ph_saved_properties')
+        if (stored) {
+          const parsed = JSON.parse(stored)
+          setHasSavedProperties(Array.isArray(parsed) && parsed.length > 0)
+        } else {
+          setHasSavedProperties(false)
+        }
+      } catch (error) {
+        console.error('Error checking saved properties:', error)
+        setHasSavedProperties(false)
+      }
+    }
+
+    checkSavedProperties()
+    
+    // Listen for storage changes (when properties are saved/unsaved)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'rental_ph_saved_properties') {
+        checkSavedProperties()
+      }
+    }
+    
+    window.addEventListener('storage', handleStorageChange)
+    
+    // Also check on custom event (for same-tab updates)
+    const handleCustomStorageChange = () => {
+      checkSavedProperties()
+    }
+    
+    window.addEventListener('savedPropertiesChanged', handleCustomStorageChange)
+    
+    // Refresh check periodically
+    const interval = setInterval(checkSavedProperties, 2000) // Check every 2 seconds
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('savedPropertiesChanged', handleCustomStorageChange)
+      clearInterval(interval)
+    }
+  }, [pathname])
 
   // Position profile dropdown for portal (so it appears above hero/other content)
   useLayoutEffect(() => {
@@ -493,6 +541,23 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
                   )}
                 </Link>
               )}
+              {hasSavedProperties && (
+                <Link
+                  href="/saved-listings"
+                  className={`font-outfit text-xs lg:text-sm px-3.5 py-1.5 whitespace-nowrap transition-all ${
+                    pathname === '/saved-listings'
+                      ? 'text-rental-blue-700 font-semibold'
+                      : 'text-rental-blue-700 hover:text-rental-orange-500'
+                  }`}
+                  style={{
+                    borderBottomWidth: '2px',
+                    borderBottomStyle: 'solid',
+                    borderBottomColor: pathname === '/saved-listings' ? '#205ED7' : 'transparent',
+                  }}
+                >
+                  SAVED LISTINGS
+                </Link>
+              )}
             </nav>
           </div>
           {/* User/Profile section */}
@@ -649,6 +714,7 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
                     { href: '/news', label: 'NEWS', icon: FiRss },
                     { href: '/contact', label: 'CONTACT US', icon: FiMail },
                     ...(hasInquiries ? [{ href: '/inquiries', label: 'INQUIRIES', icon: FiMessageCircle, badge: inquiriesUnreadCount }] : []),
+                    ...(hasSavedProperties ? [{ href: '/saved-listings', label: 'SAVED LISTINGS', icon: FiHeart }] : []),
                   ].map(({ href, label, icon: Icon, badge }) => {
                     const isActive = pathname === href
                     return (

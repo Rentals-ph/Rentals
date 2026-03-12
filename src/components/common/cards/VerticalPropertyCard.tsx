@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { ASSETS } from '@/utils/assets'
 import { FiMail, FiMapPin } from 'react-icons/fi'
 import SharePopup, { type SharePlatform } from '../misc/SharePopup'
+import { useSavedProperties } from '@/hooks/useSavedProperties'
+import type { Property } from '@/types'
 
 interface VerticalPropertyCardProps {
   id?: number | string
@@ -34,6 +36,8 @@ interface VerticalPropertyCardProps {
   city?: string | null
   streetAddress?: string | null
   stateProvince?: string | null
+  /** Full property object for saving functionality */
+  property?: Property
 }
 
 function VerticalPropertyCard({
@@ -62,10 +66,22 @@ function VerticalPropertyCard({
   city,
   streetAddress,
   stateProvince,
+  property,
 }: VerticalPropertyCardProps) {
   const locationLine = [streetAddress, city, stateProvince].filter(Boolean).join(', ') || location
   const router = useRouter()
   const [showSharePopup, setShowSharePopup] = useState(false)
+  const { isSaved, toggleSave } = useSavedProperties()
+  
+  const propertyId = typeof id === 'number' ? id : (typeof id === 'string' ? parseInt(id, 10) : null)
+  const isPropertySaved = propertyId !== null && property ? isSaved(propertyId) : false
+
+  const handleHeartClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (property && propertyId !== null) {
+      toggleSave(property)
+    }
+  }
 
   const displayImages = imagesProp?.length ? imagesProp : [image]
   const hasMultipleImages = displayImages.length > 1
@@ -134,16 +150,24 @@ function VerticalPropertyCard({
         </div>
 
         {/* Heart icon - top right */}
-        <button
-          type="button"
-          onClick={(e) => e.stopPropagation()}
-          className="absolute top-[12.99px] right-[12.99px] w-[24.99px] h-[24.99px] rounded-[5px] bg-white flex items-center justify-center hover:bg-gray-50 transition-colors z-10"
-          aria-label="Add to favorites"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-[11px] h-[11px] text-[#6B7280]">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-          </svg>
-        </button>
+        {property && propertyId !== null && (
+          <button
+            type="button"
+            onClick={handleHeartClick}
+            className="absolute top-[12.99px] right-[12.99px] w-[24.99px] h-[24.99px] rounded-[5px] bg-white flex items-center justify-center hover:bg-gray-50 transition-colors z-10"
+            aria-label={isPropertySaved ? "Remove from favorites" : "Add to favorites"}
+          >
+            <svg 
+              viewBox="0 0 24 24" 
+              fill={isPropertySaved ? "currentColor" : "none"} 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              className={`w-[11px] h-[11px] ${isPropertySaved ? 'text-red-500' : 'text-[#6B7280]'}`}
+            >
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+          </button>
+        )}
 
         {/* Location overlay - bottom left */}
         {locationLine && (

@@ -1450,11 +1450,11 @@ function PropertiesContent() {
 
                         return viewMode === 'horizontal' ? (
                           <div key={property.id} className="w-full min-w-0 [&>article]:w-full [&>article]:min-w-0 [&>article]:max-w-full">
-                            <HorizontalPropertyCard {...cardProps} />
+                            <HorizontalPropertyCard {...cardProps} property={property} />
                           </div>
                         ) : (
                           <div key={property.id} className="w-full min-w-0 [&>article]:w-full [&>article]:min-w-0 [&>article]:max-w-full [&>article]:h-full">
-                            <VerticalPropertyCard {...cardProps} />
+                            <VerticalPropertyCard {...cardProps} property={property} />
                           </div>
                         )
                       })}
