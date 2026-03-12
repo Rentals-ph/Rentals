@@ -231,7 +231,7 @@ export default function AgentDetailsPage() {
                   </div>
                 )}
 
-                <div className="flex flex-col sm:flex-row gap-6 w-full">
+                <div className="flex flex-col pb-5 sm:flex-row gap-6 w-full">
                   {/* Profile Picture */}
                   <div className="flex-shrink-0">
                     <div className="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 rounded-lg overflow-hidden bg-gray-100">
@@ -310,20 +310,20 @@ export default function AgentDetailsPage() {
                           {reviewsCount} Reviews
                         </button>
                       </div>
-                      {/* Company Image - at the right */}
-                      {companyImage && (
-                        <div className="flex items-center justify-end flex-shrink-0">
-                          <img
-                            src={companyImage}
-                            alt={agencyName}
-                            className="h-12 w-auto object-contain max-w-[200px]"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement
-                              target.style.display = 'none'
-                            }}
-                          />
-                        </div>
-                      )}
+                        {/* Company Image - at the right */}
+                        {companyImage && (
+                          <div className=" absolute bottom-77 right-7">
+                            <img
+                              src={companyImage}
+                              alt={agencyName}
+                              className="h-20 w-auto object-contain max-w-[350px]"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement
+                                target.style.display = 'none'
+                              }}
+                            />
+                          </div>
+                        )}
                     </div>
                   </div>
                 </div>
