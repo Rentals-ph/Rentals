@@ -39,6 +39,9 @@ import {
   FiSend,
   FiZap,
   FiList,
+  FiMapPin,
+  FiImage,
+  FiGrid,
 } from 'react-icons/fi'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -140,12 +143,17 @@ function resolveButtons(
   currentStep: string | null,
   aiResponse: string,
 ): Array<{ label: string; value: string }> {
-  // 1. Direct step-key match
+  // 1. Special-case: location step → show dedicated "Use current location" button.
+  if (currentStep === 'location') {
+    return [{ label: '📍 Use current location', value: '__use_current_location__' }]
+  }
+
+  // 2. Direct step-key match for all other steps
   if (currentStep && STEP_BUTTONS[currentStep]) {
     return STEP_BUTTONS[currentStep]
   }
 
-  // 2. Content-based fallback — scan the AI response text
+  // 3. Content-based fallback — scan the AI response text
   const lower = aiResponse.toLowerCase()
 
   if (
@@ -325,6 +333,7 @@ interface CoPilotPanelProps {
   onBulkFill:     ReturnType<typeof useListingConversation>['bulkFill']
   onClose:        () => void
   onGenerateDescription: () => void
+  onUseCurrentLocation: () => Promise<void> | void
 }
 
 function CoPilotPanel({
@@ -333,12 +342,14 @@ function CoPilotPanel({
   onBulkFill,
   onClose,
   onGenerateDescription,
+  onUseCurrentLocation,
 }: CoPilotPanelProps) {
   const [chatInput,    setChatInput]    = useState('')
   const [messages,     setMessages]     = useState<SequentialMsg[]>([])
   const [currentStep,   setCurrentStep]   = useState<string | null>(null)
   const [isLoading,     setIsLoading]     = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null)
   const acknowledgedFields = useRef<Set<string>>(new Set())
   const prevFormDataRef   = useRef<ListingFormData>(formData)
   const aiLogo = getAsset('LOGO_AI') || '/assets/logos/rentals-ai-logo.png'
@@ -369,6 +380,14 @@ function CoPilotPanel({
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId])
+
+  // ── Auto-scroll chat area on new messages (inside its own scroll container) ──
+  useEffect(() => {
+    const el = messagesContainerRef.current
+    if (!el) return
+    // Scroll only the inner chat area, not the whole page
+    el.scrollTop = el.scrollHeight
+  }, [messages.length])
 
   // ── Watch formData for manual fills ──────────────────────────────────────────
   useEffect(() => {
@@ -430,6 +449,91 @@ function CoPilotPanel({
     const trimmed = text.trim()
     if (!trimmed || !conversationId || isLoading) return
 
+    // Special action: generate description
+    if (trimmed === '__generate_description__') {
+      onGenerateDescription()
+      setMessages(p => [...p, {
+        id:        `u-${Date.now()}`,
+        role:      'user',
+        content:   '✨ Generate description',
+        timestamp: new Date().toISOString(),
+      }])
+      return
+    }
+
+    // Special action: use current location (for location step)
+    if (trimmed === '__use_current_location__') {
+      await onUseCurrentLocation()
+      setMessages(p => [...p, {
+        id:        `u-${Date.now()}`,
+        role:      'user',
+        content:   '📍 Use current location',
+        timestamp: new Date().toISOString(),
+      }])
+      return
+    }
+
+    // Special handling for bedrooms: intercept numeric answers and advance
+    // locally to bathrooms, instead of depending on the backend step logic
+    // which can get stuck re-asking "How many bedrooms".
+    if (currentStep === 'bedrooms') {
+      const isNumeric = /^[0-9]+$/.test(trimmed)
+      if (isNumeric) {
+        const bedrooms = Number(trimmed)
+        // Update the form immediately so the UI reflects the answer.
+        await onBulkFill({ bedrooms } as any)
+
+        setChatInput('')
+        setMessages(p => [
+          ...p,
+          {
+            id:        `u-${Date.now()}`,
+            role:      'user',
+            content:   `It has ${bedrooms} bedrooms.`,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            id:        `a-${Date.now() + 1}`,
+            role:      'assistant',
+            content:   'Got it. How many bathrooms does it have?',
+            buttons:   STEP_BUTTONS['bathrooms'],
+            timestamp: new Date().toISOString(),
+          },
+        ])
+        setCurrentStep('bathrooms')
+        return
+      }
+    }
+
+    // Special handling for bathrooms: intercept numeric answers and finalize
+    // locally so we don't get stuck in a "How many bathrooms" loop.
+    if (currentStep === 'bathrooms') {
+      const isNumeric = /^[0-9]+$/.test(trimmed)
+      if (isNumeric) {
+        const bathrooms = Number(trimmed)
+        await onBulkFill({ bathrooms } as any)
+
+        setChatInput('')
+        setMessages(p => [
+          ...p,
+          {
+            id:        `u-${Date.now()}`,
+            role:      'user',
+            content:   `It has ${bathrooms} bathrooms.`,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            id:        `a-${Date.now() + 1}`,
+            role:      'assistant',
+            content:   'Great, I’ve noted the bathrooms. You can continue filling the rest of the form, or ask me for help with the description or other details.',
+            timestamp: new Date().toISOString(),
+          },
+        ])
+        setCurrentStep(null)
+        return
+      }
+    }
+
     // Normalize short numeric answers based on the current step so the backend
     // gets a more natural sentence it can reliably parse.
     let normalized = trimmed
@@ -442,18 +546,6 @@ function CoPilotPanel({
       } else if (currentStep === 'price') {
         normalized = `The price is ${trimmed}.`
       }
-    }
-
-    // Special action: generate description
-    if (normalized === '__generate_description__') {
-      onGenerateDescription()
-      setMessages(p => [...p, {
-        id:        `u-${Date.now()}`,
-        role:      'user',
-        content:   '✨ Generate description',
-        timestamp: new Date().toISOString(),
-      }])
-      return
     }
 
     setChatInput('')
@@ -541,8 +633,11 @@ function CoPilotPanel({
       </div>
 
       {/* Sequential chat messages */}
-      {/* Let chat grow with content (page scroll) */}
-      <div className="px-5 py-4 flex flex-col gap-3 bg-white">
+      {/* Fixed-height scrollable area inside the assistant card */}
+      <div
+        ref={messagesContainerRef}
+        className="px-5 py-4 flex-1 min-h-[220px] max-h-[380px] flex flex-col gap-3 bg-white overflow-y-auto"
+      >
         {/*
           Show quick-reply buttons on the most recent ASSISTANT message.
           System "✓ already set…" notifications can come after an assistant prompt,
@@ -987,7 +1082,13 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
 
               {/* Property Location */}
               <div id="section-property_location" className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                {renderCardHeader('property_location', 'Property Location')}
+                {renderCardHeader(
+                  'property_location',
+                  'Property Location',
+                  <div className="flex items-center gap-2 text-[12px] text-gray-500">
+                    <FiMapPin className="w-4 h-4 text-blue-600" />
+                  </div>,
+                )}
                 {expandedSections.has('property_location') && (
                   <div className="px-6 py-5 space-y-4">
                     <div className="grid grid-cols-4 gap-4">
@@ -1054,6 +1155,9 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                 {renderCardHeader(
                   'property_images',
                   'Property Images',
+                  <div className="flex items-center gap-2 text-[12px] text-gray-500">
+                    <FiImage className="w-4 h-4 text-blue-600" />
+                  </div>,
                 )}
                 {expandedSections.has('property_images') && (
                   <div className="px-6 py-5 space-y-3">
@@ -1085,7 +1189,9 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                 {renderCardHeader(
                   'amenities',
                   'Amenities & Attributes',
-                  !showCustomAmenityInput ? (
+                  <>
+                    <FiGrid className="w-4 h-4 text-blue-600 mr-1" />
+                    {!showCustomAmenityInput ? (
                     <button
                       type="button"
                       onClick={(e) => {
@@ -1103,7 +1209,8 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                     >
                       + Add other
                     </button>
-                  ) : null
+                  ) : null}
+                  </>,
                 )}
                 {expandedSections.has('amenities') && (
                   <div className="px-6 py-5 space-y-3">
@@ -1226,13 +1333,14 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                   <FiChevronRight className="text-lg" />
                 </button>
                 {/* Sticky inner card keeps rounded corners/clipping */}
-                <div className="sticky top-6 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm flex flex-col max-h-[calc(100vh-140px)]">
+                <div className="sticky top-6 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm flex flex-col max-h-[calc(130vh)]">
                   <CoPilotPanel
                     conversationId={conversationId}
                     formData={formData}
                     onBulkFill={bulkFill}
                     onClose={() => setCoPilotOpen(false)}
                     onGenerateDescription={handleGenerateDescription}
+                    onUseCurrentLocation={handleUseCurrentLocation}
                   />
                 </div>
               </div>
