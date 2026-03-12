@@ -14,9 +14,9 @@ import {
   FiCamera
 } from 'react-icons/fi'
 import { ASSETS } from '@/utils/assets'
-import { resolvePropertyImage } from '@/utils/imageResolver'
+import { resolvePropertyImage, resolveAgentAvatar } from '@/utils/imageResolver'
 import PropertiesMap from '@/components/agent/PropertiesMap'
-import SimplePropertyCard from '@/components/common/cards/SimplePropertyCard'
+import VerticalPropertyCard from '@/components/common/VerticalPropertyCard'
 
 type ListingStatus = 'active' | 'rented' | 'hidden'
 
@@ -234,6 +234,29 @@ export default function AgentMyListings() {
     handlePropertyUpdate()
   }
 
+  // Helper function to format price
+  const formatPrice = (price: number): string => {
+    return `₱${price.toLocaleString('en-US')}`
+  }
+
+  // Helper function to format price type
+  const formatPriceType = (priceType: string | null | undefined): string | undefined => {
+    if (!priceType) return undefined
+    return priceType.charAt(0).toUpperCase() + priceType.slice(1).toLowerCase()
+  }
+
+  // Helper function to format date
+  const formatDate = (dateString: string | null): string => {
+    if (!dateString) return 'Date not available'
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+
+  // Helper function to get rent manager role
+  const getRentManagerRole = (isOfficial: boolean | undefined): string => {
+    return isOfficial ? 'Rent Manager' : 'Property Specialist'
+  }
+
   // Get pagination pages (e.g., 1 ... 3 4 5 ... 7)
   const getPaginationPages = (): (number | 'ellipsis')[] => {
     const total = totalPages
@@ -373,18 +396,66 @@ export default function AgentMyListings() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {listings.map((l) => {
                     const property = l.property
-                    const priceTypeLabel = property?.price_type
-                      ? property.price_type.charAt(0).toUpperCase() + property.price_type.slice(1).toLowerCase()
-                      : null
-                    const priceLabel = property && property.price != null
-                      ? priceTypeLabel
-                        ? `P ${property.price.toLocaleString('en-US')}.00/${priceTypeLabel}`
-                        : `P ${property.price.toLocaleString('en-US')}.00/monthly`
-                      : null
+                    if (!property) return null
+
+                    const propertySize = property.area 
+                      ? `${property.area} sqft` 
+                      : `${(property.bedrooms * 15 + property.bathrooms * 5)} sqft`
                     
-                    const bedrooms = property?.bedrooms ?? 0
-                    const bathrooms = property?.bathrooms ?? 0
-                    const area = property?.area ? parseFloat(property.area.toString()) : null
+                    const mainImage = l.image || ASSETS.PLACEHOLDER_PROPERTY_MAIN
+                    const agentImage = property.agent_id
+                      ? resolveAgentAvatar(
+                          property.agent_id.toString()
+                        )
+                      : undefined
+
+                    // Prefer created_at for "date listed", fallback to published_at
+                    const listedDate = formatDate(property.created_at || property.published_at)
+
+                    // Get agent name - try agent object first, then fallback to current agent if available
+                    let rentManagerName = 'Rental.Ph Official'
+                    if (property.agent?.first_name && property.agent?.last_name) {
+                      rentManagerName = `${property.agent.first_name} ${property.agent.last_name}`
+                    } else if (property.agent?.full_name) {
+                      rentManagerName = property.agent.full_name
+                    } else if (property.rent_manager?.name) {
+                      rentManagerName = property.rent_manager.name
+                    }
+
+                    // Get agent role
+                    let rentManagerRole = 'Property Specialist'
+                    if (property.agent) {
+                      rentManagerRole = getRentManagerRole(property.agent.verified)
+                    } else if (property.rent_manager) {
+                      rentManagerRole = getRentManagerRole(property.rent_manager.is_official)
+                    }
+
+                    const cardProps = {
+                      id: property.id,
+                      propertyType: property.type,
+                      listingType: property.listing_type as 'for_rent' | 'for_sale' | null,
+                      date: listedDate,
+                      dateListed: listedDate,
+                      priceType: formatPriceType(property.price_type),
+                      priceUnit: property.listing_type === 'for_sale' ? undefined : (formatPriceType(property.price_type) ? `/${formatPriceType(property.price_type)}` : '/mo'),
+                      price: formatPrice(property.price),
+                      title: property.title,
+                      image: mainImage,
+                      images: (property.images_url && property.images_url.length > 0)
+                        ? [mainImage, ...(property.images_url || []).filter((u): u is string => !!u && u !== mainImage)]
+                        : undefined,
+                      rentManagerName,
+                      rentManagerRole,
+                      rentManagerImage: agentImage,
+                      bedrooms: property.bedrooms,
+                      bathrooms: property.bathrooms,
+                      parking: 0, // Parking not in backend model, defaulting to 0
+                      propertySize,
+                      location: property.location,
+                      city: property.city,
+                      streetAddress: property.street_address,
+                      stateProvince: property.state_province,
+                    }
 
                     return (
                       <div key={l.id} className="relative">
@@ -392,16 +463,9 @@ export default function AgentMyListings() {
                           <FiEye className="mr-1.5 h-3.5 w-3.5" />
                           <span>{l.views ?? 0} views</span>
                         </div>
-                        <SimplePropertyCard
-                          id={l.id}
-                          title={l.title}
-                          location={l.address}
-                          price={priceLabel || 'Price not available'}
-                          image={l.image}
-                          bedrooms={bedrooms}
-                          bathrooms={bathrooms}
-                          area={area}
-                        />
+                        <div className="w-full min-w-0 [&>article]:w-full [&>article]:min-w-0 [&>article]:max-w-full [&>article]:h-full">
+                          <VerticalPropertyCard {...cardProps} property={property} />
+                        </div>
                         <button
                           className="absolute top-2 right-2 z-10 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-blue-600 shadow-sm ring-1 ring-blue-100 transition hover:bg-blue-50"
                           type="button"

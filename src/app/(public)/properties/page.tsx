@@ -766,61 +766,31 @@ function PropertiesContent() {
           </div>
           <div className="flex-1 overflow-y-auto p-3 space-y-3">
             {(paginatedProperties.length > 0 ? paginatedProperties : properties).map((prop) => {
-              const propertySize = prop.area 
-                ? `${prop.area} sqft` 
-                : `${(prop.bedrooms * 15 + prop.bathrooms * 5)} sqft`
-              
-              const mainImage = prop.image_url || prop.image || ASSETS.PLACEHOLDER_PROPERTY_MAIN
-              const agentImage = prop.agent
-                ? resolveAgentAvatar(
-                    prop.agent.id.toString()
-                  )
-                : undefined
-
-              // Prefer created_at for "date listed", fallback to published_at
-              const listedDate = formatDate(prop.created_at || prop.published_at)
-
-              const cardProps = {
-                id: prop.id,
-                propertyType: prop.type,
-                listingType: prop.listing_type as 'for_rent' | 'for_sale' | null,
-                date: listedDate,
-                dateListed: listedDate,
-                priceType: formatPriceType(prop.price_type),
-                priceUnit: prop.listing_type === 'for_sale' ? undefined : (formatPriceType(prop.price_type) ? `/${formatPriceType(prop.price_type)}` : '/mo'),
-                price: formatPrice(prop.price),
-                title: prop.title,
-                image: mainImage,
-                images: (prop.images_url && prop.images_url.length > 0)
-                  ? [mainImage, ...(prop.images_url || []).filter((u): u is string => !!u && u !== mainImage)]
-                  : undefined,
-                rentManagerName: prop.agent?.first_name && prop.agent?.last_name
-                  ? `${prop.agent.first_name} ${prop.agent.last_name}`
-                  : prop.agent?.full_name
-                  || prop.rent_manager?.name
-                  || 'Rental.Ph Official',
-                rentManagerRole: prop.agent
-                  ? getRentManagerRole(prop.agent.verified)
-                  : getRentManagerRole(prop.rent_manager?.is_official),
-                rentManagerImage: agentImage,
-                bedrooms: prop.bedrooms,
-                bathrooms: prop.bathrooms,
-                parking: 0, // Parking not in backend model, defaulting to 0
-                propertySize,
-                location: prop.location,
-                city: prop.city,
-                streetAddress: prop.street_address,
-                stateProvince: prop.state_province,
-              }
-
+              const mainImg = prop.image_url || prop.image || ASSETS.PLACEHOLDER_PROPERTY_MAIN
+              const locationLine = [prop.street_address, prop.city, prop.state_province].filter(Boolean).join(', ') || prop.location || prop.city || '—'
               return (
-                <div
+                <button
                   key={prop.id}
+                  type="button"
                   onClick={() => mapRef.current?.flyToProperty(prop)}
-                  className="cursor-pointer"
+                  className="w-full text-left rounded-lg overflow-hidden flex gap-3 p-3 transition-colors hover:bg-white/10 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/40 bg-white/5"
                 >
-                  <VerticalPropertyCard {...cardProps} property={prop} />
-                </div>
+                  <div
+                    className="flex-shrink-0 w-20 h-20 rounded-md bg-gray-700 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${mainImg})` }}
+                  />
+                  <div className="min-w-0 flex-1 py-0.5">
+                    <p className="text-sm font-medium text-white line-clamp-2 mb-1">
+                      {prop.title}
+                    </p>
+                    <p className="text-xs text-white/70 truncate mb-1">
+                      {locationLine}
+                    </p>
+                    <p className="text-sm font-semibold text-white">
+                      {formatPrice(prop.price)}
+                    </p>
+                  </div>
+                </button>
               )
             })}
           </div>
