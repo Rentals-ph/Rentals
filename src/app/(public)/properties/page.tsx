@@ -741,7 +741,7 @@ function PropertiesContent() {
           />
         </div>
         {/* Properties scroll container on the right */}
-        <div className="absolute top-4 right-4 bottom-4 z-[100] w-full max-w-[320px] sm:max-w-[360px] hidden md:flex flex-col rounded-xl overflow-hidden shadow-2xl"
+        <div className="absolute top-4 right-4 bottom-4 z-40 w-full max-w-[320px] sm:max-w-[360px] hidden md:flex flex-col rounded-xl overflow-hidden shadow-2xl"
           style={{ backgroundColor: 'rgba(31, 41, 55, 0.95)', backdropFilter: 'blur(10px)' }}
         >
           <div className="flex-shrink-0 px-4 py-3 border-b border-white/20 flex items-center justify-between">

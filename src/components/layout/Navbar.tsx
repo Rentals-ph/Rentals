@@ -297,11 +297,44 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
       .slice(0, 2)
   }
 
+  // Add keyframe animation to document head
+  useEffect(() => {
+    const styleId = 'navbar-sticky-animation'
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style')
+      style.id = styleId
+      style.textContent = `
+        @keyframes navbarSlideDown {
+          from {
+            transform: translateY(-10px);
+            opacity: 0.8;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+      `
+      document.head.appendChild(style)
+    }
+    return () => {
+      const style = document.getElementById(styleId)
+      if (style) {
+        document.head.removeChild(style)
+      }
+    }
+  }, [])
+
   return (
     <>
-      <header className={`sticky top-0 z-50 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300 ${
-        isSticky ? 'bg-white/30' : 'bg-white/50'
-      }`}>
+      <header 
+        className={`sticky top-0 z-50 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300 ${
+          isSticky ? 'bg-white/30' : 'bg-white/50'
+        }`}
+        style={{
+          animation: isSticky ? 'navbarSlideDown 0.3s ease-out' : 'none',
+        }}
+      >
         <div className="flex items-center justify-between gap-2 px-3 sm:px-4 py-3 sm:py-4 md:px-10 lg:px-[150px] max-w-full min-w-0 overflow-x-hidden overflow-y-hidden">
           {/* Mobile: toggle + logo side by side. Desktop: logo only in this group */}
           <div className="flex items-center gap-2 flex-shrink-0">
@@ -326,7 +359,13 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
 
           {/* Desktop Navigation Centered - lg breakpoint so nav fits without overflow */}
           <div className="hidden lg:flex flex-1 justify-center items-center min-w-0 overflow-hidden">
-            <nav className="flex items-center gap-1 xl:gap-2 2xl:gap-6 justify-center w-full min-w-0 px-3 py-1.5 rounded-full bg-white/70 border border-gray-100 shadow-[0_2px_8px_rgba(15,23,42,0.04)]">
+            <nav 
+              className="flex items-center gap-1 xl:gap-2 2xl:gap-6 justify-center min-w-0 px-3 py-1.5 rounded-full bg-white border border-gray-100 shadow-[0_2px_8px_rgba(15,23,42,0.04)] transition-all duration-300"
+              style={{
+                borderColor: isSticky ? '#205ED7' : '#E5E7EB',
+                borderWidth: isSticky ? '2px' : '1px',
+              }}
+            >
               <Link
                 href="/"
                 className={`font-outfit text-xs lg:text-sm px-3.5 py-1.5 whitespace-nowrap transition-all ${
