@@ -24,24 +24,25 @@ export default function AboutPage() {
             }}
           />
         </div>
-
-        <div className="relative z-[3] max-w-6xl mx-auto py-10 sm:py-14 md:py-16 w-full flex items-center justify-start flex-1">
-          <div className="text-left flex flex-col items-start justify-center max-w-xl">
-            <h1
-              className="font-outfit font-extrabold text-white tracking-tight leading-tight m-0 text-xl xs:text-2xl mobile:text-3xl sm:text-4xl md:text-5xl lg:text-6xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
-            >
-              ABOUT US
-            </h1>
-            <p className="max-w-3xl font-outfit text-white m-0 mt-3 px-1 text-sm xs:text-base md:text-xl drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]">
-              We connect you to the perfect rental — wherever you are in the Philippines.
-            </p>
+        <div className="relative z-[3] page-x py-10 sm:py-14 md:py-16 w-full flex-1 flex items-center justify-start">
+          <div className="page-w">
+            <div className="text-left flex flex-col items-start justify-center max-w-xl">
+              <h1
+                className="font-outfit font-extrabold text-white tracking-tight leading-tight m-0 text-xl xs:text-2xl mobile:text-3xl sm:text-4xl md:text-5xl lg:text-6xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
+              >
+                ABOUT US
+              </h1>
+              <p className="max-w-3xl font-outfit text-white m-0 mt-3 px-1 text-sm xs:text-base md:text-xl drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]">
+                We connect you to the perfect rental — wherever you are in the Philippines.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* --- WHAT WE OFFER (3-CARD ROW) --- */}
-      <section className="bg-[#F5F9FF] px-6 sm:px-10 lg:px-20 py-10 sm:py-14 md:py-16">
-        <div className="mx-auto max-w-6xl">
+      <section className="bg-[#F5F9FF] page-x py-10 sm:py-14 md:py-16">
+        <div className="page-w">
           <div className="text-center mb-6 sm:mb-8">
             <p className="text-[#205ED7] font-outfit text-xs sm:text-sm md:text-[15px] font-semibold uppercase tracking-[0.18em] mb-2">
               OUR IMPACT
@@ -140,8 +141,8 @@ export default function AboutPage() {
       </section>
 
       {/* --- OUR COMPANY STORY SPLIT SECTION --- */}
-      <section className="bg-white px-6 sm:px-10 lg:px-20 py-10 sm:py-14 md:py-16 overflow-visible">
-        <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-[minmax(0,1.05fr)_minmax(0,1.2fr)] gap-8 md:gap-10 items-center">
+      <section className="bg-white page-x py-10 sm:py-14 md:py-16 overflow-visible">
+        <div className="page-w grid grid-cols-1 md:grid-cols-[minmax(0,1.05fr)_minmax(0,1.2fr)] gap-8 md:gap-10 items-center">
           {/* Text column */}
           <div className="space-y-4 sm:space-y-5">
             <h2 className="text-2xl sm:text-3xl md:text-[34px] font-extrabold tracking-tight text-[#111827]">
@@ -179,8 +180,8 @@ export default function AboutPage() {
       </section>
 
       {/* --- OUR PARTNERS SECTION --- */}
-      <section className="bg-white px-6 sm:px-10 lg:px-20 py-10 sm:py-14 md:py-16">
-        <div className="mx-auto max-w-6xl">
+      <section className="bg-white page-x py-10 sm:py-14 md:py-16">
+        <div className="page-w">
           <div className="text-center mb-8 sm:mb-10">
             <p className="text-[#266FFD] font-outfit text-xs sm:text-sm font-semibold tracking-[0.18em] uppercase mb-2">
               STRONG PARTNERS

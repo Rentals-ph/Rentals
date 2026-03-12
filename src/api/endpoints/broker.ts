@@ -90,6 +90,16 @@ export interface BrokerDashboard {
   teams_count: number
   agents_count: number
   properties_count: number
+  total_views?: number
+  total_inquiries?: number
+  timeseries?: {
+    labels: string[]
+    teams: {
+      team_id: number
+      team_name: string
+      daily_listings: number[]
+    }[]
+  }
 }
 
 export interface PaginatedResponse<T> {

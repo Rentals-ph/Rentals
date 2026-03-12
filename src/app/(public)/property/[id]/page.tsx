@@ -11,7 +11,7 @@ import { EmptyState, EmptyStateAction } from '../../../../components/common'
 import { propertiesApi, messagesApi, agentsApi } from '../../../../api'
 import type { Property } from '../../../../types'
 import { ASSETS } from '../../../../utils/assets'
-import { resolveAgentAvatar } from '../../../../utils/imageResolver'
+import { resolveAgentAvatar, resolveImageUrl } from '../../../../utils/imageResolver'
 
 export default function PropertyDetailsPage() {
   const params = useParams()
@@ -50,6 +50,14 @@ export default function PropertyDetailsPage() {
           return
         }
         const data = await propertiesApi.getById(propertyId)
+
+        // Record a view for analytics (owner views are ignored by backend)
+        try {
+          void propertiesApi.recordView(propertyId)
+        } catch (viewError) {
+          console.error('Error recording property view:', viewError)
+        }
+
         setProperty(data)
         setFetchedAgent(null)
         setInquiryData(prev => ({
@@ -726,60 +734,155 @@ export default function PropertyDetailsPage() {
                     : getRentManagerRole(rentManager?.is_official)
                   const agentId = property.agent_id || agent?.id || rentManager?.id
                   const isVerified = agent ? (agent as { verified?: boolean }).verified : rentManager?.is_official
+                  const baseAgent = property.agent as { phone?: string; email?: string; whatsapp?: string; company_image?: string | null; company_name?: string | null; profile_image?: string | null; image?: string | null; avatar?: string | null; image_path?: string | null } | undefined
+                  const baseRentManager = property.rent_manager as { phone?: string; email?: string; whatsapp?: string; company_image?: string | null; company_name?: string | null; profile_image?: string | null; image?: string | null; avatar?: string | null; image_path?: string | null } | undefined
+                  const contactPhone = baseAgent?.phone || baseRentManager?.phone
+                  const contactEmail = baseAgent?.email || baseRentManager?.email
+                  const contactWhatsApp = baseAgent?.whatsapp || baseRentManager?.whatsapp || contactPhone
+                  const rawCompanyImage = baseAgent?.company_image || baseRentManager?.company_image || null
+                  const companyImage = rawCompanyImage ? resolveImageUrl(rawCompanyImage) : null
+                  const companyName = baseAgent?.company_name || baseRentManager?.company_name || null
+                  // Prefer the same image fields used on the Agents page
+                  const fetched = fetchedAgent as any
+                  let avatarImagePath: string | null =
+                    baseAgent?.profile_image ||
+                    baseAgent?.image ||
+                    baseAgent?.avatar ||
+                    baseAgent?.image_path ||
+                    fetched?.profile_image ||
+                    fetched?.image ||
+                    fetched?.avatar ||
+                    fetched?.image_path ||
+                    baseRentManager?.profile_image ||
+                    baseRentManager?.image ||
+                    baseRentManager?.avatar ||
+                    baseRentManager?.image_path ||
+                    null
+
                   return (
-                    <div className="rounded-xl overflow-hidden mb-4 bg-white shadow-sm" style={{ border: '1px solid #e5e7eb' }}>
-                      <div className="p-5">
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="relative w-16 h-16 rounded-full bg-[#205ed7] flex items-center justify-center text-white text-xl font-bold flex-shrink-0 overflow-hidden">
-                            {agentId ? (
-                              <>
+                    <div className="mb-4 overflow-hidden rounded-2xl bg-white shadow-[0_18px_45px_rgba(15,23,42,0.16)] border border-gray-100">
+                      {/* Top content: photo + details */}
+                      <div className="flex items-stretch px-4 py-4 gap-4">
+                        {/* Left: photo with name + role below */}
+                        <div className="flex flex-col items-start w-[126px] flex-shrink-0">
+                          <div className="h-[110px] w-full overflow-hidden rounded-lg bg-gray-200">
+                            <img
+                              src={resolveAgentAvatar(avatarImagePath, agentId)}
+                              alt={displayName}
+                              className="h-full w-full object-cover"
+                              onError={e => { e.currentTarget.src = ASSETS.PLACEHOLDER_PROFILE }}
+                            />
+                          </div>
+                          <p className="mt-2 truncate text-sm font-semibold text-gray-900 flex items-center gap-1.5">
+                            {displayName}
+                            {isVerified && (
+                              <svg className="w-4 h-4 text-[#205ed7] flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                              </svg>
+                            )}
+                          </p>
+                          <p className="mt-0.5 text-xs font-medium text-gray-500">{role}</p>
+                        </div>
+
+                        {/* Right side: company + contacts */}
+                        <div className="flex flex-1 flex-col justify-between min-w-0">
+                          {/* Company image */}
+                          <div className="mt-1">
+                            <div className="w-full max-w-[170px] h-[46px] rounded-md bg-gray-50 border border-gray-200 flex items-center justify-center overflow-hidden">
+                              {companyImage ? (
                                 <img
-                                  src={resolveAgentAvatar(agentId.toString(), agentId)}
-                                  alt={displayName}
-                                  className="absolute inset-0 w-full h-full object-cover"
+                                  src={companyImage}
+                                  alt={companyName || 'Company'}
+                                  className="w-full h-full object-contain"
                                   onError={e => {
                                     e.currentTarget.style.display = 'none'
-                                    const fallback = e.currentTarget.nextElementSibling as HTMLElement
-                                    if (fallback) fallback.classList.remove('hidden')
                                   }}
                                 />
-                                <span className="hidden absolute inset-0 flex items-center justify-center bg-[#205ed7] text-white text-xl font-bold">
-                                  {displayName.charAt(0).toUpperCase()}
-                                </span>
-                              </>
-                            ) : (
-                              <span>{displayName.charAt(0).toUpperCase()}</span>
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="font-bold text-gray-900 flex items-center gap-1.5 flex-wrap text-sm">
-                              {displayName}
-                              {isVerified && (
-                                <svg className="w-4 h-4 text-[#205ed7] flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                              ) : (
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6 text-gray-400">
+                                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                                  <path d="M3 9h18M9 3v18" />
                                 </svg>
                               )}
-                            </p>
-                            <p className="text-xs text-gray-500">{role}</p>
+                            </div>
+                          </div>
+
+                          {/* Contact rows */}
+                          <div className="mt-2 space-y-1.5 text-xs text-gray-700">
+                            {contactPhone && (
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#FFF4E6] text-[#F97316]">
+                                    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 3.16 12.8 19.79 19.79 0 0 1 .09 4.37 2 2 0 0 1 2.05 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L6.1 9.89a16 16 0 0 0 6 6l1.24-1.24a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                                    </svg>
+                                  </span>
+                                  <span className="text-[11px] text-gray-500">Phone</span>
+                                </div>
+                                <span className="text-[11px] font-semibold text-[#F97316]">
+                                  {contactPhone}
+                                </span>
+                              </div>
+                            )}
+                            {contactEmail && (
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#E0ECFF] text-[#2563eb]">
+                                    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <rect x="3" y="5" width="18" height="14" rx="2" />
+                                      <polyline points="3,7 12,13 21,7" />
+                                    </svg>
+                                  </span>
+                                  <span className="text-[11px] text-gray-500">Email</span>
+                                </div>
+                                <span className="truncate text-right text-[11px] font-semibold text-[#2563eb]">
+                                  {contactEmail}
+                                </span>
+                              </div>
+                            )}
+                            {contactWhatsApp && (
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#E7FBEF] text-[#16A34A]">
+                                    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                                      <path
+                                        d="M12 2a10 10 0 0 0-8.66 15.06L2 22l4.94-1.34A10 10 0 1 0 12 2Z"
+                                        fill="#22C55E"
+                                      />
+                                      <path
+                                        d="M9.5 7.5c-.15-.35-.3-.36-.45-.36h-.4c-.15 0-.4.05-.6.3-.2.25-.75.75-.75 1.8s.75 2.1.85 2.25c.1.15 1.5 2.3 3.65 3.2.5.2.9.35 1.2.45.5.15.95.15 1.3.1.4-.05 1.25-.5 1.4-1s.15-1 .1-1.05-.2-.15-.4-.25l-1.2-.6c-.2-.1-.35-.15-.5.15-.15.3-.6.75-.75.9-.15.15-.25.15-.45.05-.2-.1-.85-.3-1.6-1-.6-.55-1-1.2-1.1-1.4-.1-.2 0-.3.1-.4.1-.1.2-.25.3-.35.1-.1.15-.2.2-.3s.05-.2 0-.3-.5-1.2-.7-1.65Z"
+                                        fill="white"
+                                      />
+                                    </svg>
+                                  </span>
+                                  <span className="text-[11px] text-gray-500">WhatsApp</span>
+                                </div>
+                                <span className="text-[11px] font-semibold text-[#16A34A]">
+                                  {contactWhatsApp}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
-                        {agentId && (
-                          <div className="flex gap-2">
-                            <Link
-                              href={`/agents/${agentId}`}
-                              className="flex-1 text-center py-2 text-sm font-semibold border-2 border-[#205ed7] text-[#205ed7] rounded-lg hover:bg-[#205ed7] hover:text-white transition-colors"
-                            >
-                              View All Properties
-                            </Link>
-                            <Link
-                              href={`/agents/${agentId}`}
-                              className="flex-1 text-center py-2 text-sm font-semibold border-2 border-[#205ed7] text-[#205ed7] rounded-lg hover:bg-[#205ed7] hover:text-white transition-colors"
-                            >
-                              Listings
-                            </Link>
-                          </div>
-                        )}
                       </div>
+
+                      {/* Bottom buttons */}
+                      {agentId && (
+                        <div className="border-t border-gray-100 px-4 py-3 flex items-center gap-2">
+                          <Link
+                            href={`/agents/${agentId}`}
+                            className="flex-1 flex h-10 items-center justify-center rounded-md bg-[#2563eb] px-3 text-center text-[11px] font-semibold text-white hover:bg-[#1d4ed8] transition-colors"
+                          >
+                            View All Properties
+                          </Link>
+                          <Link
+                            href={`/agents/${agentId}`}
+                            className="flex-1 flex h-10 items-center justify-center rounded-md bg-[#2563eb] px-3 text-center text-[11px] font-semibold text-white hover:bg-[#1d4ed8] transition-colors"
+                          >
+                            22 Listings
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   )
                 })()}
@@ -877,8 +980,52 @@ export default function PropertyDetailsPage() {
                       prop.images_url && prop.images_url.length > 0
                         ? [mainImg, ...(prop.images_url || []).filter((u): u is string => !!u && u !== mainImg)]
                         : undefined
-                    const agentImage = prop.agent
-                      ? resolveAgentAvatar(prop.agent.id.toString(), prop.agent.id)
+                    // Normalize agent / rent manager objects to include optional avatar fields for TypeScript
+                    const baseAgent = prop.agent as {
+                      id?: number
+                      first_name?: string | null
+                      last_name?: string | null
+                      full_name?: string | null
+                      verified?: boolean
+                      phone?: string
+                      email?: string
+                      whatsapp?: string
+                      company_image?: string | null
+                      company_name?: string | null
+                      profile_image?: string | null
+                      image?: string | null
+                      avatar?: string | null
+                      image_path?: string | null
+                    } | undefined
+                    const baseRentManager = prop.rent_manager as {
+                      id?: number
+                      name?: string | null
+                      is_official?: boolean
+                      phone?: string
+                      email?: string
+                      whatsapp?: string
+                      company_image?: string | null
+                      company_name?: string | null
+                      profile_image?: string | null
+                      image?: string | null
+                      avatar?: string | null
+                      image_path?: string | null
+                    } | undefined
+
+                    // Resolve agent or rent manager avatar consistently with Agents page
+                    const rawAgentImage =
+                      baseAgent?.profile_image ||
+                      baseAgent?.image ||
+                      baseAgent?.avatar ||
+                      baseAgent?.image_path ||
+                      baseRentManager?.profile_image ||
+                      baseRentManager?.image ||
+                      baseRentManager?.avatar ||
+                      baseRentManager?.image_path ||
+                      null
+                    const agentIdForAvatar = baseAgent?.id || baseRentManager?.id
+                    const agentImage = agentIdForAvatar
+                      ? resolveAgentAvatar(rawAgentImage, agentIdForAvatar)
                       : undefined
                     return (
                       <div key={prop.id}>

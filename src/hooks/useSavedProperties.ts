@@ -13,31 +13,38 @@ export function useSavedProperties() {
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        const parsed = JSON.parse(stored) as Property[]
-        const ids = new Set(parsed.map(p => p.id))
-        setSavedPropertyIds(ids)
-        setSavedProperties(parsed)
+    const loadFromStorage = () => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY)
+        if (stored) {
+          const parsed = JSON.parse(stored) as Property[]
+          const ids = new Set(parsed.map(p => p.id))
+          setSavedPropertyIds(ids)
+          setSavedProperties(parsed)
+        } else {
+          setSavedPropertyIds(new Set())
+          setSavedProperties([])
+        }
+      } catch (error) {
+        console.error('Error loading saved properties:', error)
       }
-    } catch (error) {
-      console.error('Error loading saved properties:', error)
+    }
+
+    loadFromStorage()
+
+    // Keep multiple tabs in sync
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === STORAGE_KEY) {
+        loadFromStorage()
+      }
+    }
+
+    window.addEventListener('storage', handleStorage)
+
+    return () => {
+      window.removeEventListener('storage', handleStorage)
     }
   }, [])
-
-  // Save properties to localStorage whenever they change
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedProperties))
-      // Dispatch custom event for same-tab updates
-      window.dispatchEvent(new Event('savedPropertiesChanged'))
-    } catch (error) {
-      console.error('Error saving properties to localStorage:', error)
-    }
-  }, [savedProperties])
 
   const isSaved = useCallback((propertyId: number): boolean => {
     return savedPropertyIds.has(propertyId)
@@ -49,13 +56,31 @@ export function useSavedProperties() {
       if (prev.some(p => p.id === property.id)) {
         return prev
       }
-      return [...prev, property]
+      const next = [...prev, property]
+      try {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+        }
+      } catch (error) {
+        console.error('Error saving property to localStorage:', error)
+      }
+      return next
     })
     setSavedPropertyIds(prev => new Set([...prev, property.id]))
   }, [])
 
   const unsaveProperty = useCallback((propertyId: number) => {
-    setSavedProperties(prev => prev.filter(p => p.id !== propertyId))
+    setSavedProperties(prev => {
+      const next = prev.filter(p => p.id !== propertyId)
+      try {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+        }
+      } catch (error) {
+        console.error('Error removing property from localStorage:', error)
+      }
+      return next
+    })
     setSavedPropertyIds(prev => {
       const newSet = new Set(prev)
       newSet.delete(propertyId)

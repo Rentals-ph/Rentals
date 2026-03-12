@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Message;
 use App\Models\User;
+use App\Models\PropertyView;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
@@ -703,13 +704,27 @@ class AgentController extends Controller
         $totalInquiries = Message::where('recipient_id', $user->id)->count();
         $unreadMessages = Message::where('recipient_id', $user->id)->where('is_read', false)->count();
 
-        // Monthly listings: last 7 days, count of listings created each day
-        $monthlyListingDates = collect(range(0, 6))->map(fn ($i) => now()->subDays(6 - $i));
-        $monthlyListingCounts = $monthlyListingDates->map(function ($date) use ($user) {
+        // Timeseries (last 7 days) for listings, views and inquiries
+        $days = collect(range(0, 6))->map(fn ($i) => now()->subDays(6 - $i));
+
+        $dailyListingsCounts = $days->map(function ($date) use ($user) {
             return $user->properties()->whereDate('created_at', $date)->count();
         })->values()->all();
-        $monthlyListingLabels = $monthlyListingDates->map(fn ($d) => $d->format('M j'))->values()->all();
-        $monthlyListingTotal = array_sum($monthlyListingCounts);
+
+        $dailyViewsCounts = $days->map(function ($date) use ($user) {
+            return PropertyView::where('property_id', '>=', 1)
+                ->whereIn('property_id', $user->properties()->pluck('id'))
+                ->whereDate('viewed_at', $date)
+                ->count();
+        })->values()->all();
+
+        $dailyInquiriesCounts = $days->map(function ($date) use ($user) {
+            return Message::where('recipient_id', $user->id)
+                ->whereDate('created_at', $date)
+                ->count();
+        })->values()->all();
+
+        $dailyLabels = $days->map(fn ($d) => $d->format('M j'))->values()->all();
 
         return response()->json([
             'success' => true,
@@ -720,10 +735,11 @@ class AgentController extends Controller
                 'unread_messages' => $unreadMessages,
                 'total_views' => $totalViews,
                 'total_inquiries' => $totalInquiries,
-                'monthly_listings' => [
-                    'labels' => $monthlyListingLabels,
-                    'counts' => $monthlyListingCounts,
-                    'total' => $monthlyListingTotal,
+                'timeseries' => [
+                    'labels' => $dailyLabels,
+                    'listings' => $dailyListingsCounts,
+                    'views' => $dailyViewsCounts,
+                    'inquiries' => $dailyInquiriesCounts,
                 ],
             ],
         ]);

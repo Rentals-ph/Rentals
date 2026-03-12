@@ -10,6 +10,7 @@ use App\Models\TeamMember;
 use App\Models\User;
 use App\Models\Property;
 use App\Models\Message;
+use App\Models\PropertyView;
 use App\Models\BrokerPlan;
 use App\Models\BrokerSubscription;
 use Illuminate\Http\Request;
@@ -34,6 +35,28 @@ class BrokerController extends Controller
         $subscription = $broker->activeSubscription;
         $plan = $subscription ? $subscription->plan : null;
 
+        // Aggregate stats across broker + all managed agents
+        $agentIds = $broker->managedAgents()->pluck('id')->push($broker->id)->unique()->values()->all();
+
+        $propertiesQuery = Property::whereIn('agent_id', $agentIds);
+        $propertiesCount = (int) $propertiesQuery->count();
+        $totalViews = (int) $propertiesQuery->sum('views_count');
+        $totalInquiries = (int) Message::whereIn('recipient_id', $agentIds)->count();
+
+        // Simple 7-day timeseries per agent (for front-end team graphs)
+        $days = collect(range(0, 6))->map(fn ($i) => now()->subDays(6 - $i));
+        $teamSeries = [];
+        foreach ($broker->teams()->with('members.agent')->get() as $team) {
+            $memberIds = $team->members->pluck('agent_id')->push($broker->id)->unique()->values()->all();
+            $teamSeries[] = [
+                'team_id' => $team->id,
+                'team_name' => $team->name,
+                'daily_listings' => $days->map(function ($date) use ($memberIds) {
+                    return Property::whereIn('agent_id', $memberIds)->whereDate('created_at', $date)->count();
+                })->values()->all(),
+            ];
+        }
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -52,7 +75,13 @@ class BrokerController extends Controller
                 'companies_count' => $broker->companies()->count(),
                 'teams_count' => $broker->teams()->count(),
                 'agents_count' => $broker->managedAgents()->count(),
-                'properties_count' => Property::where('agent_id', $broker->id)->count(),
+                'properties_count' => $propertiesCount,
+                'total_views' => $totalViews,
+                'total_inquiries' => $totalInquiries,
+                'timeseries' => [
+                    'labels' => $days->map(fn ($d) => $d->format('M j'))->values()->all(),
+                    'teams' => $teamSeries,
+                ],
             ],
         ]);
     }

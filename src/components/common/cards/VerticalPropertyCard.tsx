@@ -279,7 +279,7 @@ function VerticalPropertyCard({
 
         {/* Description */}
         {description && (
-          <p className="text-[#999999] text-[10px] sm:text-[11px] font-medium leading-[1.4] line-clamp-3">
+          <p className="text-[#999999] text-[10px] sm:text-[11px] font-medium leading-[1.4] line-clamp-2">
             {description}
           </p>
         )}

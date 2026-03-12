@@ -101,11 +101,51 @@ function PropertiesForRent() {
               const images = (property.images_url && property.images_url.length > 0)
                 ? [mainImage, ...(property.images_url || []).filter((u): u is string => !!u && u !== mainImage)]
                 : undefined
-              const agentImage = property.agent
-                ? resolveAgentAvatar(
-                    (property.agent as any).image || (property.agent as any).avatar || (property.agent as any).profile_image,
-                    property.agent.id
-                  )
+
+              const baseAgent = property.agent as {
+                id?: number
+                first_name?: string | null
+                last_name?: string | null
+                full_name?: string | null
+                verified?: boolean
+                phone?: string
+                email?: string
+                whatsapp?: string
+                company_image?: string | null
+                company_name?: string | null
+                profile_image?: string | null
+                image?: string | null
+                avatar?: string | null
+                image_path?: string | null
+              } | undefined
+              const baseRentManager = property.rent_manager as {
+                id?: number
+                name?: string | null
+                is_official?: boolean
+                phone?: string
+                email?: string
+                whatsapp?: string
+                company_image?: string | null
+                company_name?: string | null
+                profile_image?: string | null
+                image?: string | null
+                avatar?: string | null
+                image_path?: string | null
+              } | undefined
+
+              const rawAgentImage =
+                baseAgent?.profile_image ||
+                baseAgent?.image ||
+                baseAgent?.avatar ||
+                baseAgent?.image_path ||
+                baseRentManager?.profile_image ||
+                baseRentManager?.image ||
+                baseRentManager?.avatar ||
+                baseRentManager?.image_path ||
+                null
+              const agentIdForAvatar = baseAgent?.id || baseRentManager?.id
+              const agentImage = agentIdForAvatar
+                ? resolveAgentAvatar(rawAgentImage, agentIdForAvatar)
                 : undefined
               return (
                 <VerticalPropertyCard
@@ -117,14 +157,18 @@ function PropertiesForRent() {
                   title={property.title}
                   image={mainImage}
                   images={images}
-                  rentManagerName={property.agent?.first_name && property.agent?.last_name
-                    ? `${property.agent.first_name} ${property.agent.last_name}`
-                    : property.agent?.full_name
-                    || property.rent_manager?.name
-                    || 'Rental.Ph Official'}
-                  rentManagerRole={property.agent
-                    ? getRentManagerRole(property.agent.verified)
-                    : getRentManagerRole(property.rent_manager?.is_official)}
+                  rentManagerName={
+                    property.agent?.first_name && property.agent?.last_name
+                      ? `${property.agent.first_name} ${property.agent.last_name}`
+                      : property.agent?.full_name ||
+                        property.rent_manager?.name ||
+                        'Rental.Ph Official'
+                  }
+                  rentManagerRole={
+                    property.agent
+                      ? getRentManagerRole(property.agent.verified)
+                      : getRentManagerRole(property.rent_manager?.is_official)
+                  }
                   rentManagerImage={agentImage}
                   bedrooms={property.bedrooms}
                   bathrooms={property.bathrooms}
@@ -134,6 +178,7 @@ function PropertiesForRent() {
                   city={property.city}
                   streetAddress={property.street_address}
                   stateProvince={property.state_province}
+                  property={property}
                 />
               )
             })}

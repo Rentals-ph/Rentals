@@ -181,6 +181,7 @@ function PropertiesContent() {
           location?: string
           search?: string
           page?: number
+          listing_type?: string
         } = {
           page: currentPage,
         }
@@ -194,6 +195,11 @@ function PropertiesContent() {
         }
         if (searchQuery) {
           params.search = searchQuery
+        }
+
+        // Pass listing type to API so backend can also filter
+        if (listingTypeFilter === 'for_rent' || listingTypeFilter === 'for_sale') {
+          params.listing_type = listingTypeFilter
         }
 
         const response = await propertiesApi.getAll(params)
@@ -237,22 +243,30 @@ function PropertiesContent() {
     }
 
     fetchProperties()
-  }, [selectedLocation, selectedType, searchQuery, currentPage, viewMode])
+  }, [selectedLocation, selectedType, searchQuery, currentPage, viewMode, listingTypeFilter])
+
+  // Reset pagination when listing type filter changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [listingTypeFilter])
 
   // Client-side filtering for additional filters (listing type, bathrooms, bedrooms, price range)
   const filteredProperties = properties.filter(property => {
-    // Listing type filter - match the logic from FeaturedProperties component
-    // Check if listing_type is explicitly set, otherwise fall back to price_type
-    const hasListingType = property.listing_type === 'for_rent' || property.listing_type === 'for_sale'
-    const listingTypeMatch = listingTypeFilter === 'all' ||
-      (listingTypeFilter === 'for_rent' && (
-        property.listing_type === 'for_rent' || 
-        (!hasListingType && property.price_type)
-      )) ||
-      (listingTypeFilter === 'for_sale' && (
-        property.listing_type === 'for_sale' || 
-        (!hasListingType && !property.price_type)
-      ))
+    // Listing type filter - be tolerant of casing/formatting from the API
+    const listingType = (property.listing_type || '').toLowerCase().trim()
+    const hasListingType = listingType === 'for_rent' || listingType === 'for_sale'
+    const listingTypeMatch =
+      listingTypeFilter === 'all' ||
+      (listingTypeFilter === 'for_rent' &&
+        (
+          listingType.includes('rent') ||
+          (!hasListingType && property.price_type) // fallback: has price type → treat as rent
+        )) ||
+      (listingTypeFilter === 'for_sale' &&
+        (
+          listingType.includes('sale') ||
+          (!hasListingType && !property.price_type) // fallback: no price type → treat as sale
+        ))
 
     const bathMatch = !minBaths || property.bathrooms >= parseInt(minBaths)
     const bedMatch = !minBeds || property.bedrooms >= parseInt(minBeds)
@@ -324,18 +338,21 @@ function PropertiesContent() {
     
     // Apply client-side filters (listing_type, bathrooms, bedrooms, price, amenities)
     filtered = filtered.filter(property => {
-      // Listing type filter - match the logic from FeaturedProperties component
-      // Check if listing_type is explicitly set, otherwise fall back to price_type
-      const hasListingType = property.listing_type === 'for_rent' || property.listing_type === 'for_sale'
-      const listingTypeMatch = listingTypeFilter === 'all' || 
-        (listingTypeFilter === 'for_rent' && (
-          property.listing_type === 'for_rent' || 
-          (!hasListingType && property.price_type)
-        )) ||
-        (listingTypeFilter === 'for_sale' && (
-          property.listing_type === 'for_sale' || 
-          (!hasListingType && !property.price_type)
-        ))
+      // Listing type filter - be tolerant of casing/formatting from the API
+      const listingType = (property.listing_type || '').toLowerCase().trim()
+      const hasListingType = listingType === 'for_rent' || listingType === 'for_sale'
+      const listingTypeMatch =
+        listingTypeFilter === 'all' ||
+        (listingTypeFilter === 'for_rent' &&
+          (
+            listingType.includes('rent') ||
+            (!hasListingType && property.price_type)
+          )) ||
+        (listingTypeFilter === 'for_sale' &&
+          (
+            listingType.includes('sale') ||
+            (!hasListingType && !property.price_type)
+          ))
       
       const bathMatch = !minBaths || property.bathrooms >= parseInt(minBaths)
       const bedMatch = !minBeds || property.bedrooms >= parseInt(minBeds)
@@ -1406,10 +1423,51 @@ function PropertiesContent() {
                           : `${(property.bedrooms * 15 + property.bathrooms * 5)} sqft`
                         
                         const mainImage = property.image_url || property.image || ASSETS.PLACEHOLDER_PROPERTY_MAIN
-                        const agentImage = property.agent
-                          ? resolveAgentAvatar(
-                              property.agent.id.toString()
-                            )
+
+                        const baseAgent = property.agent as {
+                          id?: number
+                          first_name?: string | null
+                          last_name?: string | null
+                          full_name?: string | null
+                          verified?: boolean
+                          phone?: string
+                          email?: string
+                          whatsapp?: string
+                          company_image?: string | null
+                          company_name?: string | null
+                          profile_image?: string | null
+                          image?: string | null
+                          avatar?: string | null
+                          image_path?: string | null
+                        } | undefined
+                        const baseRentManager = property.rent_manager as {
+                          id?: number
+                          name?: string | null
+                          is_official?: boolean
+                          phone?: string
+                          email?: string
+                          whatsapp?: string
+                          company_image?: string | null
+                          company_name?: string | null
+                          profile_image?: string | null
+                          image?: string | null
+                          avatar?: string | null
+                          image_path?: string | null
+                        } | undefined
+
+                        const rawAgentImage =
+                          baseAgent?.profile_image ||
+                          baseAgent?.image ||
+                          baseAgent?.avatar ||
+                          baseAgent?.image_path ||
+                          baseRentManager?.profile_image ||
+                          baseRentManager?.image ||
+                          baseRentManager?.avatar ||
+                          baseRentManager?.image_path ||
+                          null
+                        const agentIdForAvatar = baseAgent?.id || baseRentManager?.id
+                        const agentImage = agentIdForAvatar
+                          ? resolveAgentAvatar(rawAgentImage, agentIdForAvatar)
                           : undefined
 
                         // Prefer created_at for "date listed", fallback to published_at

@@ -30,10 +30,20 @@ class PropertyController extends Controller
             ),
         ]
     )]
-    public function featured()
+    public function featured(Request $request)
     {
-        $properties = Property::where('is_featured', true)
-            ->with('agent')
+        $query = Property::where('is_featured', true)
+            ->with('agent');
+
+        // Optional listing_type filter (for_rent / for_sale)
+        if ($request->has('listing_type')) {
+            $listingType = strtolower((string) $request->input('listing_type'));
+            if (in_array($listingType, ['for_rent', 'for_sale'], true)) {
+                $query->where('listing_type', $listingType);
+            }
+        }
+
+        $properties = $query
             ->latest()
             ->take(10)
             ->get();
@@ -109,6 +119,14 @@ class PropertyController extends Controller
 
         if ($request->has('type')) {
             $query->where('type', $request->type);
+        }
+
+        // Filter by listing_type (for_rent / for_sale) if provided
+        if ($request->has('listing_type')) {
+            $listingType = strtolower((string) $request->input('listing_type'));
+            if (in_array($listingType, ['for_rent', 'for_sale'], true)) {
+                $query->where('listing_type', $listingType);
+            }
         }
 
         if ($request->has('location')) {

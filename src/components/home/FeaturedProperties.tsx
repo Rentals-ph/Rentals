@@ -55,11 +55,21 @@ const FeaturedProperties = () => {
     if (!locList.includes(selectedLocation)) setSelectedLocation('All Locations')
   }, [featuredProperties, citiesFromAllProperties, selectedLocation])
 
-  // Fetch featured properties
+  // Fetch featured properties (respect current category filter)
   useEffect(() => {
     const fetchFeaturedProperties = async () => {
       try {
-        const data = await propertiesApi.getFeatured()
+        setLoading(true)
+        const listingType =
+          selectedCategory === 'For Rent'
+            ? 'for_rent'
+            : selectedCategory === 'For Sale'
+              ? 'for_sale'
+              : undefined
+
+        const data = await propertiesApi.getFeatured(
+          listingType ? { listing_type: listingType } : undefined,
+        )
         setFeaturedProperties(data)
       } catch (error) {
         console.error('Error fetching featured properties:', error)
@@ -69,7 +79,7 @@ const FeaturedProperties = () => {
     }
 
     fetchFeaturedProperties()
-  }, [])
+  }, [selectedCategory])
 
   // Fetch first page of all properties to get unique cities for subcategory (so Manila, Cebu, etc. all appear)
   useEffect(() => {
@@ -99,7 +109,16 @@ const FeaturedProperties = () => {
       }
       setBrowseLoading(true)
       try {
-        const params: { location?: string } = { location: selectedLocation }
+        const params: { location?: string; listing_type?: string } = {
+          location: selectedLocation,
+        }
+
+        // Mirror the category filter when browsing by city
+        if (selectedCategory === 'For Rent') {
+          params.listing_type = 'for_rent'
+        } else if (selectedCategory === 'For Sale') {
+          params.listing_type = 'for_sale'
+        }
         const dataResponse = await propertiesApi.getAll(params)
         const data: Property[] = Array.isArray(dataResponse)
           ? dataResponse
@@ -183,7 +202,7 @@ const FeaturedProperties = () => {
       id="properties"
       className="border-t-0 relative page-x py-10 sm:py-14 pb-6 bg-[#F5F9FF] before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-gray-200 before:to-transparent after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-gray-200 after:to-transparent"
     >
-      <div className="max-w-6xl mx-auto w-full">
+      <div className="page-w">
         {/* Header: BROWSE HOT OFFERS label, title + subtitle, category buttons */}
         <FadeInOnView
           className="relative flex flex-col gap-4 mb-6 sm:mb-8 pb-4"
@@ -286,11 +305,51 @@ const FeaturedProperties = () => {
                 const images = (property.images_url && property.images_url.length > 0)
                   ? [mainImage, ...(property.images_url || []).filter((u): u is string => !!u && u !== mainImage)]
                   : undefined
-                const agentImage = property.agent
-                  ? resolveAgentAvatar(
-                      (property.agent as any).image || (property.agent as any).avatar || (property.agent as any).profile_image,
-                      property.agent.id
-                    )
+
+                const baseAgent = property.agent as {
+                  id?: number
+                  first_name?: string | null
+                  last_name?: string | null
+                  full_name?: string | null
+                  verified?: boolean
+                  phone?: string
+                  email?: string
+                  whatsapp?: string
+                  company_image?: string | null
+                  company_name?: string | null
+                  profile_image?: string | null
+                  image?: string | null
+                  avatar?: string | null
+                  image_path?: string | null
+                } | undefined
+                const baseRentManager = property.rent_manager as {
+                  id?: number
+                  name?: string | null
+                  is_official?: boolean
+                  phone?: string
+                  email?: string
+                  whatsapp?: string
+                  company_image?: string | null
+                  company_name?: string | null
+                  profile_image?: string | null
+                  image?: string | null
+                  avatar?: string | null
+                  image_path?: string | null
+                } | undefined
+
+                const rawAgentImage =
+                  baseAgent?.profile_image ||
+                  baseAgent?.image ||
+                  baseAgent?.avatar ||
+                  baseAgent?.image_path ||
+                  baseRentManager?.profile_image ||
+                  baseRentManager?.image ||
+                  baseRentManager?.avatar ||
+                  baseRentManager?.image_path ||
+                  null
+                const agentIdForAvatar = baseAgent?.id || baseRentManager?.id
+                const agentImage = agentIdForAvatar
+                  ? resolveAgentAvatar(rawAgentImage, agentIdForAvatar)
                   : undefined
                 
                 const rentManagerName = property.agent?.first_name && property.agent?.last_name
@@ -307,7 +366,11 @@ const FeaturedProperties = () => {
                       listingType={property.listing_type as 'for_rent' | 'for_sale' | null}
                       priceType={formatPriceType(property.price_type)}
                       price={formatPrice(property.price)}
-                      priceUnit={property.listing_type === 'for_sale' ? undefined : (formatPriceType(property.price_type) ? `/${formatPriceType(property.price_type)}` : '/mo')}
+                      priceUnit={
+                        property.listing_type === 'for_sale'
+                          ? undefined
+                          : (formatPriceType(property.price_type) ? `/${formatPriceType(property.price_type)}` : '/mo')
+                      }
                       title={property.title}
                       description={property.description}
                       image={mainImage}
@@ -326,6 +389,7 @@ const FeaturedProperties = () => {
                       city={property.city}
                       streetAddress={property.street_address}
                       stateProvince={property.state_province}
+                      property={property}
                     />
                   </div>
                 )

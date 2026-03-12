@@ -50,6 +50,7 @@ export default function AgentDashboard() {
     counts: [],
     total: 0,
   })
+  const [chartMetric, setChartMetric] = useState<'listings' | 'views' | 'inquiries'>('listings')
   const [statsLoading, setStatsLoading] = useState(true)
   const [editingProperty, setEditingProperty] = useState<Property | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -112,11 +113,23 @@ export default function AgentDashboard() {
         totalViews: dashboardStats.total_views ?? 0,
         totalInquiries: dashboardStats.total_inquiries ?? 0,
       })
-      setMonthlyListings({
-        labels: dashboardStats.monthly_listings?.labels ?? [],
-        counts: dashboardStats.monthly_listings?.counts ?? [],
-        total: dashboardStats.monthly_listings?.total ?? 0,
-      })
+      const ts = dashboardStats.timeseries
+      if (ts) {
+        setMonthlyListings({
+          labels: ts.labels ?? [],
+          counts:
+            (chartMetric === 'views'
+              ? ts.views
+              : chartMetric === 'inquiries'
+              ? ts.inquiries
+              : ts.listings) ?? [],
+          total: (chartMetric === 'views'
+            ? ts.views?.reduce((a, b) => a + b, 0)
+            : chartMetric === 'inquiries'
+            ? ts.inquiries?.reduce((a, b) => a + b, 0)
+            : ts.listings?.reduce((a, b) => a + b, 0)) ?? 0,
+        })
+      }
     } catch (error) {
       console.error('Error fetching dashboard stats:', error)
     } finally {
@@ -240,10 +253,56 @@ export default function AgentDashboard() {
         {/* Middle row: Monthly Listings chart (left) + Recent Messages (right), side by side */}
         <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-[1fr_380px]">
           {/* Monthly Listings chart - from backend (last 7 days) */}
-          <div className="relative flex flex-shrink-0 rounded-xl bg-white p-6 shadow-sm">
-            <h2 className="mb-6 text-lg font-bold text-gray-800">
-              Monthly Listings: {statsLoading ? '...' : monthlyListings.total}
-            </h2>
+          <div className="relative flex flex-shrink-0 flex-col rounded-xl bg-white p-6 shadow-sm">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-bold text-gray-800">
+                {chartMetric === 'views'
+                  ? 'Views (last 7 days)'
+                  : chartMetric === 'inquiries'
+                  ? 'Inquiries (last 7 days)'
+                  : 'Listings (last 7 days)'}
+              </h2>
+              <div className="flex items-center gap-2 rounded-full bg-gray-100 p-1 text-xs">
+                {(['listings', 'views', 'inquiries'] as const).map((metric) => (
+                  <button
+                    key={metric}
+                    type="button"
+                    onClick={() => {
+                      setChartMetric(metric)
+                      // Re-map counts based on existing timeseries in stats fetch
+                      ;(async () => {
+                        try {
+                          const dashboardStats = await agentsApi.getDashboardStats()
+                          const ts = dashboardStats.timeseries
+                          if (!ts) return
+                          const counts =
+                            metric === 'views'
+                              ? ts.views
+                              : metric === 'inquiries'
+                              ? ts.inquiries
+                              : ts.listings
+                          const total = counts?.reduce((a, b) => a + b, 0) ?? 0
+                          setMonthlyListings({
+                            labels: ts.labels ?? [],
+                            counts: counts ?? [],
+                            total,
+                          })
+                        } catch (e) {
+                          console.error('Error updating chart metric:', e)
+                        }
+                      })()
+                    }}
+                    className={`rounded-full px-3 py-1 font-medium transition-colors ${
+                      chartMetric === metric
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-800'
+                    }`}
+                  >
+                    {metric === 'listings' ? 'Listings' : metric === 'views' ? 'Views' : 'Inquiries'}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="flex items-end gap-4" style={{ minHeight: 200 }}>
               <div className="flex flex-col justify-between pb-7 text-right text-xs text-gray-400" style={{ height: 200 }}>
                 {[7, 6, 5, 4, 3, 2, 1].map((n) => (
@@ -266,7 +325,12 @@ export default function AgentDashboard() {
               </div>
             </div>
             <p className="mt-4 text-center text-sm text-gray-500">
-              {statsLoading ? '...' : monthlyListings.total} Listings
+              {statsLoading ? '...' : monthlyListings.total}{' '}
+              {chartMetric === 'views'
+                ? 'Views'
+                : chartMetric === 'inquiries'
+                ? 'Inquiries'
+                : 'Listings'}
             </p>
           </div>
 

@@ -13,14 +13,16 @@ export interface GetPropertiesParams {
   page?: number
   per_page?: number
   agent_id?: number
+  /** Optional listing type filter: 'for_rent' or 'for_sale' */
+  listing_type?: string
 }
 
 export const propertiesApi = {
   /**
    * Get featured properties
    */
-  getFeatured: async (): Promise<Property[]> => {
-    const response = await apiClient.get<Property[]>('/properties/featured')
+  getFeatured: async (params?: { listing_type?: string }): Promise<Property[]> => {
+    const response = await apiClient.get<Property[]>('/properties/featured', { params })
     return response.data
   },
 

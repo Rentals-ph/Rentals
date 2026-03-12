@@ -160,10 +160,11 @@ export const agentsApi = {
     unread_messages: number
     total_views?: number
     total_inquiries?: number
-    monthly_listings?: {
+    timeseries?: {
       labels: string[]
-      counts: number[]
-      total: number
+      listings: number[]
+      views: number[]
+      inquiries: number[]
     }
   }> => {
     try {
@@ -176,7 +177,12 @@ export const agentsApi = {
           unread_messages: number
           total_views?: number
           total_inquiries?: number
-          monthly_listings?: { labels: string[]; counts: number[]; total: number }
+          timeseries?: {
+            labels: string[]
+            listings: number[]
+            views: number[]
+            inquiries: number[]
+          }
         }
       }>('/agents/dashboard/stats')
       return response.data.data
