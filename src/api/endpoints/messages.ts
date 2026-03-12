@@ -7,7 +7,8 @@ import apiClient from '../client'
 export interface Message {
   id: number
   sender_id: number | null
-  recipient_id: number
+  recipient_id: number | null
+  conversation_id: number | null
   property_id: number | null
   sender_name: string
   sender_email: string
@@ -29,6 +30,37 @@ export interface Message {
     name: string
     email: string
   } | null
+  conversation?: InquiryConversation
+}
+
+export interface InquiryConversation {
+  id: number
+  agent_id: number | null
+  broker_id: number | null
+  customer_email: string
+  customer_name: string
+  property_id: number | null
+  type: 'contact' | 'property_inquiry' | 'general'
+  subject: string | null
+  last_message_at: string | null
+  created_at: string
+  updated_at: string
+  property?: {
+    id: number
+    title: string
+    image: string | null
+  } | null
+  agent?: {
+    id: number
+    name: string
+    email: string
+  } | null
+  broker?: {
+    id: number
+    name: string
+    email: string
+  } | null
+  latestMessage?: Message
 }
 
 export interface SendMessageData {
@@ -48,6 +80,10 @@ export interface GetMessagesParams {
   property_id?: number
 }
 
+export interface ReplyMessageData {
+  message: string
+}
+
 export const messagesApi = {
   /**
    * Send a message (public endpoint)
@@ -65,9 +101,9 @@ export const messagesApi = {
   /**
    * Get messages for authenticated user
    */
-  getAll: async (params?: GetMessagesParams): Promise<{ success: boolean; data: Message[]; unread_count: number }> => {
+  getAll: async (params?: GetMessagesParams): Promise<{ success: boolean; data: Message[]; conversations?: InquiryConversation[]; unread_count: number }> => {
     try {
-      const response = await apiClient.get<{ success: boolean; data: Message[]; unread_count: number }>('/messages', { params })
+      const response = await apiClient.get<{ success: boolean; data: Message[]; conversations?: InquiryConversation[]; unread_count: number }>('/messages', { params })
       return response.data
     } catch (error: any) {
       console.error('API call error:', error)
@@ -120,6 +156,65 @@ export const messagesApi = {
   delete: async (id: number): Promise<{ success: boolean; message: string }> => {
     try {
       const response = await apiClient.delete<{ success: boolean; message: string }>(`/messages/${id}`)
+      return response.data
+    } catch (error: any) {
+      console.error('API call error:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Get customer inquiries by email (public endpoint)
+   */
+  getCustomerInquiries: async (email: string): Promise<{ success: boolean; data: Message[]; conversations?: InquiryConversation[]; unread_count: number }> => {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: Message[]; conversations?: InquiryConversation[]; unread_count: number }>(`/messages/customer/${encodeURIComponent(email)}`)
+      return response.data
+    } catch (error: any) {
+      console.error('API call error:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Get conversation messages by conversation ID
+   * @param conversationId - The conversation ID
+   * @param customerEmail - Optional customer email for public access (when not authenticated)
+   */
+  getConversationMessages: async (conversationId: number, customerEmail?: string): Promise<{ success: boolean; data: Message[]; conversation: InquiryConversation }> => {
+    try {
+      const params = customerEmail ? { email: customerEmail } : undefined
+      const response = await apiClient.get<{ success: boolean; data: Message[]; conversation: InquiryConversation }>(`/conversations/${conversationId}/messages`, { params })
+      return response.data
+    } catch (error: any) {
+      console.error('API call error:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Reply to a message (agent/broker only)
+   */
+  reply: async (id: number, data: ReplyMessageData): Promise<{ success: boolean; message: string; data: Message }> => {
+    try {
+      const response = await apiClient.post<{ success: boolean; message: string; data: Message }>(`/messages/${id}/reply`, data)
+      return response.data
+    } catch (error: any) {
+      console.error('API call error:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Mark conversation as read for customer
+   * @param conversationId - The conversation ID
+   * @param customerEmail - Customer email
+   */
+  markConversationAsRead: async (conversationId: number, customerEmail: string): Promise<{ success: boolean; message: string; count: number }> => {
+    try {
+      const response = await apiClient.put<{ success: boolean; message: string; count: number }>(`/conversations/${conversationId}/mark-read`, null, {
+        params: { email: customerEmail }
+      })
       return response.data
     } catch (error: any) {
       console.error('API call error:', error)

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import Footer from '../../../../components/layout/Footer'
-import FloatingInquiryChat from '@/components/public/FloatingInquiryChat'
 import VerticalPropertyCard from '../../../../components/common/cards/VerticalPropertyCard'
 import SharePopup, { type SharePlatform, type ShareOption } from '../../../../components/common/misc/SharePopup'
 import PropertyLocationMap from '../../../../components/common/maps/PropertyLocationMap'
@@ -255,6 +254,41 @@ export default function PropertyDetailsPage() {
         type: 'property_inquiry',
         subject: `Inquiry about ${property.title}`,
       })
+      
+      // Store customer profile in localStorage so inquiries link appears
+      // Replace email if different, keep if same
+      if (typeof window !== 'undefined') {
+        try {
+          const existingProfile = localStorage.getItem('temp_chat_profile_v1')
+          let shouldUpdate = true
+          
+          if (existingProfile) {
+            try {
+              const parsed = JSON.parse(existingProfile)
+              // Only update if email is different
+              if (parsed?.email === inquiryData.email) {
+                shouldUpdate = false
+              }
+            } catch {
+              // If parsing fails, update anyway
+            }
+          }
+          
+          if (shouldUpdate) {
+            const profile = {
+              name: inquiryData.name,
+              email: inquiryData.email,
+              phone: inquiryData.phone,
+            }
+            localStorage.setItem('temp_chat_profile_v1', JSON.stringify(profile))
+            // Trigger storage event to update navbar
+            window.dispatchEvent(new Event('storage'))
+          }
+        } catch {
+          // ignore localStorage errors
+        }
+      }
+      
       alert('Inquiry submitted successfully!')
       setInquiryData({ name: '', phone: '', email: '', message: '' })
     } catch (error: any) {
@@ -896,8 +930,6 @@ export default function PropertyDetailsPage() {
       )}
 
       <Footer />
-
-      {property && <FloatingInquiryChat property={property} />}
 
       {/* ════════════════════════════════════════════════════ */}
       {/* GALLERY MODAL                                       */}

@@ -65,27 +65,29 @@
    WRONG PATTERN (Pattern B — makes content narrower than expected):
      <div class="page-w page-x">…</div>          ← both on same element
 
-   page-x  →  px-6 (mobile) / px-10 (sm) / px-20 (lg)
-   page-w  →  max-w-6xl (72rem / 1152px) + mx-auto + w-full
+   page-x  →  px-4 (mobile) / px-6 (sm) / px-10 (lg)
+   page-w  →  max-w-[90rem] (1440px) + mx-auto + w-full
 ───────────────────────────────────────────────────────────────── */
-.page-x {
-  padding-left: 1.5rem;    /* 24px — px-6 */
-  padding-right: 1.5rem;
-}
-@media (min-width: 640px) {
+@layer utilities {
   .page-x {
-    padding-left: 2.5rem;  /* 40px — px-10 */
-    padding-right: 2.5rem;
+    padding-left: 1.5rem !important;    /* 16px — px-4 */
+    padding-right: 1.5rem !important;
   }
-}
-@media (min-width: 1024px) {
-  .page-x {
-    padding-left: 5rem;    /* 80px — px-20 */
-    padding-right: 5rem;
+  @media (min-width: 640px) {
+    .page-x {
+      padding-left: 2.5rem !important;  /* 24px — px-6 */
+      padding-right: 2.5rem !important;
+    }
+  }
+  @media (min-width: 1024px) {
+    .page-x {
+      padding-left: 3rem !important;    /* 40px — px-10 */
+      padding-right: 3rem !important;
+    }
   }
 }
 .page-w {
-  max-width: 72rem;        /* 1152px — max-w-6xl */
+  max-width: 90rem;        /* 1440px — increased to allow wider content */
   width: 100%;
   margin-left: auto;
   margin-right: auto;

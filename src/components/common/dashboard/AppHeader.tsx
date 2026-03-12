@@ -117,8 +117,13 @@ function AppHeader() {
       try {
         setLoadingNotifications(true)
         const response = await messagesApi.getAll({ is_read: false })
-        // Filter for property inquiries only
-        const inquiries = response.data.filter(msg => msg.type === 'property_inquiry')
+        // Filter for property inquiries only and exclude messages where user is the sender
+        const userEmail = typeof window !== 'undefined' ? localStorage.getItem('user_email') : null
+        const inquiries = response.data.filter(msg => 
+          msg.type === 'property_inquiry' && 
+          msg.sender_email !== userEmail && 
+          msg.sender_id !== (typeof window !== 'undefined' ? parseInt(localStorage.getItem('agent_id') || '0') : 0)
+        )
         setUnreadMessages(inquiries.slice(0, 5)) // Show latest 5
         // Count only property inquiries for the badge
         setUnreadCount(inquiries.length)
@@ -178,8 +183,14 @@ function AppHeader() {
           msg.id === message.id ? { ...msg, is_read: true } : msg
         ))
         setUnreadCount(prev => Math.max(0, prev - 1))
-      } catch (error) {
-        console.error('Error marking message as read:', error)
+      } catch (error: any) {
+        // If message not found or unauthorized, just remove it from the list
+        if (error?.response?.status === 404 || error?.response?.status === 403) {
+          setUnreadMessages(prev => prev.filter(msg => msg.id !== message.id))
+          setUnreadCount(prev => Math.max(0, prev - 1))
+        } else {
+          console.error('Error marking message as read:', error)
+        }
       }
     }
     setShowNotificationDropdown(false)

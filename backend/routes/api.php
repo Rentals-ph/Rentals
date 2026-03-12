@@ -172,11 +172,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Message routes
 Route::post('/messages', [MessageController::class, 'store']); // Public - anyone can send a message
+Route::get('/messages/customer/{email}', [MessageController::class, 'getCustomerInquiries']); // Public - get customer inquiries by email
+Route::get('/conversations/{id}/messages', [MessageController::class, 'getConversationMessages']); // Public - get conversation messages (with email param for customers)
+Route::put('/conversations/{id}/mark-read', [MessageController::class, 'markConversationAsReadForCustomer']); // Public - mark conversation as read for customer
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/messages', [MessageController::class, 'index']);
     Route::get('/messages/{id}', [MessageController::class, 'show']);
     Route::put('/messages/{id}/read', [MessageController::class, 'markAsRead']);
     Route::put('/messages/read-all', [MessageController::class, 'markAllAsRead']);
+    Route::post('/messages/{id}/reply', [MessageController::class, 'reply']); // Reply to a message
     Route::delete('/messages/{id}', [MessageController::class, 'destroy']);
 });
 

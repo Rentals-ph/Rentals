@@ -12,6 +12,7 @@ class Message extends Model
     protected $fillable = [
         'sender_id',
         'recipient_id',
+        'conversation_id',
         'property_id',
         'sender_name',
         'sender_email',
@@ -50,6 +51,14 @@ class Message extends Model
     public function property()
     {
         return $this->belongsTo(Property::class, 'property_id');
+    }
+
+    /**
+     * Get the conversation this message belongs to
+     */
+    public function conversation()
+    {
+        return $this->belongsTo(InquiryConversation::class, 'conversation_id');
     }
 
     /**

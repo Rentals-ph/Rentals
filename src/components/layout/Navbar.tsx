@@ -4,9 +4,9 @@ import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { FiUser, FiLogOut, FiChevronDown, FiHome, FiMenu, FiX, FiInfo, FiLayers, FiUsers, FiBook, FiRss, FiMail } from 'react-icons/fi'
+import { FiUser, FiLogOut, FiChevronDown, FiHome, FiMenu, FiX, FiInfo, FiLayers, FiUsers, FiBook, FiRss, FiMail, FiMessageCircle } from 'react-icons/fi'
 import { ASSETS } from '@/utils/assets'
-import { agentsApi } from '@/api'
+import { agentsApi, messagesApi } from '@/api'
 import { resolveAgentAvatar } from '@/utils/imageResolver'
 import LoginModal from '@/components/common/LoginModal'
 import RegisterModal from '@/components/common/RegisterModal'
@@ -36,6 +36,8 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
   const [userRole, setUserRole] = useState<'agent' | 'admin' | 'broker'>('agent')
   const [userImage, setUserImage] = useState<string | null>(null)
   const [userId, setUserId] = useState<number | null>(null)
+  const [hasInquiries, setHasInquiries] = useState(false)
+  const [inquiriesUnreadCount, setInquiriesUnreadCount] = useState(0)
   const pathname = usePathname()
   const router = useRouter()
   const userMenuRef = useRef<HTMLDivElement>(null)
@@ -131,6 +133,54 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
   useEffect(() => {
     checkAuthStatus()
   }, [pathname])
+
+  // Check for customer inquiries
+  useEffect(() => {
+    const checkInquiries = async () => {
+      if (isUserLoggedIn) {
+        // Don't show inquiries link for logged-in users (agents/brokers)
+        setHasInquiries(false)
+        setInquiriesUnreadCount(0)
+        return
+      }
+
+      if (typeof window === 'undefined') return
+
+      try {
+        const profile = localStorage.getItem('temp_chat_profile_v1')
+        if (profile) {
+          const parsed = JSON.parse(profile)
+          if (parsed?.email) {
+            const response = await messagesApi.getCustomerInquiries(parsed.email)
+            if (response.data && response.data.length > 0) {
+              setHasInquiries(true)
+              setInquiriesUnreadCount(response.unread_count || 0)
+            } else {
+              setHasInquiries(false)
+              setInquiriesUnreadCount(0)
+            }
+          } else {
+            setHasInquiries(false)
+            setInquiriesUnreadCount(0)
+          }
+        } else {
+          setHasInquiries(false)
+          setInquiriesUnreadCount(0)
+        }
+      } catch (error) {
+        console.error('Error checking inquiries:', error)
+        setHasInquiries(false)
+        setInquiriesUnreadCount(0)
+      }
+    }
+
+    checkInquiries()
+    
+    // Refresh inquiries check periodically
+    const interval = setInterval(checkInquiries, 30000) // Check every 30 seconds
+    
+    return () => clearInterval(interval)
+  }, [isUserLoggedIn, pathname])
 
   // Position profile dropdown for portal (so it appears above hero/other content)
   useLayoutEffect(() => {
@@ -363,6 +413,28 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
               >
                 CONTACT US
               </Link>
+              {hasInquiries && (
+                <Link
+                  href="/inquiries"
+                  className={`font-outfit text-xs lg:text-sm px-3.5 py-1.5 whitespace-nowrap transition-all relative ${
+                    pathname === '/inquiries'
+                      ? 'text-rental-blue-700 font-semibold'
+                      : 'text-rental-blue-700 hover:text-rental-orange-500'
+                  }`}
+                  style={{
+                    borderBottomWidth: '2px',
+                    borderBottomStyle: 'solid',
+                    borderBottomColor: pathname === '/inquiries' ? '#205ED7' : 'transparent',
+                  }}
+                >
+                  INQUIRIES
+                  {inquiriesUnreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 border-2 border-white flex items-center justify-center">
+                      <span className="text-[8px] font-bold text-white">{inquiriesUnreadCount > 9 ? '9+' : inquiriesUnreadCount}</span>
+                    </span>
+                  )}
+                </Link>
+              )}
             </nav>
           </div>
           {/* User/Profile section */}
@@ -518,14 +590,15 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
                     { href: '/blog', label: 'BLOG', icon: FiBook },
                     { href: '/news', label: 'NEWS', icon: FiRss },
                     { href: '/contact', label: 'CONTACT US', icon: FiMail },
-                  ].map(({ href, label, icon: Icon }) => {
+                    ...(hasInquiries ? [{ href: '/inquiries', label: 'INQUIRIES', icon: FiMessageCircle, badge: inquiriesUnreadCount }] : []),
+                  ].map(({ href, label, icon: Icon, badge }) => {
                     const isActive = pathname === href
                     return (
                       <Link
                         key={href}
                         href={href}
                         onClick={() => setMobileMenuOpen(false)}
-                        className={`font-outfit text-[14px] sm:text-[15px] px-4 py-3.5 rounded-xl flex items-center gap-3 transition-all duration-200 ${
+                        className={`font-outfit text-[14px] sm:text-[15px] px-4 py-3.5 rounded-xl flex items-center gap-3 transition-all duration-200 relative ${
                           isActive
                             ? 'bg-rental-blue-600 text-white font-bold shadow-md shadow-rental-blue-600/25'
                             : 'text-rental-blue-700 font-medium hover:bg-white/80 hover:text-rental-orange-500 hover:shadow-sm'
@@ -533,6 +606,11 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
                       >
                         <Icon className={`flex-shrink-0 text-lg ${isActive ? 'text-white' : 'text-rental-orange-500/80'}`} aria-hidden />
                         {label}
+                        {badge && badge > 0 && (
+                          <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 border-2 border-white flex items-center justify-center">
+                            <span className="text-[10px] font-bold text-white">{badge > 9 ? '9+' : badge}</span>
+                          </span>
+                        )}
                       </Link>
                     )
                   })}
