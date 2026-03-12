@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import AppSidebar from '@/components/common/AppSidebar'
-import AgentHeader from '@/components/agent/AgentHeader'
 import { agentsApi } from '@/api'
 import type { Agent } from '@/api/endpoints/agents'
 import { ASSETS } from '@/utils/assets'
@@ -190,21 +188,14 @@ export default function AgentAccount() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-gray-100 font-outfit">
-        <AppSidebar />
-        <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4">
-          <div className="p-10 text-center text-gray-400">Loading account information...</div>
-        </main>
-      </div>
+      <>
+        <div className="p-10 text-center text-gray-400">Loading account information...</div>
+      </>
     )
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit">
-      <AppSidebar />
-
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4 md:pt-20">
-        <AgentHeader title="Account Settings" subtitle="Manage your account information and preferences." />
+    <>
 
         {/* ───────── SUCCESS TOAST ───────── */}
         {successMsg && (
@@ -631,8 +622,7 @@ export default function AgentAccount() {
             )}
           </div>
         </div>
-      </main>
-    </div>
+    </>
   )
 }
 

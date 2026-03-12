@@ -1,13 +1,10 @@
 'use client'
 
 import { useMemo } from 'react'
-import AppSidebar from '../common/AppSidebar'
 import { FiCheck } from 'react-icons/fi'
 import type { ReactNode } from 'react'
 
 export interface CreateListingStepLayoutProps {
-  /** Header element (e.g. AgentHeader or BrokerHeader) */
-  header: ReactNode
   /** Labels for each step in the progress stepper */
   stepLabels: string[]
   /** Current step index (0-based) */
@@ -65,7 +62,6 @@ function ProgressRing({ percent }: { percent: number }) {
 }
 
 export function CreateListingStepLayout({
-  header,
   stepLabels,
   currentStepIndex,
   breadcrumbStepName,
@@ -77,10 +73,7 @@ export function CreateListingStepLayout({
     : 0
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit">
-      <AppSidebar />
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4">
-        {header}
+    <>
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
@@ -125,7 +118,6 @@ export function CreateListingStepLayout({
         </div>
 
         {children}
-      </main>
-    </div>
+    </>
   )
 }

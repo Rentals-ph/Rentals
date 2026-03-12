@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import AppSidebar from '@/components/common/AppSidebar'
-import BrokerHeader from '@/components/broker/BrokerHeader'
 import { brokerApi } from '@/api'
 import type { Company } from '@/api/endpoints/broker'
 import { FiUser, FiMail, FiPhone, FiLock, FiBriefcase } from 'react-icons/fi'
@@ -78,14 +76,7 @@ export default function CreateAgentPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit">
-      <AppSidebar />
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4 md:pt-15">
-        <BrokerHeader
-          title="Create Agent Account"
-          subtitle="Create a new agent account for your team. Agents can manage listings and will be able to log in with the credentials you provide."
-        />
-
+    <>
         <div className="max-w-xl">
           {success ? (
             <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6">
@@ -231,7 +222,6 @@ export default function CreateAgentPage() {
             </form>
           )}
         </div>
-      </main>
-    </div>
+    </>
   )
 }

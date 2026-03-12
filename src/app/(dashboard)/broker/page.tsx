@@ -1,8 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import AppSidebar from '@/components/common/AppSidebar'
-import BrokerHeader from '@/components/broker/BrokerHeader'
 import { agentsApi, propertiesApi } from '@/api'
 import { brokerApi } from '@/api'
 import type { Agent } from '@/api/endpoints/agents'
@@ -169,15 +167,7 @@ export default function BrokerDashboard() {
   const linePathRevenue = pointsRevenue.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
 
   return (
-    <div className="flex min-h-screen bg-gray-50 font-outfit">
-      <AppSidebar />
-      <main className="main-with-sidebar flex-1 min-h-screen">
-        <div className="p-8 lg:py-6 md:py-4 md:pt-15">
-          <BrokerHeader
-            title="Dashboard Overview"
-            subtitle={`Welcome back, ${userName}! Here's what's happening with your team.`}
-            showNotifications
-          />
+    <>
 
           {/* Stats Cards - 4 compact box cards */}
           <div className="grid grid-cols-4 gap-3 mb-6  w-[100%] lg:grid-cols-4 md:grid-cols-2">
@@ -276,15 +266,8 @@ export default function BrokerDashboard() {
                   <path d={linePathRevenue} fill="none" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
-
-              
             </div>
-
-            
           </div>
-
-        </div>
-      </main>
-    </div>
+    </>
   )
 }

@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import AppSidebar from '@/components/common/AppSidebar'
-import AgentHeader from '@/components/agent/AgentHeader'
 import { ConversationalListingAssistant } from '@/components/listing-assistant'
 import VerticalPropertyCard from '@/components/common/VerticalPropertyCard'
 import type { ExtractedPropertyData } from '@/types/listingAssistant'
@@ -79,14 +77,8 @@ export default function ListingAssistantPage() {
   const propertyCardData = formatPropertyData()
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit">
+    <>
       <style dangerouslySetInnerHTML={{ __html: propertyCardStyles }} />
-      <AppSidebar />
-      <main className="main-with-sidebar flex-1 p-6 lg:p-4 md:p-4 flex flex-col min-h-0 overflow-auto">
-        <AgentHeader
-          title="AI Listing Assistant"
-          subtitle="Create property listings with the help of AI"
-        />
 
         {/* Hero chat-mode layout: single rounded container, two-column content; cap height so it doesn't dominate viewport */}
         <div className="flex flex-col flex-1 min-h-0 w-full max-w-7xl mx-auto max-h-[calc(100vh-8rem)]">
@@ -109,7 +101,6 @@ export default function ListingAssistantPage() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+    </>
   )
 }

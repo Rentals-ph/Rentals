@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import AppSidebar from '@/components/common/AppSidebar'
-import BrokerHeader from '@/components/broker/BrokerHeader'
 import { ConversationalListingAssistant } from '@/components/listing-assistant'
 import VerticalPropertyCard from '@/components/common/VerticalPropertyCard'
 import type { ExtractedPropertyData } from '@/types/listingAssistant'
@@ -83,14 +81,8 @@ export default function BrokerListingAssistantPage() {
   const propertyCardData = formatPropertyData()
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit">
+    <>
       <style dangerouslySetInnerHTML={{ __html: propertyCardStyles }} />
-      <AppSidebar />
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4">
-        <BrokerHeader
-          title="AI Listing Assistant"
-          subtitle="Create property listings with the help of AI"
-        />
 
         <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl p-6 mb-6 border border-indigo-200 sm:p-4">
           <div className="flex items-start gap-4 mb-4 lg:flex-col lg:items-start sm:flex-col sm:items-start">
@@ -136,7 +128,6 @@ export default function BrokerListingAssistantPage() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+    </>
   )
 }

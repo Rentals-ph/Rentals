@@ -2,8 +2,6 @@
 
 import { useMemo, useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import AppSidebar from '@/components/common/AppSidebar'
-import AgentHeader from '@/components/agent/AgentHeader'
 import LocationMap from '@/components/agent/LocationMap'
 import { useCreateListing } from '@/contexts/CreateListingContext'
 import { createThumbnail } from '@/utils/imageCompression'
@@ -337,10 +335,7 @@ export function ManualListingForm() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit">
-      <AppSidebar />
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4">
-        <AgentHeader title="Create Listing" subtitle="Add a new property to your portfolio." />
+    <>
         <div className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
           <a href="/agent/create-listing" className="text-gray-900 hover:text-blue-600 no-underline">Create Listing</a>
           <span className="text-gray-400">&gt;</span>
@@ -561,7 +556,6 @@ export function ManualListingForm() {
             </div>
           </section>
         </div>
-      </main>
-    </div>
+    </>
   )
 }

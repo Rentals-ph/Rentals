@@ -1,4 +1,5 @@
 export { default as AppSidebar } from './AppSidebar'
+export { default as AppHeader } from './AppHeader'
 export { default as DashboardHeader } from './DashboardHeader'
 export { default as AccountSettings } from './AccountSettings'
 export type { ProfileData, EditFormData, PasswordFormData, AccountSettingsProps } from './AccountSettings'

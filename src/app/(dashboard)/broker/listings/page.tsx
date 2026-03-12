@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import AppSidebar from '@/components/common/AppSidebar'
-import BrokerHeader from '@/components/broker/BrokerHeader'
 import EditPropertyModal from '@/components/agent/EditPropertyModal'
 import { brokerApi } from '@/api'
 import type { Property } from '@/types'
@@ -181,15 +179,7 @@ export default function ListingsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit">
-      <AppSidebar />
-
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4 md:pt-20">
-        <BrokerHeader 
-          title="Listings" 
-          subtitle="Manage and track all your team's property listings." 
-        />
-
+    <>
         <div className="flex flex-col gap-4 sm:gap-4.5">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
             <div className="bg-white rounded-xl p-4 sm:p-5 md:p-6 flex items-start gap-3 sm:gap-4 shadow-sm border border-gray-100">
@@ -366,7 +356,6 @@ export default function ListingsPage() {
             })()}
           </div>
         </div>
-      </main>
 
       <EditPropertyModal
         property={editingProperty}
@@ -375,6 +364,6 @@ export default function ListingsPage() {
         onUpdate={handlePropertyUpdate}
         onDelete={handlePropertyDelete}
       />
-    </div>
+    </>
   )
 }

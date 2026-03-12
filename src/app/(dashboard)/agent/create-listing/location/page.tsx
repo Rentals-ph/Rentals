@@ -2,8 +2,6 @@
 
 import { useMemo, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import AppSidebar from '@/components/common/AppSidebar'
-import AgentHeader from '@/components/agent/AgentHeader'
 import LocationMap from '@/components/agent/LocationMap'
 import { useCreateListing } from '@/contexts/CreateListingContext'
 import {
@@ -165,14 +163,7 @@ export default function AgentCreateListingLocation() {
   }
 
   return (
-    <div className="agent-dashboard">
-      <AppSidebar/>
-
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4">
-        <AgentHeader 
-          title="Create Listing" 
-          subtitle="Add property location." 
-        />
+    <>
 
         <div className="flex items-center gap-2 text-xl font-semibold text-gray-900 my-1.5 mx-0 mb-4"> {/* aclc-breadcrumb */}
           <span className="text-gray-900">Create Listing</span> {/* aclc-breadcrumb-strong */}
@@ -346,8 +337,7 @@ export default function AgentCreateListingLocation() {
             </button>
           </div>
         </div>
-      </main>
-    </div>
+    </>
   )
 }
 

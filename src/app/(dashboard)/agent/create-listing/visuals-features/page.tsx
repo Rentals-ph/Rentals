@@ -1,6 +1,5 @@
 'use client'
 
-import AgentHeader from '@/components/agent/AgentHeader'
 import {
   CreateListingStepLayout,
   VisualsFeaturesStepContent,
@@ -15,12 +14,6 @@ const STEP_LABELS = [
 export default function AgentCreateListingVisualsFeatures() {
   return (
     <CreateListingStepLayout
-      header={
-        <AgentHeader
-          title="Create Listing"
-          subtitle="Add visuals and features."
-        />
-      }
       stepLabels={STEP_LABELS}
       currentStepIndex={1}
       breadcrumbStepName="Visuals & Features"

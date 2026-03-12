@@ -2,8 +2,6 @@
 
 import { useMemo, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import AppSidebar from '@/components/common/AppSidebar'
-import AgentHeader from '@/components/agent/AgentHeader'
 import { useCreateListing } from '@/contexts/CreateListingContext'
 import {
   FiArrowLeft,
@@ -93,14 +91,7 @@ export default function AgentCreateListingAttributes() {
   }
 
   return (
-    <div className="agent-dashboard">
-      <AppSidebar/>
-
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4">
-        <AgentHeader 
-          title="Create Listing" 
-          subtitle="Add property attributes and amenities." 
-        />
+    <>
 
         <div className="aclc-breadcrumb">
           <span className="aclc-breadcrumb-strong">Create Listing</span>
@@ -182,8 +173,7 @@ export default function AgentCreateListingAttributes() {
             </button>
           </div>
         </div>
-      </main>
-    </div>
+    </>
   )
 }
 

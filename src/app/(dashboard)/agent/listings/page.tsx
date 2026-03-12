@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import AppSidebar from '@/components/common/AppSidebar'
-import AgentHeader from '@/components/agent/AgentHeader'
 import EditPropertyModal from '@/components/agent/EditPropertyModal'
 import { propertiesApi, agentsApi } from '@/api'
 import type { Property } from '@/types'
@@ -255,14 +253,7 @@ export default function AgentMyListings() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit"> {/* agent-dashboard */}
-      <AppSidebar/>
-
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4 md:pt-20"> {/* agent-main */}
-        <AgentHeader 
-          title="My Listings" 
-          subtitle="Manage and track all your property listings." 
-        />
+    <>
 
         <div className="flex flex-col gap-4 sm:gap-4.5"> {/* aml-page */}
           
@@ -449,7 +440,6 @@ export default function AgentMyListings() {
             })()}
           </div>
         </div>
-      </main>
 
       <EditPropertyModal
         property={editingProperty}
@@ -458,7 +448,7 @@ export default function AgentMyListings() {
         onUpdate={handlePropertyUpdate}
         onDelete={handlePropertyDelete}
       />
-    </div>
+    </>
   )
 }
 

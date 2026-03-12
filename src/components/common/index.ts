@@ -19,6 +19,7 @@ export {
 // Dashboard (sidebar, header, account, protected route)
 export {
   AppSidebar,
+  AppHeader,
   DashboardHeader,
   AccountSettings,
   ProtectedRoute,
