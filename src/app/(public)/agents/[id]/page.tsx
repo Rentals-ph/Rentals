@@ -276,8 +276,8 @@ export default function AgentDetailsPage() {
                       )}
                       {agentEmail && (
                         <div className="flex items-center gap-2">
-                          <FiMail className="w-5 h-5 text-green-500 flex-shrink-0" />
-                          <a href={`mailto:${agentEmail}`} className="text-green-500 text-sm sm:text-base hover:underline">
+                          <FiMail className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                          <a href={`mailto:${agentEmail}`} className="text-blue-600 text-sm sm:text-base hover:underline">
                             {agentEmail}
                           </a>
                         </div>
