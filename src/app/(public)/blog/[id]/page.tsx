@@ -8,7 +8,7 @@ import { EmptyState, EmptyStateAction } from '@/components/common'
 import { blogsApi } from '@/api'
 import type { Blog, BlogComment } from '@/api/endpoints/blogs'
 import { ASSETS } from '@/utils/assets'
-import { FiHeart, FiMessageCircle, FiShare2, FiThumbsUp, FiReply } from 'react-icons/fi'
+import { FiHeart, FiMessageCircle, FiShare2, FiThumbsUp, FiCornerUpRight } from 'react-icons/fi'
 import { toast, ToastContainer } from '@/utils/toast'
 
 export default function BlogDetailsPage() {
@@ -307,7 +307,7 @@ export default function BlogDetailsPage() {
                   onClick={() => handleReplyClick(comment.id)}
                   className="flex items-center gap-1 text-xs font-outfit text-gray-500 hover:text-blue-600 transition-colors"
                 >
-                  <FiReply className="w-4 h-4" />
+                  <FiCornerUpRight className="w-4 h-4" />
                   <span>Reply</span>
                 </button>
               )}
