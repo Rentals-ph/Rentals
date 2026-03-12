@@ -25,19 +25,16 @@ import LocationMap from '@/components/agent/LocationMap'
 import { useListingConversation } from '@/hooks/useListingConversation'
 import type { ListingFormData } from '@/hooks/useListingConversation'
 import { LISTING_ROLE_CONFIG } from '@/config/listingRoles'
-import { createThumbnail } from '@/utils/imageCompression'
 import { philippinesProvinces, getCitiesByProvince } from '@/data/philippinesLocations'
 import { listingAssistantApi } from '@/api/endpoints/listingAssistant'
+import { getAsset } from '@/utils/assets'
 import type { ListingAssistantMessage, DescriptionTemplate } from '@/types/listingAssistant'
 import { DESCRIPTION_TEMPLATES } from '@/types/listingAssistant'
 import {
   FiCheck,
   FiChevronDown,
-  FiChevronUp,
-  FiArrowRight,
+  FiChevronRight,
   FiUploadCloud,
-  FiPlayCircle,
-  FiEdit,
   FiMessageSquare,
   FiX,
   FiSend,
@@ -287,6 +284,31 @@ const FI = 'w-full h-9 border border-gray-300 rounded-[6px] px-2.5 text-[13px] t
 const FS = 'w-full h-9 border border-gray-300 rounded-[6px] px-2.5 pr-6 text-[13px] text-gray-900 bg-white outline-none appearance-none focus:border-blue-600 transition-colors'
 const FT = 'w-full border border-gray-300 rounded-[6px] px-2.5 py-2 text-[13px] text-gray-900 bg-white outline-none resize-none focus:border-blue-600 transition-colors'
 
+function HouseIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden="true"
+    >
+      {/* Roof — V/caret shape stroked */}
+      <path
+        d="M2 12 L12 2 L22 12"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* House body — pentagon with peaked top matching the caret angle */}
+      <path d="M3.5 22 L3.5 15 L12 6 L20.5 15 L20.5 22 Z" />
+      {/* Door cutout */}
+      <rect x="9.5" y="16.5" width="5" height="5.5" fill="#FFFFFF" />
+    </svg>
+  )
+}
+
 // ─── SectionBadge ─────────────────────────────────────────────────────────────
 
 function SectionBadge({ num, isDone, isActive }: { num: number; isDone: boolean; isActive: boolean }) {
@@ -321,6 +343,7 @@ function CoPilotPanel({
   const messagesEndRef    = useRef<HTMLDivElement>(null)
   const acknowledgedFields = useRef<Set<string>>(new Set())
   const prevFormDataRef   = useRef<ListingFormData>(formData)
+  const aiLogo = getAsset('LOGO_AI') || '/assets/logos/rentals-ai-logo.png'
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -474,30 +497,34 @@ function CoPilotPanel({
   return (
     <>
       {/* Header */}
-      <div className="flex-shrink-0 flex items-center justify-between px-[18px] py-4 border-b border-gray-200">
-        <div className="flex items-center gap-2 text-[12px] font-semibold text-gray-900">
-          <span className="inline-block w-[7px] h-[7px] rounded-full bg-blue-500 animate-pulse" />
-          AI Co-Pilot
+      <div className="flex-shrink-0 flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-white">
+        <div className="flex items-center gap-3 min-w-0">
+          <img
+            src={aiLogo}
+            alt="Rentals Assist"
+            className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200"
+          />
+          <div className="min-w-0">
+            <div className="text-[13px] font-bold text-gray-900 truncate">Rentals Assist</div>
+            <div className="text-[12px] text-gray-500 truncate">AI Listing Assistant</div>
+          </div>
         </div>
-        <button onClick={onClose} className="text-[16px] text-gray-400 hover:text-gray-900 leading-none transition-colors">
-          ‹
-        </button>
       </div>
 
       {/* Field completion status */}
-      <div className="flex-shrink-0 px-[18px] py-3 border-b border-gray-200">
-        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-[0.6px] mb-2">Field Completion</div>
+      <div className="flex-shrink-0 px-5 py-4 border-b border-gray-200 bg-white">
+        <div className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.6px] mb-3">Field Completion</div>
         {fieldStatuses.map(({ label, value, warn }) => {
           const isDone = !!value && !warn
           const isWarn = !!value && !!warn
           return (
-            <div key={label} className="flex items-center justify-between py-[5px] border-b border-white/[0.04] last:border-0">
+            <div key={label} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
               <div className="flex items-center gap-1.5">
-                <span className={`inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 ${isDone ? 'bg-emerald-600' : isWarn ? 'bg-amber-500' : 'bg-gray-400'}`} />
-                <span className="text-[12px] text-gray-400">{label}</span>
+                <span className={`inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 ${isDone ? 'bg-emerald-600' : isWarn ? 'bg-amber-500' : 'bg-gray-300'}`} />
+                <span className="text-[12px] text-gray-600">{label}</span>
               </div>
-              <span className={`text-[12px] font-medium max-w-[130px] overflow-hidden text-ellipsis whitespace-nowrap ${
-                isWarn ? 'text-amber-500' : isDone ? 'text-gray-900' : 'text-gray-400'
+              <span className={`text-[12px] font-semibold max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap ${
+                isWarn ? 'text-amber-600' : isDone ? 'text-gray-900' : 'text-gray-400'
               }`}>
                 {value || '—'}
               </span>
@@ -507,14 +534,14 @@ function CoPilotPanel({
       </div>
 
       {/* Sequential chat messages */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-[18px] py-3 flex flex-col gap-2.5">
+      <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4 flex flex-col gap-3 bg-white">
         {messages.map((msg, i) => {
           const isLastMsg = i === messages.length - 1
 
           if (msg.role === 'system') {
             // System notifications for manual fills — green pill style
             return (
-              <div key={msg.id} className="text-[11px] text-emerald-600 bg-emerald-600/10 border border-emerald-600/30 rounded-lg px-3 py-2 my-0.5">
+              <div key={msg.id} className="text-[12px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-[10px] px-3 py-2">
                 {msg.content}
               </div>
             )
@@ -525,12 +552,16 @@ function CoPilotPanel({
               {/* Bubble */}
               <div className={`flex gap-2 items-start ${msg.role === 'user' ? 'justify-end' : ''}`}>
                 {msg.role === 'assistant' && (
-                  <div className="w-[26px] h-[26px] bg-blue-600 rounded-md flex-shrink-0 flex items-center justify-center text-[12px] mt-[1px]">✦</div>
+                  <img
+                    src={aiLogo}
+                    alt=""
+                    className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-gray-200 mt-[1px]"
+                  />
                 )}
-                <div className={`text-[12px] leading-relaxed px-3 py-2 rounded-lg max-w-[220px] ${
+                <div className={`text-[12px] leading-relaxed px-3 py-2 rounded-2xl max-w-[240px] ${
                   msg.role === 'user'
-                    ? 'bg-blue-600 text-white rounded-tr-none'
-                    : 'bg-gray-50 border border-gray-200 text-gray-900 rounded-tl-none'
+                    ? 'bg-blue-600 text-white rounded-tr-md'
+                    : 'bg-gray-50 border border-gray-200 text-gray-900 rounded-tl-md'
                 }`}>
                   {msg.content}
                 </div>
@@ -538,13 +569,13 @@ function CoPilotPanel({
 
               {/* Quick-reply buttons — only on the last assistant message */}
               {msg.role === 'assistant' && isLastMsg && msg.buttons && msg.buttons.length > 0 && (
-                <div className="ml-[34px] mt-2 flex flex-wrap gap-1.5">
+                <div className="ml-10 mt-2 flex flex-wrap gap-2">
                   {msg.buttons.map(btn => (
                     <button
                       key={btn.value}
                       onClick={() => sendMessage(btn.value)}
                       disabled={isLoading}
-                      className="text-[11px] font-medium px-2.5 py-1 bg-gray-50 border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-gray-900 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="text-[12px] font-semibold px-3 py-1.5 bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {btn.label}
                     </button>
@@ -558,8 +589,8 @@ function CoPilotPanel({
         {/* Loading dots */}
         {isLoading && (
           <div className="flex gap-2 items-start">
-            <div className="w-[26px] h-[26px] bg-blue-600 rounded-md flex-shrink-0 flex items-center justify-center text-[12px]">✦</div>
-            <div className="bg-gray-50 border border-gray-200 rounded-lg rounded-tl-none px-3 py-2 flex gap-1">
+            <img src={aiLogo} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-gray-200" />
+            <div className="bg-gray-50 border border-gray-200 rounded-2xl px-3 py-2 flex gap-1">
               {[0, 150, 300].map(d => (
                 <span key={d} className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: `${d}ms` }} />
               ))}
@@ -570,129 +601,23 @@ function CoPilotPanel({
       </div>
 
       {/* Text input */}
-      <div className="flex-shrink-0 flex gap-2 px-[18px] py-3 border-t border-gray-200">
+      <div className="flex-shrink-0 flex gap-2 px-5 py-4 border-t border-gray-200 bg-white">
         <input
           value={chatInput}
           onChange={e => setChatInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(chatInput) } }}
           placeholder="Or type your answer…"
-          className="flex-1 bg-gray-50 border border-gray-200 focus:border-blue-500 rounded-[6px] px-2.5 py-2 text-[12px] text-gray-900 placeholder-gray-400 outline-none transition-colors"
+          className="flex-1 bg-gray-50 border border-gray-200 focus:border-blue-500 rounded-[10px] px-3 py-2.5 text-[13px] text-gray-900 placeholder-gray-400 outline-none transition-colors"
         />
         <button
           onClick={() => sendMessage(chatInput)}
           disabled={!chatInput.trim() || isLoading}
-          className="w-[34px] h-[34px] flex-shrink-0 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-[6px] flex items-center justify-center text-white transition-colors"
+          className="w-10 h-10 flex-shrink-0 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-[10px] flex items-center justify-center text-white transition-colors"
         >
           <FiSend className="w-3.5 h-3.5" />
         </button>
       </div>
     </>
-  )
-}
-
-// ─── Chat Full View ───────────────────────────────────────────────────────────
-
-function ChatView({
-  conversationId,
-  onBulkFill,
-}: {
-  conversationId: string | null
-  onBulkFill: ReturnType<typeof useListingConversation>['bulkFill']
-}) {
-  const [chatInput, setChatInput] = useState('')
-  const [messages,  setMessages]  = useState<ListingAssistantMessage[]>([
-    {
-      role:      'assistant',
-      content:   'Hi! Describe your property and I\'ll fill the listing form. E.g. "3BR condo in BGC, ₱45k/month, fully furnished, with parking"',
-      timestamp: new Date().toISOString(),
-    },
-  ])
-  const [isLoading, setIsLoading] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
-
-  const sendMessage = useCallback(async () => {
-    if (!chatInput.trim() || isLoading) return
-    const text = chatInput.trim()
-    setChatInput('')
-    setMessages(p => [...p, { role: 'user', content: text, timestamp: new Date().toISOString() }])
-    setIsLoading(true)
-    try {
-      const res = await listingAssistantApi.processMessage(text, conversationId)
-      setMessages(p => [...p, { role: 'assistant', content: res.ai_response, timestamp: new Date().toISOString() }])
-      if (res.extracted_data && Object.values(res.extracted_data).some(v => v != null)) {
-        await onBulkFill(res.extracted_data)
-        const filled = Object.entries(res.extracted_data).filter(([, v]) => v != null).map(([k]) => k)
-        if (filled.length > 0)
-          setMessages(p => [...p, {
-            role: 'assistant',
-            content: `✅ Filled: ${filled.join(', ')}. Switch to Form View to review.`,
-            timestamp: new Date().toISOString(),
-          }])
-      }
-    } catch (err: unknown) {
-      setMessages(p => [...p, {
-        role: 'assistant',
-        content: '⚠️ ' + (err instanceof Error ? err.message : 'Something went wrong.'),
-        timestamp: new Date().toISOString(),
-      }])
-    } finally { setIsLoading(false) }
-  }, [chatInput, conversationId, isLoading, onBulkFill])
-
-  return (
-    <div className="max-w-2xl mx-auto bg-white border border-gray-300 rounded-[10px] overflow-hidden flex flex-col" style={{ minHeight: 480 }}>
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-300 flex-shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white text-[14px]">✦</div>
-        <div>
-          <p className="text-[13px] font-semibold text-gray-900">AI Chat</p>
-          <p className="text-[12px] text-gray-500">Describe your property, I'll fill the form</p>
-        </div>
-      </div>
-      <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-3">
-        {messages.map((msg, i) => (
-          <div key={i} className={`flex gap-2 items-start ${msg.role === 'user' ? 'justify-end' : ''}`}>
-            {msg.role === 'assistant' && (
-              <div className="w-[26px] h-[26px] bg-blue-600 rounded-md flex-shrink-0 flex items-center justify-center text-white text-[12px] mt-[2px]">✦</div>
-            )}
-            <div className={`text-[13px] rounded-2xl px-4 py-2.5 max-w-[80%] ${
-              msg.role === 'user' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-gray-50 text-gray-900 rounded-tl-none'
-            }`}>
-              {msg.content}
-            </div>
-          </div>
-        ))}
-        {isLoading && (
-          <div className="flex gap-2 items-start">
-            <div className="w-[26px] h-[26px] bg-blue-600 rounded-md flex-shrink-0 flex items-center justify-center text-white text-[12px]">✦</div>
-            <div className="bg-gray-50 rounded-2xl rounded-tl-none px-4 py-2.5 flex gap-1.5 items-center">
-              {[0, 150, 300].map(d => (
-                <span key={d} className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: `${d}ms` }} />
-              ))}
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-      <div className="flex-shrink-0 p-4 border-t border-gray-300 flex gap-3">
-        <input
-          type="text"
-          value={chatInput}
-          onChange={e => setChatInput(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') sendMessage() }}
-          placeholder="Describe your property…"
-          disabled={isLoading}
-          className="flex-1 h-11 px-4 border border-gray-300 rounded-[10px] text-[13px] text-gray-900 bg-white outline-none focus:border-blue-600 disabled:opacity-50 transition-colors"
-        />
-        <button
-          onClick={sendMessage}
-          disabled={!chatInput.trim() || isLoading}
-          className="w-11 h-11 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center disabled:opacity-50 flex-shrink-0 transition-colors"
-        >
-          <FiSend className="w-4 h-4" />
-        </button>
-      </div>
-    </div>
   )
 }
 
@@ -711,57 +636,17 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
   })
 
   // ── UI state ──────────────────────────────────────────────────────────────────
-  const [viewMode,          setViewMode]          = useState<ViewMode>('form')
   const [coPilotOpen,       setCoPilotOpen]       = useState(true)
-  const [expandedSections,  setExpandedSections]  = useState<Set<string>>(new Set(['category', 'details']))
+  const [expandedSections,  setExpandedSections]  = useState<Set<string>>(new Set(['property_details', 'property_location', 'property_images', 'amenities']))
   const [showSuccessModal,  setShowSuccessModal]  = useState(false)
-
-  // ── AI Quick Fill state (independent from conversation) ───────────────────────
-  const [pasteText,        setPasteText]        = useState('')
-  const [isExtracting,     setIsExtracting]     = useState(false)
-  const [extractError,     setExtractError]     = useState<string | null>(null)
-  const [lastFilledFields, setLastFilledFields] = useState<string[]>([])
-
-  // ── Image state ───────────────────────────────────────────────────────────────
-  const [localThumbnails, setLocalThumbnails] = useState<string[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // ── Location state ────────────────────────────────────────────────────────────
   const [availableCities, setAvailableCities] = useState<string[]>([])
-  const [isGeocoding,     setIsGeocoding]     = useState(false)
 
   // ── AI generate description ───────────────────────────────────────────────────
   const [isGeneratingDesc,  setIsGeneratingDesc]  = useState(false)
   const [selectedTemplate,  setSelectedTemplate]  = useState<DescriptionTemplate>('narrative')
-
-  // ── Computed ──────────────────────────────────────────────────────────────────
-  const sectionDone = useMemo(() => ({
-    category:   !!formData.category,
-    details:    !!formData.title,
-    location:   !!formData.state && !!formData.city,
-    images:     formData.uploadedImages.length >= 5,
-    pricing:    !!formData.price,
-    attributes: formData.amenities.length > 0,
-    review:     false,
-  }), [formData])
-
-  const completedCount    = Object.values(sectionDone).filter(Boolean).length
-  const completionPercent = Math.round((completedCount / 7) * 100)
-
-  const sectionPreview = useMemo(() => ({
-    category:   formData.category,
-    details:    formData.title,
-    location:   [formData.city, formData.state].filter(Boolean).join(', '),
-    images:     formData.uploadedImages.length > 0 ? `${formData.uploadedImages.length} photo(s)` : '',
-    pricing:    formData.price ? (formData.listingType === 'for_sale' ? `₱ ${Number(formData.price).toLocaleString()} (For Sale)` : `₱ ${Number(formData.price).toLocaleString()} / ${formData.priceType}`) : '',
-    attributes: formData.amenities.length > 0 ? formData.amenities.slice(0, 3).join(', ') : '',
-    review:     '',
-  }), [formData])
-
-  const sectionHasAiFill = useCallback(
-    (id: string) => SECTION_AI_FIELDS[id]?.some(f => recentlyFilledFields.includes(f)) ?? false,
-    [recentlyFilledFields]
-  )
 
   const toggleSection = (id: string) =>
     setExpandedSections(prev => {
@@ -773,6 +658,12 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
   const aiFilled = (key: string) =>
     recentlyFilledFields.includes(key) ? 'border-emerald-600 bg-emerald-50 text-emerald-600 font-medium' : ''
 
+  // Property Details styles to match provided design
+  const PD_L = 'block text-[13px] font-semibold text-gray-500 mb-2'
+  const PD_I = 'w-full h-11 border border-gray-300 rounded-[6px] px-3 text-[13px] text-gray-900 bg-white outline-none focus:border-blue-600 transition-colors'
+  const PD_S = 'w-full h-11 border border-gray-300 rounded-[6px] px-3 pr-9 text-[13px] text-gray-900 bg-white outline-none appearance-none focus:border-blue-600 transition-colors'
+  const PD_T = 'w-full border border-gray-300 rounded-[6px] px-3 py-3 text-[13px] text-gray-900 bg-white outline-none resize-none focus:border-blue-600 transition-colors'
+
   // ── Province → cities ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (formData.state) {
@@ -782,58 +673,6 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
     } else setAvailableCities([])
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.state])
-
-  // ── Thumbnails ────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    const gen = async () => {
-      const thumbs = await Promise.all(
-        formData.images.map(f => createThumbnail(f, 200).catch(() => URL.createObjectURL(f)))
-      )
-      setLocalThumbnails(thumbs)
-    }
-    if (formData.images.length > 0) gen(); else setLocalThumbnails([])
-  }, [formData.images])
-
-  useEffect(() => {
-    return () => localThumbnails.forEach(u => u.startsWith('blob:') && URL.revokeObjectURL(u))
-  }, [localThumbnails])
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // AI QUICK FILL — completely separate from the conversational assistant.
-  //
-  // Uses processMessage(text, null) → creates a temporary independent extraction
-  // with NO conversation context, then syncs the result into the main conversation
-  // via updateData() so the CoPilot knows not to ask about already-filled fields.
-  // ─────────────────────────────────────────────────────────────────────────────
-  const handleQuickFill = async () => {
-    if (!pasteText.trim()) return
-    setIsExtracting(true)
-    setExtractError(null)
-    setLastFilledFields([])
-    try {
-      // ↓ null conversationId = standalone extraction, separate from AI chat flow
-      const res = await listingAssistantApi.processMessage(pasteText.trim(), null)
-      const nonNull = Object.entries(res.extracted_data).filter(([, v]) => v != null)
-
-      if (nonNull.length > 0) {
-        // Apply to form
-        await bulkFill(res.extracted_data)
-        setLastFilledFields(nonNull.map(([k]) => k))
-        setPasteText('')
-
-        // Sync to main conversation so the sequential assistant skips filled fields
-        if (conversationId) {
-          await listingAssistantApi.updateData(conversationId, res.extracted_data)
-        }
-      } else {
-        setExtractError("Couldn't extract any fields. Try adding type, location, price, or bedrooms.")
-      }
-    } catch (err: unknown) {
-      setExtractError(err instanceof Error ? err.message : 'Extraction failed. Please try again.')
-    } finally {
-      setIsExtracting(false)
-    }
-  }
 
   // ── AI Generate Description ───────────────────────────────────────────────────
   const handleGenerateDescription = useCallback(async (template?: DescriptionTemplate) => {
@@ -845,32 +684,6 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
       if (res.success && res.description) updateField('description', res.description)
     } catch { /* ignore */ } finally { setIsGeneratingDesc(false) }
   }, [conversationId, selectedTemplate, updateField])
-
-  // ── Street geocoding ──────────────────────────────────────────────────────────
-  const handleStreetChange = async (value: string) => {
-    updateField('street', value)
-    if (value.trim().length > 10) {
-      setIsGeocoding(true)
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value + ', Philippines')}&limit=1`,
-          { headers: { 'User-Agent': 'Rental.ph Property Listing' } }
-        )
-        const json = await res.json()
-        if (json?.[0]) {
-          const r = json[0]
-          updateField('latitude', r.lat); updateField('longitude', r.lon); updateField('country', 'Philippines')
-          const addr = r.display_name || ''
-          const prov = philippinesProvinces.find(p => addr.includes(p.name))
-          if (prov) {
-            updateField('state', prov.name)
-            const cityMatch = prov.cities.find((c: string) => addr.includes(c))
-            if (cityMatch) updateField('city', cityMatch)
-          }
-        }
-      } catch { /* ignore */ } finally { setIsGeocoding(false) }
-    }
-  }
 
   // ── Image handling ────────────────────────────────────────────────────────────
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -904,35 +717,37 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
     setShowCustomAmenityInput(false)
   }
 
-  // ── Section header renderer ───────────────────────────────────────────────────
-  const renderSectionHeader = (
-    id: string, num: number, label: string, subtitle: string, extra?: React.ReactNode
+  const renderCardHeader = (
+    id: string,
+    label: string,
+    right?: React.ReactNode,
   ) => {
-    const isOpen  = expandedSections.has(id)
-    const isDone  = sectionDone[id as keyof typeof sectionDone] ?? false
-    const hasAi   = sectionHasAiFill(id)
-    const preview = sectionPreview[id as keyof typeof sectionPreview] ?? ''
-
+    const isOpen = expandedSections.has(id)
     return (
       <div
-        className={`px-[18px] py-3.5 flex items-center justify-between cursor-pointer select-none hover:bg-gray-50 transition-colors ${isOpen ? 'border-b border-gray-300' : ''}`}
+        className={`px-6 py-4 flex items-center justify-between cursor-pointer select-none hover:bg-gray-50 transition-colors ${isOpen ? 'border-b border-gray-200' : ''}`}
         onClick={() => toggleSection(id)}
       >
-        <div className="flex items-center gap-2.5">
-          <SectionBadge num={num} isDone={isDone} isActive={isOpen && !isDone} />
-          <div>
-            <div className="text-[13px] font-semibold text-gray-900">{label}</div>
-            {isOpen && <div className="text-[12px] text-gray-500">{subtitle}</div>}
-          </div>
-        </div>
-        <div className="flex items-center gap-2.5">
-          {hasAi && <span className="text-[10px] text-emerald-600 font-semibold">✦ AI filled</span>}
-          {extra}
-          {!isOpen && preview && <span className="text-[12px] text-gray-500 italic">{preview}</span>}
-          {isOpen ? <FiChevronUp className="text-gray-500 w-3.5 h-3.5 flex-shrink-0" />
-                  : <FiChevronDown className="text-gray-500 w-3.5 h-3.5 flex-shrink-0" />}
+        <div className="text-[14px] font-semibold text-gray-900">{label}</div>
+        <div className="flex items-center gap-3">
+          {right}
+          <FiChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </div>
       </div>
+    )
+  }
+
+  const handleUseCurrentLocation = async () => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        updateField('latitude', String(pos.coords.latitude))
+        updateField('longitude', String(pos.coords.longitude))
+      },
+      () => {
+        // silent fail (permissions, etc.)
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     )
   }
 
@@ -957,571 +772,402 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
       <AppSidebar />
       <main className="main-with-sidebar flex-1 flex flex-col min-h-0 overflow-hidden">
 
-        {/* ── Topbar ── */}
-        <nav className="flex-shrink-0 bg-gray-50/95 border-b border-gray-200 h-14 px-8 flex items-center justify-between z-50 shadow-sm">
-          <div className="flex items-center gap-1.5 text-[13px]">
-            <button onClick={() => router.push(roleConfig.listingsPath)} className="text-gray-500 hover:text-blue-600 transition-colors">
-              Listings
-            </button>
-            <span className="text-gray-400">›</span>
-            <span className="text-gray-900 font-medium">New Listing</span>
-          </div>
+        
+        {/* 2-col content */}
+        <div className="flex flex-1 min-h-0 overflow-hidden">
 
-          <div className="flex bg-gray-50 border border-gray-300 rounded-[8px] p-[3px] gap-[2px]">
-            {(['form', 'chat'] as const).map(mode => (
-              <button
-                key={mode}
-                onClick={() => setViewMode(mode)}
-                className={`flex items-center gap-1.5 px-3.5 py-[5px] rounded-[6px] text-[12px] font-medium transition-all ${
-                  viewMode === mode ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
-                }`}
-              >
-                {mode === 'form' ? <FiList className="w-3 h-3" /> : <FiMessageSquare className="w-3 h-3" />}
-                {mode === 'form' ? 'Form View' : 'Chat View'}
-              </button>
-            ))}
-          </div>
+          {/* ── Form area ── */}
+          <div className="flex-1 min-h-0 overflow-y-auto px-8 py-7">
 
-          <div className="flex items-center gap-2.5">
-            <span className="text-[11px] text-gray-500 bg-gray-50 border border-gray-300 px-2.5 py-[3px] rounded-full">
-              ● Draft saved
-            </span>
-            <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2.5 py-[3px] rounded-full uppercase tracking-[0.5px]">
-              {role}
-            </span>
-          </div>
-        </nav>
-
-        {/* ── Chat View ── */}
-        {viewMode === 'chat' && (
-          <div className="flex-1 min-h-0 overflow-y-auto p-8">
-            <ChatView conversationId={conversationId} onBulkFill={bulkFill} />
-          </div>
-        )}
-
-        {/* ── Form View ── */}
-        {viewMode === 'form' && (
-          <>
-            {/* ─────────────────────────────────────────────────────────────────
-              AI QUICK FILL BAR
-              Functionally independent from the AI listing assistant conversation.
-              Sends text to processMessage(text, null) — no conversationId —
-              so it uses its own extraction context.
-            ───────────────────────────────────────────────────────────────── */}
-            <div className="flex-shrink-0 bg-gray-50 border-b border-gray-200 px-8 py-4 flex items-center gap-4 shadow-sm">
-              <div className="w-8 h-8 rounded-[8px] bg-blue-600 flex items-center justify-center text-[15px] flex-shrink-0">✨</div>
-              <div className="flex-1">
-                <div className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.6px] mb-1.5">AI Quick Fill</div>
-                <div className="flex items-center bg-gray-50 border border-gray-200 focus-within:border-blue-500 rounded-[6px] overflow-hidden transition-colors">
-                  <input
-                    value={pasteText}
-                    onChange={e => { setPasteText(e.target.value); setExtractError(null); setLastFilledFields([]) }}
-                    onKeyDown={e => { if (e.key === 'Enter') handleQuickFill() }}
-                    placeholder='Paste a description — "3BR condo in BGC, ₱45k/month, fully furnished with parking"'
-                    className="flex-1 bg-transparent border-none outline-none px-3.5 py-[9px] text-[13px] text-gray-900 placeholder-gray-400"
-                  />
-                  <button
-                    onClick={handleQuickFill}
-                    disabled={!pasteText.trim() || isExtracting}
-                    className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-[9px] text-white text-[12px] font-semibold flex items-center gap-1.5 flex-shrink-0 whitespace-nowrap transition-colors"
-                  >
-                    {isExtracting
-                      ? <><span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Extracting…</>
-                      : <><FiArrowRight className="w-3 h-3" /> Fill Form</>}
-                  </button>
-                </div>
-                {extractError && <p className="mt-1 text-[11px] text-red-400">{extractError}</p>}
+            {/* Error banner */}
+            {hookError && (
+              <div className="mb-4 flex items-start justify-between gap-3 rounded-[10px] border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-800">
+                <span>{hookError}</span>
+                <button onClick={clearError} className="text-red-400 hover:text-red-600 flex-shrink-0"><FiX className="w-4 h-4" /></button>
               </div>
+            )}
 
-              {lastFilledFields.length > 0 && (
-                <div className="flex-shrink-0 min-w-[140px]">
-                  <div className="text-[11px] font-semibold text-emerald-600 uppercase tracking-[0.6px] mb-1">✓ Fields filled</div>
-                  <div className="flex flex-wrap gap-1">
-                    {lastFilledFields.slice(0, 5).map(f => (
-                      <span key={f} className="text-[11px] bg-emerald-600 text-white px-2 py-[2px] rounded-full font-medium">
-                        ✓ {FIELD_LABELS[f] || f}
-                      </span>
-                    ))}
-                    {lastFilledFields.length > 5 && (
-                      <span className="text-[11px] bg-emerald-600 text-white px-2 py-[2px] rounded-full font-medium">
-                        +{lastFilledFields.length - 5}
-                      </span>
-                    )}
+            <div className="space-y-4">
+              {/* Property Details */}
+              <div id="section-property_details" className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                <div
+                  className={`px-6 py-4 flex items-center justify-between cursor-pointer select-none hover:bg-gray-50 transition-colors ${
+                    expandedSections.has('property_details') ? 'border-b border-gray-200' : ''
+                  }`}
+                  onClick={() => toggleSection('property_details')}
+                >
+                  <div className="flex items-center gap-3">
+                    <HouseIcon className="w-5 h-5 text-blue-600" />
+                    <div className="text-[14px] font-semibold text-gray-900">Property Details</div>
                   </div>
+                  <FiChevronDown
+                    className={`w-4 h-4 text-blue-600 transition-transform ${
+                      expandedSections.has('property_details') ? 'rotate-180' : ''
+                    }`}
+                  />
                 </div>
-              )}
-            </div>
+                {expandedSections.has('property_details') && (
+                  <div className="px-6 py-5 space-y-5">
+                    {/* Row 1: Property Name | Property Type (For Rent/Sale) | Type (House/Condo/etc) */}
+                    <div className="grid grid-cols-12 gap-6">
+                      <div className="col-span-4">
+                        <label className={PD_L}>Property Name</label>
+                        <input
+                          className={`${PD_I} ${aiFilled('property_name')}`}
+                          value={formData.title}
+                          onChange={e => updateField('title', e.target.value)}
+                          placeholder="Property Name"
+                        />
+                      </div>
 
-            {/* 2-col content */}
-            <div className="flex flex-1 min-h-0 overflow-hidden">
+                      <div className="col-span-4">
+                        <label className={PD_L}>Property Type</label>
+                        <div className="relative">
+                          <select
+                            className={PD_S}
+                            value={formData.listingType}
+                            onChange={e => updateField('listingType', e.target.value as ListingFormData['listingType'])}
+                          >
+                            <option value="for_rent">For Rent</option>
+                            <option value="for_sale">For Sale</option>
+                          </select>
+                          <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-600 pointer-events-none w-4 h-4" />
+                        </div>
+                      </div>
 
-              {/* ── Form area ── */}
-              <div className="flex-1 min-h-0 overflow-y-auto px-8 py-7">
+                      <div className="col-span-4">
+                        <label className={PD_L}>Type</label>
+                        <div className="relative">
+                          <select
+                            className={`${PD_S} ${aiFilled('property_type')}`}
+                            value={formData.category}
+                            onChange={e => updateField('category', e.target.value)}
+                          >
+                            <option value="">Select</option>
+                            {(roleConfig.allowedCategories ?? CATEGORIES).map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                          <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-600 pointer-events-none w-4 h-4" />
+                        </div>
+                      </div>
+                    </div>
 
-                {/* Progress bar */}
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="flex-1 h-1 bg-gray-300 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{ width: `${completionPercent}%`, background: 'linear-gradient(90deg, #2563eb, #3b82f2)' }}
-                    />
-                  </div>
-                  <span className="text-[12px] text-gray-500 whitespace-nowrap">
-                    {completedCount} of 7 sections · {completionPercent}% complete
-                  </span>
-                </div>
+                    {/* Row 2: Property Price (wide) | Listing Type (Monthly/Weekly/Daily) */}
+                    <div className="grid grid-cols-12 gap-6">
+                      <div className="col-span-8">
+                        <label className={PD_L}>Property Price</label>
+                        <input
+                          className={`${PD_I} ${aiFilled('price')}`}
+                          value={formData.price}
+                          onChange={e => updateField('price', e.target.value)}
+                          placeholder="150,0000"
+                        />
+                      </div>
+                      <div className="col-span-4">
+                        <label className={PD_L}>Listing Type</label>
+                        {formData.listingType === 'for_rent' ? (
+                          <div className="relative">
+                            <select
+                              className={`${PD_S} ${aiFilled('price_type')}`}
+                              value={formData.priceType}
+                              onChange={e => updateField('priceType', e.target.value as ListingFormData['priceType'])}
+                            >
+                              <option value="Monthly">Monthly</option>
+                              <option value="Weekly">Weekly</option>
+                              <option value="Daily">Daily</option>
+                              <option value="Yearly">Yearly</option>
+                            </select>
+                            <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-600 pointer-events-none w-4 h-4" />
+                          </div>
+                        ) : (
+                          <div className="h-11 px-3 rounded-[6px] border border-gray-300 bg-gray-50 flex items-center text-[13px] text-gray-700">
+                            For sale
+                          </div>
+                        )}
+                      </div>
+                    </div>
 
-                {/* Error banner */}
-                {hookError && (
-                  <div className="mb-4 flex items-start justify-between gap-3 rounded-[10px] border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-800">
-                    <span>{hookError}</span>
-                    <button onClick={clearError} className="text-red-400 hover:text-red-600 flex-shrink-0"><FiX className="w-4 h-4" /></button>
+                    {/* Row 3: Bedrooms | Bathrooms | Garage | Floor Area */}
+                    <div className="grid grid-cols-4 gap-6">
+                      <div>
+                        <label className={PD_L}>Bedrooms</label>
+                        <input type="number" min={0} className={`${PD_I} ${aiFilled('bedrooms')}`} value={formData.bedrooms} onChange={e => updateField('bedrooms', Number(e.target.value))} placeholder="Property Name" />
+                      </div>
+                      <div>
+                        <label className={PD_L}>Bathrooms</label>
+                        <input type="number" min={0} className={`${PD_I} ${aiFilled('bathrooms')}`} value={formData.bathrooms} onChange={e => updateField('bathrooms', Number(e.target.value))} placeholder="Property Name" />
+                      </div>
+                      <div>
+                        <label className={PD_L}>Garage</label>
+                        <input type="number" min={0} className={PD_I} value={formData.garage} onChange={e => updateField('garage', Number(e.target.value))} placeholder="Property Name" />
+                      </div>
+                      <div>
+                        <label className={PD_L}>Floor Area (SQM)</label>
+                        <input type="number" min={0} className={`${PD_I} ${aiFilled('area_sqm')}`} value={formData.floorArea || ''} onChange={e => updateField('floorArea', Number(e.target.value))} placeholder="Property Name" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-[13px] font-semibold text-gray-500 tracking-[0.6px] uppercase mb-3">
+                        Description
+                      </div>
+                      <div className="grid grid-cols-12 gap-6">
+                        {/* Templates (match screenshot) */}
+                        <div className="col-span-4 border border-gray-300 rounded-[6px] overflow-hidden bg-white">
+                          <div className="bg-blue-600 text-white px-4 py-3 text-[13px] font-semibold">
+                            Templates
+                          </div>
+                          <div className="divide-y divide-gray-200">
+                            {(Object.entries(DESCRIPTION_TEMPLATES) as [DescriptionTemplate, typeof DESCRIPTION_TEMPLATES[DescriptionTemplate]][]).map(([key, tmpl]) => {
+                              const isSelected = selectedTemplate === key
+                              return (
+                                <button
+                                  key={key}
+                                  type="button"
+                                  onClick={() => setSelectedTemplate(key)}
+                                  className={`w-full text-left px-4 py-3 text-[13px] font-semibold transition-colors ${
+                                    isSelected
+                                      ? 'bg-gray-50 text-gray-900 border-l-4 border-blue-600'
+                                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                                  }`}
+                                >
+                                  {tmpl.label}
+                                </button>
+                              )
+                            })}
+                          </div>
+                          <div className="bg-blue-600 p-3">
+                            <button
+                              type="button"
+                              onClick={() => handleGenerateDescription()}
+                              disabled={!conversationId || isGeneratingDesc}
+                              className="w-full h-11 rounded-[6px] bg-white/10 hover:bg-white/15 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[13px] font-semibold transition-colors"
+                            >
+                              {isGeneratingDesc ? 'Generating…' : 'Generate'}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Description textarea */}
+                        <div className="col-span-8">
+                          <textarea
+                            className={`${PD_T} ${aiFilled('description')}`}
+                            rows={12}
+                            value={formData.description}
+                            onChange={e => updateField('description', e.target.value)}
+                            placeholder="Lorem ipsum dolor sit amet..."
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
+              </div>
 
-                {/* ── Accordion sections ── */}
-                <div className="space-y-3">
-
-                  {/* 1. Category */}
-                  <div id="section-category" className="bg-white/95 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    {renderSectionHeader('category', 1, 'Category', 'Property type')}
-                    {expandedSections.has('category') && (
-                      <div className="px-[18px] py-4">
-                        <label className={FL}>Property Category</label>
-                        <div className="relative max-w-xs">
-                          <select className={`${FS} ${aiFilled('property_type')}`} value={formData.category} onChange={e => updateField('category', e.target.value)}>
-                            <option value="">Select a category</option>
-                            {(roleConfig.allowedCategories ?? CATEGORIES).map(c => <option key={c} value={c}>{c}</option>)}
+              {/* Property Location */}
+              <div id="section-property_location" className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {renderCardHeader('property_location', 'Property Location')}
+                {expandedSections.has('property_location') && (
+                  <div className="px-6 py-5 space-y-4">
+                    <div className="grid grid-cols-4 gap-4">
+                      <div>
+                        <label className={FL}>State/Province</label>
+                        <div className="relative">
+                          <select className={`${FS} ${aiFilled('location')}`} value={formData.state} onChange={e => updateField('state', e.target.value)}>
+                            <option value="">Select</option>
+                            {philippinesProvinces.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
                           </select>
                           <FiChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none w-3.5 h-3.5" />
                         </div>
                       </div>
-                    )}
-                  </div>
-
-                  {/* 2. Property Details */}
-                  <div id="section-details" className="bg-white/95 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    {renderSectionHeader('details', 2, 'Property Details', 'Title, description & specs')}
-                    {expandedSections.has('details') && (
-                      <div className="px-[18px] py-4 space-y-3">
-                        <div>
-                          <label className={FL}>Listing Title</label>
-                          <input className={`${FI} ${aiFilled('property_name')}`} value={formData.title} onChange={e => updateField('title', e.target.value)} placeholder="e.g. Fully Furnished 3BR Condo in BGC" />
-                          {recentlyFilledFields.includes('property_name') && (
-                            <div className="mt-1 text-[10px] text-emerald-600 font-semibold">✦ Suggested by AI</div>
-                          )}
-                        </div>
-
-                        <div>
-                          {/* Description header */}
-                          <label className={FL}>Description</label>
-
-                          {/* Template picker + Generate button */}
-                          <div className="border border-gray-300 rounded-[8px] bg-gray-50 p-3 mb-2 space-y-2.5">
-                            <div className="flex items-center justify-between">
-                              <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-[0.5px]">✨ AI Generate · Style</span>
-                              <button
-                                type="button"
-                                disabled={!formData.category || !formData.title || isGeneratingDesc}
-                                onClick={() => handleGenerateDescription()}
-                                className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-[6px] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                              >
-                                {isGeneratingDesc
-                                  ? <><span className="w-3 h-3 border-[1.5px] border-white/30 border-t-white rounded-full animate-spin" /> Generating…</>
-                                  : <>✨ Generate</>}
-                              </button>
-                            </div>
-
-                            {/* 5 template pills — one row, scrollable if narrow */}
-                            <div className="flex gap-1.5 flex-wrap">
-                              {(Object.entries(DESCRIPTION_TEMPLATES) as [DescriptionTemplate, typeof DESCRIPTION_TEMPLATES[DescriptionTemplate]][]).map(([key, tmpl]) => {
-                                const isSelected = selectedTemplate === key
-                                return (
-                                  <button
-                                    key={key}
-                                    type="button"
-                                    onClick={() => setSelectedTemplate(key)}
-                                    title={tmpl.description}
-                                    className={`text-[11px] font-medium px-2.5 py-1 rounded-full border transition-all whitespace-nowrap ${
-                                      isSelected
-                                        ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
-                                        : 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300'
-                                    }`}
-                                  >
-                                    {tmpl.label}
-                                  </button>
-                                )
-                              })}
-                            </div>
-
-                            {/* Selected template description */}
-                            <p className="text-[11px] text-gray-500 leading-relaxed">
-                              {DESCRIPTION_TEMPLATES[selectedTemplate].description}
-                            </p>
-                          </div>
-
-                          {/* Textarea */}
-                          <textarea
-                            className={`${FT} ${aiFilled('description')}`}
-                            rows={5}
-                            value={formData.description}
-                            onChange={e => updateField('description', e.target.value)}
-                            placeholder="Write a description or click ✨ Generate to create one with AI…"
-                          />
-                          {recentlyFilledFields.includes('description') && (
-                            <div className="mt-1 text-[10px] text-emerald-600 font-semibold">✦ Generated by AI</div>
-                          )}
-                        </div>
-
-                        <div className="grid grid-cols-4 gap-3">
-                          <div>
-                            <label className={FL}>Bedrooms</label>
-                            <input type="number" min={0} className={`${FI} ${aiFilled('bedrooms')}`} value={formData.bedrooms} onChange={e => updateField('bedrooms', Number(e.target.value))} />
-                          </div>
-                          <div>
-                            <label className={FL}>Bathrooms</label>
-                            <input type="number" min={0} className={`${FI} ${aiFilled('bathrooms')}`} value={formData.bathrooms} onChange={e => updateField('bathrooms', Number(e.target.value))} />
-                          </div>
-                          <div>
-                            <label className={FL}>Garage</label>
-                            <input type="number" min={0} className={FI} value={formData.garage} onChange={e => updateField('garage', Number(e.target.value))} />
-                          </div>
-                          <div>
-                            <label className={FL}>Floor Area (sqm)</label>
-                            <input type="number" min={0} className={`${FI} ${aiFilled('area_sqm')}`} value={formData.floorArea || ''} onChange={e => updateField('floorArea', Number(e.target.value))} placeholder="e.g. 75" />
-                          </div>
+                      <div>
+                        <label className={FL}>City</label>
+                        <div className="relative">
+                          <select className={`${FS} ${aiFilled('location')}`} value={formData.city} onChange={e => updateField('city', e.target.value)} disabled={!formData.state}>
+                            <option value="">Select</option>
+                            {availableCities.map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                          <FiChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none w-3.5 h-3.5" />
                         </div>
                       </div>
-                    )}
-                  </div>
-
-                  {/* 3. Location */}
-                  <div id="section-location" className="bg-white/95 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    {renderSectionHeader('location', 3, 'Location', 'Address & map')}
-                    {expandedSections.has('location') && (
-                      <div className="px-[18px] py-4 space-y-3">
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className={FL}>State / Province</label>
-                            <div className="relative">
-                              <select className={`${FS} ${aiFilled('location')}`} value={formData.state} onChange={e => updateField('state', e.target.value)}>
-                                <option value="">--Select--</option>
-                                {philippinesProvinces.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
-                              </select>
-                              <FiChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none w-3.5 h-3.5" />
-                            </div>
-                          </div>
-                          <div>
-                            <label className={FL}>City</label>
-                            <div className="relative">
-                              <select className={`${FS} ${aiFilled('location')}`} value={formData.city} onChange={e => updateField('city', e.target.value)} disabled={!formData.state}>
-                                <option value="">--Select--</option>
-                                {availableCities.map(c => <option key={c} value={c}>{c}</option>)}
-                              </select>
-                              <FiChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none w-3.5 h-3.5" />
-                            </div>
-                          </div>
-                        </div>
-                        <div>
-                          <label className={FL}>Street Address</label>
-                          <input className={`${FI} ${aiFilled('address')}`} value={formData.street} onChange={e => handleStreetChange(e.target.value)} placeholder="Enter street address" />
-                          {isGeocoding && <p className="mt-1 text-[11px] text-emerald-600">● Detecting location…</p>}
-                        </div>
-                        <LocationMap
-                          latitude={formData.latitude || null}
-                          longitude={formData.longitude || null}
-                          onLocationChange={(lat, lng) => { updateField('latitude', lat); updateField('longitude', lng) }}
-                          onAddressChange={addr => {
-                            if (addr.country) updateField('country', addr.country)
-                            if (addr.state)   updateField('state', addr.state)
-                            if (addr.city)    updateField('city', addr.city)
-                            if (addr.street)  updateField('street', addr.street)
-                          }}
-                        />
+                      <div>
+                        <label className={FL}>Latitude</label>
+                        <input className={`${FI} ${aiFilled('latitude')}`} value={formData.latitude} onChange={e => updateField('latitude', e.target.value)} />
                       </div>
-                    )}
+                      <div>
+                        <label className={FL}>Longitude</label>
+                        <input className={`${FI} ${aiFilled('longitude')}`} value={formData.longitude} onChange={e => updateField('longitude', e.target.value)} />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="text-[12px] font-semibold text-gray-500 uppercase tracking-[0.5px]">
+                        Set Property Location
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleUseCurrentLocation}
+                        className="h-9 px-4 bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-semibold rounded-[8px] transition-colors"
+                      >
+                        Use Current Location
+                      </button>
+                    </div>
+
+                    <LocationMap
+                      latitude={formData.latitude || null}
+                      longitude={formData.longitude || null}
+                      onLocationChange={(lat, lng) => { updateField('latitude', lat); updateField('longitude', lng) }}
+                      onAddressChange={addr => {
+                        if (addr.country) updateField('country', addr.country)
+                        if (addr.state)   updateField('state', addr.state)
+                        if (addr.city)    updateField('city', addr.city)
+                        if (addr.street)  updateField('street', addr.street)
+                      }}
+                    />
                   </div>
+                )}
+              </div>
 
-                  {/* 4. Property Images */}
-                  <div id="section-images" className="bg-white/95 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    {renderSectionHeader(
-                      'images', 4, 'Property Images', 'Min. 5 images required',
-                      <span className={`text-[12px] font-semibold ${formData.uploadedImages.length >= 5 ? 'text-emerald-600' : 'text-blue-600'}`}>
-                        {formData.uploadedImages.length} / 5 {formData.uploadedImages.length < 5 ? '⚠' : '✓'}
-                      </span>
-                    )}
-                    {expandedSections.has('images') && (
-                      <div className="px-[18px] py-4">
-                        <input type="file" ref={fileInputRef} onChange={handleFileSelect} accept="image/*" multiple className="hidden" />
+              {/* Property Images */}
+              <div id="section-property_images" className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {renderCardHeader(
+                  'property_images',
+                  'Property Images',
+                )}
+                {expandedSections.has('property_images') && (
+                  <div className="px-6 py-5 space-y-3">
+                    <div className="text-[12px] font-semibold text-gray-500 uppercase tracking-[0.5px]">
+                      Upload files here (5 images required)
+                    </div>
+                    <input type="file" ref={fileInputRef} onChange={handleFileSelect} accept="image/*" multiple className="hidden" />
+                    <div
+                      className="border-[1.5px] border-dashed border-gray-300 rounded-[10px] py-12 flex flex-col items-center justify-center gap-2 text-[12px] text-gray-500 cursor-pointer hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600 bg-gray-50 transition-all"
+                      onDrop={handleDrop}
+                      onDragOver={e => { e.preventDefault(); e.stopPropagation() }}
+                      onClick={() => fileInputRef.current?.click()}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      {isUploadingImages
+                        ? <><span className="w-4 h-4 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin" /> Uploading…</>
+                        : <><FiUploadCloud className="w-5 h-5" /> Drag & drop images here or click to upload</>}
+                      <div className="text-[11px] text-gray-400">
+                        {formData.uploadedImages.length} / 5 uploaded
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
 
-                        {formData.uploadedImages.length > 0 && (
-                          <div className="grid grid-cols-5 gap-2 mb-3">
-                            {formData.uploadedImages.map((img, i) => (
-                              <div key={i} className="relative aspect-square rounded-[6px] overflow-hidden border border-gray-300">
-                                <img src={img.url} alt={img.original_name} className="w-full h-full object-cover" />
-                                <button type="button" onClick={() => removeUploadedImage(i)}
-                                  className="absolute top-1 right-1 w-5 h-5 bg-white/80 hover:bg-red-500 hover:text-white text-gray-600 rounded-full flex items-center justify-center transition-all">
-                                  <FiX className="w-3 h-3" />
-                                </button>
-                              </div>
-                            ))}
-                            {formData.uploadedImages.length < 10 && (
-                              <button type="button" onClick={() => fileInputRef.current?.click()}
-                                className="aspect-square rounded-[6px] border-[1.5px] border-dashed border-gray-400 flex items-center justify-center text-gray-500 text-sm hover:border-blue-600 hover:text-blue-600 bg-gray-50 transition-all">
-                                + Add
-                              </button>
-                            )}
-                          </div>
-                        )}
-
-                        {formData.images.length > 0 && (
-                          <div className="grid grid-cols-5 gap-2 mb-3 opacity-60">
-                            {formData.images.map((img, i) => (
-                              <div key={i} className="relative aspect-square rounded-[6px] overflow-hidden border border-gray-300">
-                                <img src={localThumbnails[i] || URL.createObjectURL(img)} alt={`Preview ${i + 1}`} className="w-full h-full object-cover" />
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        <div
-                          className="border-[1.5px] border-dashed border-gray-400 rounded-[6px] p-4 flex items-center justify-center gap-2 text-[12px] text-gray-500 cursor-pointer hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600 bg-gray-50 transition-all"
-                          onDrop={handleDrop} onDragOver={e => { e.preventDefault(); e.stopPropagation() }}
-                          onClick={() => fileInputRef.current?.click()} role="button" tabIndex={0}
+              {/* Amenities */}
+              <div id="section-amenities" className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {renderCardHeader(
+                  'amenities',
+                  'Amenities & Attributes',
+                  !showCustomAmenityInput ? (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setShowCustomAmenityInput(true)
+                        setTimeout(() => customAmenityRef.current?.focus(), 50)
+                      }}
+                      className="h-8 px-3 bg-blue-50 border border-blue-200 hover:bg-blue-100 hover:border-blue-300 text-blue-700 text-[12px] font-semibold rounded-[8px] transition-colors"
+                    >
+                      + Add other
+                    </button>
+                  ) : null
+                )}
+                {expandedSections.has('amenities') && (
+                  <div className="px-6 py-5 space-y-3">
+                    <div className="flex flex-wrap gap-2">
+                      {AMENITIES_LIST.map(a => (
+                        <button
+                          key={a}
+                          type="button"
+                          onClick={() => handleAmenityToggle(a)}
+                          className={`px-3 py-1.5 rounded-full border text-[12px] font-medium transition-all ${
+                            formData.amenities.includes(a)
+                              ? 'bg-blue-600 border-blue-600 text-white'
+                              : 'bg-white border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-300'
+                          }`}
                         >
-                          {isUploadingImages
-                            ? <><span className="w-4 h-4 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin" /> Uploading…</>
-                            : <><FiUploadCloud className="w-4 h-4" /> Drag & drop images here or click to browse</>}
-                        </div>
+                          {a}
+                        </button>
+                      ))}
+                    </div>
 
-                        <div className="mt-3">
-                          <label className={FL}>Video Link (Optional)</label>
-                          <div className="flex">
-                            <div className="flex items-center px-2.5 bg-gray-50 border border-gray-300 border-r-0 rounded-l-[6px]">
-                              <FiPlayCircle className="text-gray-500 w-4 h-4" />
-                            </div>
-                            <input
-                              className="flex-1 h-9 border border-gray-300 rounded-r-[6px] px-2.5 text-[13px] text-gray-900 bg-white outline-none focus:border-blue-600 transition-colors"
-                              placeholder="YouTube / video link"
-                              value={formData.videoUrl}
-                              onChange={e => updateField('videoUrl', e.target.value)}
-                            />
-                          </div>
-                        </div>
+                    {showCustomAmenityInput && (
+                      <div className="flex items-center gap-2">
+                        <input
+                          ref={customAmenityRef}
+                          autoFocus
+                          type="text"
+                          value={customAmenityInput}
+                          onChange={e => setCustomAmenityInput(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') { e.preventDefault(); handleAddCustomAmenity() }
+                            if (e.key === 'Escape') { setShowCustomAmenityInput(false); setCustomAmenityInput('') }
+                          }}
+                          placeholder="Type amenity..."
+                          className="h-9 flex-1 max-w-[260px] border border-gray-300 focus:border-blue-600 rounded-[8px] px-3 text-[13px] text-gray-900 outline-none bg-white transition-colors"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddCustomAmenity}
+                          disabled={!customAmenityInput.trim()}
+                          className="h-9 px-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-[12px] font-semibold rounded-[8px] transition-colors"
+                        >
+                          Add
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { setShowCustomAmenityInput(false); setCustomAmenityInput('') }}
+                          className="h-9 px-4 border border-gray-300 text-gray-700 hover:bg-gray-50 text-[12px] font-semibold rounded-[8px] transition-colors"
+                        >
+                          Cancel
+                        </button>
                       </div>
                     )}
                   </div>
+                )}
+              </div>
 
-                  {/* 5. Pricing */}
-                  <div id="section-pricing" className="bg-white/95 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    {renderSectionHeader('pricing', 5, 'Pricing', 'Rent amount & frequency')}
-                    {expandedSections.has('pricing') && (
-                      <div className="px-[18px] py-4">
-                        {/* Listing Type toggle */}
-                        <div>
-                          <label className={FL}>Listing Type</label>
-                          <div className="flex gap-2">
-                            <button type="button"
-                              onClick={() => updateField('listingType', 'for_rent')}
-                              className={`flex-1 h-9 rounded-lg border-2 text-[12px] font-semibold transition-all ${formData.listingType === 'for_rent' ? 'bg-blue-600 border-blue-600 text-white' : 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300'}`}>
-                              For Rent
-                            </button>
-                            <button type="button"
-                              onClick={() => updateField('listingType', 'for_sale')}
-                              className={`flex-1 h-9 rounded-lg border-2 text-[12px] font-semibold transition-all ${formData.listingType === 'for_sale' ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300'}`}>
-                              For Sale
-                            </button>
-                          </div>
-                        </div>
-                        <div className={`grid gap-3 ${formData.listingType === 'for_rent' ? 'grid-cols-2' : 'grid-cols-1'}`}>
-                          <div>
-                            <label className={FL}>{formData.listingType === 'for_sale' ? 'Selling Price (₱)' : 'Price (₱)'}</label>
-                            <div className="relative">
-                              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[13px] text-gray-500">₱</span>
-                              <input type="text" className={`${FI} pl-6 ${aiFilled('price')}`} placeholder={formData.listingType === 'for_sale' ? 'e.g. 4500000' : 'e.g. 45000'} value={formData.price} onChange={e => updateField('price', e.target.value)} />
-                            </div>
-                          </div>
-                          {formData.listingType === 'for_rent' && (
-                            <div>
-                              <label className={FL}>Price Type</label>
-                              <div className="relative">
-                                <select className={`${FS} ${aiFilled('price_type')}`} value={formData.priceType} onChange={e => updateField('priceType', e.target.value as 'Monthly' | 'Weekly' | 'Daily' | 'Yearly')}>
-                                  <option value="Monthly">Monthly</option>
-                                  <option value="Weekly">Weekly</option>
-                                  <option value="Daily">Daily</option>
-                                  <option value="Yearly">Yearly</option>
-                                </select>
-                                <FiChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none w-3.5 h-3.5" />
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+              {/* Footer buttons */}
+              <div className="flex items-center justify-between mt-2 px-2">
+                <button
+                  type="button"
+                  onClick={() => router.push(roleConfig.listingsPath)}
+                  className="h-10 px-6 rounded-[8px] bg-gray-200 hover:bg-gray-300 text-gray-700 text-[12px] font-semibold transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={submit}
+                  disabled={isSubmitting || !formData.title || !formData.category || !formData.price}
+                  className="h-10 px-6 rounded-[8px] bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[12px] font-semibold transition-colors"
+                >
+                  {isSubmitting ? 'Adding…' : 'Add Property'}
+                </button>
+              </div>
+            </div>
+          </div>
 
-                  {/* 6. Amenities */}
-                  <div id="section-attributes" className="bg-white/95 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    {renderSectionHeader('attributes', 6, 'Amenities & Attributes', 'Features & facilities')}
-                    {expandedSections.has('attributes') && (
-                      <div className="px-[18px] py-4 space-y-3">
-
-                        {/* Preset amenity pills */}
-                        <div className="flex flex-wrap gap-1.5">
-                          {AMENITIES_LIST.map(a => (
-                            <button key={a} type="button" onClick={() => handleAmenityToggle(a)}
-                              className={`px-2.5 py-1 rounded-full border text-[11px] font-medium cursor-pointer transition-all ${
-                                formData.amenities.includes(a)
-                                  ? 'bg-blue-600 border-blue-600 text-white'
-                                  : 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300'
-                              }`}>
-                              {a}
-                            </button>
-                          ))}
-                        </div>
-
-                        {/* Custom amenities added by the user */}
-                        {formData.amenities.filter(a => !AMENITIES_LIST.includes(a)).length > 0 && (
-                          <div className="flex flex-wrap gap-1.5">
-                            {formData.amenities
-                              .filter(a => !AMENITIES_LIST.includes(a))
-                              .map(a => (
-                                <span
-                                  key={a}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[11px] font-medium bg-blue-50 border-blue-600 text-blue-600"
-                                >
-                                  {a}
-                                  <button
-                                    type="button"
-                                    onClick={() => updateField('amenities', formData.amenities.filter(x => x !== a))}
-                                    className="w-3.5 h-3.5 flex items-center justify-center rounded-full hover:bg-blue-600 hover:text-white transition-colors leading-none"
-                                    title={`Remove ${a}`}
-                                  >
-                                    <FiX className="w-2.5 h-2.5" />
-                                  </button>
-                                </span>
-                              ))}
-                          </div>
-                        )}
-
-                        {/* Add custom amenity row */}
-                        {showCustomAmenityInput ? (
-                          <div className="flex items-center gap-2">
-                            <input
-                              ref={customAmenityRef}
-                              autoFocus
-                              type="text"
-                              value={customAmenityInput}
-                              onChange={e => setCustomAmenityInput(e.target.value)}
-                              onKeyDown={e => {
-                                if (e.key === 'Enter') { e.preventDefault(); handleAddCustomAmenity() }
-                                if (e.key === 'Escape') { setShowCustomAmenityInput(false); setCustomAmenityInput('') }
-                              }}
-                              placeholder="e.g. Rooftop access"
-                              className="h-8 flex-1 max-w-[200px] border border-blue-600 focus:border-blue-600 rounded-full px-3 text-[12px] text-gray-900 outline-none bg-white"
-                            />
-                            <button
-                              type="button"
-                              onClick={handleAddCustomAmenity}
-                              disabled={!customAmenityInput.trim()}
-                              className="h-8 px-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-[11px] font-semibold rounded-full transition-colors"
-                            >
-                              Add
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => { setShowCustomAmenityInput(false); setCustomAmenityInput('') }}
-                              className="h-8 px-3 border border-gray-300 text-gray-500 hover:text-gray-900 text-[11px] rounded-full transition-colors"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setShowCustomAmenityInput(true)
-                              setTimeout(() => customAmenityRef.current?.focus(), 50)
-                            }}
-                            className="flex items-center gap-1.5 text-[11px] font-medium text-gray-500 hover:text-blue-600 border border-dashed border-gray-400 hover:border-blue-600 px-2.5 py-1 rounded-full transition-all"
-                          >
-                            <span className="text-[14px] leading-none">+</span> Add other
-                          </button>
-                        )}
-
-                      </div>
-                    )}
-                  </div>
-
-                  {/* 7. Review & Publish */}
-                  <div id="section-review" className="bg-white/95 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    {renderSectionHeader(
-                      'review', 7, 'Review & Publish', 'Final check before publishing',
-                      (!sectionDone.category || !sectionDone.details || !sectionDone.pricing)
-                        ? <span className="text-[12px] text-[#ADA69C]">Complete sections above first</span>
-                        : null
-                    )}
-                    {expandedSections.has('review') && (
-                      <div className="px-[18px] py-4">
-                        {([
-                          { label: 'Category',   value: formData.category || 'Not set', sid: 'category' },
-                          { label: 'Title',      value: formData.title || 'Not set',    sid: 'details'  },
-                          { label: 'Price',      value: formData.price ? (formData.listingType === 'for_sale' ? `₱ ${Number(formData.price).toLocaleString()} (For Sale)` : `₱ ${Number(formData.price).toLocaleString()} / ${formData.priceType}`) : 'Not set', sid: 'pricing' },
-                          { label: 'Location',   value: [formData.city, formData.state].filter(Boolean).join(', ') || 'Not set', sid: 'location' },
-                          { label: 'Bedrooms',   value: String(formData.bedrooms),  sid: 'details' },
-                          { label: 'Bathrooms',  value: String(formData.bathrooms), sid: 'details' },
-                          { label: 'Floor Area', value: formData.floorArea ? `${formData.floorArea} ${formData.floorUnit}` : 'Not set', sid: 'details' },
-                        ]).map(({ label, value, sid }) => (
-                          <div key={label} className="flex items-center justify-between py-2 border-b border-gray-300 last:border-0">
-                            <span className="text-[12px] text-gray-500">{label}</span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[12px] font-medium text-gray-900 max-w-[200px] truncate">{value}</span>
-                              <button type="button"
-                                onClick={() => {
-                                  if (!expandedSections.has(sid)) toggleSection(sid)
-                                  setTimeout(() => document.getElementById(`section-${sid}`)?.scrollIntoView({ behavior: 'smooth' }), 100)
-                                }}
-                                className="flex items-center gap-1 text-[11px] text-blue-600 hover:bg-blue-50 px-1.5 py-0.5 rounded transition-colors">
-                                <FiEdit className="w-3 h-3" /> Edit
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                </div>{/* /sections */}
-
-                {/* Submit bar */}
-                <div className="mt-3 flex items-center justify-between p-4 bg-white/95 border border-gray-200 rounded-xl shadow-sm">
-                  <div className="text-[12px] text-gray-500">
-                    {formData.uploadedImages.length < 5 ? (
-                      <><strong className="text-gray-900">{5 - formData.uploadedImages.length} more image{5 - formData.uploadedImages.length !== 1 ? 's' : ''} needed</strong> to publish</>
-                    ) : (
-                      <strong className="text-emerald-600">Ready to publish!</strong>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <button type="button" onClick={() => router.push(roleConfig.listingsPath)}
-                      className="px-4 py-2 rounded-[6px] border border-blue-200 text-[13px] font-semibold text-blue-700 hover:bg-blue-100 hover:border-blue-300 bg-blue-50 transition-all">
-                      Cancel
-                    </button>
-                    <button type="button" onClick={submit}
-                      disabled={isSubmitting || !formData.price || !formData.category || !formData.title}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[13px] font-semibold rounded-[6px] transition-colors">
-                      {isSubmitting
-                        ? <><span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Publishing…</>
-                        : <>Publish Listing <FiArrowRight className="w-3.5 h-3.5" /></>}
-                    </button>
-                  </div>
-                </div>
-
-              </div>{/* /form area */}
-
-              {/* ── AI Co-Pilot Panel ── */}
-              {coPilotOpen ? (
-                <div className="w-[340px] flex-shrink-0 bg-gray-50 flex flex-col min-h-0 overflow-hidden border-l border-gray-200 shadow-[ -4px_0_16px_rgba(0,0,0,0.06)]">
+          {/* ── AI Co-Pilot Panel ── */}
+          {coPilotOpen ? (
+            <div className="w-[360px] flex-shrink-0 flex flex-col min-h-0 overflow-hidden border-l border-gray-200 bg-gray-100">
+              <div className="p-4 min-h-0 flex flex-col">
+                <div className="relative bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm flex flex-col min-h-0">
+                  {/* Collapse handle (mirrors sidebar overflow button, but on left) */}
+                  <button
+                    type="button"
+                    onClick={() => setCoPilotOpen(false)}
+                    className="absolute -left-4 top-6 w-9 h-9 rounded-full text-gray-600 hover:text-gray-900 bg-white shadow-md border border-gray-200 hover:bg-gray-50 transition-colors z-20 flex items-center justify-center"
+                    aria-label="Collapse listing assistant"
+                    title="Collapse"
+                  >
+                    <FiChevronRight className="text-lg" />
+                  </button>
                   <CoPilotPanel
                     conversationId={conversationId}
                     formData={formData}
@@ -1530,26 +1176,26 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                     onGenerateDescription={handleGenerateDescription}
                   />
                 </div>
-              ) : (
-                <button
-                  onClick={() => setCoPilotOpen(true)}
-                  className="w-10 flex-shrink-0 bg-gray-50 border-l border-gray-200 flex flex-col items-center justify-center gap-3 hover:bg-gray-100 transition-colors"
-                  title="Open AI Co-Pilot"
-                >
-                  <span className="inline-block w-[7px] h-[7px] rounded-full bg-blue-500 animate-pulse" />
-                  <span
-                    className="text-[10px] text-gray-400 font-semibold tracking-widest"
-                    style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
-                  >
-                    AI CO-PILOT
-                  </span>
-                  <FiZap className="w-3.5 h-3.5 text-blue-500" />
-                </button>
-              )}
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setCoPilotOpen(true)}
+              className="w-10 flex-shrink-0 bg-gray-50 border-l border-gray-200 flex flex-col items-center justify-center gap-3 hover:bg-gray-100 transition-colors"
+              title="Open AI Co-Pilot"
+            >
+              <span className="inline-block w-[7px] h-[7px] rounded-full bg-blue-500 animate-pulse" />
+              <span
+                className="text-[10px] text-gray-400 font-semibold tracking-widest"
+                style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+              >
+                AI CO-PILOT
+              </span>
+              <FiZap className="w-3.5 h-3.5 text-blue-500" />
+            </button>
+          )}
 
-            </div>{/* /2-col */}
-          </>
-        )}
+        </div>
 
       </main>
 
