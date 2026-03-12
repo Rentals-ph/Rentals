@@ -142,6 +142,7 @@ const STEP_BUTTONS: Record<string, Array<{ label: string; value: string }>> = {
 function resolveButtons(
   currentStep: string | null,
   aiResponse: string,
+  context?: { propertyTypeFilled?: boolean },
 ): Array<{ label: string; value: string }> {
   // 1. Special-case: location step → show dedicated "Use current location" button.
   if (currentStep === 'location') {
@@ -167,7 +168,12 @@ function resolveButtons(
     lower.includes('house') || lower.includes('condo') ||
     lower.includes('type of property') || lower.includes('property type') ||
     lower.includes('apartment') || lower.includes('townhouse')
-  ) return STEP_BUTTONS['property_type']
+  ) {
+    // If the form already has a property type, don't keep showing
+    // property-type buttons on repeated "what type of property" questions.
+    if (context?.propertyTypeFilled) return []
+    return STEP_BUTTONS['property_type']
+  }
 
   if (lower.includes('bedroom') || lower.includes('how many bed'))
     return STEP_BUTTONS['bedrooms']
@@ -366,7 +372,9 @@ function CoPilotPanel({
         id:        '0',
         role:      'assistant',
         content:   firstStep.question,
-        buttons:   resolveButtons(firstStep.step, firstStep.question),
+        buttons:   resolveButtons(firstStep.step, firstStep.question, {
+          propertyTypeFilled: !!formData.category,
+        }),
         timestamp: new Date().toISOString(),
       }])
     } else {
@@ -435,7 +443,9 @@ function CoPilotPanel({
         id:        `a-${Date.now()}`,
         role:      'assistant',
         content:   res.ai_response,
-        buttons:   resolveButtons(nextStep, res.ai_response),
+        buttons:   resolveButtons(nextStep, res.ai_response, {
+          propertyTypeFilled: !!formData.category,
+        }),
         timestamp: new Date().toISOString(),
       }])
       if (res.extracted_data && Object.values(res.extracted_data).some(v => v != null)) {
@@ -564,7 +574,9 @@ function CoPilotPanel({
         id:        `a-${Date.now()}`,
         role:      'assistant',
         content:   res.ai_response,
-        buttons:   resolveButtons(nextStep, res.ai_response),
+        buttons:   resolveButtons(nextStep, res.ai_response, {
+          propertyTypeFilled: !!formData.category,
+        }),
         timestamp: new Date().toISOString(),
       }])
       if (res.extracted_data && Object.values(res.extracted_data).some(v => v != null)) {
@@ -684,7 +696,13 @@ function CoPilotPanel({
                 </div>
 
                 {/* Quick-reply buttons — on last assistant message */}
-                {msg.role === 'assistant' && isLastAssistantMsg && msg.buttons && msg.buttons.length > 0 && (
+                {msg.role === 'assistant'
+                  && isLastAssistantMsg
+                  && msg.buttons && msg.buttons.length > 0
+                  // If price is already filled in the form, don't keep asking
+                  // for "What's the asking price?" again — hide price buttons.
+                  && !(currentStep === 'price' && formData.price)
+                  && (
                   <div className="ml-10 mt-2 flex flex-wrap gap-2">
                     {msg.buttons.map(btn => (
                       <button
@@ -778,7 +796,7 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
   const PD_L = 'block text-[13px] font-semibold text-gray-500 mb-2'
   const PD_I = 'w-full h-11 border border-gray-300 rounded-[6px] px-3 text-[13px] text-gray-900 bg-white outline-none focus:border-blue-600 transition-colors'
   const PD_S = 'w-full h-11 border border-gray-300 rounded-[6px] px-3 pr-9 text-[13px] text-gray-900 bg-white outline-none appearance-none focus:border-blue-600 transition-colors'
-  const PD_T = 'w-full border border-gray-300 rounded-[6px] px-3 py-3 text-[13px] text-gray-900 bg-white outline-none resize-none focus:border-blue-600 transition-colors'
+  const PD_T = 'w-full h-full border border-gray-300 rounded-[6px] px-3 py-3 text-[13px] text-gray-900 bg-white outline-none resize-none focus:border-blue-600 transition-colors'
 
   // ── Province → cities ─────────────────────────────────────────────────────────
   useEffect(() => {
@@ -1041,10 +1059,10 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                                   key={key}
                                   type="button"
                                   onClick={() => setSelectedTemplate(key)}
-                                  className={`w-full text-left px-4 py-3 text-[13px] font-semibold transition-colors ${
+                                  className={`relative w-full text-left px-4 py-3 text-[13px] font-medium transition-colors ${
                                     isSelected
-                                      ? 'bg-gray-50 text-gray-900 border-l-4 border-blue-600'
-                                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                                      ? 'bg-blue-50 text-blue-600 border-l-2 border-blue-600'
+                                      : 'bg-white text-gray-700 hover:bg-gray-50 hover:text-blue-600'
                                   }`}
                                 >
                                   {tmpl.label}
@@ -1052,12 +1070,12 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                               )
                             })}
                           </div>
-                          <div className="bg-blue-600 p-3">
+                          <div className="bg-blue-600">
                             <button
                               type="button"
                               onClick={() => handleGenerateDescription()}
                               disabled={!conversationId || isGeneratingDesc}
-                              className="w-full h-11 rounded-[6px] bg-white/10 hover:bg-white/15 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[13px] font-semibold transition-colors"
+                              className="w-full h-11 rounded-[6px] hover:bg-white/15 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[13px] font-semibold transition-colors"
                             >
                               {isGeneratingDesc ? 'Generating…' : 'Generate'}
                             </button>
