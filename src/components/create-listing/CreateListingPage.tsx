@@ -14,10 +14,8 @@ export interface CreateListingPageProps {
 
 const AGENT_MANUAL_HREF = '/agent/create-listing/manual'
 const AGENT_AI_HREF = '/agent/listing-assistant'
-// Broker's manual path now points to the unified form (AI co-pilot + manual form in one page).
-// The old multi-step flow (/broker/create-listing/basic-info) is kept intact and still reachable
-// directly, but the choice-screen "Manual Input" button now takes brokers to the unified experience.
-const BROKER_MANUAL_HREF = '/broker/create-listing/unified'
+// Broker's manual path points to the unified form (AI co-pilot + manual form in one page).
+const BROKER_MANUAL_HREF = '/broker/create-listing'
 const BROKER_AI_HREF = '/broker/listing-assistant'
 
 export function CreateListingPage({ role, header }: CreateListingPageProps) {
