@@ -5,15 +5,15 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import Footer from '@/components/layout/Footer'
 import HorizontalPropertyCard from '@/components/common/HorizontalPropertyCard'
-import VerticalPropertyCard from '@/components/common/VerticalPropertyCard'
 import { propertiesApi, agentsApi, messagesApi } from '@/api'
 import type { Property } from '@/types'
 import type { PaginatedResponse } from '@/api/types'
+import type { Agent } from '@/api/endpoints/agents'
 import { ASSETS } from '@/utils/assets'
-import { resolveAgentAvatar } from '@/utils/imageResolver'
-import PageHeader from '@/components/layout/PageHeader'
-import DigitalProfileCard from '@/components/common/DigitalProfileCard'
+import { resolveAgentAvatar, resolveImageUrl } from '@/utils/imageResolver'
 import { EmptyState, EmptyStateAction } from '@/components/common'
+import Pagination from '@/components/common/Pagination'
+import { FiPhone, FiMail } from 'react-icons/fi'
 
 export default function AgentDetailsPage() {
   const params = useParams()
@@ -21,31 +21,20 @@ export default function AgentDetailsPage() {
   const agentId = Number(id)
   const [properties, setProperties] = useState<Property[]>([])
   const [loading, setLoading] = useState(true)
-  const [manager, setManager] = useState<{ id: number; name: string; role: string; listings: Property[]; image?: string | null } | null>(null)
+  const [agent, setAgent] = useState<Agent | null>(null)
 
   useEffect(() => {
     const fetchAgentAndProperties = async () => {
       try {
         const agents = await agentsApi.getAll()
-        const agent = agents.find(a => a.id === agentId)
-        if (!agent) {
-          setManager(null)
+        const foundAgent = agents.find(a => a.id === agentId)
+        if (!foundAgent) {
+          setAgent(null)
           setProperties([])
           setLoading(false)
           return
         }
-        const agentImage = agent.image || agent.avatar || agent.profile_image
-        const agentName = agent.full_name ||
-          (agent.first_name || agent.last_name
-            ? `${agent.first_name || ''} ${agent.last_name || ''}`.trim()
-            : 'Unknown Agent')
-        setManager({
-          id: agent.id,
-          name: agentName,
-          role: 'Agent',
-          listings: [],
-          image: agentImage
-        })
+        setAgent(foundAgent)
         const allPropertiesResponse = await propertiesApi.getAll()
         const allProperties: Property[] = Array.isArray(allPropertiesResponse)
           ? allPropertiesResponse
@@ -61,7 +50,7 @@ export default function AgentDetailsPage() {
         setProperties(managerProperties)
       } catch (error) {
         console.error('Error fetching agent and properties:', error)
-        setManager(null)
+        setAgent(null)
         setProperties([])
       } finally {
         setLoading(false)
@@ -73,30 +62,14 @@ export default function AgentDetailsPage() {
   }, [agentId])
 
   const [activeTab, setActiveTab] = useState<'listing' | 'reviews'>('listing')
-  const [viewMode, setViewMode] = useState<'horizontal' | 'vertical'>('horizontal')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [priceFilter, setPriceFilter] = useState('all')
-  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest')
-  const [showMoreFilters, setShowMoreFilters] = useState(false)
-  const [moreFilters, setMoreFilters] = useState({
-    propertyType: 'all',
-    bedrooms: 'all',
-    bathrooms: 'all',
-    parking: 'all',
-  })
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 6
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    name: '',
     phone: '',
     email: '',
-    message: '',
+    message: ''
   })
-  const [profileQrUrl, setProfileQrUrl] = useState<string>('')
-  useEffect(() => {
-    if (typeof window !== 'undefined' && Number.isFinite(agentId)) {
-      setProfileQrUrl(`${window.location.origin}/agents/${agentId}`)
-    }
-  }, [agentId])
 
   const formatPrice = (price: number): string => `₱${price.toLocaleString('en-US')}`
   const formatPriceType = (priceType: string | null | undefined): string | undefined => {
@@ -115,39 +88,37 @@ export default function AgentDetailsPage() {
     return name.substring(0, 2).toUpperCase()
   }
 
+  const agentName = agent?.full_name || 
+    (agent?.first_name || agent?.last_name
+      ? `${agent.first_name || ''} ${agent.last_name || ''}`.trim()
+      : 'Unknown Agent')
+  const agencyName = agent?.agency_name || agent?.company_name || 'CondorHome RealEstate Agency'
+  const agentPhone = agent?.phone || '099548238356'
+  const agentEmail = agent?.email || 'locaylocay@gmail.com'
+  const agentWhatsApp = agent?.whatsapp || '+44 20 7946 0958'
+  const agentDescription = agent?.description || 'Beautiful corner suite with modern amenities, floor-to-ceiling windows, and stunning city views. Located in the heart of IT Park with easy access to shopping, dining, and transportation.'
+
   const filteredAndSortedProperties = useMemo(() => {
-    if (!manager) return []
-    let filtered = [...properties]
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase()
-      filtered = filtered.filter(p =>
-        p.title.toLowerCase().includes(query) ||
-        p.type.toLowerCase().includes(query)
-      )
-    }
-    if (priceFilter !== 'all') {
-      filtered = filtered.filter(p => {
-        const price = p.price
-        switch (priceFilter) {
-          case 'under-20k': return price < 20000
-          case '20k-40k': return price >= 20000 && price < 40000
-          case '40k-60k': return price >= 40000 && price < 60000
-          case '60k-80k': return price >= 60000 && price < 80000
-          case 'over-80k': return price >= 80000
-          default: return true
-        }
-      })
-    }
-    if (moreFilters.propertyType !== 'all') filtered = filtered.filter(p => p.type === moreFilters.propertyType)
-    if (moreFilters.bedrooms !== 'all') filtered = filtered.filter(p => p.bedrooms === parseInt(moreFilters.bedrooms))
-    if (moreFilters.bathrooms !== 'all') filtered = filtered.filter(p => p.bathrooms === parseInt(moreFilters.bathrooms))
-    filtered.sort((a, b) => {
+    if (!agent) return []
+    return [...properties].sort((a, b) => {
       const dateA = a.published_at ? new Date(a.published_at).getTime() : 0
       const dateB = b.published_at ? new Date(b.published_at).getTime() : 0
-      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB
+      return dateB - dateA // newest first
     })
-    return filtered
-  }, [properties, searchQuery, priceFilter, sortOrder, moreFilters, manager])
+  }, [properties, agent])
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredAndSortedProperties.length / itemsPerPage)
+  const paginatedProperties = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    return filteredAndSortedProperties.slice(startIndex, endIndex)
+  }, [filteredAndSortedProperties, currentPage, itemsPerPage])
+
+  // Reset to page 1 when tab changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [activeTab])
 
   const reviews = [
     { id: 1, reviewerName: 'Sarah Johnson', rating: 5, date: 'Jan 20, 2026', comment: 'Excellent service! Very professional and responsive. They helped us find the perfect property quickly and handled all the paperwork smoothly.' },
@@ -162,19 +133,19 @@ export default function AgentDetailsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!manager) return
+    if (!agent) return
     try {
       await messagesApi.send({
-        recipient_id: manager.id,
-        sender_name: `${formData.firstName} ${formData.lastName}`,
+        recipient_id: agent.id,
+        sender_name: formData.name,
         sender_email: formData.email,
         sender_phone: formData.phone,
         message: formData.message,
         type: 'contact',
-        subject: `Contact from ${formData.firstName} ${formData.lastName}`,
+        subject: `Contact from ${formData.name}`,
       })
       alert('Message sent successfully!')
-      setFormData({ firstName: '', lastName: '', phone: '', email: '', message: '' })
+      setFormData({ name: '', phone: '', email: '', message: '' })
     } catch (error: any) {
       console.error('Error sending message:', error)
       alert(error.response?.data?.message || 'Failed to send message. Please try again.')
@@ -184,7 +155,6 @@ export default function AgentDetailsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <PageHeader title="AGENT PROFILE" />
         <div className="text-center py-10 px-6 sm:px-10 lg:px-20">
           <p className="text-gray-600 text-sm sm:text-base">Loading agent profile...</p>
         </div>
@@ -193,15 +163,12 @@ export default function AgentDetailsPage() {
     )
   }
 
-  if (!manager) {
+  if (!agent) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <PageHeader title="AGENT PROFILE" />
         <div className="px-6 sm:px-10 lg:px-20 py-4 bg-white">
           <nav className="flex items-center gap-2 text-xs sm:text-sm flex-wrap">
-            <Link href="/" className="text-blue-600 hover:text-blue-800">Home</Link>
-            <span className="text-gray-400">&gt;</span>
-            <Link href="/agents" className="text-blue-600 hover:text-blue-800">Agents</Link>
+            <Link href="/properties" className="text-blue-600 hover:text-blue-800">Properties</Link>
             <span className="text-gray-400">&gt;</span>
             <span className="text-gray-600">Not Found</span>
           </nav>
@@ -221,40 +188,56 @@ export default function AgentDetailsPage() {
     )
   }
 
-  const activeListingsCount = properties.length
-  const totalSold = '1,276'
-  const yearsExperience = '8+'
-  const networkSize = '729'
+  const reviewsCount = reviews.length
+  const agentProfileUrl = typeof window !== 'undefined' ? `${window.location.origin}/agents/${agentId}` : ''
+  const companyImage = agent?.company_image ? resolveImageUrl(agent.company_image) : null
 
   return (
-    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
-      <main className="px-6 sm:px-10 lg:px-20 min-w-0">
-        <div className="mx-auto max-w-full min-w-0">
-          {/* Breadcrumb - mobile friendly */}
-          <nav className="py-3 sm:py-4 flex items-center gap-2 text-xs sm:text-sm flex-wrap" aria-label="Breadcrumb">
-            <Link href="/" className="text-blue-600 hover:text-blue-800">Home</Link>
-            <span className="text-gray-400" aria-hidden="true">&gt;</span>
-            <Link href="/agents" className="text-blue-600 hover:text-blue-800">Agents</Link>
-            <span className="text-gray-400" aria-hidden="true">&gt;</span>
-            <span className="text-gray-600 truncate max-w-[140px] sm:max-w-none" title={manager.name}>{manager.name}</span>
+    <div className="min-h-screen overflow-x-hidden">
+      {/* Breadcrumb - matching news details page */}
+      <section className="w-full bg-white page-x pt-4 pb-5">
+        <div className="page-w">
+          <nav className="flex items-center gap-2 text-sm mb-4 flex-wrap" aria-label="Breadcrumb">
+            <Link href="/properties" className="text-gray-500 hover:text-gray-800 font-outfit transition-colors">
+              Properties
+            </Link>
+            <span className="text-gray-400">›</span>
+            <span className="text-[#205ED7] font-outfit truncate max-w-xs sm:max-w-none" title={agentName}>
+              {agentName}
+            </span>
           </nav>
+        </div>
+      </section>
 
-          {/* Profile hero - gradient background with three translucent containers */}
-          <section
-            className="relative mb-6 sm:mb-8 md:mb-10 -mx-4 sm:-mx-6 md:-mx-10 lg:-mx-[150px] bg-gradient-to-r from-blue-700 via-blue-500 to-orange-400"
-            aria-label="Agent profile hero"
-          >
-            <div className="mx-auto px-6 sm:px-10 lg:px-20 py-8 sm:py-10 md:py-12" style={{ background: 'linear-gradient(135deg, #0ea5e9 0%, #1d4ed8 40%, #f97316 100%)' }}>
-              {/* Top row: 3 columns on large screens */}
-              <div className="grid grid-cols-1 lg:grid-cols-[70%_30%] gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
-                {/* Left column: avatar + main info + company, then buttons+QR at bottom */}
-                <div className="relative flex flex-col bg-white/10 backdrop-blur-md rounded-3xl px-5 sm:px-6 md:px-7 lg:px-8 py-5 sm:py-6 md:py-7 shadow-lg min-h-[320px] sm:min-h-[360px]">
-                  {/* Avatar + name + company row (enlarged) */}
-                  <div className="flex items-center gap-5 sm:gap-6 md:gap-8 flex-1 min-h-0">
-                    <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg ring-4 ring-white/40 bg-white">
+      <main className="page-x py-6 sm:py-8">
+        <div className="page-w">
+
+          {/* Two-column layout: Agent Profile (left) and Contact Form (right) */}
+          <section className="mb-6 sm:mb-8 md:mb-10" aria-label="Agent profile">
+            <div className="grid grid-cols-1 lg:grid-cols-[75%_25%] gap-6 sm:gap-8 items-start">
+              {/* Left Column: Agent Profile */}
+              <div >
+                <div className="bg-white rounded-xl shadow-md p-6 sm:p-8 relative">
+                {/* QR Code - Absolute Position Top Right */}
+                {agentProfileUrl && (
+                  <div className="absolute top-7 right-7 z-10">
+                    <div className="w-32 h-32 sm:w-36 sm:h-36 bg-white border-2 border-gray-300 rounded flex items-center justify-center shadow-md">
                       <img
-                        src={getAgentImageUrl(manager.image)}
-                        alt={manager.name}
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(agentProfileUrl)}`}
+                        alt="QR code to agent profile"
+                        className="w-full h-full rounded object-contain"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex flex-col sm:flex-row gap-6 w-full">
+                  {/* Profile Picture */}
+                  <div className="flex-shrink-0">
+                    <div className="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 rounded-lg overflow-hidden bg-gray-100">
+                      <img
+                        src={getAgentImageUrl(agent.image || agent.avatar || agent.profile_image)}
+                        alt={agentName}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement
@@ -264,286 +247,132 @@ export default function AgentDetailsPage() {
                         }}
                       />
                       <div
-                        className="w-full h-full flex items-center justify-center text-white font-semibold text-3xl sm:text-4xl rounded-2xl hidden"
+                        className="w-full h-full flex items-center justify-center text-blue-600 font-semibold text-2xl hidden"
+                        style={{ backgroundColor: '#E5E7EB' }}
                       >
-                        {getInitials(manager.name)}
-                      </div>
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <h1 className="m-0 text-2xl sm:text-3xl md:text-4xl font-bold text-white truncate">
-                        {manager.name}
-                      </h1>
-                      <p className="m-0 mt-1.5 text-sm sm:text-base md:text-lg text-blue-100 font-medium">
-                        Property Agent
-                      </p>
-                      <div className="mt-4 flex items-center gap-2.5 text-sm sm:text-base text-blue-50 flex-wrap">
-                        <span className="inline-flex items-center gap-1.5">
-                          <span className="font-semibold">{roundedRating.toFixed(1)}</span>
-                          <span className="flex items-center gap-0.5">
-                            {[...Array(5)].map((_, i) => (
-                              <svg
-                                key={i}
-                                className={`w-4 h-4 sm:w-5 sm:h-5 ${i < Math.round(overallRating) ? 'text-yellow-300' : 'text-blue-200/60'}`}
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
-                              >
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z" />
-                              </svg>
-                            ))}
-                          </span>
-                        </span>
-                        <span className="opacity-80">Top Rated Agent</span>
-                      </div>
-                    </div>
-
-                    {/* Company badge inside this row */}
-                    <div className="flex flex-col items-end gap-2 text-right flex-shrink-0">
-                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white flex items-center justify-center shadow-md">
-                        <span className="text-xs sm:text-sm font-semibold text-blue-700">Company</span>
-                      </div>
-                      <div className="flex flex-col items-end gap-0.5">
-                        <p className="m-0 text-sm sm:text-base font-semibold text-white">Filipino Homes</p>
-                        <p className="m-0 text-xs sm:text-sm text-blue-100/90">Cebu City</p>
+                        {getInitials(agentName)}
                       </div>
                     </div>
                   </div>
 
-                  {/* Buttons + QR at bottom of card */}
-                  <div className="mt-6 pt-5 border-t border-white/20 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
-                    <div className="flex flex-wrap gap-3">
-                      <a
-                        href="#listings"
-                        className="inline-flex items-center justify-center rounded-full bg-white text-blue-700 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold shadow-md hover:bg-blue-50 transition-colors"
-                      >
-                        View Listings
-                      </a>
-                      <a
-                        href="#contact-manager"
-                        className="inline-flex items-center justify-center rounded-full bg-emerald-500/90 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-white shadow-md hover:bg-emerald-400 transition-colors"
-                      >
-                        WhatsApp
-                      </a>
-                      <a
-                        href="#contact-manager"
-                        className="inline-flex items-center justify-center rounded-full border border-white/60 bg-white/10 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-white/20 transition-colors"
-                      >
-                        Email
-                      </a>
+                  {/* Agent Info */}
+                  <div className="flex-1 min-w-0">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-blue-600 mb-1">
+                      {agentName}
+                    </h1>
+                    <p className="text-gray-600 text-sm sm:text-base mb-4">
+                      {agencyName}
+                    </p>
+
+                    {/* Contact Information */}
+                    <div className="space-y-2 mb-4">
+                      {agentPhone && (
+                        <div className="flex items-center gap-2">
+                          <FiPhone className="w-5 h-5 text-orange-500 flex-shrink-0" />
+                          <a href={`tel:${agentPhone}`} className="text-orange-500 text-sm sm:text-base hover:underline">
+                            {agentPhone}
+                          </a>
+                        </div>
+                      )}
+                      {agentEmail && (
+                        <div className="flex items-center gap-2">
+                          <FiMail className="w-5 h-5 text-green-500 flex-shrink-0" />
+                          <a href={`mailto:${agentEmail}`} className="text-green-500 text-sm sm:text-base hover:underline">
+                            {agentEmail}
+                          </a>
+                        </div>
+                      )}
+                      {agentWhatsApp && (
+                        <div className="flex items-center gap-2">
+                          <svg className="w-5 h-5 text-green-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                          </svg>
+                          <a href={`https://wa.me/${agentWhatsApp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-green-500 text-sm sm:text-base hover:underline">
+                            {agentWhatsApp}
+                          </a>
+                        </div>
+                      )}
                     </div>
-                    {/* QR code - same as digital business card */}
-                    <div className="flex items-center gap-3">
-                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white p-1.5 flex items-center justify-center shadow-md flex-shrink-0">
-                        {profileQrUrl ? (
+
+                    {/* Listings and Reviews Counts - Blue Button Design with Company Image */}
+                    <div className="flex items-center justify-between gap-3 mb-4 w-full">
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <button
+                          onClick={() => setActiveTab('listing')}
+                          className="bg-blue-600 text-white px-4 py-2 rounded font-semibold text-sm hover:bg-blue-700 transition-colors whitespace-nowrap"
+                        >
+                          {properties.length} Listings
+                        </button>
+                        <button
+                          onClick={() => setActiveTab('reviews')}
+                          className="bg-blue-600 text-white px-4 py-2 rounded font-semibold text-sm hover:bg-blue-700 transition-colors whitespace-nowrap"
+                        >
+                          {reviewsCount} Reviews
+                        </button>
+                      </div>
+                      {/* Company Image - at the right */}
+                      {companyImage && (
+                        <div className="flex items-center justify-end flex-shrink-0">
                           <img
-                            src={`https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(profileQrUrl)}`}
-                            alt="QR code to profile"
-                            className="w-full h-full rounded-lg object-contain"
+                            src={companyImage}
+                            alt={agencyName}
+                            className="h-12 w-auto object-contain max-w-[200px]"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement
+                              target.style.display = 'none'
+                            }}
                           />
-                        ) : (
-                          <div className="w-14 h-14 border-2 border-gray-900 grid grid-cols-3 grid-rows-3 gap-0.5 rounded">
-                            {[...Array(9)].map((_, i) => (
-                              <div
-                                key={i}
-                                className={i % 2 === 0 ? 'bg-gray-900' : 'bg-transparent'}
-                              />
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <p className="m-0 text-[11px] sm:text-xs text-blue-100/90 whitespace-nowrap">
-                        Scan to view my profile
-                      </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
 
-                {/* Right column: contact form */}
-                <aside
-                  id="contact-manager"
-                  className="bg-white/10 backdrop-blur-md rounded-3xl px-5 sm:px-6 lg:px-7 py-5 sm:py-6 lg:py-7 shadow-lg scroll-mt-4 sm:scroll-mt-6 min-w-0"
+                {/* About Me Section */}
+                <div className="pt-6 border-t border-gray-200" style={{ borderTop: '1px solid #E5E7EB' }}>
+                  <h2 className="text-lg font-bold text-gray-800 mb-3">About Me</h2>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    {agentDescription}
+                  </p>
+                </div>
+                </div>
+                {/* Listings Container - Matched to profile container width */}
+          <div className="grid grid-cols-1  gap-6 sm:gap-8">
+            
+            <section id="listings" >
+            <div className="flex items-center my-5 w-full">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setActiveTab('listing')}
+                  className={`px-4 sm:px-6 py-2.5 sm:py-3 font-semibold transition-colors whitespace-nowrap text-sm sm:text-base touch-manipulation rounded ${activeTab === 'listing' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:text-gray-800 border border-gray-300'}`}
+                  type="button"
                 >
-                  <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-white">
-                    Contact {manager.name}
-                  </h3>
-                  <form className="space-y-3 sm:space-y-4" onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                      <input
-                        name="firstName"
-                        placeholder="First Name"
-                        value={formData.firstName}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 sm:py-3 border border-white/40 bg-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm sm:text-base min-h-[44px] placeholder:text-blue-100 text-white"
-                        required
-                      />
-                      <input
-                        name="lastName"
-                        placeholder="Last Name"
-                        value={formData.lastName}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 sm:py-3 border border-white/40 bg-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm sm:text-base min-h-[44px] placeholder:text-blue-100 text-white"
-                        required
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                      <input
-                        name="phone"
-                        placeholder="Phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 sm:py-3 border border-white/40 bg-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm sm:text-base min-h-[44px] placeholder:text-blue-100 text-white"
-                        required
-                      />
-                      <input
-                        type="email"
-                        name="email"
-                        placeholder="Email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 sm:py-3 border border-white/40 bg-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm sm:text-base min-h-[44px] placeholder:text-blue-100 text-white"
-                        required
-                      />
-                    </div>
-                    <textarea
-                      name="message"
-                      placeholder="Your message"
-                      value={formData.message}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2.5 sm:py-3 border border-white/40 bg-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm sm:text-base min-h-[100px] placeholder:text-blue-100 text-white"
-                      rows={4}
-                      required
-                    />
-                    <button
-                      type="submit"
-                      className="w-full bg-white text-blue-700 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors min-h-[44px] touch-manipulation"
-                    >
-                      Contact
-                    </button>
-                  </form>
-                </aside>
+                  {properties.length} Listings
+                </button>
+                <button
+                  onClick={() => setActiveTab('reviews')}
+                  className={`px-4 sm:px-6 py-2.5 sm:py-3 font-semibold transition-colors whitespace-nowrap text-sm sm:text-base touch-manipulation rounded ${activeTab === 'reviews' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:text-gray-800 border border-gray-300'}`}
+                  type="button"
+                >
+                  {reviewsCount} Reviews
+                </button>
               </div>
 
-              {/* Bottom full-width stats row */}
-              <div className="mt-4 sm:mt-6 lg:mt-8 max-w-6xl mx-auto bg-white/10 backdrop-blur-md rounded-3xl px-5 sm:px-6 md:px-7 lg:px-10 py-5 sm:py-6 md:py-7 shadow-lg">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-5 sm:gap-x-8 sm:gap-y-6 text-left text-xs sm:text-sm md:text-base text-blue-50">
-                  <div>
-                    <p className="m-0 text-[10px] sm:text-xs uppercase tracking-wide text-blue-100/80">
-                      Active Listings
-                    </p>
-                    <p className="m-0 mt-1 text-xl sm:text-2xl font-extrabold text-white">
-                      {activeListingsCount.toLocaleString()}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="m-0 text-[10px] sm:text-xs uppercase tracking-wide text-blue-100/80">
-                      Total Properties Sold
-                    </p>
-                    <p className="m-0 mt-1 text-xl sm:text-2xl font-extrabold text-white">
-                      {totalSold}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="m-0 text-[10px] sm:text-xs uppercase tracking-wide text-blue-100/80">
-                      Years of Experience
-                    </p>
-                    <p className="m-0 mt-1 text-xl sm:text-2xl font-extrabold text-white">
-                      {yearsExperience}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="m-0 text-[10px] sm:text-xs uppercase tracking-wide text-blue-100/80">
-                      Agent Network Size
-                    </p>
-                    <p className="m-0 mt-1 text-xl sm:text-2xl font-extrabold text-white">
-                      {networkSize}
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <div style={{ flex: 1, marginLeft: '1.5rem', borderTop: '1px solid #E5E7EB' }} />
             </div>
-          </section>
-
-          {/* Tabs + Listings */}
-          <section id="listings" className="bg-white rounded-xl shadow-md p-4 sm:p-6 scroll-mt-4 sm:scroll-mt-6">
-            <div className="flex border-b border-gray-200 mb-4 sm:mb-6 overflow-x-auto -mx-1 px-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-              <button
-                className={`flex-1 sm:flex-none min-w-0 sm:min-w-[auto] px-4 sm:px-6 py-2.5 sm:py-3 font-semibold border-b-2 transition-colors whitespace-nowrap text-sm sm:text-base touch-manipulation ${activeTab === 'listing' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-800'}`}
-                onClick={() => setActiveTab('listing')}
-                type="button"
-              >
-                Listing ({properties.length})
-              </button>
-              <button
-                className={`flex-1 sm:flex-none min-w-0 sm:min-w-[auto] px-4 sm:px-6 py-2.5 sm:py-3 font-semibold border-b-2 transition-colors whitespace-nowrap text-sm sm:text-base touch-manipulation ${activeTab === 'reviews' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-800'}`}
-                onClick={() => setActiveTab('reviews')}
-                type="button"
-              >
-                Reviews
-              </button>
-            </div>
-
             {activeTab === 'listing' ? (
-              <div className="min-w-0">
-                <div className="mb-4 sm:mb-6 space-y-3 sm:space-y-4">
-                  <div className="relative min-w-0">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" aria-hidden="true">🔍</span>
-                    <input
-                      className="w-full min-w-0 pl-10 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base min-h-[44px]"
-                      placeholder="Search properties..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex flex-wrap gap-2 sm:gap-3">
-                    <select className="flex-1 min-w-0 sm:flex-initial sm:min-w-[auto] px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm min-h-[40px] sm:min-h-[44px]" value={priceFilter} onChange={(e) => setPriceFilter(e.target.value)}>
-                      <option value="all">All Prices</option>
-                      <option value="under-20k">Under ₱20,000</option>
-                      <option value="20k-40k">₱20,000 - ₱40,000</option>
-                      <option value="40k-60k">₱40,000 - ₱60,000</option>
-                      <option value="60k-80k">₱60,000 - ₱80,000</option>
-                      <option value="over-80k">Over ₱80,000</option>
-                    </select>
-                    <select className="flex-1 min-w-0 sm:flex-initial sm:min-w-[auto] px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm min-h-[40px] sm:min-h-[44px]" value={sortOrder} onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}>
-                      <option value="newest">Newest First</option>
-                      <option value="oldest">Oldest First</option>
-                    </select>
-                    <button type="button" onClick={() => setShowMoreFilters(!showMoreFilters)} className={`flex-1 min-w-0 sm:flex-initial sm:min-w-[auto] px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-xs sm:text-sm min-h-[40px] sm:min-h-[44px] touch-manipulation ${showMoreFilters ? 'bg-blue-50 border-blue-500' : ''}`}>
-                      More Filters
-                    </button>
-                    <div className="flex gap-1 border border-gray-300 rounded-lg p-1 shrink-0">
-                      <button type="button" aria-label="List view" onClick={() => setViewMode('horizontal')} className={`p-2 rounded transition-colors touch-manipulation ${viewMode === 'horizontal' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
-                      </button>
-                      <button type="button" aria-label="Grid view" onClick={() => setViewMode('vertical')} className={`p-2 rounded transition-colors touch-manipulation ${viewMode === 'vertical' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" fill="none" /><rect x="14" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" fill="none" /><rect x="3" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2" fill="none" /><rect x="14" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2" fill="none" /></svg>
-                      </button>
-                    </div>
-                  </div>
-
-                  {showMoreFilters && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 rounded-lg">
-                      <div><label className="block text-xs sm:text-sm font-semibold mb-1.5 text-gray-700">Property Type</label><select className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" value={moreFilters.propertyType} onChange={(e) => setMoreFilters({ ...moreFilters, propertyType: e.target.value })}><option value="all">All Types</option><option value="Condominium">Condominium</option><option value="Apartment">Apartment</option><option value="House">House</option><option value="Studio">Studio</option><option value="TownHouse">TownHouse</option><option value="Commercial Spaces">Commercial Spaces</option><option value="Bed Space">Bed Space</option></select></div>
-                      <div><label className="block text-xs sm:text-sm font-semibold mb-1.5 text-gray-700">Bedrooms</label><select className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" value={moreFilters.bedrooms} onChange={(e) => setMoreFilters({ ...moreFilters, bedrooms: e.target.value })}><option value="all">All</option><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4+</option></select></div>
-                      <div><label className="block text-xs sm:text-sm font-semibold mb-1.5 text-gray-700">Bathrooms</label><select className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" value={moreFilters.bathrooms} onChange={(e) => setMoreFilters({ ...moreFilters, bathrooms: e.target.value })}><option value="all">All</option><option value="1">1</option><option value="2">2</option><option value="3">3+</option></select></div>
-                      <div><label className="block text-xs sm:text-sm font-semibold mb-1.5 text-gray-700">Parking</label><select className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" value={moreFilters.parking} onChange={(e) => setMoreFilters({ ...moreFilters, parking: e.target.value })}><option value="all">All</option><option value="0">0</option><option value="1">1</option><option value="2">2+</option></select></div>
-                    </div>
-                  )}
-                </div>
-
-                <div className={`mt-4 sm:mt-6 min-w-0 overflow-hidden ${viewMode === 'vertical' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6' : 'space-y-4 sm:space-y-6'}`}>
-                  {filteredAndSortedProperties.length > 0 ? (
-                    filteredAndSortedProperties.map((p) => {
+              <div className="min-w-0 bg-white rounded-xl shadow-md p-4 sm:p-6 scroll-mt-4 sm:scroll-mt-6">
+                <div className={`min-w-0 overflow-hidden space-y-4 sm:space-y-6`}>
+                  {paginatedProperties.length > 0 ? (
+                    paginatedProperties.map((p) => {
                       const propertySize = p.area ? `${p.area} sqft` : `${(p.bedrooms * 15 + p.bathrooms * 5)} sqft`
                       const mainImg = p.image_url || p.image || ASSETS.PLACEHOLDER_PROPERTY_MAIN
                       const images = (p.images_url && p.images_url.length > 0) ? [mainImg, ...(p.images_url || []).filter((u): u is string => !!u && u !== mainImg)] : undefined
-                      const managerImage = manager.image ? getAgentImageUrl(manager.image) : undefined
-                      return viewMode === 'horizontal' ? (
+                      const agentImage = agent.image || agent.avatar || agent.profile_image
+                      const agentImageUrl = agentImage ? getAgentImageUrl(agentImage) : undefined
+                      return (
                         <div key={p.id} className="min-w-0 w-full [&>article]:min-w-0 [&>article]:w-full [&>article]:max-w-full">
-                          <HorizontalPropertyCard id={p.id} propertyType={p.type} date={formatDate(p.published_at)} price={formatPrice(p.price)} title={p.title} image={mainImg} images={images} rentManagerName={manager.name} rentManagerRole={manager.role} rentManagerImage={managerImage} bedrooms={p.bedrooms} bathrooms={p.bathrooms} parking={0} propertySize={propertySize} location={p.location} city={p.city} streetAddress={p.street_address} stateProvince={p.state_province} />
-                        </div>
-                      ) : (
-                        <div key={p.id} className="w-full min-w-0 [&>article]:w-full [&>article]:min-w-0 [&>article]:max-w-full">
-                          <VerticalPropertyCard id={p.id} propertyType={p.type} priceType={formatPriceType(p.price_type)} price={formatPrice(p.price)} title={p.title} image={mainImg} images={images} rentManagerName={manager.name} rentManagerRole={manager.role} rentManagerImage={managerImage} bedrooms={p.bedrooms} bathrooms={p.bathrooms} parking={0} propertySize={propertySize} location={p.location} city={p.city} streetAddress={p.street_address} stateProvince={p.state_province} />
+                          <HorizontalPropertyCard id={p.id} propertyType={p.type} date={formatDate(p.published_at)} price={formatPrice(p.price)} priceUnit="/monthly" title={p.title} description={p.description || undefined} image={mainImg} images={images} rentManagerName={agentName} rentManagerRole="Agent" rentManagerImage={agentImageUrl} rentManagerEmail={agentEmail} rentManagerWhatsApp={agentWhatsApp} bedrooms={p.bedrooms} bathrooms={p.bathrooms} parking={0} propertySize={propertySize} location={p.location} city={p.city} streetAddress={p.street_address} stateProvince={p.state_province} />
                         </div>
                       )
                     })
@@ -580,13 +409,104 @@ export default function AgentDetailsPage() {
                 </div>
               </div>
             )}
+            </section>
 
-            <div className="flex flex-wrap items-center justify-center gap-2 mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200">
-              <button className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors touch-manipulation text-sm" type="button">←</button>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold text-sm touch-manipulation" type="button">1</button>
-              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm touch-manipulation" type="button">→</button>
+            {/* Pagination - Outside listings container, below it */}
+            {activeTab === 'listing' && filteredAndSortedProperties.length > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                totalItems={filteredAndSortedProperties.length}
+                itemsPerPage={itemsPerPage}
+                showInfo={false}
+                className="mt-4"
+              />
+            )}
+          <div></div>
+          </div>
+              </div>
+              
+              {/* Right Column: Contact Form */}
+              <aside
+                id="contact-manager"
+                className="rounded-xl overflow-hidden bg-white shadow-sm scroll-mt-4 sm:scroll-mt-6"
+                style={{ border: '1px solid #e5e7eb' }}
+              >
+                <div className="bg-[#205ed7] text-white px-5 py-3 font-semibold text-base">
+                  Contact {agentName.split(' ')[agentName.split(' ').length - 1]}
+                </div>
+                <div className="p-5">
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Your name</label>
+                      <input
+                        type="text"
+                        name="name"
+                        placeholder="Isaac Locaylocay"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2.5 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-[#205ed7]"
+                        style={{ border: '1px solid #d1d5db' }}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Your number</label>
+                      <div className="flex items-center rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-[#205ed7]" style={{ border: '1px solid #d1d5db' }}>
+                        <div className="flex items-center gap-1.5 px-3 py-2.5 bg-gray-50 flex-shrink-0" style={{ borderRight: '1px solid #d1d5db' }}>
+                          <span className="text-base leading-none">🇵🇭</span>
+                          <span className="text-sm text-gray-600">+63</span>
+                        </div>
+                        <input
+                          type="tel"
+                          name="phone"
+                          placeholder="(999) 1231-2131"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          className="flex-1 px-3 py-2.5 text-sm border-none  bg-transparent"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Your email</label>
+                      <input
+                        type="email"
+                        name="email"
+                        placeholder="isaaclocaylocay@gmail.com"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2.5 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-[#205ed7]"
+                        style={{ border: '1px solid #d1d5db' }}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Your message</label>
+                      <textarea
+                        name="message"
+                        placeholder="I'm interested in this property and I'd like to know more details."
+                        value={formData.message}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2.5 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-[#205ed7]"
+                        rows={4}
+                        style={{ minHeight: '100px', resize: 'vertical', border: '1px solid #d1d5db' }}
+                        required
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full bg-[#205ed7] text-white py-3 rounded-lg font-semibold hover:bg-[#1a4bb5] transition-colors text-sm"
+                    >
+                      Send Inquiry
+                    </button>
+                  </form>
+                </div>
+              </aside>
             </div>
           </section>
+
+          
         </div>
       </main>
       <Footer />
