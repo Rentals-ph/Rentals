@@ -50,6 +50,14 @@ class BlogComment extends Model
     }
 
     /**
+     * Likes for this comment.
+     */
+    public function likes(): HasMany
+    {
+        return $this->hasMany(BlogCommentLike::class, 'comment_id');
+    }
+
+    /**
      * Resolved display name: user's full name, the provided guest name, or "Guest".
      */
     public function getDisplayNameAttribute(): string

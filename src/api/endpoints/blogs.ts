@@ -121,5 +121,97 @@ export const blogsApi = {
   delete: async (id: number): Promise<void> => {
     await apiClient.delete(`/blogs/${id}`)
   },
+
+  /**
+   * Get blog likes
+   */
+  getLikes: async (blogId: number): Promise<{ liked: boolean; likes_count: number }> => {
+    const response = await apiClient.get<{ success: boolean; data: { liked: boolean; likes_count: number } }>(`/blogs/${blogId}/likes`)
+    return response.data.data
+  },
+
+  /**
+   * Toggle blog like
+   */
+  toggleLike: async (blogId: number): Promise<{ liked: boolean; likes_count: number }> => {
+    try {
+      const response = await apiClient.post<{ success: boolean; data: { liked: boolean; likes_count: number } }>(`/blogs/${blogId}/likes`)
+      return response.data.data
+    } catch (error: any) {
+      // Re-throw with better error message for rate limiting
+      if (error.response?.status === 429) {
+        throw new Error(error.response?.data?.message || 'Please wait a moment before liking again.')
+      }
+      throw error
+    }
+  },
+
+  /**
+   * Get blog comments
+   */
+  getComments: async (blogId: number): Promise<BlogComment[]> => {
+    const response = await apiClient.get<{ success: boolean; data: BlogComment[] }>(`/blogs/${blogId}/comments`)
+    return response.data.data || []
+  },
+
+  /**
+   * Post a comment
+   */
+  postComment: async (blogId: number, data: { content: string; name?: string; email?: string; parent_id?: number }): Promise<BlogComment> => {
+    const response = await apiClient.post<{ success: boolean; data: { comment: BlogComment; comments_count: number } }>(`/blogs/${blogId}/comments`, data)
+    return response.data.data.comment
+  },
+
+  /**
+   * Delete a comment
+   */
+  deleteComment: async (blogId: number, commentId: number): Promise<void> => {
+    await apiClient.delete(`/blogs/${blogId}/comments/${commentId}`)
+  },
+
+  /**
+   * Get comment likes
+   */
+  getCommentLikes: async (blogId: number, commentId: number): Promise<{ liked: boolean; likes_count: number }> => {
+    const response = await apiClient.get<{ success: boolean; data: { liked: boolean; likes_count: number } }>(`/blogs/${blogId}/comments/${commentId}/likes`)
+    return response.data.data
+  },
+
+  /**
+   * Toggle comment like
+   */
+  toggleCommentLike: async (blogId: number, commentId: number): Promise<{ liked: boolean; likes_count: number }> => {
+    try {
+      const response = await apiClient.post<{ success: boolean; data: { liked: boolean; likes_count: number } }>(`/blogs/${blogId}/comments/${commentId}/likes`)
+      return response.data.data
+    } catch (error: any) {
+      // Re-throw with better error message for rate limiting
+      if (error.response?.status === 429) {
+        throw new Error(error.response?.data?.message || 'Please wait a moment before liking again.')
+      }
+      throw error
+    }
+  },
+}
+
+export interface BlogComment {
+  id: number
+  blog_id: number
+  user_id?: number
+  parent_id?: number
+  name?: string
+  email?: string
+  content: string
+  created_at: string
+  updated_at: string
+  user?: {
+    id: number
+    first_name: string
+    last_name: string
+    image_path?: string
+  }
+  replies?: BlogComment[]
+  likes_count?: number
+  display_name?: string
 }
 

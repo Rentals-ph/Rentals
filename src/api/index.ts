@@ -18,6 +18,8 @@ export { pageBuilderApi } from './endpoints/pageBuilder'
 export { listingAssistantApi } from './endpoints/listingAssistant'
 export { brokerApi } from './endpoints/broker'
 export type { TeamProductivityRow } from './endpoints/broker'
+export { downloadablesApi } from './endpoints/downloadables'
+export type { Downloadable } from './endpoints/downloadables'
 
 // Export types from endpoints
 export type { GetPropertiesParams } from './endpoints/properties'

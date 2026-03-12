@@ -1,7 +1,8 @@
 'use client'
 
-import AppSidebar from '@/components/common/AppSidebar'
-import DashboardHeader from '@/components/common/DashboardHeader'
+import { useState, useEffect } from 'react'
+import DashboardHeader from '@/components/common/dashboard/DashboardHeader'
+import api from '@/lib/api'
 import { 
   FiUsers, 
   FiHome, 
@@ -9,43 +10,101 @@ import {
   FiLayers,
   FiCheckCircle
 } from 'react-icons/fi'
-// import './page.css' // Removed - converted to Tailwind
 
 export default function AdminDashboard() {
+  const [stats, setStats] = useState({
+    totalProperties: 0,
+    activeAgents: 0,
+    totalUsers: 0,
+    totalBlogs: 0,
+  })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchDashboardStats()
+  }, [])
+
+  const fetchDashboardStats = async () => {
+    try {
+      setLoading(true)
+      // Fetch properties count
+      const propertiesRes = await api.get('/properties')
+      const properties = propertiesRes.success ? propertiesRes.data : []
+      
+      // Fetch agents count
+      const agentsRes = await api.get('/admin/agents')
+      const agents = agentsRes.success ? agentsRes.data : []
+      
+      // Fetch users count
+      const usersRes = await api.get('/admin/users')
+      const users = usersRes.success ? usersRes.data : []
+      
+      // Fetch blogs count
+      const blogsRes = await api.get('/blogs')
+      const blogs = blogsRes.success ? blogsRes.data : []
+
+      setStats({
+        totalProperties: Array.isArray(properties) ? properties.length : 0,
+        activeAgents: Array.isArray(agents) ? agents.filter((a: any) => a.status === 'approved' || a.status === 'active').length : 0,
+        totalUsers: Array.isArray(users) ? users.length : 0,
+        totalBlogs: Array.isArray(blogs) ? blogs.length : 0,
+      })
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit">
-      <AppSidebar/>
-      <main className="ml-[280px] flex-1 w-[calc(100%-280px)] p-8 min-h-screen lg:ml-[240px] lg:w-[calc(100%-240px)] lg:p-6 md:ml-0 md:w-full md:p-4 md:pt-15">
-        <DashboardHeader
-          title="Dashboard Overview"
-          subtitle="Welcome back, Admin"
-          showNotifications={true}
-        />
+    <>
+      <DashboardHeader
+        title="Dashboard Overview"
+        subtitle="Welcome back, Admin"
+        showNotifications={false}
+      />
 
-        <div className="grid grid-cols-4 gap-6 mb-8 lg:grid-cols-2 md:grid-cols-1">
-          <div className="bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm transition-all duration-200 hover:shadow-md">
-            <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-blue-100 text-blue-600">
-              <FiLayers />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-sm font-medium text-gray-600 mb-2">Total Properties</h3>
-              <p className="text-3xl font-bold text-gray-900 mb-1">1,247</p>
-              <p className="text-xs font-medium text-emerald-600">↑ 12% from last month</p>
-            </div>
+      <div className="grid grid-cols-4 gap-6 mb-8 lg:grid-cols-2 md:grid-cols-1">
+        <div className="bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm transition-all duration-200 hover:shadow-md">
+          <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-blue-100 text-blue-600">
+            <FiLayers />
           </div>
-
-          <div className="bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm transition-all duration-200 hover:shadow-md">
-            <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-orange-100 text-orange-600">
-              <FiUsers />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-sm font-medium text-gray-600 mb-2">Active Agents</h3>
-              <p className="text-3xl font-bold text-gray-900 mb-1">89</p>
-              <p className="text-xs font-medium text-emerald-600">↑ 8% from last month</p>
-            </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-medium text-gray-600 mb-2">Total Properties</h3>
+            <p className="text-3xl font-bold text-gray-900 mb-1">{loading ? '...' : stats.totalProperties.toLocaleString()}</p>
           </div>
         </div>
+
+        <div className="bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm transition-all duration-200 hover:shadow-md">
+          <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-orange-100 text-orange-600">
+            <FiUsers />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-medium text-gray-600 mb-2">Active Agents</h3>
+            <p className="text-3xl font-bold text-gray-900 mb-1">{loading ? '...' : stats.activeAgents.toLocaleString()}</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm transition-all duration-200 hover:shadow-md">
+          <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-purple-100 text-purple-600">
+            <FiUsers />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-medium text-gray-600 mb-2">Total Users</h3>
+            <p className="text-3xl font-bold text-gray-900 mb-1">{loading ? '...' : stats.totalUsers.toLocaleString()}</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm transition-all duration-200 hover:shadow-md">
+          <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-green-100 text-green-600">
+            <FiCheckCircle />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-medium text-gray-600 mb-2">Total Blogs</h3>
+            <p className="text-3xl font-bold text-gray-900 mb-1">{loading ? '...' : stats.totalBlogs.toLocaleString()}</p>
+          </div>
+        </div>
+      </div>
 
         <div className="grid grid-cols-2 gap-6 mb-8 lg:grid-cols-1">
           
@@ -230,9 +289,8 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
-        </div>
-      </main>
-    </div>
+      </div>
+    </>
   )
 }
 

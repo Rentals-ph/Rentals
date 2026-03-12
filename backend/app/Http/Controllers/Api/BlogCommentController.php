@@ -36,8 +36,15 @@ class BlogCommentController extends Controller
                 'user:id,first_name,last_name,image_path',
                 'replies.user:id,first_name,last_name,image_path',
             ])
+            ->withCount('likes')
             ->latest()
-            ->paginate($request->integer('per_page', 20));
+            ->get()
+            ->map(function ($comment) {
+                $comment->replies->each(function ($reply) {
+                    $reply->loadCount('likes');
+                });
+                return $comment;
+            });
 
         return response()->json([
             'success'        => true,
@@ -134,8 +141,9 @@ class BlogCommentController extends Controller
             'content'          => $validated['content'],
         ]);
 
-        // Load user relation for response
+        // Load user relation and likes count for response
         $comment->load('user:id,first_name,last_name,image_path');
+        $comment->loadCount('likes');
 
         $post->refresh();
 

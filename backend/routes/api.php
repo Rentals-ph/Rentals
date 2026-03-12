@@ -303,6 +303,7 @@ use App\Http\Controllers\Api\ProfileViewController;
 use App\Http\Controllers\Api\BlogViewController;
 use App\Http\Controllers\Api\BlogLikeController;
 use App\Http\Controllers\Api\BlogCommentController;
+use App\Http\Controllers\Api\BlogCommentLikeController;
 use App\Http\Controllers\Api\NewsViewController;
 use App\Http\Controllers\Api\NewsLikeController;
 use App\Http\Controllers\Api\NewsCommentController;
@@ -329,10 +330,15 @@ Route::middleware('guest.session')->group(function () {
     Route::get('/blogs/{blog}/views',     [BlogViewController::class, 'count']);
 
     Route::get('/blogs/{blog}/likes',     [BlogLikeController::class, 'show']);
-    Route::post('/blogs/{blog}/likes',    [BlogLikeController::class, 'toggle']);
+    // Rate limit likes: 10 likes per minute per user/guest session
+    Route::post('/blogs/{blog}/likes',    [BlogLikeController::class, 'toggle'])->middleware('throttle:10,1');
 
     Route::get('/blogs/{blog}/comments',  [BlogCommentController::class, 'index']);
-    Route::post('/blogs/{blog}/comments', [BlogCommentController::class, 'store']);
+    Route::post('/blogs/{blog}/comments', [BlogCommentController::class, 'store'])->middleware('throttle:5,1');
+    
+    Route::get('/blogs/{blog}/comments/{comment}/likes',  [BlogCommentLikeController::class, 'show']);
+    // Rate limit comment likes: 10 likes per minute per user/guest session
+    Route::post('/blogs/{blog}/comments/{comment}/likes', [BlogCommentLikeController::class, 'toggle'])->middleware('throttle:10,1');
 
     // ─────────────────────────────────────────────────────────────────────────
     // News engagement
@@ -359,5 +365,21 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::delete('/blogs/{blog}/comments/{comment}', [BlogCommentController::class, 'destroy']);
     Route::delete('/news/{news}/comments/{comment}',  [NewsCommentController::class, 'destroy']);
+});
+
+// Downloadables routes
+use App\Http\Controllers\Api\DownloadableController;
+// Public route for agents/brokers to get active downloadables
+Route::get('/downloadables', [DownloadableController::class, 'index']);
+// Public route for downloading files
+Route::get('/downloadables/{id}/download', [DownloadableController::class, 'download']);
+
+// Admin routes for managing downloadables
+Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
+    Route::get('/downloadables', [DownloadableController::class, 'getAll']);
+    Route::post('/downloadables', [DownloadableController::class, 'store']);
+    Route::get('/downloadables/{id}', [DownloadableController::class, 'show']);
+    Route::put('/downloadables/{id}', [DownloadableController::class, 'update']);
+    Route::delete('/downloadables/{id}', [DownloadableController::class, 'destroy']);
 });
 

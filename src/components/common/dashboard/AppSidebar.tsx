@@ -216,6 +216,17 @@ function AppSidebar() {
   // Admin sidebar content
   const renderAdminSidebar = () => (
     <>
+      <NavLink href="/admin" icon={FiHome} label="Dashboard" active={isActive('/admin') && pathname === '/admin'} />
+      <NavLink href="/admin/agents" icon={FiUsers} label="Agents" active={isActive('/admin/agents')} />
+      <NavLink href="/admin/properties" icon={FiLayers} label="Properties" active={isActive('/admin/properties')} />
+      <NavLink href="/admin/blogs" icon={FiBookOpen} label="Blogs" active={isActive('/admin/blogs')} />
+      <NavLink href="/admin/downloadables" icon={FiDownload} label="Downloadables" active={isActive('/admin/downloadables')} />
+    </>
+  )
+
+  // Old admin sidebar - keeping for reference
+  const renderAdminSidebarOld = () => (
+    <>
       <NavLink href="/admin" icon={FiHome} label="Dashboard" active={isActive('/admin')} />
       <NavLink href="/admin/agents" icon={FiUsers} label="User Management" active={isActive('/admin/agents')} />
       <NavLink href="/admin/properties" icon={FiLayers} label="Property Management" active={isActive('/admin/properties')} />
