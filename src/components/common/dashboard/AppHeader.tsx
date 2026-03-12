@@ -3,10 +3,11 @@
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { agentsApi } from '@/api'
+import { agentsApi, messagesApi } from '@/api'
+import type { Message } from '@/api/endpoints/messages'
 import { ASSETS } from '@/utils/assets'
 import { resolveAgentAvatar } from '@/utils/imageResolver'
-import { FiBell, FiLogOut, FiUser } from 'react-icons/fi'
+import { FiBell, FiLogOut, FiUser, FiX } from 'react-icons/fi'
 
 function AppHeader() {
   const router = useRouter()
@@ -15,7 +16,12 @@ function AppHeader() {
   const [userAvatar, setUserAvatar] = useState<string>(ASSETS.PLACEHOLDER_PROFILE)
   const [isVerified, setIsVerified] = useState<boolean>(false)
   const [showProfileDropdown, setShowProfileDropdown] = useState(false)
+  const [showNotificationDropdown, setShowNotificationDropdown] = useState(false)
+  const [unreadMessages, setUnreadMessages] = useState<Message[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [loadingNotifications, setLoadingNotifications] = useState(false)
   const profileRef = useRef<HTMLDivElement>(null)
+  const notificationRef = useRef<HTMLDivElement>(null)
 
   // Determine if we're on agent or broker routes
   const isAgentRoute = pathname?.startsWith('/agent')
@@ -103,22 +109,97 @@ function AppHeader() {
     fetchUserData()
   }, [isAgentRoute, isBrokerRoute])
 
-  // Close profile dropdown when clicking outside
+  // Fetch unread messages (property inquiries)
+  useEffect(() => {
+    const fetchUnreadMessages = async () => {
+      if (!isAgentRoute && !isBrokerRoute) return
+      
+      try {
+        setLoadingNotifications(true)
+        const response = await messagesApi.getAll({ is_read: false })
+        // Filter for property inquiries only
+        const inquiries = response.data.filter(msg => msg.type === 'property_inquiry')
+        setUnreadMessages(inquiries.slice(0, 5)) // Show latest 5
+        // Count only property inquiries for the badge
+        setUnreadCount(inquiries.length)
+      } catch (error) {
+        console.error('Error fetching unread messages:', error)
+      } finally {
+        setLoadingNotifications(false)
+      }
+    }
+
+    fetchUnreadMessages()
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchUnreadMessages, 30000)
+    return () => clearInterval(interval)
+  }, [isAgentRoute, isBrokerRoute])
+
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setShowProfileDropdown(false)
       }
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+        setShowNotificationDropdown(false)
+      }
     }
 
-    if (showProfileDropdown) {
+    if (showProfileDropdown || showNotificationDropdown) {
       document.addEventListener('mousedown', handleClickOutside)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [showProfileDropdown])
+  }, [showProfileDropdown, showNotificationDropdown])
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await messagesApi.markAllAsRead()
+      // Refresh messages to update the list
+      const response = await messagesApi.getAll({ is_read: false })
+      const inquiries = response.data.filter(msg => msg.type === 'property_inquiry')
+      setUnreadMessages(inquiries.slice(0, 5))
+      setUnreadCount(inquiries.length)
+    } catch (error) {
+      console.error('Error marking all as read:', error)
+    }
+  }
+
+  const handleNotificationClick = async (message: Message) => {
+    // Mark as read if not already read
+    if (!message.is_read) {
+      try {
+        await messagesApi.markAsRead(message.id)
+        // Update local state
+        setUnreadMessages(prev => prev.map(msg => 
+          msg.id === message.id ? { ...msg, is_read: true } : msg
+        ))
+        setUnreadCount(prev => Math.max(0, prev - 1))
+      } catch (error) {
+        console.error('Error marking message as read:', error)
+      }
+    }
+    setShowNotificationDropdown(false)
+    router.push(inboxPath)
+  }
+
+  const formatTime = (dateString: string): string => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+
+    if (diffMins < 1) return 'Just now'
+    if (diffMins < 60) return `${diffMins}m ago`
+    if (diffHours < 24) return `${diffHours}h ago`
+    if (diffDays < 7) return `${diffDays}d ago`
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined })
+  }
 
   const handleLogout = () => {
     localStorage.removeItem('auth_token')
@@ -187,14 +268,93 @@ function AppHeader() {
             <span>Add Listing</span>
           </Link>
 
-          {/* Bell Icon */}
-          <Link
-            href={inboxPath}
-            className="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-blue-600 transition-colors"
-            aria-label="Notifications"
-          >
-            <FiBell className="text-xl" />
-          </Link>
+          {/* Bell Icon with Notification Dropdown */}
+          <div className="relative" ref={notificationRef}>
+            <button
+              onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
+              className="relative flex items-center justify-center w-10 h-10 text-gray-600 hover:text-blue-600 transition-colors"
+              aria-label="Notifications"
+            >
+              <FiBell className="text-xl" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+              )}
+            </button>
+
+            {/* Notification Dropdown */}
+            {showNotificationDropdown && (
+              <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white border border-gray-200 rounded-lg shadow-xl z-50 max-h-[500px] flex flex-col">
+                {/* Header */}
+                <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                  <h3 className="text-sm font-semibold text-gray-900 m-0">Notifications</h3>
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={handleMarkAllAsRead}
+                      className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                      type="button"
+                    >
+                      Mark all as read
+                    </button>
+                  )}
+                </div>
+
+                {/* Messages List */}
+                <div className="overflow-y-auto flex-1">
+                  {loadingNotifications ? (
+                    <div className="p-4 text-center text-sm text-gray-500">Loading...</div>
+                  ) : unreadMessages.length === 0 ? (
+                    <div className="p-6 text-center text-sm text-gray-500">
+                      <FiBell className="text-2xl text-gray-300 mx-auto mb-2" />
+                      <p className="m-0">No new inquiries</p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-gray-100">
+                      {unreadMessages.map((message) => (
+                        <button
+                          key={message.id}
+                          onClick={() => handleNotificationClick(message)}
+                          className="w-full text-left p-4 hover:bg-gray-50 transition-colors"
+                          type="button"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <p className="text-xs font-semibold text-gray-900 truncate m-0">
+                                  {message.sender_email}
+                                </p>
+                                {!message.is_read && (
+                                  <span className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0"></span>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-600 line-clamp-2 m-0 mb-1">
+                                {message.message}
+                              </p>
+                              <p className="text-xs text-gray-400 m-0">
+                                {formatTime(message.created_at)}
+                              </p>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer - View All */}
+                {unreadMessages.length > 0 && (
+                  <div className="p-3 border-t border-gray-200">
+                    <Link
+                      href={inboxPath}
+                      onClick={() => setShowNotificationDropdown(false)}
+                      className="block text-center text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      View all messages
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Divider */}
           <div className="h-8 w-px bg-gray-300" />

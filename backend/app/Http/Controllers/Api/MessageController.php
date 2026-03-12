@@ -295,6 +295,53 @@ class MessageController extends Controller
     }
 
     /**
+     * Mark all messages as read for authenticated user.
+     */
+    #[OA\Put(
+        path: "/messages/read-all",
+        summary: "Mark all messages as read",
+        tags: ["Messages"],
+        security: [["sanctum" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "All messages marked as read"),
+        ]
+    )]
+    public function markAllAsRead(Request $request): JsonResponse
+    {
+        try {
+            $user = $request->user();
+            
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized',
+                ], 401);
+            }
+
+            $count = Message::where('recipient_id', $user->id)
+                ->where('is_read', false)
+                ->update([
+                    'is_read' => true,
+                    'read_at' => now(),
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => $count . ' message(s) marked as read',
+                'count' => $count,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error marking all messages as read: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to mark all messages as read',
+                'error' => config('app.debug') ? $e->getMessage() : 'An error occurred',
+            ], 500);
+        }
+    }
+
+    /**
      * Delete a message.
      */
     #[OA\Delete(

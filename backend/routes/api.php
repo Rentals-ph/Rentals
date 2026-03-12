@@ -176,6 +176,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/messages', [MessageController::class, 'index']);
     Route::get('/messages/{id}', [MessageController::class, 'show']);
     Route::put('/messages/{id}/read', [MessageController::class, 'markAsRead']);
+    Route::put('/messages/read-all', [MessageController::class, 'markAllAsRead']);
     Route::delete('/messages/{id}', [MessageController::class, 'destroy']);
 });
 
