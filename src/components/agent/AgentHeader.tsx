@@ -134,9 +134,29 @@ function AgentHeader({ title, subtitle, showAddListing = true }: AgentHeaderProp
           {showAddListing && (
             <Link
               href="/agent/create-listing"
-              className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-full shadow-md hover:bg-blue-700 transition-colors"
             >
-              <FiHome className="text-base" />
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                style={{ width: '20px', height: '20px' }}
+              >
+                {/* Roof — V/caret shape stroked */}
+                <path
+                  d="M2 12 L12 2 L22 12"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+
+                {/* House body — pentagon with peaked top matching the caret angle */}
+                <path d="M3.5 22 L3.5 15 L12 6 L20.5 15 L20.5 22 Z" />
+
+                {/* Door cutout */}
+                <rect x="9.5" y="16.5" width="5" height="5.5" fill="#3B82F6" />
+              </svg>
               <span>Add Listing</span>
             </Link>
           )}
