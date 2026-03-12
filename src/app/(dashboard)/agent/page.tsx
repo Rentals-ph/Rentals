@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import AppSidebar from '@/components/common/AppSidebar'
-import AgentHeader from '@/components/agent/AgentHeader'
 import EditPropertyModal from '@/components/agent/EditPropertyModal'
 import PropertyMapPopupCard from '@/components/common/PropertyMapPopupCard'
 import { propertiesApi, agentsApi, messagesApi } from '@/api'
@@ -210,28 +208,7 @@ export default function AgentDashboard() {
   const paginationPages = getPaginationPages()
 
   return (
-    <div className="flex min-h-screen font-outfit bg-[#f0f7ff]">
-      <AppSidebar />
-
-      <main className="main-with-sidebar flex-1 min-h-screen p-6 lg:p-6 md:p-4 md:pt-14 md:pb-6">
-        <AgentHeader
-          title="Dashboard"
-          subtitle="Welcome back, manage your rental properties."
-          rightAction={
-            <div className="relative flex flex-shrink-0 items-center gap-3">
-              <Link
-                href="/agent/create-listing"
-                className="relative flex flex-shrink-0 items-center gap-2 rounded-xl bg-[#2563eb] px-4 py-2.5 font-semibold text-white shadow-md transition-all hover:bg-[#1d4ed8]"
-              >
-                <FiHome className="h-5 w-5 flex-shrink-0" aria-hidden />
-                <span>Add Listing</span>
-              </Link>
-              <Link href="/agent/inbox" className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-[#2563eb] transition-colors hover:bg-blue-100" aria-label="Notifications">
-                <FiBell className="h-5 w-5" aria-hidden />
-              </Link>
-            </div>
-          }
-        />
+    <>
 
         {/* Top row: 4 stat cards - all from backend */}
         <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -425,8 +402,6 @@ export default function AgentDashboard() {
             )}
           </div>
         </div>
-      </main>
-
      
       <EditPropertyModal
         property={editingProperty}
@@ -459,6 +434,6 @@ export default function AgentDashboard() {
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }
