@@ -48,6 +48,34 @@ export const propertiesApi = {
   },
 
   /**
+   * Record a view for a property.
+   * Uses guest.session middleware on the backend so it works for
+   * authenticated users, guest sessions, and anonymous visitors.
+   */
+  recordView: async (
+    id: number,
+  ): Promise<{ views_count: number; already_viewed: boolean }> => {
+    const response = await apiClient.post<{
+      success: boolean
+      data: { views_count: number; already_viewed: boolean }
+    }>(`/properties/${id}/views`)
+
+    return response.data.data
+  },
+
+  /**
+   * Get the cached view count for a property.
+   */
+  getViewCount: async (id: number): Promise<number> => {
+    const response = await apiClient.get<{
+      success: boolean
+      data: { views_count: number }
+    }>(`/properties/${id}/views`)
+
+    return response.data.data.views_count
+  },
+
+  /**
    * Create a new property (requires authentication)
    */
   create: async (propertyData: FormData): Promise<{ success: boolean; message: string; data: Property }> => {

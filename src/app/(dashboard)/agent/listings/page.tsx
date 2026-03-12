@@ -388,6 +388,10 @@ export default function AgentMyListings() {
 
                     return (
                       <div key={l.id} className="relative">
+                        <div className="absolute left-2 bottom-2 z-10 inline-flex items-center rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-medium text-gray-700 shadow-sm ring-1 ring-gray-200">
+                          <FiEye className="mr-1.5 h-3.5 w-3.5" />
+                          <span>{l.views ?? 0} views</span>
+                        </div>
                         <SimplePropertyCard
                           id={l.id}
                           title={l.title}
