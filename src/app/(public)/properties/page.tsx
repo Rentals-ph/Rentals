@@ -11,7 +11,6 @@ import { HorizontalPropertyCardSkeleton } from '@/components/common/HorizontalPr
 import PublicPropertiesMap, { type PublicPropertiesMapHandle } from '@/components/common/PublicPropertiesMap'
 import { EmptyState, EmptyStateAction } from '@/components/common'
 // import './page.css' // Removed - converted to Tailwind
-import PageHeader from '@/components/layout/PageHeader'
 import { propertiesApi } from '@/api/endpoints/properties'
 import type { Property } from '@/types'
 import { ASSETS } from '@/utils/assets'
@@ -979,7 +978,7 @@ function PropertiesContent() {
             onClick={() => {
               window.scrollTo({ top: 0, behavior: 'smooth' })
             }}
-            className="hidden sticky top-5 lg:block w-full bg-blue-600 text-white px-4 py-3 flex items-center justify-center gap-2 font-medium text-sm hover:bg-blue-700 transition-colors shadow-lg mt-4 rounded-lg"
+            className="hidden sticky top-28 lg:block w-full bg-blue-600 text-white px-4 py-3 flex items-center justify-center gap-2 font-medium text-sm hover:bg-blue-700 transition-colors shadow-lg mt-4 rounded-lg"
             aria-label="Back to Filters"
           >
             <span>Back to Filters</span>
@@ -1538,7 +1537,6 @@ export default function PropertiesForRentPage() {
   return (
     <Suspense fallback={
       <div className="properties-for-rent-page">
-        <PageHeader title="Properties for Rent" />
         <div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>
         <Footer />
       </div>

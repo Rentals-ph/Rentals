@@ -132,8 +132,9 @@ export default function AgentsPage() {
         </div>
 
         {/* Content */}
-        <div className="relative z-[3] max-w-6xl mx-auto py-10 sm:py-14 md:py-16 w-full flex items-center justify-start flex-1">
-          <div className="text-left flex flex-col items-start justify-center max-w-xl">
+        <div className="relative z-[3] page-x py-10 sm:py-14 md:py-16 w-full flex items-center justify-start flex-1">
+          <div className="page-w">
+            <div className="text-left flex flex-col items-start justify-center max-w-xl">
             <h1 className="font-outfit font-extrabold text-white tracking-tight leading-tight m-0 text-xl xs:text-2xl mobile:text-3xl sm:text-4xl md:text-5xl lg:text-6xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
               AGENTS
             </h1>
@@ -142,6 +143,7 @@ export default function AgentsPage() {
               in finding their perfect home. They handle everything from property listings to tenant screening, making
               the rental process smooth and stress-free for everyone involved.
             </p>
+          </div>
           </div>
         </div>
 
@@ -172,8 +174,8 @@ export default function AgentsPage() {
       </section>
 
       {/* Results header below hero - styled like properties page */}
-      <section className="px-6 sm:px-10 lg:px-20 pt-6 sm:pt-8 pb-2">
-        <div className="mx-auto max-w-6xl">
+      <section className="page-x pt-6 sm:pt-8 pb-2">
+        <div className="page-w">
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(320px,1.2fr)] gap-3 sm:gap-4 items-start lg:items-center">
             {/* Left column: results + sort + view mode controls (aligned with agents grid) */}
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
@@ -241,8 +243,8 @@ export default function AgentsPage() {
       </section>
 
       {/* Find agents list with right-side filters & CTA */}
-      <main className="px-6 sm:px-10 lg:px-20 pb-8 sm:pb-10 md:pb-12">
-        <section className="mx-auto max-w-6xl">
+      <main className="page-x pb-8 sm:pb-10 md:pb-12">
+        <section className="page-w">
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(320px,1.2fr)] gap-6 lg:gap-10 items-start">
             {/* Left: Agents list */}
             <div>
@@ -287,7 +289,7 @@ export default function AgentsPage() {
             </div>
 
             {/* Right: Search, Featured Agents, and CTA */}
-            <div className="space-y-6 lg:space-y-8">
+            <div className="space-y-6 lg:space-y-8 lg:self-start h-full">
               {/* Search & filters card (matches provided layout) */}
               <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-5 md:p-6">
                 <div className="space-y-4">
@@ -492,7 +494,24 @@ export default function AgentsPage() {
                   </Link>
                 </div>
               </div>
+
+              <button
+                  type="button"
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                  }}
+                  className="hidden sticky top-28 lg:block w-full bg-blue-600 text-white px-4 py-3 flex items-center justify-center gap-2 font-medium text-sm hover:bg-blue-700 transition-colors shadow-lg mt-4 rounded-lg"
+                  aria-label="Back to Top"
+                >
+                  <span>Back to Top</span>
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 15l-6-6-6 6" />
+                  </svg>
+                </button>
+            
             </div>
+            {/* Sticky Back to Top Button */}
+          
           </div>
         </section>
       </main>

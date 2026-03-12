@@ -109,8 +109,8 @@ export default function NewsPage() {
       {/* ══════════════════════════════════════
           1. RED HERO HEADER
       ══════════════════════════════════════ */}
-      <section style={{ background: '#CC1A1A' }} className="w-full px-6 sm:px-10 lg:px-20 py-8">
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-8 flex-wrap">
+      <section style={{ background: '#CC1A1A' }} className="w-full page-x py-8">
+        <div className="page-w flex items-center justify-between gap-8 flex-wrap">
           {/* Left: title + subtitle */}
           <div>
             <h1
@@ -140,8 +140,8 @@ export default function NewsPage() {
       {/* ══════════════════════════════════════
           2. CATEGORY TABS
       ══════════════════════════════════════ */}
-      <section className="w-full bg-white px-6 sm:px-10 lg:px-20" style={{ borderBottom: '1px solid #E5E7EB' }}>
-        <div className="max-w-6xl mx-auto flex items-center gap-6 overflow-x-auto py-3 scrollbar-hide">
+      <section className="w-full bg-white page-x" style={{ borderBottom: '1px solid #E5E7EB' }}>
+        <div className="page-w flex items-center gap-6 overflow-x-auto py-3 scrollbar-hide">
           {displayCategories.map(cat => (
             <button
               key={cat}
@@ -168,8 +168,8 @@ export default function NewsPage() {
       {/* ══════════════════════════════════════
           3. FLASH NEWS TICKER
       ══════════════════════════════════════ */}
-      <section className="w-full bg-white px-6 sm:px-10 lg:px-20 py-2" style={{ borderBottom: '1px solid #E5E7EB' }}>
-        <div className="max-w-6xl mx-auto flex items-center gap-0 overflow-hidden">
+      <section className="w-full bg-white page-x py-2" style={{ borderBottom: '1px solid #E5E7EB' }}>
+        <div className="page-w flex items-center gap-0 overflow-hidden">
           <span
             className="flex-shrink-0 text-white text-xs font-bold px-3 py-1.5 uppercase tracking-wide mr-3 font-outfit"
             style={{ background: '#CC1A1A' }}
@@ -192,8 +192,8 @@ export default function NewsPage() {
       {/* ══════════════════════════════════════
           4. FEATURED ARTICLES SLIDER
       ══════════════════════════════════════ */}
-      <section className="w-full bg-[#F2F2F2] px-6 sm:px-10 lg:px-20 pt-6 pb-2">
-        <div className="max-w-6xl mx-auto">
+      <section className="w-full bg-[#F2F2F2] page-x pt-6 pb-2">
+        <div className="page-w">
           {loading ? (
             <div className="grid grid-cols-1 lg:grid-cols-[56%_44%] gap-2">
               <div className="aspect-[4/3] lg:h-80 bg-gray-300 animate-pulse" />
@@ -211,7 +211,7 @@ export default function NewsPage() {
 
                 {/* Left: large featured */}
                 <Link href={`/news/${getFeatured(0).id}`} className="block relative overflow-hidden group">
-                  <div className="lg:h-80 aspect-[4/3] lg:aspect-auto relative overflow-hidden">
+                  <div className="lg:h-96 xl:h-[420px] aspect-[4/3] lg:aspect-auto relative overflow-hidden">
                     <img
                       src={getImageUrl(getFeatured(0).image)}
                       alt={getFeatured(0).title}
@@ -244,7 +244,7 @@ export default function NewsPage() {
                 <div className="flex flex-col gap-2">
                   {/* Top medium */}
                   <Link href={`/news/${getFeatured(1).id}`} className="block relative overflow-hidden group">
-                    <div className="h-40 relative overflow-hidden">
+                    <div className="h-44 lg:h-48 xl:h-52 relative overflow-hidden">
                       <img
                         src={getImageUrl(getFeatured(1).image)}
                         alt={getFeatured(1).title}
@@ -277,7 +277,7 @@ export default function NewsPage() {
                   <div className="grid grid-cols-2 gap-2">
                     {([getFeatured(2), getFeatured(3)] as News[]).map((article, i) => (
                       <Link key={article.id + '-f-' + i} href={`/news/${article.id}`} className="block relative overflow-hidden group">
-                        <div className="h-36 relative overflow-hidden">
+                        <div className="h-40 lg:h-44 xl:h-48 relative overflow-hidden">
                           <img
                             src={getImageUrl(article.image)}
                             alt={article.title}
@@ -349,8 +349,8 @@ export default function NewsPage() {
       {/* ══════════════════════════════════════
           5. MAIN CONTENT  (left grid + right sidebar)
       ══════════════════════════════════════ */}
-      <section className="w-full bg-[#F2F2F2] px-6 sm:px-10 lg:px-20 py-6">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[60%_40%] gap-6">
+      <section className="w-full bg-[#F2F2F2] page-x py-6">
+        <div className="page-w grid grid-cols-1 lg:grid-cols-[60%_40%] gap-6">
 
           {/* ── LEFT COLUMN ── */}
           <div className="flex flex-col gap-6">
@@ -438,7 +438,7 @@ export default function NewsPage() {
                   ).map((article, i) => (
                     <Link key={article.id + '-hw-' + i} href={`/news/${article.id}`} className="block group">
                       <article className="flex gap-4 bg-white p-3 shadow-sm hover:shadow-md transition-shadow">
-                        <div className="flex-shrink-0 w-28 h-24 overflow-hidden">
+                        <div className="flex-shrink-0 w-32 lg:w-36 xl:w-40 h-28 lg:h-32 xl:h-36 overflow-hidden">
                           <img
                             src={getImageUrl(article.image)}
                             alt={article.title}
@@ -505,7 +505,7 @@ export default function NewsPage() {
                 ).map((article, i) => (
                   <Link key={article.id + '-ln-' + i} href={`/news/${article.id}`} className="block group">
                     <article className="flex gap-3">
-                      <div className="flex-shrink-0 w-24 h-20 overflow-hidden bg-gray-200">
+                      <div className="flex-shrink-0 w-28 lg:w-32 xl:w-36 h-24 lg:h-28 xl:h-32 overflow-hidden bg-gray-200">
                         <img
                           src={getImageUrl(article.image)}
                           alt={article.title}

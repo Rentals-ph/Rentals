@@ -38,6 +38,7 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
   const [userId, setUserId] = useState<number | null>(null)
   const [hasInquiries, setHasInquiries] = useState(false)
   const [inquiriesUnreadCount, setInquiriesUnreadCount] = useState(0)
+  const [isSticky, setIsSticky] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
   const userMenuRef = useRef<HTMLDivElement>(null)
@@ -233,6 +234,22 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
     }
   }, [isMobileMenuOpen])
 
+  // Handle sticky navbar with opacity change on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY
+      setIsSticky(scrollY > 10)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    // Check initial scroll position
+    handleScroll()
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
+
   const handleLoginClick = () => {
     setIsLoginOpen(true)
   }
@@ -282,7 +299,9 @@ const Navbar = ({ mobileMenuOpen, onMobileMenuToggle }: NavbarProps) => {
 
   return (
     <>
-      <header className="relative z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+      <header className={`sticky top-0 z-50 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300 ${
+        isSticky ? 'bg-white/30' : 'bg-white/50'
+      }`}>
         <div className="flex items-center justify-between gap-2 px-3 sm:px-4 py-3 sm:py-4 md:px-10 lg:px-[150px] max-w-full min-w-0 overflow-x-hidden overflow-y-hidden">
           {/* Mobile: toggle + logo side by side. Desktop: logo only in this group */}
           <div className="flex items-center gap-2 flex-shrink-0">

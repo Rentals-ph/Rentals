@@ -62,7 +62,7 @@ export default function PublicLayoutClient({
         className="min-h-screen min-h-[100dvh] flex flex-col"
         style={pushStyle}
       >
-        <header className="flex-shrink-0 sticky top-0 z-[60] lg:static bg-white">
+        <header className="flex-shrink-0 sticky top-0 z-[60]">
           <Navbar
             mobileMenuOpen={leftOpen}
             onMobileMenuToggle={(open) => setOpenSidebar(open ? 'left' : null)}
