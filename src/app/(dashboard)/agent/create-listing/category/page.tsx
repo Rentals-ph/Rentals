@@ -2,8 +2,6 @@
 
 import { useMemo, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import AppSidebar from '@/components/common/AppSidebar'
-import AgentHeader from '@/components/agent/AgentHeader'
 import { useCreateListing } from '@/contexts/CreateListingContext'
 import {
   FiChevronDown,
@@ -81,13 +79,7 @@ export default function AgentCreateListingCategory() {
   const stepLabels = ['Category', 'Details', 'Location', 'Property Images', 'Pricing', 'Attributes', 'Owner Info', 'Publish']
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit">
-      <AppSidebar />
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4">
-        <AgentHeader 
-          title="Create Listing" 
-          subtitle="Add a new property to your portfolio." 
-        />
+    <>
 
         <div className="flex items-center gap-2 text-xl font-semibold text-gray-900 my-1.5 mb-[18px]">
           <span className="text-gray-900">Create Listing</span>
@@ -168,8 +160,7 @@ export default function AgentCreateListingCategory() {
             <FiArrowRight />
           </button>
         </div>
-      </main>
-    </div>
+    </>
   )
 }
 

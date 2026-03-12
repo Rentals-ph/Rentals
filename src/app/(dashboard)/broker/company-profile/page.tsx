@@ -1,8 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import AppSidebar from '@/components/common/AppSidebar'
-import BrokerHeader from '@/components/broker/BrokerHeader'
 import { brokerApi, propertiesApi } from '@/api'
 import type { Company, CustomStat, Award } from '@/api/endpoints/broker'
 import type { Property } from '@/types'
@@ -169,14 +167,7 @@ export default function CompanyProfilePage() {
   const showJoinSection = company?.show_join_section !== false
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit">
-      <AppSidebar />
-      <main className="main-with-sidebar flex-1 min-h-screen">
-        <div className="p-8  lg:py-6 md:py-4 md:pt-15">
-          <BrokerHeader 
-            title="Company Profile" 
-            subtitle="Create and edit your company profile here." 
-          />
+    <>
 
           {loading ? (
             <div className="p-8 text-center">Loading company profile...</div>
@@ -661,8 +652,6 @@ export default function CompanyProfilePage() {
               )}
             </div>
           )}
-        </div>
-      </main>
-    </div>
+    </>
   )
 }

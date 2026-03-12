@@ -2,8 +2,6 @@
 
 import { useMemo, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import AppSidebar from '@/components/common/AppSidebar'
-import AgentHeader from '@/components/agent/AgentHeader'
 import { useCreateListing } from '@/contexts/CreateListingContext'
 import { compressImage } from '@/utils/imageCompression'
 import { uploadWithProgress } from '@/utils/uploadProgress'
@@ -199,14 +197,7 @@ export default function AgentCreateListingPricing() {
   ]
 
   return (
-    <div className="agent-dashboard">
-      <AppSidebar/>
-
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4">
-        <AgentHeader 
-          title="Create Listing" 
-          subtitle="Set property pricing." 
-        />
+    <>
 
         <div className="aclc-breadcrumb">
           <span className="aclc-breadcrumb-strong">Create Listing</span>
@@ -335,8 +326,7 @@ export default function AgentCreateListingPricing() {
             </button>
           </div>
         </div>
-      </main>
-    </div>
+    </>
   )
 }
 

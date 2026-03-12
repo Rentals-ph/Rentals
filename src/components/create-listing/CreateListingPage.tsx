@@ -1,16 +1,14 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import AgentHeader from '../agent/AgentHeader'
-import BrokerHeader from '../broker/BrokerHeader'
 import { CreateListingChoice } from './CreateListingChoice'
 
 export type CreateListingRole = 'agent' | 'broker'
 
 export interface CreateListingPageProps {
-  /** Which flow: agent or broker. Determines header and routes. */
+  /** Which flow: agent or broker. Determines routes. */
   role: CreateListingRole
-  /** Optional custom header. If not provided, uses default AgentHeader or BrokerHeader. */
+  /** Optional custom header. Header is now in layout, but can be overridden here if needed. */
   header?: ReactNode
 }
 
@@ -26,24 +24,10 @@ export function CreateListingPage({ role, header }: CreateListingPageProps) {
   const manualHref = role === 'agent' ? AGENT_MANUAL_HREF : BROKER_MANUAL_HREF
   const aiAssistantHref = role === 'agent' ? AGENT_AI_HREF : BROKER_AI_HREF
 
-  const resolvedHeader =
-    header ??
-    (role === 'agent' ? (
-      <AgentHeader
-        title="Create New Listing"
-        subtitle="Choose how you'd like to create your property listing"
-      />
-    ) : (
-      <BrokerHeader
-        title="Create New Listing"
-        subtitle="Choose how you'd like to create your property listing"
-        showAddListing
-      />
-    ))
-
+  // Header is now in layout, but allow custom header override if needed
   return (
     <CreateListingChoice
-      header={resolvedHeader}
+      header={header}
       manualHref={manualHref}
       aiAssistantHref={aiAssistantHref}
     />

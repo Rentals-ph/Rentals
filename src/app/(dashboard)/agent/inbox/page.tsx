@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import AppSidebar from '@/components/common/AppSidebar'
-import AgentHeader from '@/components/agent/AgentHeader'
 import { messagesApi } from '@/api'
 import type { Message } from '@/api/endpoints/messages'
 import { 
@@ -169,14 +167,7 @@ export default function AgentInbox() {
 
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit"> {/* agent-inbox */}
-      <AppSidebar/>
-
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4 md:pt-15"> {/* agent-main */}
-        <AgentHeader 
-          title="Inbox" 
-          subtitle="Manage your messages and inquiries." 
-        />
+    <>
 
         <div className="bg-white rounded-2xl p-6 shadow-sm"> {/* inbox-container */}
           <h2 className="text-xl font-bold text-gray-900 mb-5">Inbox</h2> {/* inbox-title */}
@@ -436,8 +427,7 @@ export default function AgentInbox() {
             </div>
           )}
         </div>
-      </main>
-    </div>
+    </>
   )
 }
 

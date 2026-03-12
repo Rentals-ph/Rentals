@@ -1,7 +1,5 @@
 'use client'
 
-import AppSidebar from '@/components/common/AppSidebar'
-import AgentHeader from '@/components/agent/AgentHeader'
 import { 
   FiDownload,
   FiFileText,
@@ -15,14 +13,7 @@ export default function AgentDownloadables() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit">
-      <AppSidebar/>
-
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4">
-        <AgentHeader 
-          title="Downloadables" 
-          subtitle="Download resources and documents." 
-        />
+    <>
 
         <div className="bg-white rounded-xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.1)] md:p-6">
           <h2 className="m-0 mb-8 text-2xl font-bold text-gray-900">Downloadables</h2>
@@ -77,7 +68,6 @@ export default function AgentDownloadables() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+    </>
   )
 }

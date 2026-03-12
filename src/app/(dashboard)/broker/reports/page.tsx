@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import AppSidebar from '@/components/common/AppSidebar'
-import BrokerHeader from '@/components/broker/BrokerHeader'
 import { brokerApi, type TeamProductivityRow } from '@/api'
 import {
   FiChevronDown,
@@ -116,14 +114,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit"> {/* broker-dashboard */}
-      <AppSidebar />
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4 md:pt-15"> {/* broker-main */}
-        <BrokerHeader 
-          title="Reports" 
-          subtitle="You can view your team's performance, lead conversion, and inventory health." 
-        />
-
+    <> 
         {/* Stats Row */}
         <div className="grid grid-cols-4 gap-5 mb-6 lg:grid-cols-2 md:grid-cols-1"> {/* rp-stats-grid */}
           {statsData.map((stat, index) => (
@@ -348,7 +339,6 @@ export default function ReportsPage() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+    </>
   )
 }

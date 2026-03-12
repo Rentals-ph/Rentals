@@ -1,6 +1,5 @@
 'use client'
 
-import BrokerHeader from '@/components/broker/BrokerHeader'
 import {
   CreateListingStepLayout,
   OwnerReviewStepContent,
@@ -39,13 +38,6 @@ export default function BrokerCreateListingOwnerReview() {
 
   return (
     <CreateListingStepLayout
-      header={
-        <BrokerHeader
-          title="Create Listing"
-          subtitle="Review your listing and publish."
-          showAddListing
-        />
-      }
       stepLabels={STEP_LABELS}
       currentStepIndex={3}
       breadcrumbStepName="Review & Publish"

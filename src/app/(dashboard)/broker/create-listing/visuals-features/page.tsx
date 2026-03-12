@@ -1,6 +1,5 @@
 'use client'
 
-import BrokerHeader from '@/components/broker/BrokerHeader'
 import {
   CreateListingStepLayout,
   VisualsFeaturesStepContent,
@@ -16,13 +15,6 @@ const STEP_LABELS = [
 export default function BrokerCreateListingVisualsFeatures() {
   return (
     <CreateListingStepLayout
-      header={
-        <BrokerHeader
-          title="Create Listing"
-          subtitle="Add visuals and features."
-          showAddListing
-        />
-      }
       stepLabels={STEP_LABELS}
       currentStepIndex={1}
       breadcrumbStepName="Visuals & Features"

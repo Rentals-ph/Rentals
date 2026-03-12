@@ -1,6 +1,5 @@
 'use client'
 
-import AgentHeader from '@/components/agent/AgentHeader'
 import {
   CreateListingStepLayout,
   OwnerReviewStepContent,
@@ -27,12 +26,6 @@ const EDIT_STEP_MAP: Record<string, string> = {
 export default function AgentCreateListingOwnerReview() {
   return (
     <CreateListingStepLayout
-      header={
-        <AgentHeader
-          title="Create Listing"
-          subtitle="Review your listing and publish."
-        />
-      }
       stepLabels={STEP_LABELS}
       currentStepIndex={2}
       breadcrumbStepName="Review & Publish"

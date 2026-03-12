@@ -2,22 +2,13 @@
 
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import AppSidebar from '@/components/common/AppSidebar'
-import AgentHeader from '@/components/agent/AgentHeader'
 import { FiHome, FiArrowLeft } from 'react-icons/fi'
 
 export default function AgentListingNotFound() {
   const router = useRouter()
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit">
-      <AppSidebar />
-
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4 md:pt-20">
-        <AgentHeader 
-          title="Listing Not Found" 
-          subtitle="The listing you're looking for doesn't exist or has been removed." 
-        />
+    <>
 
         <div className="flex flex-col items-center justify-center min-h-[60vh] max-w-2xl mx-auto">
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 sm:p-12 text-center w-full">
@@ -58,8 +49,7 @@ export default function AgentListingNotFound() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+    </>
   )
 }
 

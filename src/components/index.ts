@@ -27,15 +27,10 @@ export {
 
 // Agent
 export {
-  AgentHeader,
-  AgentLayout,
   EditPropertyModal,
   LocationMap,
   PropertiesMap,
 } from './agent'
-
-// Broker
-export { BrokerHeader } from './broker'
 
 // Create listing (agent + broker flows)
 export {

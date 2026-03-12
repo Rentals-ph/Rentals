@@ -2,28 +2,37 @@
 
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { agentsApi } from '../../api'
+import { useRouter, usePathname } from 'next/navigation'
+import { agentsApi } from '@/api'
 import { ASSETS } from '@/utils/assets'
 import { resolveAgentAvatar } from '@/utils/imageResolver'
-import { FiBell, FiHome, FiLogOut, FiUser } from 'react-icons/fi'
+import { FiBell, FiLogOut, FiUser } from 'react-icons/fi'
 
-interface AgentHeaderProps {
-  title?: string
-  subtitle?: string
-  showAddListing?: boolean
-}
-
-function AgentHeader({ title, subtitle, showAddListing = true }: AgentHeaderProps) {
+function AppHeader() {
   const router = useRouter()
+  const pathname = usePathname()
   const [userName, setUserName] = useState<string>('')
   const [userAvatar, setUserAvatar] = useState<string>(ASSETS.PLACEHOLDER_PROFILE)
   const [isVerified, setIsVerified] = useState<boolean>(false)
   const [showProfileDropdown, setShowProfileDropdown] = useState(false)
   const profileRef = useRef<HTMLDivElement>(null)
 
+  // Determine if we're on agent or broker routes
+  const isAgentRoute = pathname?.startsWith('/agent')
+  const isBrokerRoute = pathname?.startsWith('/broker')
+  const isAdminRoute = pathname?.startsWith('/admin')
+
+  // Determine create listing path and inbox path based on route
+  const createListingPath = isBrokerRoute ? '/broker/create-listing' : '/agent/create-listing'
+  const inboxPath = isBrokerRoute ? '/broker/inbox' : '/agent/inbox'
+  const accountPath = isBrokerRoute ? '/broker/account' : '/agent/account'
+  const roleLabel = isBrokerRoute ? 'Broker' : isVerified ? 'Rent Manager' : 'Property Agent'
+  const defaultName = isBrokerRoute ? 'Broker' : 'Agent'
+
   useEffect(() => {
-    const fetchAgentData = async () => {
+    const fetchUserData = async () => {
+      if (!isAgentRoute && !isBrokerRoute) return
+
       try {
         // Get stored data first
         const storedName = localStorage.getItem('user_name') || localStorage.getItem('agent_name') || ''
@@ -34,41 +43,53 @@ function AgentHeader({ title, subtitle, showAddListing = true }: AgentHeaderProp
           setUserName(storedName)
         }
 
-        try {
-          const agentData = await agentsApi.getCurrent()
-          
-          // Update name
-          if (agentData.first_name && agentData.last_name) {
-            const fullName = `${agentData.first_name} ${agentData.last_name}`
-            setUserName(fullName)
-            localStorage.setItem('agent_name', fullName)
-            localStorage.setItem('user_name', fullName)
-          } else if (agentData.full_name) {
-            setUserName(agentData.full_name)
-            localStorage.setItem('agent_name', agentData.full_name)
-            localStorage.setItem('user_name', agentData.full_name)
+        const role = typeof window !== 'undefined' ? (localStorage.getItem('user_role') || localStorage.getItem('agent_role')) : null
+        const isAgent = role === 'agent'
+
+        // /agents/me is only for users with role 'agent'; brokers/admins get 403
+        if (isAgent && (isAgentRoute || isBrokerRoute)) {
+          try {
+            const agentData = await agentsApi.getCurrent()
+            
+            // Update name
+            if (agentData.first_name && agentData.last_name) {
+              const fullName = `${agentData.first_name} ${agentData.last_name}`
+              setUserName(fullName)
+              localStorage.setItem('agent_name', fullName)
+              localStorage.setItem('user_name', fullName)
+            } else if (agentData.full_name) {
+              setUserName(agentData.full_name)
+              localStorage.setItem('agent_name', agentData.full_name)
+              localStorage.setItem('user_name', agentData.full_name)
+            }
+            
+            // Update avatar and verification status
+            if (agentData.id) {
+              const avatarImage = resolveAgentAvatar(
+                agentData.image || agentData.avatar || agentData.profile_image,
+                agentData.id
+              )
+              setUserAvatar(avatarImage)
+              setIsVerified(agentData.verified || false)
+              localStorage.setItem('agent_id', agentData.id.toString())
+            }
+          } catch (error) {
+            console.error('Error fetching agent data in AppHeader:', error)
+            // Fallback to stored agent ID for avatar
+            if (storedAgentId) {
+              const avatarImage = resolveAgentAvatar(null, parseInt(storedAgentId))
+              setUserAvatar(avatarImage)
+            }
           }
-          
-          // Update avatar and verification status
-          if (agentData.id) {
-            const avatarImage = resolveAgentAvatar(
-              agentData.image || agentData.avatar || agentData.profile_image,
-              agentData.id
-            )
-            setUserAvatar(avatarImage)
-            setIsVerified(agentData.verified || false)
-            localStorage.setItem('agent_id', agentData.id.toString())
-          }
-        } catch (error) {
-          console.error('Error fetching agent data in AgentHeader:', error)
-          // Fallback to stored agent ID for avatar
+        } else {
+          // For brokers/admins we rely on localStorage only (no /agents/me call)
           if (storedAgentId) {
             const avatarImage = resolveAgentAvatar(null, parseInt(storedAgentId))
             setUserAvatar(avatarImage)
           }
         }
       } catch (error) {
-        console.error('Error in fetchAgentData:', error)
+        console.error('Error in fetchUserData:', error)
         // Fallback to localStorage values
         const storedName = localStorage.getItem('user_name') || localStorage.getItem('agent_name') || ''
         const storedAgentId = localStorage.getItem('agent_id')
@@ -79,8 +100,8 @@ function AgentHeader({ title, subtitle, showAddListing = true }: AgentHeaderProp
         }
       }
     }
-    fetchAgentData()
-  }, [])
+    fetchUserData()
+  }, [isAgentRoute, isBrokerRoute])
 
   // Close profile dropdown when clicking outside
   useEffect(() => {
@@ -111,9 +132,16 @@ function AgentHeader({ title, subtitle, showAddListing = true }: AgentHeaderProp
     localStorage.removeItem('agent_name')
     localStorage.removeItem('agent_status')
     localStorage.removeItem('agent_registration_status')
+    localStorage.removeItem('broker_status')
+    localStorage.removeItem('broker_registration_status')
     localStorage.removeItem('unread_messages_count')
     setShowProfileDropdown(false)
     router.push('/')
+  }
+
+  // Don't show header on admin routes or if not on agent/broker routes
+  if (isAdminRoute || (!isAgentRoute && !isBrokerRoute)) {
+    return null
   }
 
   return (
@@ -131,39 +159,37 @@ function AgentHeader({ title, subtitle, showAddListing = true }: AgentHeaderProp
         {/* Right side: Add Listing button, Bell icon, Divider, Profile */}
         <div className="flex items-center gap-4">
           {/* Add Listing Button */}
-          {showAddListing && (
-            <Link
-              href="/agent/create-listing"
-              className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-full shadow-md hover:bg-blue-700 transition-colors"
+          <Link
+            href={createListingPath}
+            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-full shadow-md hover:bg-blue-700 transition-colors"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              style={{ width: '20px', height: '20px' }}
             >
-              <svg
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                style={{ width: '20px', height: '20px' }}
-              >
-                {/* Roof — V/caret shape stroked */}
-                <path
-                  d="M2 12 L12 2 L22 12"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+              {/* Roof — V/caret shape stroked */}
+              <path
+                d="M2 12 L12 2 L22 12"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
 
-                {/* House body — pentagon with peaked top matching the caret angle */}
-                <path d="M3.5 22 L3.5 15 L12 6 L20.5 15 L20.5 22 Z" />
+              {/* House body — pentagon with peaked top matching the caret angle */}
+              <path d="M3.5 22 L3.5 15 L12 6 L20.5 15 L20.5 22 Z" />
 
-                {/* Door cutout */}
-                <rect x="9.5" y="16.5" width="5" height="5.5" fill="#3B82F6" />
-              </svg>
-              <span>Add Listing</span>
-            </Link>
-          )}
+              {/* Door cutout */}
+              <rect x="9.5" y="16.5" width="5" height="5.5" fill="#3B82F6" />
+            </svg>
+            <span>Add Listing</span>
+          </Link>
 
           {/* Bell Icon */}
           <Link
-            href="/agent/inbox"
+            href={inboxPath}
             className="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-blue-600 transition-colors"
             aria-label="Notifications"
           >
@@ -205,10 +231,10 @@ function AgentHeader({ title, subtitle, showAddListing = true }: AgentHeaderProp
               </div>
               <div className="flex flex-col items-start hidden md:flex">
                 <span className="text-sm font-semibold text-gray-900">
-                  {userName || 'Agent'}
+                  {userName || defaultName}
                 </span>
                 <span className="text-xs text-gray-500">
-                  {isVerified ? 'Rent Manager' : 'Property Agent'}
+                  {roleLabel}
                 </span>
               </div>
             </button>
@@ -219,7 +245,7 @@ function AgentHeader({ title, subtitle, showAddListing = true }: AgentHeaderProp
                 <button
                   className="flex items-center w-full gap-2.5 px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors"
                   onClick={() => {
-                    router.push('/agent/account')
+                    router.push(accountPath)
                     setShowProfileDropdown(false)
                   }}
                 >
@@ -242,4 +268,5 @@ function AgentHeader({ title, subtitle, showAddListing = true }: AgentHeaderProp
   )
 }
 
-export default AgentHeader
+export default AppHeader
+

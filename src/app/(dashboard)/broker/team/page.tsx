@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useRef, useEffect, useMemo } from 'react'
-import AppSidebar from '@/components/common/AppSidebar'
-import BrokerHeader from '@/components/broker/BrokerHeader'
 import { SimplePropertyCard } from '@/components/common/cards'
 import { brokerApi } from '@/api'
 import type { Team, TeamMember } from '@/api/endpoints/broker'
@@ -616,14 +614,7 @@ export default function TeamManagementPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit">
-      <AppSidebar />
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4 md:pt-15">
-        <BrokerHeader 
-          title="Team Management" 
-          subtitle="Manage your team members and their account permissions here." 
-        />
-
+    <> 
         {/* Listings summary + property cards - white container above team grid */}
         <div className="bg-white rounded-[14px] p-6 shadow-sm border border-gray-100 mb-6">
           <div className="flex items-center gap-3 mb-4">
@@ -1259,7 +1250,6 @@ export default function TeamManagementPage() {
             ) : null}
           </DragOverlay>
         </DndContext>
-      </main>
-    </div>
+    </>
   )
 }

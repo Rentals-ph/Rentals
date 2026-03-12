@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import AppSidebar from '@/components/common/AppSidebar'
-import AgentHeader from '@/components/agent/AgentHeader'
 import { agentsApi, propertiesApi } from '@/api'
 import type { Agent } from '@/api/endpoints/agents'
 import type { Property } from '@/types'
@@ -151,16 +149,7 @@ export default function AgentMyProfile() {
   }, [agent?.id])
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit"> {/* agent-profile-page */}
-      <AppSidebar />
-
-      {/* Main Content */}
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen bg-gray-100 lg:p-6 md:p-4 md:pt-20"> {/* agent-main */}
-        {/* Header */}
-        <AgentHeader 
-          title="My Profile" 
-          subtitle="View and manage your profile information." 
-        />
+    <>
 
         {/* Profile Section */}
         <div className="mt-6"> {/* profile-section */}
@@ -487,8 +476,7 @@ export default function AgentMyProfile() {
             )}
           </div>
         </div>
-      </main>
-    </div>
+    </>
   )
 }
 

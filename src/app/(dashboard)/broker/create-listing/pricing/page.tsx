@@ -1,6 +1,5 @@
 'use client'
 
-import BrokerHeader from '@/components/broker/BrokerHeader'
 import {
   CreateListingStepLayout,
   PricingStepContent,
@@ -16,13 +15,6 @@ const STEP_LABELS = [
 export default function BrokerCreateListingPricing() {
   return (
     <CreateListingStepLayout
-      header={
-        <BrokerHeader
-          title="Create Listing"
-          subtitle="Set property pricing."
-          showAddListing
-        />
-      }
       stepLabels={STEP_LABELS}
       currentStepIndex={2}
       breadcrumbStepName="Pricing"
