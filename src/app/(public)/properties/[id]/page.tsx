@@ -50,6 +50,14 @@ export default function PropertyDetailsPage() {
           return
         }
         const data = await propertiesApi.getById(propertyId)
+
+        // Record a view for analytics (owner views are ignored by backend)
+        try {
+          void propertiesApi.recordView(propertyId)
+        } catch (viewError) {
+          console.error('Error recording property view:', viewError)
+        }
+
         setProperty(data)
         setFetchedAgent(null)
         setInquiryData(prev => ({
@@ -712,7 +720,7 @@ export default function PropertyDetailsPage() {
                     <button
                       type="submit"
                       className="w-full bg-[#205ed7] text-white py-3 rounded-lg font-semibold hover:bg-[#1a4bb5] transition-colors text-sm"
-                    >
+                    >   
                       Submit Review
                     </button>
                   </form>
