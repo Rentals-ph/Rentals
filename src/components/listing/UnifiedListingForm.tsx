@@ -336,18 +336,12 @@ function CoPilotPanel({
 }: CoPilotPanelProps) {
   const [chatInput,    setChatInput]    = useState('')
   const [messages,     setMessages]     = useState<SequentialMsg[]>([])
-  const [currentStep,  setCurrentStep]  = useState<string | null>(null)
-  const [isLoading,    setIsLoading]    = useState(false)
+  const [currentStep,   setCurrentStep]   = useState<string | null>(null)
+  const [isLoading,     setIsLoading]     = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
-  const messagesEndRef    = useRef<HTMLDivElement>(null)
   const acknowledgedFields = useRef<Set<string>>(new Set())
   const prevFormDataRef   = useRef<ListingFormData>(formData)
   const aiLogo = getAsset('LOGO_AI') || '/assets/logos/rentals-ai-logo.png'
-
-  // Scroll to bottom on new messages
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
 
   // ── Init: show first unanswered question ──────────────────────────────────────
   useEffect(() => {
@@ -625,7 +619,6 @@ function CoPilotPanel({
             </div>
           </div>
         )}
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Text input */}
@@ -1212,38 +1205,35 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                   className="h-10 px-6 rounded-[8px] bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[12px] font-semibold transition-colors"
                 >
                   {isSubmitting ? 'Adding…' : 'Add Property'}
-                </button>
+                </button>\
               </div>
             </div>
           </div>
 
           {/* ── AI Co-Pilot Panel (right column) ── */}
           {coPilotOpen ? (
-            <div className="w-[360px] flex-shrink-0 flex flex-col max-h-[calc(100vh-140px)]">
-              {/* Outer wrapper is overflow-visible so collapse handle isn't clipped */}
-              <div className="relative flex-1 overflow-visible">
-                {/* Scroll container for the assistant content */}
-                <div className="h-full overflow-y-auto pr-1">
-                  {/* Collapse handle (mirrors sidebar overflow button, but on left) */}
-                  <button
-                    type="button"
-                    onClick={() => setCoPilotOpen(false)}
-                    className="absolute -left-4 top-6 w-9 h-9 rounded-full text-gray-600 hover:text-gray-900 bg-white shadow-md border border-gray-200 hover:bg-gray-50 transition-colors z-20 flex items-center justify-center"
-                    aria-label="Collapse listing assistant"
-                    title="Collapse"
-                  >
-                    <FiChevronRight className="text-lg" />
-                  </button>
-                  {/* Inner card keeps rounded corners/clipping */}
-                  <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm flex flex-col min-h-0">
-                    <CoPilotPanel
-                      conversationId={conversationId}
-                      formData={formData}
-                      onBulkFill={bulkFill}
-                      onClose={() => setCoPilotOpen(false)}
-                      onGenerateDescription={handleGenerateDescription}
-                    />
-                  </div>
+            <div className="w-[360px] flex-shrink-0 flex flex-col">
+              {/* Make the inner assistant card sticky */}
+              <div className="relative overflow-visible">
+                {/* Collapse handle (mirrors sidebar overflow button, but on left) */}
+                <button
+                  type="button"
+                  onClick={() => setCoPilotOpen(false)}
+                  className="absolute -left-4 top-6 w-9 h-9 rounded-full text-gray-600 hover:text-gray-900 bg-white shadow-md border border-gray-200 hover:bg-gray-50 transition-colors z-20 flex items-center justify-center"
+                  aria-label="Collapse listing assistant"
+                  title="Collapse"
+                >
+                  <FiChevronRight className="text-lg" />
+                </button>
+                {/* Sticky inner card keeps rounded corners/clipping */}
+                <div className="sticky top-6 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm flex flex-col max-h-[calc(100vh-140px)]">
+                  <CoPilotPanel
+                    conversationId={conversationId}
+                    formData={formData}
+                    onBulkFill={bulkFill}
+                    onClose={() => setCoPilotOpen(false)}
+                    onGenerateDescription={handleGenerateDescription}
+                  />
                 </div>
               </div>
             </div>
