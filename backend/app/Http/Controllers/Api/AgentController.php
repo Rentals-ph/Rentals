@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -686,19 +687,30 @@ class AgentController extends Controller
         
         // Get total listings count
         $totalListings = $user->properties()->count();
-        
+
         // Get active listings (published)
         $activeListings = $user->properties()->whereNotNull('published_at')->count();
-        
+
         // Calculate total revenue (sum of all property prices)
-        // Note: This is a simple calculation. In a real app, you'd track actual rental income
-        $totalRevenue = $user->properties()
+        $totalRevenue = (int) $user->properties()
             ->whereNotNull('published_at')
             ->sum('price');
-        
-        // For now, unread messages is set to 0 (would need a messages table)
-        $unreadMessages = 0;
-        
+
+        // Total views: sum of views_count across agent's properties
+        $totalViews = (int) $user->properties()->sum('views_count');
+
+        // Messages: total inquiries and unread count (recipient_id = agent)
+        $totalInquiries = Message::where('recipient_id', $user->id)->count();
+        $unreadMessages = Message::where('recipient_id', $user->id)->where('is_read', false)->count();
+
+        // Monthly listings: last 7 days, count of listings created each day
+        $monthlyListingDates = collect(range(0, 6))->map(fn ($i) => now()->subDays(6 - $i));
+        $monthlyListingCounts = $monthlyListingDates->map(function ($date) use ($user) {
+            return $user->properties()->whereDate('created_at', $date)->count();
+        })->values()->all();
+        $monthlyListingLabels = $monthlyListingDates->map(fn ($d) => $d->format('M j'))->values()->all();
+        $monthlyListingTotal = array_sum($monthlyListingCounts);
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -706,6 +718,13 @@ class AgentController extends Controller
                 'active_listings' => $activeListings,
                 'total_revenue' => $totalRevenue,
                 'unread_messages' => $unreadMessages,
+                'total_views' => $totalViews,
+                'total_inquiries' => $totalInquiries,
+                'monthly_listings' => [
+                    'labels' => $monthlyListingLabels,
+                    'counts' => $monthlyListingCounts,
+                    'total' => $monthlyListingTotal,
+                ],
             ],
         ]);
     }
@@ -936,4 +955,3 @@ class AgentController extends Controller
         }
     }
 }
-

@@ -24,7 +24,7 @@ function DashboardHeader({
           <p className="m-0 text-sm md:text-xs text-gray-500 break-words">{subtitle}</p>
         </div>
         {(showNotifications || rightAction) && (
-          <div className="flex items-center gap-4 flex-shrink-0">
+          <div className="relative flex flex-shrink-0 items-center gap-4">
             {showNotifications && (
               <FiBell className="text-xl text-gray-500 cursor-pointer transition-colors hover:text-gray-900" />
             )}
@@ -37,4 +37,3 @@ function DashboardHeader({
 }
 
 export default DashboardHeader
-

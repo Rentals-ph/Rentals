@@ -66,31 +66,64 @@ export const propertiesApi = {
   },
 
   /**
-   * Get properties by agent ID
+   * Get properties by agent ID (all pages, no pagination meta)
    */
   getByAgentId: async (agentId: number): Promise<Property[]> => {
     try {
-      const response = await apiClient.get<Property[] | PaginatedResponse<Property>>('/properties', { 
-        params: { agent_id: agentId } 
+      const response = await apiClient.get<Property[] | PaginatedResponse<Property>>('/properties', {
+        params: { agent_id: agentId },
       })
-      
-      // Backend returns paginated response with data, current_page, per_page, total, last_page
+
       if (Array.isArray(response.data)) {
         return response.data
       }
-      
-      // Handle paginated response
+
       const paginatedResponse = response.data as PaginatedResponse<Property>
-      if (paginatedResponse && paginatedResponse.data && Array.isArray(paginatedResponse.data)) {
+      if (paginatedResponse?.data && Array.isArray(paginatedResponse.data)) {
         return paginatedResponse.data
       }
-      
-      // Fallback: return empty array if structure is unexpected
+
       console.warn('Unexpected response structure from /properties endpoint:', response.data)
       return []
     } catch (error: any) {
       console.error('Error fetching properties by agent ID:', error)
       throw error
+    }
+  },
+
+  /**
+   * Get properties by agent ID with pagination (returns data + pagination meta)
+   */
+  getByAgentIdPaginated: async (
+    agentId: number,
+    page: number = 1,
+    perPage: number = 3
+  ): Promise<PaginatedResponse<Property>> => {
+    const response = await apiClient.get<PaginatedResponse<Property>>('/properties', {
+      params: { agent_id: agentId, page, per_page: perPage },
+    })
+
+    const raw = response.data as any
+    if (raw?.data && Array.isArray(raw.data)) {
+      return {
+        data: raw.data,
+        current_page: raw.current_page ?? page,
+        last_page: raw.last_page ?? 1,
+        per_page: raw.per_page ?? perPage,
+        total: raw.total ?? 0,
+        from: raw.from ?? 0,
+        to: raw.to ?? 0,
+      }
+    }
+
+    return {
+      data: [],
+      current_page: 1,
+      last_page: 1,
+      per_page: perPage,
+      total: 0,
+      from: 0,
+      to: 0,
     }
   },
 
@@ -154,4 +187,3 @@ export const propertiesApi = {
     }
   },
 }
-

@@ -201,13 +201,11 @@ const Blogs = () => {
                                       By {blog.author}
                                     </span>
                                   </div>
-                                  <Link
-                                    href={`/blog/${blog.id}`}
-                                    onClick={(e) => e.stopPropagation()}
+                                  <span
                                     className="px-[15px] py-[10.49px] bg-[#387CFF] rounded-[5px] text-white font-inter text-[13px] font-medium leading-[1.21] hover:bg-[#266FFD] transition-colors whitespace-nowrap"
                                   >
                                     Read More
-                                  </Link>
+                                  </span>
                                 </div>
                               </div>
                             </div>

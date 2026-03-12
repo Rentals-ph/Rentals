@@ -158,6 +158,13 @@ export const agentsApi = {
     active_listings: number
     total_revenue: number
     unread_messages: number
+    total_views?: number
+    total_inquiries?: number
+    monthly_listings?: {
+      labels: string[]
+      counts: number[]
+      total: number
+    }
   }> => {
     try {
       const response = await apiClient.get<{
@@ -167,6 +174,9 @@ export const agentsApi = {
           active_listings: number
           total_revenue: number
           unread_messages: number
+          total_views?: number
+          total_inquiries?: number
+          monthly_listings?: { labels: string[]; counts: number[]; total: number }
         }
       }>('/agents/dashboard/stats')
       return response.data.data
@@ -231,4 +241,3 @@ export const agentsApi = {
     }
   },
 }
-

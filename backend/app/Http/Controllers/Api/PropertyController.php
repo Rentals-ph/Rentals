@@ -128,7 +128,9 @@ class PropertyController extends Controller
             });
         }
 
-        $properties = $query->latest()->paginate(12);
+        $perPage = (int) $request->input('per_page', 12);
+        $perPage = max(1, min(100, $perPage));
+        $properties = $query->latest()->paginate($perPage);
 
         // Image URL is automatically included via model accessor (getImageUrlAttribute)
 
@@ -1136,4 +1138,3 @@ class PropertyController extends Controller
         }
     }
 }
-

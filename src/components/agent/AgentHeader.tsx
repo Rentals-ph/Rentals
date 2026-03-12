@@ -7,9 +7,12 @@ import { agentsApi } from '../../api'
 interface AgentHeaderProps {
   title?: string
   subtitle?: string
+  /** Optional right-side content (e.g. Add Listing button, notifications) */
+  rightAction?: React.ReactNode
+  showNotifications?: boolean
 }
 
-function AgentHeader({ title = 'Dashboard', subtitle = 'Welcome back, manage your rental properties.' }: AgentHeaderProps) {
+function AgentHeader({ title = 'Dashboard', subtitle = 'Welcome back, manage your rental properties.', rightAction, showNotifications = false }: AgentHeaderProps) {
   useEffect(() => {
     const fetchAgentData = async () => {
       try {
@@ -45,9 +48,10 @@ function AgentHeader({ title = 'Dashboard', subtitle = 'Welcome back, manage you
     <DashboardHeader
       title={title}
       subtitle={subtitle}
+      rightAction={rightAction}
+      showNotifications={showNotifications}
     />
   )
 }
 
 export default AgentHeader
-
