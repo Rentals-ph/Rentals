@@ -90,6 +90,8 @@ export interface Blog {
   read_time: number
   likes: number
   comments: number
+  likes_count?: number
+  comments_count?: number
   author: string
   image: string | null
   published_at: string | null
