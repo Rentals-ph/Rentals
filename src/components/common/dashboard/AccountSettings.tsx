@@ -33,6 +33,7 @@ export interface EditFormData {
   region: string
   province: string
   city: string
+  companyName?: string
 }
 
 export interface PasswordFormData {
@@ -48,10 +49,12 @@ export interface AccountSettingsProps {
   loading?: boolean
   uploading?: boolean
   imagePreview?: string | null
+  companyImagePreview?: string | null
   onEditFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void
   onEditSubmit: (e: React.FormEvent) => void
   onPasswordSubmit: (passwordData: PasswordFormData) => void
   onImageChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onCompanyImageChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
   cancelRoute?: string
 }
 
@@ -66,6 +69,8 @@ export default function AccountSettings({
   onEditSubmit,
   onPasswordSubmit,
   onImageChange,
+  onCompanyImageChange,
+  companyImagePreview,
   cancelRoute
 }: AccountSettingsProps) {
   const router = useRouter()
@@ -486,6 +491,69 @@ export default function AccountSettings({
                       <option value="Talisay City">Talisay City</option>
                     </select>
                   </div>
+                </div>
+              </div>
+
+              {/* Company Information Section */}
+              <div className="flex flex-col gap-5">
+                <h3 className="m-0 text-xs font-bold text-gray-500 uppercase tracking-widest">COMPANY INFORMATION</h3>
+                <div className="grid grid-cols-2 gap-5 lg:grid-cols-1">
+                  <div className="flex flex-col gap-2 col-span-2 lg:col-span-1">
+                    <label htmlFor="companyName" className="text-sm font-medium text-gray-700">
+                      Company Name
+                    </label>
+                    <input
+                      type="text"
+                      id="companyName"
+                      name="companyName"
+                      value={editFormData.companyName || ''}
+                      onChange={onEditFormChange}
+                      disabled={!isEditMode}
+                      className={`w-full ${INPUT_STYLE}`}
+                      placeholder="Enter your company name"
+                    />
+                  </div>
+                  {onCompanyImageChange && (
+                    <div className="flex flex-col gap-2 col-span-2 lg:col-span-1">
+                      <label htmlFor="company-image-upload" className="text-sm font-medium text-gray-700">
+                        Company Logo
+                      </label>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <label
+                            htmlFor="company-image-upload"
+                            className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Upload Logo
+                          </label>
+                          <input
+                            type="file"
+                            id="company-image-upload"
+                            accept="image/*"
+                            onChange={onCompanyImageChange}
+                            disabled={!isEditMode}
+                            className="hidden"
+                          />
+                        </div>
+                        {companyImagePreview && (
+                          <div className="mt-2">
+                            <img
+                              src={companyImagePreview}
+                              alt="Company logo"
+                              className="max-w-[200px] h-auto rounded-lg border border-gray-200"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement
+                                target.style.display = 'none'
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </form>

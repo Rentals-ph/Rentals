@@ -31,6 +31,8 @@ export default function AgentAccount() {
   const [saving, setSaving] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [companyImageFile, setCompanyImageFile] = useState<File | null>(null)
+  const [companyImagePreview, setCompanyImagePreview] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState('')
 
   /* form fields */
@@ -94,6 +96,9 @@ export default function AgentAccount() {
             prcLicense: data!.prc_license_number || '',
             licenseType: data!.license_type || '',
           }))
+          if (data.company_image) {
+            setCompanyImagePreview(data.company_image)
+          }
         }
       } catch (e) {
         console.error('Error fetching agent:', e)
@@ -125,6 +130,15 @@ export default function AgentAccount() {
     reader.readAsDataURL(file)
   }
 
+  const onCompanyImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setCompanyImageFile(file)
+    const reader = new FileReader()
+    reader.onloadend = () => setCompanyImagePreview(reader.result as string)
+    reader.readAsDataURL(file)
+  }
+
   const flash = (msg: string) => { setSuccessMsg(msg); setTimeout(() => setSuccessMsg(''), 3500) }
 
   const handleSave = async (e: React.FormEvent) => {
@@ -139,8 +153,10 @@ export default function AgentAccount() {
         city: form.city.trim(),
         state: form.region.trim(),
         office_address: form.addressLine1.trim(),
+        company_name: form.companyName.trim(),
       }
       if (imageFile) updateData.image = imageFile
+      if (companyImageFile) updateData.company_image = companyImageFile
       await agentsApi.update(updateData)
       const refreshed = await agentsApi.getCurrent()
       setAgent(refreshed)
@@ -163,6 +179,8 @@ export default function AgentAccount() {
       }))
       setImageFile(null)
       setImagePreview(null)
+      setCompanyImageFile(null)
+      setCompanyImagePreview(null)
       setIsEditMode(false)
       flash('Profile updated successfully!')
     } catch {
@@ -316,6 +334,43 @@ export default function AgentAccount() {
                 <div className="sm:col-span-2">
                   <Field label="About Yourself">
                     <textarea name="aboutYourself" value={form.aboutYourself} onChange={onChange} disabled={!isEditMode} rows={4} className={`w-full ${INPUT} resize-y`} placeholder="Write about yourself" />
+                  </Field>
+                </div>
+                <div className="sm:col-span-2">
+                  <Field label="Company Name">
+                    <input type="text" name="companyName" value={form.companyName} onChange={onChange} disabled={!isEditMode} className={`w-full ${INPUT}`} placeholder="Enter your company name" />
+                  </Field>
+                </div>
+                <div className="sm:col-span-2">
+                  <Field label="Company Logo">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <label htmlFor="company-image-input" className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors">
+                          <FiCamera className="w-4 h-4" />
+                          {companyImageFile ? 'Change Logo' : 'Upload Logo'}
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={onCompanyImage}
+                          disabled={!isEditMode}
+                          className="hidden"
+                          id="company-image-input"
+                        />
+                        {companyImageFile && (
+                          <span className="text-sm text-gray-600">{companyImageFile.name}</span>
+                        )}
+                      </div>
+                      {(companyImagePreview || agent?.company_image) && (
+                        <div className="mt-2">
+                          <img
+                            src={companyImagePreview || agent?.company_image || ''}
+                            alt="Company logo"
+                            className="max-w-[200px] h-auto rounded-lg border border-gray-200"
+                          />
+                        </div>
+                      )}
+                    </div>
                   </Field>
                 </div>
               </div>

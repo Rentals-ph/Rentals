@@ -110,7 +110,94 @@ export interface PaginatedResponse<T> {
   last_page: number
 }
 
+export interface Broker {
+  id: number
+  first_name: string | null
+  last_name: string | null
+  full_name?: string
+  email: string
+  phone?: string | null
+  whatsapp?: string | null
+  agency_name?: string | null
+  company_name?: string | null
+  description?: string | null
+  company_image?: string | null
+  office_address?: string | null
+  city?: string | null
+  state?: string | null
+  prc_license_number?: string | null
+  license_type?: 'broker' | 'salesperson' | null
+  status?: 'pending' | 'approved' | 'rejected' | null
+  verified?: boolean
+  properties_count?: number
+  image?: string | null
+  image_path?: string | null
+  avatar?: string | null
+  profile_image?: string | null
+  created_at?: string | null
+  updated_at?: string | null
+}
+
 export const brokerApi = {
+  /**
+   * Get current authenticated broker
+   */
+  getCurrent: async (): Promise<Broker> => {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: Broker }>('/broker/me')
+      return response.data.data
+    } catch (error: any) {
+      console.error('API call error:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Update broker profile
+   */
+  update: async (data: {
+    first_name?: string
+    last_name?: string
+    phone?: string
+    city?: string
+    state?: string
+    office_address?: string
+    company_name?: string
+    image?: File
+    company_image?: File
+  }): Promise<Broker> => {
+    const formData = new FormData()
+    
+    // Always send these fields, even if empty (backend handles null/empty)
+    formData.append('first_name', data.first_name !== undefined ? (data.first_name || '') : '')
+    formData.append('last_name', data.last_name !== undefined ? (data.last_name || '') : '')
+    formData.append('phone', data.phone !== undefined ? (data.phone || '') : '')
+    formData.append('city', data.city !== undefined ? (data.city || '') : '')
+    formData.append('state', data.state !== undefined ? (data.state || '') : '')
+    formData.append('office_address', data.office_address !== undefined ? (data.office_address || '') : '')
+    if (data.company_name !== undefined) formData.append('company_name', data.company_name || '')
+    if (data.image) formData.append('image', data.image)
+    if (data.company_image) formData.append('company_image', data.company_image)
+    
+    // Use POST with _method=PUT for FormData (Laravel method spoofing)
+    if (!formData.has('_method')) {
+      formData.append('_method', 'PUT')
+    }
+
+    try {
+      // Use POST with method spoofing for FormData
+      const response = await apiClient.post<{ success: boolean; data: Broker }>('/broker/me', formData, {
+        headers: {
+          // Don't set Content-Type - let browser set it with boundary for multipart/form-data
+        },
+      })
+      return response.data.data
+    } catch (error: any) {
+      console.error('API call error:', error)
+      throw error
+    }
+  },
+
   /**
    * Get broker dashboard data
    */

@@ -129,6 +129,12 @@ Route::get('/companies/{identifier}', [BrokerController::class, 'showCompany']);
 
 // Broker routes (protected by authentication)
 Route::middleware('auth:sanctum')->prefix('broker')->group(function () {
+    // Profile management (uses AgentController since brokers are also Users)
+    Route::get('/me', [AgentController::class, 'show']);
+    Route::put('/me', [AgentController::class, 'update']);
+    Route::post('/me', [AgentController::class, 'update']); // Support POST with _method=PUT for FormData
+    Route::get('/dashboard/stats', [AgentController::class, 'dashboardStats']);
+    
     // Dashboard
     Route::get('/dashboard', [BrokerController::class, 'dashboard']);
     
