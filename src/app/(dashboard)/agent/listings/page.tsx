@@ -16,7 +16,7 @@ import {
 import { ASSETS } from '@/utils/assets'
 import { resolvePropertyImage } from '@/utils/imageResolver'
 import PropertiesMap from '@/components/agent/PropertiesMap'
-import HorizontalPropertyCard from '@/components/common/cards/HorizontalPropertyCard'
+import SimplePropertyCard from '@/components/common/cards/SimplePropertyCard'
 
 type ListingStatus = 'active' | 'rented' | 'hidden'
 
@@ -294,66 +294,66 @@ export default function AgentMyListings() {
           </div>
         </div>
 
-        {/* Search and Filter Bar */}
-        <div className="flex flex-col sm:flex-row gap-3 items-stretch">
-          <div className="flex-1 flex items-center gap-2.5 bg-white border border-gray-200 rounded-lg py-3 px-4">
-            <FiSearch className="text-gray-400 text-lg flex-shrink-0" />
-            <input 
-              className="border-0 outline-0 w-full min-w-0 text-sm text-gray-900 bg-transparent placeholder:text-gray-400" 
-              placeholder="Search" 
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value)
-                setCurrentPage(1)
-              }}
-            />
-          </div>
-          <select 
-            className="bg-white border border-gray-200 rounded-lg py-3 px-4 text-sm text-gray-900 cursor-pointer min-w-[140px]"
-            value={selectedFilter}
-            onChange={(e) => {
-              setSelectedFilter(e.target.value)
-              setCurrentPage(1)
-            }}
-          >
-            <option value="all">All Types</option>
-            {(() => {
-              const typeCounts: Record<string, number> = {}
-              properties.forEach((property) => {
-                const type = property.type || 'Other'
-                typeCounts[type] = (typeCounts[type] || 0) + 1
-              })
-              const propertyTypes = Object.keys(typeCounts).sort((a, b) => typeCounts[b] - typeCounts[a])
-              return propertyTypes.map((type) => (
-                <option key={type} value={type}>{type}</option>
-              ))
-            })()}
-          </select>
-          <select 
-            className="bg-white border border-gray-200 rounded-lg py-3 px-4 text-sm text-gray-900 cursor-pointer min-w-[160px]"
-            value={sortBy}
-            onChange={(e) => {
-              setSortBy(e.target.value)
-              setCurrentPage(1)
-            }}
-          >
-            <option value="newest">Sort by Newest</option>
-            <option value="oldest">Sort by Oldest</option>
-            <option value="price-high">Price: High to Low</option>
-            <option value="price-low">Price: Low to High</option>
-          </select>
-        </div>
-
         {/* Main Content: Two Column Layout */}
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-5 h-[500px] lg:h-[calc(100vh-200px)]">
           {/* Left: Property Listings */}
           <div className="flex-1 lg:flex-[0_0_50%] lg:max-w-[50%] flex flex-col h-full">
-            <div className="flex-1 overflow-y-auto lg:sticky lg:top-4 pr-2 space-y-3 h-full [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:hover:bg-gray-400">
+            {/* Search and Filter Bar */}
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch mb-4 flex-shrink-0">
+              <div className="flex-1 flex items-center gap-2.5 bg-white border border-gray-200 rounded-lg py-3 px-4">
+                <FiSearch className="text-gray-400 text-lg flex-shrink-0" />
+                <input 
+                  className="border-0 outline-0 w-full min-w-0 text-sm text-gray-900 bg-transparent placeholder:text-gray-400" 
+                  placeholder="Search" 
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value)
+                    setCurrentPage(1)
+                  }}
+                />
+              </div>
+              <select 
+                className="bg-white border border-gray-200 rounded-lg py-3 px-4 text-sm text-gray-900 cursor-pointer min-w-[140px]"
+                value={selectedFilter}
+                onChange={(e) => {
+                  setSelectedFilter(e.target.value)
+                  setCurrentPage(1)
+                }}
+              >
+                <option value="all">All Types</option>
+                {(() => {
+                  const typeCounts: Record<string, number> = {}
+                  properties.forEach((property) => {
+                    const type = property.type || 'Other'
+                    typeCounts[type] = (typeCounts[type] || 0) + 1
+                  })
+                  const propertyTypes = Object.keys(typeCounts).sort((a, b) => typeCounts[b] - typeCounts[a])
+                  return propertyTypes.map((type) => (
+                    <option key={type} value={type}>{type}</option>
+                  ))
+                })()}
+              </select>
+              <select 
+                className="bg-white border border-gray-200 rounded-lg py-3 px-4 text-sm text-gray-900 cursor-pointer min-w-[160px]"
+                value={sortBy}
+                onChange={(e) => {
+                  setSortBy(e.target.value)
+                  setCurrentPage(1)
+                }}
+              >
+                <option value="newest">Sort by Newest</option>
+                <option value="oldest">Sort by Oldest</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="price-low">Price: Low to High</option>
+              </select>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto lg:sticky lg:top-4 pr-2 h-full [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:hover:bg-gray-400">
               {loading ? (
-                <>
-                  {Array.from({ length: 3 }).map((_, i) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {Array.from({ length: 4 }).map((_, i) => (
                     <div key={i} className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-                      <div className="h-32 bg-gray-200 animate-pulse" />
+                      <div className="h-48 bg-gray-200 animate-pulse" />
                       <div className="p-3 space-y-2">
                         <span className="block h-3 w-20 rounded bg-gray-200 animate-pulse" />
                         <span className="block h-4 w-full rounded bg-gray-200 animate-pulse" />
@@ -361,7 +361,7 @@ export default function AgentMyListings() {
                       </div>
                     </div>
                   ))}
-                </>
+                </div>
               ) : listings.length === 0 ? (
                 <div className="p-6 text-center text-sm text-gray-600 bg-white rounded-lg border border-gray-200">
                   {selectedFilter === 'all' 
@@ -370,62 +370,48 @@ export default function AgentMyListings() {
                   }
                 </div>
               ) : (
-                listings.map((l) => {
-                const property = l.property
-                const priceTypeLabel = property?.price_type
-                  ? property.price_type.charAt(0).toUpperCase() + property.price_type.slice(1).toLowerCase()
-                  : null
-                const priceLabel = property && property.price != null
-                  ? priceTypeLabel
-                    ? `P ${property.price.toLocaleString('en-US')}.00/${priceTypeLabel}`
-                    : `P ${property.price.toLocaleString('en-US')}.00/monthly`
-                  : null
-                
-                const bedrooms = property?.bedrooms ?? 0
-                const bathrooms = property?.bathrooms ?? 0
-                const area = property?.area ? `${property.area}${property.floor_area_unit || 'sqm'}` : 'N/A'
-                const description = property?.description || 'Beautiful property with modern amenities and stunning views.'
-                
-                // Extract price and price unit from priceLabel
-                const priceMatch = priceLabel?.match(/P\s*([\d,]+)\.00\/(.+)/)
-                const price = priceMatch ? priceMatch[1].replace(/,/g, '') : (property?.price?.toString() || '0')
-                const priceUnit = priceMatch ? `/${priceMatch[2]}` : '/monthly'
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {listings.map((l) => {
+                    const property = l.property
+                    const priceTypeLabel = property?.price_type
+                      ? property.price_type.charAt(0).toUpperCase() + property.price_type.slice(1).toLowerCase()
+                      : null
+                    const priceLabel = property && property.price != null
+                      ? priceTypeLabel
+                        ? `P ${property.price.toLocaleString('en-US')}.00/${priceTypeLabel}`
+                        : `P ${property.price.toLocaleString('en-US')}.00/monthly`
+                      : null
+                    
+                    const bedrooms = property?.bedrooms ?? 0
+                    const bathrooms = property?.bathrooms ?? 0
+                    const area = property?.area ? parseFloat(property.area.toString()) : null
 
-                return (
-                  <div key={l.id} className="relative">
-                    <div className="[&_article]:h-[200px] [&_article]:sm:h-[220px]">
-                      <HorizontalPropertyCard
-                        id={l.id}
-                        propertyType={property?.type || 'Property'}
-                        listingType={property?.listing_type || null}
-                        price={`P ${property?.price?.toLocaleString('en-US') || '0'}.00`}
-                        priceUnit={priceUnit}
-                        title={l.title}
-                        description={description}
-                        image={l.image}
-                        images={property?.images_url || property?.images ? (property.images_url || property.images?.map(img => resolvePropertyImage(img, property.id))) : undefined}
-                        bedrooms={bedrooms}
-                        bathrooms={bathrooms}
-                        propertySize={area}
-                        location={l.address}
-                        city={property?.city || null}
-                        streetAddress={property?.street_address || null}
-                        stateProvince={property?.state_province || null}
-                      />
-                    </div>
-                    <button
-                      className="absolute right-4 bottom-4 z-10 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-blue-600 shadow-sm ring-1 ring-blue-100 transition hover:bg-blue-50"
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleEditClick(l.id)
-                      }}
-                    >
-                      EDIT
-                    </button>
-                  </div>
-                )
-              })
+                    return (
+                      <div key={l.id} className="relative">
+                        <SimplePropertyCard
+                          id={l.id}
+                          title={l.title}
+                          location={l.address}
+                          price={priceLabel || 'Price not available'}
+                          image={l.image}
+                          bedrooms={bedrooms}
+                          bathrooms={bathrooms}
+                          area={area}
+                        />
+                        <button
+                          className="absolute top-2 right-2 z-10 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-blue-600 shadow-sm ring-1 ring-blue-100 transition hover:bg-blue-50"
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleEditClick(l.id)
+                          }}
+                        >
+                          EDIT
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
               )}
             </div>
             

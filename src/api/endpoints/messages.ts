@@ -102,6 +102,19 @@ export const messagesApi = {
   },
 
   /**
+   * Mark all messages as read
+   */
+  markAllAsRead: async (): Promise<{ success: boolean; message: string; count: number }> => {
+    try {
+      const response = await apiClient.put<{ success: boolean; message: string; count: number }>('/messages/read-all')
+      return response.data
+    } catch (error: any) {
+      console.error('API call error:', error)
+      throw error
+    }
+  },
+
+  /**
    * Delete a message
    */
   delete: async (id: number): Promise<{ success: boolean; message: string }> => {
