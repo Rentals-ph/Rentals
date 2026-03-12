@@ -196,7 +196,9 @@ export const agentsApi = {
     city?: string
     state?: string
     office_address?: string
+    company_name?: string
     image?: File
+    company_image?: File
   }): Promise<Agent> => {
     const formData = new FormData()
     
@@ -207,7 +209,9 @@ export const agentsApi = {
     formData.append('city', data.city !== undefined ? (data.city || '') : '')
     formData.append('state', data.state !== undefined ? (data.state || '') : '')
     formData.append('office_address', data.office_address !== undefined ? (data.office_address || '') : '')
+    if (data.company_name !== undefined) formData.append('company_name', data.company_name || '')
     if (data.image) formData.append('image', data.image)
+    if (data.company_image) formData.append('company_image', data.company_image)
     
     // Use POST with _method=PUT for FormData (Laravel method spoofing)
     // This ensures FormData is parsed correctly, especially for file uploads

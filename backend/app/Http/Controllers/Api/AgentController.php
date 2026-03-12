@@ -513,11 +513,11 @@ class AgentController extends Controller
     {
         $user = $request->user();
         
-        // Ensure user is an agent
-        if (!$user->isAgent()) {
+        // Ensure user is an agent or broker
+        if (!$user->isAgent() && !$user->isBroker()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Access denied. Agent authentication required.',
+                'message' => 'Access denied. Agent or Broker authentication required.',
             ], 403);
         }
         
@@ -526,6 +526,17 @@ class AgentController extends Controller
         $avatarPath = $user->avatar ?? $user->image_path;
         if ($avatarPath) {
             $imageUrl = \App\Services\ImageService::url($avatarPath);
+        }
+        
+        // Get company image from media table
+        $companyImageUrl = null;
+        $companyImage = $user->getFirstMedia('company');
+        if ($companyImage) {
+            try {
+                $companyImageUrl = \App\Services\ImageService::url($companyImage->path);
+            } catch (\Exception $e) {
+                \Log::warning('Error generating company image URL for user ' . $user->id . ': ' . $e->getMessage());
+            }
         }
         
         return response()->json([
@@ -538,6 +549,9 @@ class AgentController extends Controller
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'agency_name' => $user->agency_name,
+                'company_name' => $user->company_name,
+                'description' => $user->description,
+                'company_image' => $companyImageUrl,
                 'prc_license_number' => $user->prc_license_number,
                 'license_type' => $user->license_type,
                 'status' => $user->status,
@@ -677,11 +691,11 @@ class AgentController extends Controller
     {
         $user = $request->user();
         
-        // Ensure user is an agent
-        if (!$user->isAgent()) {
+        // Ensure user is an agent or broker
+        if (!$user->isAgent() && !$user->isBroker()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Access denied. Agent authentication required.',
+                'message' => 'Access denied. Agent or Broker authentication required.',
             ], 403);
         }
         
@@ -773,11 +787,11 @@ class AgentController extends Controller
         try {
             $user = $request->user();
             
-            // Ensure user is an agent
-            if (!$user->isAgent()) {
+            // Ensure user is an agent or broker
+            if (!$user->isAgent() && !$user->isBroker()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Access denied. Agent authentication required.',
+                    'message' => 'Access denied. Agent or Broker authentication required.',
                 ], 403);
             }
             
@@ -789,7 +803,9 @@ class AgentController extends Controller
                 'city'           => 'sometimes|nullable|string|max:255',
                 'state'          => 'sometimes|nullable|string|max:255',
                 'office_address' => 'sometimes|nullable|string|max:500',
+                'company_name'   => 'sometimes|nullable|string|max:255',
                 'image'          => 'sometimes|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
+                'company_image' => 'sometimes|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
             ]);
             
             // Handle image upload
@@ -863,9 +879,69 @@ class AgentController extends Controller
                     'allFiles' => array_keys($request->allFiles()),
                 ]);
             }
+
+            // Handle company image upload
+            if ($request->hasFile('company_image')) {
+                try {
+                    $file = $request->file('company_image');
+                    
+                    \Log::info('Company image file received for user ' . $user->id, [
+                        'filename' => $file->getClientOriginalName(),
+                        'size' => $file->getSize(),
+                        'mime' => $file->getMimeType(),
+                        'isValid' => $file->isValid(),
+                    ]);
+                    
+                    // Validate file
+                    if (!$file->isValid()) {
+                        \Log::warning('Invalid company image file uploaded for user ' . $user->id);
+                    } else {
+                        // Remove old company image media record
+                        $user->deleteMedia('company');
+                        
+                        // Upload new company image - use users directory structure
+                        $directory = 'images/users/' . $user->id;
+                        $extension = $file->getClientOriginalExtension();
+                        
+                        // Fallback to jpg if extension is missing
+                        if (empty($extension)) {
+                            $mimeType = $file->getMimeType();
+                            if (strpos($mimeType, 'jpeg') !== false || strpos($mimeType, 'jpg') !== false) {
+                                $extension = 'jpg';
+                            } elseif (strpos($mimeType, 'png') !== false) {
+                                $extension = 'png';
+                            } elseif (strpos($mimeType, 'gif') !== false) {
+                                $extension = 'gif';
+                            } elseif (strpos($mimeType, 'webp') !== false) {
+                                $extension = 'webp';
+                            } else {
+                                $extension = 'jpg'; // Default fallback
+                            }
+                        }
+                        
+                        $filename = 'company.' . strtolower($extension);
+                        
+                        // Store the file with the specific filename
+                        $imagePath = $file->storeAs($directory, $filename, 'public');
+                        
+                        if ($imagePath) {
+                            \Log::info('Company image uploaded successfully for user ' . $user->id . ': ' . $imagePath);
+
+                            // Store in media table (new system) with 'company' collection
+                            $user->storeMedia($imagePath, 'company');
+                        } else {
+                            \Log::error('Failed to store company image for user ' . $user->id . ' - storeAs returned false');
+                        }
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Error uploading company image for user ' . $user->id . ': ' . $e->getMessage(), [
+                        'trace' => $e->getTraceAsString(),
+                    ]);
+                }
+            }
             
             // Convert empty strings to null for optional fields (similar to property controller)
-            $optionalFields = ['first_name', 'last_name', 'phone', 'city', 'state', 'office_address'];
+            $optionalFields = ['first_name', 'last_name', 'phone', 'city', 'state', 'office_address', 'company_name'];
             foreach ($optionalFields as $field) {
                 if (isset($validated[$field]) && $validated[$field] === '') {
                     $validated[$field] = null;
@@ -882,8 +958,8 @@ class AgentController extends Controller
             
             // Process other fields - include all fields that were validated
             foreach ($validated as $key => $value) {
-                // Skip image (file, not a database field)
-                if ($key === 'image') {
+                // Skip image files (files, not database fields)
+                if ($key === 'image' || $key === 'company_image') {
                     continue;
                 }
                 
