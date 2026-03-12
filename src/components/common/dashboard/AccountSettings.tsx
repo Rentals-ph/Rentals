@@ -70,6 +70,7 @@ export default function AccountSettings({
 }: AccountSettingsProps) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<'profile' | 'edit' | 'password'>('profile')
+  const [isEditMode, setIsEditMode] = useState(false)
   
   // Change password form data (local state since it's not persisted)
   const [passwordFormData, setPasswordFormData] = useState<PasswordFormData>({
@@ -77,6 +78,9 @@ export default function AccountSettings({
     newPassword: '',
     confirmPassword: ''
   })
+
+  // Standard input style used across the application
+  const INPUT_STYLE = 'px-4 py-3 border border-gray-300 rounded-xl text-sm text-gray-900 bg-white transition-all focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed'
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -94,6 +98,13 @@ export default function AccountSettings({
     }
     onPasswordSubmit(passwordFormData)
     setPasswordFormData({ currentPassword: '', newPassword: '', confirmPassword: '' })
+  }
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await onEditSubmit(e)
+    // Reset edit mode after successful submission
+    setIsEditMode(false)
   }
 
   const getInitials = (name: string, email?: string) => {
@@ -122,7 +133,10 @@ export default function AccountSettings({
       <div className="flex border-b border-gray-200 bg-gray-50 md:flex-wrap">
         <button 
           className={`flex items-center gap-2 px-6 py-4 border-none bg-transparent text-sm font-medium text-gray-500 cursor-pointer transition-all border-b-2 border-transparent relative md:flex-1 md:min-w-[120px] md:px-4 md:py-3 md:text-xs ${activeTab === 'profile' ? 'text-blue-500 border-b-blue-500 bg-white' : 'hover:text-blue-500 hover:bg-gray-100'}`}
-          onClick={() => setActiveTab('profile')}
+          onClick={() => {
+            setActiveTab('profile')
+            setIsEditMode(false)
+          }}
         >
           <FiUser className="text-lg" />
           <span>Profile</span>
@@ -170,7 +184,10 @@ export default function AccountSettings({
             <div className="flex gap-3">
               <button 
                 className="px-6 py-3 bg-blue-500 text-white border-none rounded-lg text-sm font-semibold cursor-pointer transition-all hover:bg-blue-600 hover:-translate-y-px hover:shadow-[0_4px_6px_rgba(0,0,0,0.1)]"
-                onClick={() => setActiveTab('edit')}
+                onClick={() => {
+                  setActiveTab('edit')
+                  setIsEditMode(false)
+                }}
               >
                 Edit Profile
               </button>
@@ -197,7 +214,7 @@ export default function AccountSettings({
                   <div className="w-full h-full hidden items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-5xl">
                     {getInitials(profileData.name)}
                   </div>
-                  {onImageChange && (
+                  {onImageChange && isEditMode && (
                     <label htmlFor="profile-image-upload" className="absolute bottom-0 left-0 right-0 top-0 flex items-end justify-center cursor-pointer">
                       <input
                         type="file"
@@ -217,17 +234,39 @@ export default function AccountSettings({
                   <p className="m-0 text-sm text-gray-500">{profileData.role}</p>
                 </div>
               </div>
-              <button 
-                type="submit" 
-                form="edit-profile-form" 
-                className="px-6 py-3 bg-blue-500 text-white border-none rounded-lg text-sm font-semibold cursor-pointer transition-all hover:bg-blue-600 hover:-translate-y-px hover:shadow-[0_4px_6px_rgba(0,0,0,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
-                disabled={uploading}
-              >
-                {uploading ? 'Saving...' : 'Save Changes'}
-              </button>
+              <div className="flex gap-3">
+                {!isEditMode ? (
+                  <button 
+                    type="button"
+                    onClick={() => setIsEditMode(true)}
+                    className="px-6 py-3 bg-blue-500 text-white border-none rounded-lg text-sm font-semibold cursor-pointer transition-all hover:bg-blue-600 hover:-translate-y-px hover:shadow-[0_4px_6px_rgba(0,0,0,0.1)] flex items-center gap-2"
+                  >
+                    <FiEdit3 className="text-base" />
+                    Edit Profile
+                  </button>
+                ) : (
+                  <>
+                    <button 
+                      type="button"
+                      onClick={() => setIsEditMode(false)}
+                      className="px-6 py-3 bg-white text-gray-500 border border-gray-300 rounded-lg text-sm font-semibold cursor-pointer transition-all hover:bg-gray-50 hover:border-gray-400 hover:text-gray-700"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="submit" 
+                      form="edit-profile-form" 
+                      className="px-6 py-3 bg-blue-500 text-white border-none rounded-lg text-sm font-semibold cursor-pointer transition-all hover:bg-blue-600 hover:-translate-y-px hover:shadow-[0_4px_6px_rgba(0,0,0,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                      disabled={uploading}
+                    >
+                      {uploading ? 'Saving...' : 'Save Changes'}
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
 
-            <form id="edit-profile-form" onSubmit={onEditSubmit} className="flex flex-col gap-8">
+            <form id="edit-profile-form" onSubmit={handleEditSubmit} className="flex flex-col gap-8">
               <div className="flex flex-col gap-5">
                 <h3 className="m-0 text-xs font-bold text-gray-500 uppercase tracking-widest">PERSONAL INFORMATION</h3>
                 <div className="grid grid-cols-2 gap-5 lg:grid-cols-1">
@@ -241,7 +280,8 @@ export default function AccountSettings({
                       name="firstName"
                       value={editFormData.firstName}
                       onChange={onEditFormChange}
-                      className="px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white transition-all font-inherit focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
+                      disabled={!isEditMode}
+                      className={`w-full ${INPUT_STYLE}`}
                     />
                   </div>
 
@@ -255,7 +295,8 @@ export default function AccountSettings({
                       name="lastName"
                       value={editFormData.lastName}
                       onChange={onEditFormChange}
-                      className="px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white transition-all font-inherit focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
+                      disabled={!isEditMode}
+                      className={`w-full ${INPUT_STYLE}`}
                     />
                   </div>
 
@@ -269,7 +310,8 @@ export default function AccountSettings({
                       name="email"
                       value={editFormData.email}
                       onChange={onEditFormChange}
-                      className="px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white transition-all font-inherit focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
+                      disabled={!isEditMode}
+                      className={`w-full ${INPUT_STYLE}`}
                     />
                   </div>
 
@@ -277,15 +319,16 @@ export default function AccountSettings({
                     <label htmlFor="contactNumber" className="text-sm font-medium text-gray-700">
                       Contact Number <span className="text-red-500">*</span>
                     </label>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 min-w-0">
                       <input
                         type="text"
                         id="countryCode"
                         name="countryCode"
                         value={editFormData.countryCode}
                         onChange={onEditFormChange}
-                        className="w-[100px] flex-shrink-0 px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white transition-all font-inherit focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
+                        className={`w-[100px] flex-shrink-0 ${INPUT_STYLE} bg-gray-50`}
                         readOnly
+                        disabled
                       />
                       <input
                         type="text"
@@ -293,7 +336,8 @@ export default function AccountSettings({
                         name="contactNumber"
                         value={editFormData.contactNumber}
                         onChange={onEditFormChange}
-                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white transition-all font-inherit focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
+                        disabled={!isEditMode}
+                        className={`flex-1 min-w-0 ${INPUT_STYLE}`}
                       />
                     </div>
                   </div>
@@ -308,7 +352,8 @@ export default function AccountSettings({
                       name="whatsapp"
                       value={editFormData.whatsapp || ''}
                       onChange={onEditFormChange}
-                      className="px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white transition-all font-inherit focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
+                      disabled={!isEditMode}
+                      className={`w-full ${INPUT_STYLE}`}
                       placeholder="e.g., +63 912 345 6789"
                     />
                   </div>
@@ -323,7 +368,8 @@ export default function AccountSettings({
                       name="facebook"
                       value={editFormData.facebook || ''}
                       onChange={onEditFormChange}
-                      className="px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white transition-all font-inherit focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
+                      disabled={!isEditMode}
+                      className={`w-full ${INPUT_STYLE}`}
                       placeholder="e.g., https://facebook.com/yourprofile"
                     />
                   </div>
@@ -335,7 +381,8 @@ export default function AccountSettings({
                       name="aboutYourself"
                       value={editFormData.aboutYourself}
                       onChange={onEditFormChange}
-                      className="px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white transition-all font-inherit resize-y min-h-[100px] focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
+                      disabled={!isEditMode}
+                      className={`w-full ${INPUT_STYLE} resize-y min-h-[100px]`}
                       placeholder="About yourself..."
                       rows={4}
                     />
@@ -358,7 +405,8 @@ export default function AccountSettings({
                         name="addressLine1"
                         value={editFormData.addressLine1}
                         onChange={onEditFormChange}
-                        className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white transition-all font-inherit focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
+                        disabled={!isEditMode}
+                        className={`w-full ${INPUT_STYLE} pl-12`}
                         placeholder="Sample Address Street (Near Somewhere on Earth)."
                       />
                     </div>
@@ -373,7 +421,8 @@ export default function AccountSettings({
                       name="country"
                       value={editFormData.country}
                       onChange={onEditFormChange}
-                      className="px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white transition-all font-inherit focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
+                      disabled={!isEditMode}
+                      className={`w-full ${INPUT_STYLE}`}
                     >
                       <option value="Philippines">Philippines</option>
                     </select>
@@ -388,7 +437,8 @@ export default function AccountSettings({
                       name="region"
                       value={editFormData.region}
                       onChange={onEditFormChange}
-                      className="px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white transition-all font-inherit focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
+                      disabled={!isEditMode}
+                      className={`w-full ${INPUT_STYLE}`}
                     >
                       <option value="Region VII - Central Visayas">Region VII - Central Visayas</option>
                       <option value="Region I - Ilocos Region">Region I - Ilocos Region</option>
@@ -408,7 +458,8 @@ export default function AccountSettings({
                       name="province"
                       value={editFormData.province}
                       onChange={onEditFormChange}
-                      className="px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white transition-all font-inherit focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
+                      disabled={!isEditMode}
+                      className={`w-full ${INPUT_STYLE}`}
                     >
                       <option value="Cebu">Cebu</option>
                       <option value="Bohol">Bohol</option>
@@ -426,7 +477,8 @@ export default function AccountSettings({
                       name="city"
                       value={editFormData.city}
                       onChange={onEditFormChange}
-                      className="px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white transition-all font-inherit focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
+                      disabled={!isEditMode}
+                      className={`w-full ${INPUT_STYLE}`}
                     >
                       <option value="Cebu City">Cebu City</option>
                       <option value="Lapu-Lapu City">Lapu-Lapu City</option>
@@ -457,7 +509,7 @@ export default function AccountSettings({
                   name="currentPassword"
                   value={passwordFormData.currentPassword}
                   onChange={handlePasswordChange}
-                  className="px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white transition-all font-inherit focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
+                  className={`w-full ${INPUT_STYLE}`}
                   placeholder="Current password"
                   required
                 />
@@ -471,7 +523,7 @@ export default function AccountSettings({
                   name="newPassword"
                   value={passwordFormData.newPassword}
                   onChange={handlePasswordChange}
-                  className="px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white transition-all font-inherit focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
+                  className={`w-full ${INPUT_STYLE}`}
                   placeholder="New password"
                   required
                 />
@@ -485,7 +537,7 @@ export default function AccountSettings({
                   name="confirmPassword"
                   value={passwordFormData.confirmPassword}
                   onChange={handlePasswordChange}
-                  className="px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white transition-all font-inherit focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
+                  className={`w-full ${INPUT_STYLE}`}
                   placeholder="Confirm new password"
                   required
                 />

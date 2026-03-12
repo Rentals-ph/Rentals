@@ -18,7 +18,7 @@ const getInitials = (name: string) =>
   name.split(' ').map(n => n[0]).filter(Boolean).join('').toUpperCase().slice(0, 2) || 'A'
 
 const INPUT =
-  'w-full px-4 py-3 border border-gray-300 rounded-xl text-sm text-gray-900 bg-white transition-all focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10'
+  'px-4 py-3 border border-gray-300 rounded-xl text-sm text-gray-900 bg-white transition-all focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed'
 
 type Tab = 'overview' | 'edit' | 'company' | 'password'
 
@@ -56,6 +56,7 @@ export default function AgentAccount() {
 
   const [pwd, setPwd] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
   const [showPasswords, setShowPasswords] = useState({ current: false, new: false, confirm: false })
+  const [isEditMode, setIsEditMode] = useState(false)
 
   /* ─── fetch ─── */
   useEffect(() => {
@@ -162,6 +163,7 @@ export default function AgentAccount() {
       }))
       setImageFile(null)
       setImagePreview(null)
+      setIsEditMode(false)
       flash('Profile updated successfully!')
     } catch {
       flash('Failed to update profile. Please try again.')
@@ -239,10 +241,12 @@ export default function AgentAccount() {
                       </div>
                     </div>
                     {/* Edit Icon */}
-                    <label className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center cursor-pointer hover:bg-blue-700 transition-colors shadow-md border-2 border-white">
-                      <FiEdit3 className="text-white text-sm" />
-                      <input type="file" accept="image/*" onChange={onImage} className="hidden" />
-                    </label>
+                    {isEditMode && (
+                      <label className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center cursor-pointer hover:bg-blue-700 transition-colors shadow-md border-2 border-white">
+                        <FiEdit3 className="text-white text-sm" />
+                        <input type="file" accept="image/*" onChange={onImage} className="hidden" />
+                      </label>
+                    )}
                   </div>
                   <div className="mt-2 ml-2">
                     <p className="m-0 text-sm font-semibold text-gray-900">{fullName}</p>
@@ -255,53 +259,77 @@ export default function AgentAccount() {
 
           {/* Personal Info Section */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="p-5 border-b border-gray-200 flex items-center gap-3">
-              <FiSettings className="text-blue-600 text-xl" />
-              <h2 className="text-lg font-semibold text-gray-900 m-0">Personal Info</h2>
+            <div className="p-5 border-b border-gray-200 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FiSettings className="text-blue-600 text-xl" />
+                <h2 className="text-lg font-semibold text-gray-900 m-0">Personal Info</h2>
+              </div>
+              {!isEditMode ? (
+                <button
+                  type="button"
+                  onClick={() => setIsEditMode(true)}
+                  className="px-6 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2"
+                >
+                  <FiEdit3 className="text-base" />
+                  Edit Profile
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditMode(false)}
+                    className="px-6 py-2.5 bg-white text-gray-500 border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50 hover:border-gray-400 hover:text-gray-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
             </div>
             <form onSubmit={handleSave} className="p-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                 <Field label="First Name" required>
-                  <input type="text" name="firstName" value={form.firstName} onChange={onChange} className={INPUT} />
+                  <input type="text" name="firstName" value={form.firstName} onChange={onChange} disabled={!isEditMode} className={`w-full ${INPUT}`} />
                 </Field>
                 <Field label="Last Name" required>
-                  <input type="text" name="lastName" value={form.lastName} onChange={onChange} className={INPUT} />
+                  <input type="text" name="lastName" value={form.lastName} onChange={onChange} disabled={!isEditMode} className={`w-full ${INPUT}`} />
                 </Field>
                 <Field label="Email" required>
-                  <input type="email" name="email" value={form.email} onChange={onChange} className={INPUT} readOnly />
+                  <input type="email" name="email" value={form.email} onChange={onChange} className={`w-full ${INPUT}`} readOnly disabled />
                 </Field>
                 <Field label="Contact Number" required>
-                  <div className="flex gap-2">
-                    <input type="text" value={form.countryCode} readOnly className={`${INPUT} w-24 flex-shrink-0 bg-gray-50 text-gray-500`} />
-                    <input type="text" name="contactNumber" value={form.contactNumber} onChange={onChange} className={`${INPUT} flex-1`} placeholder="9914099656" />
+                  <div className="flex gap-2 min-w-0">
+                    <input type="text" value={form.countryCode} readOnly className={`${INPUT} w-24 flex-shrink-0 bg-gray-50 text-gray-500`} disabled />
+                    <input type="text" name="contactNumber" value={form.contactNumber} onChange={onChange} disabled={!isEditMode} className={`flex-1 min-w-0 ${INPUT}`} placeholder="9914099656" />
                   </div>
                 </Field>
                 <div className="sm:col-span-2">
                   <Field label="Address" required>
-                    <input type="text" name="addressLine1" value={form.addressLine1} onChange={onChange} className={INPUT} placeholder="Somewhere On Earth Street" />
+                    <input type="text" name="addressLine1" value={form.addressLine1} onChange={onChange} disabled={!isEditMode} className={`w-full ${INPUT}`} placeholder="Somewhere On Earth Street" />
                   </Field>
                 </div>
                 <Field label="City" required>
-                  <input type="text" name="city" value={form.city} onChange={onChange} className={INPUT} placeholder="Cebu City" />
+                  <input type="text" name="city" value={form.city} onChange={onChange} disabled={!isEditMode} className={`w-full ${INPUT}`} placeholder="Cebu City" />
                 </Field>
                 <Field label="Province" required>
-                  <input type="text" name="province" value={form.province} onChange={onChange} className={INPUT} placeholder="Cebu" />
+                  <input type="text" name="province" value={form.province} onChange={onChange} disabled={!isEditMode} className={`w-full ${INPUT}`} placeholder="Cebu" />
                 </Field>
                 <div className="sm:col-span-2">
                   <Field label="About Yourself">
-                    <textarea name="aboutYourself" value={form.aboutYourself} onChange={onChange} rows={4} className={`${INPUT} resize-y`} placeholder="Write about yourself" />
+                    <textarea name="aboutYourself" value={form.aboutYourself} onChange={onChange} disabled={!isEditMode} rows={4} className={`w-full ${INPUT} resize-y`} placeholder="Write about yourself" />
                   </Field>
                 </div>
               </div>
-              <div className="mt-6 pt-4 border-t border-gray-200">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-6 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {saving ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
+              {isEditMode && (
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="px-6 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {saving ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </div>
+              )}
             </form>
           </div>
         </div>
@@ -322,7 +350,7 @@ export default function AgentAccount() {
                     name="currentPassword"
                     value={pwd.currentPassword}
                     onChange={e => setPwd(p => ({ ...p, currentPassword: e.target.value }))}
-                    className={INPUT}
+                    className={`w-full ${INPUT}`}
                     placeholder="************"
                     required
                   />
@@ -342,7 +370,7 @@ export default function AgentAccount() {
                     name="newPassword"
                     value={pwd.newPassword}
                     onChange={e => setPwd(p => ({ ...p, newPassword: e.target.value }))}
-                    className={INPUT}
+                    className={`w-full ${INPUT}`}
                     placeholder="************"
                     required
                   />
@@ -362,7 +390,7 @@ export default function AgentAccount() {
                     name="confirmPassword"
                     value={pwd.confirmPassword}
                     onChange={e => setPwd(p => ({ ...p, confirmPassword: e.target.value }))}
-                    className={INPUT}
+                    className={`w-full ${INPUT}`}
                     placeholder="************"
                     required
                   />
@@ -396,13 +424,13 @@ export default function AgentAccount() {
               <Field label="Email">
                 <div className="relative">
                   <FiMail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-600" />
-                  <input type="email" value={form.email} readOnly className={`${INPUT} pl-10`} />
+                  <input type="email" value={form.email} readOnly className={`w-full ${INPUT} pl-10`} disabled />
                 </div>
               </Field>
               <Field label="What's App">
                 <div className="relative">
                   <FaWhatsapp className="absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-600 text-lg" />
-                  <input type="text" name="whatsapp" value={form.whatsapp} onChange={onChange} className={`${INPUT} pl-10`} placeholder="+63 9914099656" />
+                  <input type="text" name="whatsapp" value={form.whatsapp} onChange={onChange} disabled={!isEditMode} className={`w-full ${INPUT} pl-10`} placeholder="+63 9914099656" />
                 </div>
               </Field>
               <div className="pt-2">
