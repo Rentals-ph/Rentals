@@ -305,18 +305,8 @@ export default function LocationMap({ latitude, longitude, onLocationChange, onA
   return (
     <div className="location-map-container">
       <div className="location-map-header">
-        <h4>
-          <FiMapPin /> Set Property Location
-        </h4>
-        <button
-          type="button"
-          className="location-map-get-current-btn"
-          onClick={getCurrentLocation}
-          disabled={isLoading}
-        >
-          <FiNavigation />
-          {isLoading ? 'Getting location...' : 'Use Current Location'}
-        </button>
+     
+       
       </div>
 
       {error && (
@@ -334,13 +324,9 @@ export default function LocationMap({ latitude, longitude, onLocationChange, onA
       )}
 
       <div className="location-map-info">
-        <p>
-          Click on the map to set the property location, or use the button above to get your current location.
-          You can also drag the marker to adjust the position.
-        </p>
         {(latitude && longitude) && (
           <div className="location-map-coordinates">
-            <strong>Coordinates:</strong> {latitude}, {longitude}
+            
           </div>
         )}
       </div>

@@ -436,8 +436,22 @@ function CoPilotPanel({
     const trimmed = text.trim()
     if (!trimmed || !conversationId || isLoading) return
 
+    // Normalize short numeric answers based on the current step so the backend
+    // gets a more natural sentence it can reliably parse.
+    let normalized = trimmed
+    const isNumeric = /^[0-9]+$/.test(trimmed)
+    if (isNumeric && currentStep) {
+      if (currentStep === 'bedrooms') {
+        normalized = `It has ${trimmed} bedrooms.`
+      } else if (currentStep === 'bathrooms') {
+        normalized = `It has ${trimmed} bathrooms.`
+      } else if (currentStep === 'price') {
+        normalized = `The price is ${trimmed}.`
+      }
+    }
+
     // Special action: generate description
-    if (trimmed === '__generate_description__') {
+    if (normalized === '__generate_description__') {
       onGenerateDescription()
       setMessages(p => [...p, {
         id:        `u-${Date.now()}`,
@@ -452,12 +466,12 @@ function CoPilotPanel({
     setMessages(p => [...p, {
       id:        `u-${Date.now()}`,
       role:      'user',
-      content:   trimmed,
+      content:   normalized,
       timestamp: new Date().toISOString(),
     }])
     setIsLoading(true)
     try {
-      const res = await listingAssistantApi.processMessage(trimmed, conversationId)
+      const res = await listingAssistantApi.processMessage(normalized, conversationId)
       const nextStep = res.current_step ?? currentStep ?? null
       setCurrentStep(nextStep)
       setMessages(p => [...p, {
@@ -533,57 +547,72 @@ function CoPilotPanel({
       </div>
 
       {/* Sequential chat messages */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4 flex flex-col gap-3 bg-white">
-        {messages.map((msg, i) => {
-          const isLastMsg = i === messages.length - 1
+      {/* Let chat grow with content (page scroll) */}
+      <div className="px-5 py-4 flex flex-col gap-3 bg-white">
+        {/*
+          Show quick-reply buttons on the most recent ASSISTANT message.
+          System "✓ already set…" notifications can come after an assistant prompt,
+          which would otherwise hide the buttons if we only render on the last message.
+        */}
+        {(() => {
+          const lastAssistantIndex = (() => {
+            for (let i = messages.length - 1; i >= 0; i--) {
+              if (messages[i]?.role === 'assistant') return i
+            }
+            return -1
+          })()
 
-          if (msg.role === 'system') {
-            // System notifications for manual fills — green pill style
-            return (
-              <div key={msg.id} className="text-[12px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-[10px] px-3 py-2">
-                {msg.content}
-              </div>
-            )
-          }
+          return messages.map((msg, i) => {
+            const isLastAssistantMsg = i === lastAssistantIndex
 
-          return (
-            <div key={msg.id}>
-              {/* Bubble */}
-              <div className={`flex gap-2 items-start ${msg.role === 'user' ? 'justify-end' : ''}`}>
-                {msg.role === 'assistant' && (
-                  <img
-                    src={aiLogo}
-                    alt=""
-                    className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-gray-200 mt-[1px]"
-                  />
-                )}
-                <div className={`text-[12px] leading-relaxed px-3 py-2 rounded-2xl max-w-[240px] ${
-                  msg.role === 'user'
-                    ? 'bg-blue-600 text-white rounded-tr-md'
-                    : 'bg-gray-50 border border-gray-200 text-gray-900 rounded-tl-md'
-                }`}>
+            if (msg.role === 'system') {
+              // System notifications for manual fills — green pill style
+              return (
+                <div key={msg.id} className="text-[12px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-[10px] px-3 py-2">
                   {msg.content}
                 </div>
-              </div>
+              )
+            }
 
-              {/* Quick-reply buttons — only on the last assistant message */}
-              {msg.role === 'assistant' && isLastMsg && msg.buttons && msg.buttons.length > 0 && (
-                <div className="ml-10 mt-2 flex flex-wrap gap-2">
-                  {msg.buttons.map(btn => (
-                    <button
-                      key={btn.value}
-                      onClick={() => sendMessage(btn.value)}
-                      disabled={isLoading}
-                      className="text-[12px] font-semibold px-3 py-1.5 bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {btn.label}
-                    </button>
-                  ))}
+            return (
+              <div key={msg.id}>
+                {/* Bubble */}
+                <div className={`flex gap-2 items-start ${msg.role === 'user' ? 'justify-end' : ''}`}>
+                  {msg.role === 'assistant' && (
+                    <img
+                      src={aiLogo}
+                      alt=""
+                      className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-gray-200 mt-[1px]"
+                    />
+                  )}
+                  <div className={`text-[12px] leading-relaxed px-3 py-2 rounded-2xl max-w-[240px] ${
+                    msg.role === 'user'
+                      ? 'bg-blue-600 text-white rounded-tr-md'
+                      : 'bg-gray-50 border border-gray-200 text-gray-900 rounded-tl-md'
+                  }`}>
+                    {msg.content}
+                  </div>
                 </div>
-              )}
-            </div>
-          )
-        })}
+
+                {/* Quick-reply buttons — on last assistant message */}
+                {msg.role === 'assistant' && isLastAssistantMsg && msg.buttons && msg.buttons.length > 0 && (
+                  <div className="ml-10 mt-2 flex flex-wrap gap-2">
+                    {msg.buttons.map(btn => (
+                      <button
+                        key={btn.value}
+                        onClick={() => sendMessage(btn.value)}
+                        disabled={isLoading}
+                        className="text-[12px] font-semibold px-3 py-1.5 bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {btn.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })
+        })()}
 
         {/* Loading dots */}
         {isLoading && (
@@ -767,15 +796,17 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
     // Render inside the dashboard layout (sidebar + main offset already applied).
-    <div className="-m-6 md:-m-4 flex h-[calc(100vh-var(--header-height,80px))] overflow-hidden bg-gray-100">
-      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+    // Use min-height instead of fixed height so the page can scroll naturally,
+    // and avoid negative margins that were causing scroll bleed.
+    <div className="flex min-h-[calc(100vh-var(--header-height,80px))] bg-gray-100">
+      <div className="flex-1 flex flex-col min-h-0">
 
         
         {/* 2-col content (form left, assistant right) */}
-        <div className="flex flex-1 min-h-0 overflow-hidden gap-6 px-8 py-7">
+        <div className="flex flex-1 gap-6 px-8 py-7 items-start">
 
-          {/* ── Form area (scrolls) ── */}
-          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+          {/* ── Form area ── */}
+          <div className="flex-1 pr-1">
 
             {/* Error banner */}
             {hookError && (
@@ -1066,6 +1097,12 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation()
+                        // Ensure the amenities section is expanded when adding
+                        setExpandedSections(prev => {
+                          const next = new Set(prev)
+                          next.add('amenities')
+                          return next
+                        })
                         setShowCustomAmenityInput(true)
                         setTimeout(() => customAmenityRef.current?.focus(), 50)
                       }}
@@ -1093,6 +1130,35 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
                         </button>
                       ))}
                     </div>
+
+                    {/* Custom amenities added by the user */}
+                    {formData.amenities.filter(a => !AMENITIES_LIST.includes(a)).length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {formData.amenities
+                          .filter(a => !AMENITIES_LIST.includes(a))
+                          .map(a => (
+                            <span
+                              key={a}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[12px] font-medium bg-blue-50 border-blue-400 text-blue-700"
+                            >
+                              {a}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  updateField(
+                                    'amenities',
+                                    formData.amenities.filter(x => x !== a),
+                                  )
+                                }
+                                className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-blue-600 hover:text-white transition-colors leading-none"
+                                title={`Remove ${a}`}
+                              >
+                                <FiX className="w-3 h-3" />
+                              </button>
+                            </span>
+                          ))}
+                      </div>
+                    )}
 
                     {showCustomAmenityInput && (
                       <div className="flex items-center gap-2">
@@ -1153,28 +1219,31 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
 
           {/* ── AI Co-Pilot Panel (right column) ── */}
           {coPilotOpen ? (
-            <div className="w-[360px] flex-shrink-0 flex flex-col min-h-0 overflow-visible">
+            <div className="w-[360px] flex-shrink-0 flex flex-col max-h-[calc(100vh-140px)]">
               {/* Outer wrapper is overflow-visible so collapse handle isn't clipped */}
-              <div className="relative overflow-visible flex flex-col min-h-0">
-                {/* Collapse handle (mirrors sidebar overflow button, but on left) */}
-                <button
-                  type="button"
-                  onClick={() => setCoPilotOpen(false)}
-                  className="absolute -left-4 top-6 w-9 h-9 rounded-full text-gray-600 hover:text-gray-900 bg-white shadow-md border border-gray-200 hover:bg-gray-50 transition-colors z-20 flex items-center justify-center"
-                  aria-label="Collapse listing assistant"
-                  title="Collapse"
-                >
-                  <FiChevronRight className="text-lg" />
-                </button>
-                {/* Inner card keeps rounded corners/clipping */}
-                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm flex flex-col min-h-0">
-                  <CoPilotPanel
-                    conversationId={conversationId}
-                    formData={formData}
-                    onBulkFill={bulkFill}
-                    onClose={() => setCoPilotOpen(false)}
-                    onGenerateDescription={handleGenerateDescription}
-                  />
+              <div className="relative flex-1 overflow-visible">
+                {/* Scroll container for the assistant content */}
+                <div className="h-full overflow-y-auto pr-1">
+                  {/* Collapse handle (mirrors sidebar overflow button, but on left) */}
+                  <button
+                    type="button"
+                    onClick={() => setCoPilotOpen(false)}
+                    className="absolute -left-4 top-6 w-9 h-9 rounded-full text-gray-600 hover:text-gray-900 bg-white shadow-md border border-gray-200 hover:bg-gray-50 transition-colors z-20 flex items-center justify-center"
+                    aria-label="Collapse listing assistant"
+                    title="Collapse"
+                  >
+                    <FiChevronRight className="text-lg" />
+                  </button>
+                  {/* Inner card keeps rounded corners/clipping */}
+                  <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm flex flex-col min-h-0">
+                    <CoPilotPanel
+                      conversationId={conversationId}
+                      formData={formData}
+                      onBulkFill={bulkFill}
+                      onClose={() => setCoPilotOpen(false)}
+                      onGenerateDescription={handleGenerateDescription}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
