@@ -27,7 +27,7 @@ import {
 } from 'react-icons/fi'
 
 const SIDEBAR_STORAGE_KEY = 'sidebar-collapsed'
-const SIDEBAR_WIDTH_EXPANDED = 280
+const SIDEBAR_WIDTH_EXPANDED = 240
 const SIDEBAR_WIDTH_COLLAPSED = 72
 
 function AppSidebar() {
