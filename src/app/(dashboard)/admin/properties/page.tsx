@@ -1,63 +1,54 @@
 'use client'
 
-import { useState } from 'react'
-import { AppSidebar, DashboardHeader } from '@/components/common'
+import { useState, useEffect } from 'react'
+import DashboardHeader from '@/components/common/dashboard/DashboardHeader'
+import api from '@/lib/api'
 
 interface Property {
-  id: string
-  propertyId: string
-  propertyName: string
-  type: string
-  location: string
-  status: 'published' | 'draft' | 'occupied' | 'under-review'
-  dateCreated: string
+  id: number
+  slug?: string
+  title: string
+  property_type?: string
+  location?: string
+  city?: string
+  barangay?: string
+  status?: string
+  draft_status?: string
+  created_at: string
 }
 
 export default function PropertiesPage() {
   const [filter, setFilter] = useState('all')
+  const [properties, setProperties] = useState<Property[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const properties: Property[] = [
-    {
-      id: '1',
-      propertyId: 'PROP-502',
-      propertyName: 'Skyline Studio',
-      type: 'Condominium',
-      location: 'Barangay Bel-Air',
-      status: 'published',
-      dateCreated: '12-8-2025'
-    },
-    {
-      id: '2',
-      propertyId: 'PROP-512',
-      propertyName: 'Highrise Complex',
-      type: 'Condominium',
-      location: 'Barangay Guadalupe',
-      status: 'draft',
-      dateCreated: '11-4-2025'
-    },
-    {
-      id: '3',
-      propertyId: 'PROP-546',
-      propertyName: 'Reach Front',
-      type: 'Apartment',
-      location: 'Barangay Batasan',
-      status: 'occupied',
-      dateCreated: '10-27-2025'
-    },
-    {
-      id: '4',
-      propertyId: 'PROP-509',
-      propertyName: 'Between Edges Co.',
-      type: 'Condominium',
-      location: 'Barangay Lahug',
-      status: 'under-review',
-      dateCreated: '8-19-2025'
+  useEffect(() => {
+    fetchProperties()
+  }, [filter])
+
+  const fetchProperties = async () => {
+    try {
+      setLoading(true)
+      const response = await api.get('/properties')
+      if (response.success && response.data) {
+        setProperties(Array.isArray(response.data) ? response.data : [])
+      }
+    } catch (error) {
+      console.error('Error fetching properties:', error)
+    } finally {
+      setLoading(false)
     }
-  ]
+  }
 
-  const filteredProperties = properties
+  const filteredProperties = properties.filter((p) => {
+    if (filter === 'all') return true
+    if (filter === 'published') return p.draft_status === 'published' || p.status === 'published'
+    if (filter === 'draft') return p.draft_status === 'draft' || p.status === 'draft'
+    return true
+  })
 
-  const getStatusDisplay = (status: string) => {
+  const getStatusDisplay = (property: Property) => {
+    const status = property.draft_status || property.status || 'draft'
     switch (status) {
       case 'published':
         return 'Published'
@@ -72,7 +63,8 @@ export default function PropertiesPage() {
     }
   }
 
-  const getStatusStyles = (status: string) => {
+  const getStatusStyles = (property: Property) => {
+    const status = property.draft_status || property.status || 'draft'
     switch (status) {
       case 'published':
         return 'bg-emerald-100 text-emerald-800 border-emerald-200'
@@ -87,45 +79,53 @@ export default function PropertiesPage() {
     }
   }
 
+  const getLocationDisplay = (property: Property) => {
+    if (property.location) return property.location
+    const parts = [property.barangay, property.city].filter(Boolean)
+    return parts.length > 0 ? parts.join(', ') : 'N/A'
+  }
+
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit">
-      <AppSidebar />
+    <>
+      <DashboardHeader
+        title="Property Management"
+        subtitle="Manage properties and listings"
+        showNotifications={false}
+      />
 
-      <main className="ml-[280px] flex-1 w-[calc(100%-280px)] p-8 min-h-screen lg:ml-[240px] lg:w-[calc(100%-240px)] lg:p-6 md:ml-0 md:w-full md:p-4 md:pt-15 transition-[margin,width] duration-200">
-        <DashboardHeader
-          title="Property Management"
-          subtitle="Manage properties and listings"
-          showNotifications={true}
-        />
-
-        <div className="mx-4 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <h2 className="text-xl font-bold text-gray-900">Properties</h2>
-            <div className="flex flex-wrap items-center gap-2 p-1 bg-gray-100 rounded-lg">
-              {[
-                { value: 'all', label: 'All (23)' },
-                { value: 'newest', label: 'Newest (12)' },
-                { value: 'oldest', label: 'Oldest (67)' }
-              ].map(({ value, label }) => (
-                <label
-                  key={value}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-md cursor-pointer transition-colors has-[:checked]:bg-white has-[:checked]:shadow-sm has-[:checked]:text-gray-900"
-                >
-                  <input
-                    type="radio"
-                    name="propertyFilter"
-                    value={value}
-                    checked={filter === value}
-                    onChange={(e) => setFilter(e.target.value)}
-                    className="sr-only"
-                  />
-                  <span className="text-sm font-medium text-gray-600">{label}</span>
-                </label>
-              ))}
-            </div>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h2 className="text-xl font-bold text-gray-900">Properties</h2>
+          <div className="flex flex-wrap items-center gap-2 p-1 bg-gray-100 rounded-lg">
+            {[
+              { value: 'all', label: `All (${properties.length})` },
+              { value: 'published', label: 'Published' },
+              { value: 'draft', label: 'Draft' }
+            ].map(({ value, label }) => (
+              <label
+                key={value}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-md cursor-pointer transition-colors has-[:checked]:bg-white has-[:checked]:shadow-sm has-[:checked]:text-gray-900"
+              >
+                <input
+                  type="radio"
+                  name="propertyFilter"
+                  value={value}
+                  checked={filter === value}
+                  onChange={(e) => setFilter(e.target.value)}
+                  className="sr-only"
+                />
+                <span className="text-sm font-medium text-gray-600">{label}</span>
+              </label>
+            ))}
           </div>
+        </div>
 
-          <div className="overflow-x-auto">
+        <div className="overflow-x-auto">
+          {loading ? (
+            <div className="p-12 text-center text-gray-500">Loading properties...</div>
+          ) : filteredProperties.length === 0 ? (
+            <div className="p-12 text-center text-gray-500">No properties found</div>
+          ) : (
             <table className="w-full min-w-[640px]">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
@@ -140,24 +140,26 @@ export default function PropertiesPage() {
               <tbody>
                 {filteredProperties.map((property) => (
                   <tr key={property.id} className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">{property.propertyId}</td>
-                    <td className="px-6 py-4 text-gray-900 font-medium">{property.propertyName}</td>
-                    <td className="px-6 py-4 text-gray-600">{property.type}</td>
-                    <td className="px-6 py-4 text-gray-600">{property.location}</td>
+                    <td className="px-6 py-4 font-medium text-gray-900">#{property.id}</td>
+                    <td className="px-6 py-4 text-gray-900 font-medium">{property.title}</td>
+                    <td className="px-6 py-4 text-gray-600">{property.property_type || 'N/A'}</td>
+                    <td className="px-6 py-4 text-gray-600">{getLocationDisplay(property)}</td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusStyles(property.status)}`}>
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusStyles(property)}`}>
                         <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" />
-                        {getStatusDisplay(property.status)}
+                        {getStatusDisplay(property)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-gray-600">{property.dateCreated}</td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {new Date(property.created_at).toLocaleDateString()}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
+          )}
         </div>
-      </main>
-    </div>
+      </div>
+    </>
   )
 }

@@ -3,56 +3,55 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Blog;
-use App\Models\BlogLike;
+use App\Models\BlogComment;
+use App\Models\BlogCommentLike;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use OpenApi\Attributes as OA;
 
-class BlogLikeController extends Controller
+class BlogCommentLikeController extends Controller
 {
     /**
-     * Toggle like / unlike on a blog post.
-     *
-     * Works for:
-     *  - Authenticated registered users (user_id set)
-     *  - Guest sessions (guest_session_id set via guest.session middleware)
+     * Toggle like / unlike on a blog comment.
      */
     #[OA\Post(
-        path: '/blogs/{blog}/likes',
-        summary: 'Toggle like on a blog post',
+        path: '/blogs/{blog}/comments/{comment}/likes',
+        summary: 'Toggle like on a blog comment',
         tags: ['Blog Engagement'],
         parameters: [
             new OA\Parameter(name: 'blog', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'comment', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
             new OA\Response(response: 200, description: 'Liked or unliked successfully'),
             new OA\Response(response: 403, description: 'No user or guest session found'),
-            new OA\Response(response: 404, description: 'Blog not found'),
+            new OA\Response(response: 404, description: 'Comment not found'),
         ]
     )]
-    public function toggle(Request $request, int $blog): JsonResponse
+    public function toggle(Request $request, int $blog, int $comment): JsonResponse
     {
-        $post         = Blog::findOrFail($blog);
+        $commentModel = BlogComment::where('id', $comment)
+            ->where('blog_id', $blog)
+            ->firstOrFail();
+
         $user         = $request->user();
         $guestSession = $request->attributes->get('guestSession');
 
         if (!$user && !$guestSession) {
             return response()->json([
                 'success' => false,
-                'message' => 'A user account or guest session is required to like posts.',
+                'message' => 'A user account or guest session is required to like comments.',
             ], 403);
         }
 
         $userId         = $user?->id;
         $guestSessionId = $guestSession?->id;
 
-        // Create a unique cache key for this user/guest and blog combination
+        // Create a unique cache key for this user/guest and comment combination
         $cacheKey = $userId 
-            ? "blog_like_action:blog_{$blog}:user_{$userId}"
-            : "blog_like_action:blog_{$blog}:guest_{$guestSessionId}";
+            ? "comment_like_action:comment_{$comment}:user_{$userId}"
+            : "comment_like_action:comment_{$comment}:guest_{$guestSessionId}";
 
         // Check if there was a recent action (within last 3 seconds) to prevent spam
         $recentAction = Cache::get($cacheKey);
@@ -63,7 +62,7 @@ class BlogLikeController extends Controller
             ], 429);
         }
 
-        $existing = BlogLike::findForViewer($post->id, $userId, $guestSessionId);
+        $existing = BlogCommentLike::findForViewer($commentModel->id, $userId, $guestSessionId);
 
         if ($existing) {
             // Check if this like was just created (prevent rapid toggle spam)
@@ -79,63 +78,71 @@ class BlogLikeController extends Controller
             // Store action timestamp in cache (expires in 10 seconds)
             Cache::put($cacheKey, now()->timestamp, 10);
             
-            $existing->delete(); // observer decrements likes_count
+            $existing->delete();
             $liked = false;
         } else {
             // Store action timestamp in cache (expires in 10 seconds)
             Cache::put($cacheKey, now()->timestamp, 10);
             
-            BlogLike::create([
-                'blog_id'          => $post->id,
+            BlogCommentLike::create([
+                'comment_id'       => $commentModel->id,
                 'user_id'          => $userId,
                 'guest_session_id' => $guestSessionId,
-            ]); // observer increments likes_count
+            ]);
             $liked = true;
         }
 
-        $post->refresh();
+        // Refresh to get updated likes count
+        $commentModel->refresh();
+        $likesCount = BlogCommentLike::where('comment_id', $commentModel->id)->count();
 
         return response()->json([
             'success' => true,
             'data'    => [
                 'liked'       => $liked,
-                'likes_count' => $post->likes_count,
+                'likes_count' => $likesCount,
             ],
         ]);
     }
 
     /**
-     * Return the like count and whether the current viewer has liked the post.
+     * Get like count and whether the current viewer has liked the comment.
      */
     #[OA\Get(
-        path: '/blogs/{blog}/likes',
-        summary: 'Get blog like count and liked status',
+        path: '/blogs/{blog}/comments/{comment}/likes',
+        summary: 'Get comment like count and liked status',
         tags: ['Blog Engagement'],
         parameters: [
             new OA\Parameter(name: 'blog', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'comment', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
             new OA\Response(response: 200, description: 'Like info retrieved'),
-            new OA\Response(response: 404, description: 'Blog not found'),
+            new OA\Response(response: 404, description: 'Comment not found'),
         ]
     )]
-    public function show(Request $request, int $blog): JsonResponse
+    public function show(Request $request, int $blog, int $comment): JsonResponse
     {
-        $post         = Blog::findOrFail($blog);
+        $commentModel = BlogComment::where('id', $comment)
+            ->where('blog_id', $blog)
+            ->firstOrFail();
+
         $user         = $request->user();
         $guestSession = $request->attributes->get('guestSession');
 
-        $liked = BlogLike::findForViewer(
-            $post->id,
+        $liked = BlogCommentLike::findForViewer(
+            $commentModel->id,
             $user?->id,
             $guestSession?->id,
         ) !== null;
+
+        $likesCount = BlogCommentLike::where('comment_id', $commentModel->id)->count();
 
         return response()->json([
             'success' => true,
             'data'    => [
                 'liked'       => $liked,
-                'likes_count' => $post->likes_count,
+                'likes_count' => $likesCount,
             ],
         ]);
     }

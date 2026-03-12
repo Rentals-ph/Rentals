@@ -99,15 +99,12 @@ export default function AgentsPage() {
   const modalPanel = 'bg-white rounded-xl shadow-xl w-[90%] max-w-lg max-h-[90vh] overflow-auto'
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit">
-      <AppSidebar />
-
-      <main className="ml-[280px] flex-1 w-[calc(100%-280px)] p-8 min-h-screen lg:ml-[240px] lg:w-[calc(100%-240px)] lg:p-6 md:ml-0 md:w-full md:p-4 md:pt-15 transition-[margin,width] duration-200">
-        <DashboardHeader
-          title="User Management"
-          subtitle="View and manage agents (agents are created by brokers)"
-          showNotifications={true}
-        />
+    <>
+      <DashboardHeader
+        title="User Management"
+        subtitle="View and manage agents (agents are created by brokers)"
+        showNotifications={false}
+      />
 
         {error && (
           <div className="mx-4 mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 flex items-center justify-between gap-2">
@@ -238,8 +235,7 @@ export default function AgentsPage() {
               </table>
             )}
           </div>
-        </div>
-      </main>
+      </div>
 
       {/* Details Modal */}
       {showDetailsModal && selectedAgent && (
@@ -268,6 +264,6 @@ export default function AgentsPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }

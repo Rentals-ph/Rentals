@@ -23,7 +23,7 @@ function AppHeader() {
   const profileRef = useRef<HTMLDivElement>(null)
   const notificationRef = useRef<HTMLDivElement>(null)
 
-  // Determine if we're on agent or broker routes
+  // Determine if we're on agent, broker, or admin routes
   const isAgentRoute = pathname?.startsWith('/agent')
   const isBrokerRoute = pathname?.startsWith('/broker')
   const isAdminRoute = pathname?.startsWith('/admin')
@@ -31,13 +31,13 @@ function AppHeader() {
   // Determine create listing path and inbox path based on route
   const createListingPath = isBrokerRoute ? '/broker/create-listing' : '/agent/create-listing'
   const inboxPath = isBrokerRoute ? '/broker/inbox' : '/agent/inbox'
-  const accountPath = isBrokerRoute ? '/broker/account' : '/agent/account'
-  const roleLabel = isBrokerRoute ? 'Broker' : isVerified ? 'Rent Manager' : 'Property Agent'
-  const defaultName = isBrokerRoute ? 'Broker' : 'Agent'
+  const accountPath = isBrokerRoute ? '/broker/account' : isAdminRoute ? '/admin' : '/agent/account'
+  const roleLabel = isAdminRoute ? 'Admin' : isBrokerRoute ? 'Broker' : isVerified ? 'Rent Manager' : 'Property Agent'
+  const defaultName = isAdminRoute ? 'Admin' : isBrokerRoute ? 'Broker' : 'Agent'
 
   useEffect(() => {
     const fetchUserData = async () => {
-      if (!isAgentRoute && !isBrokerRoute) return
+      if (!isAgentRoute && !isBrokerRoute && !isAdminRoute) return
 
       try {
         // Get stored data first
@@ -107,9 +107,9 @@ function AppHeader() {
       }
     }
     fetchUserData()
-  }, [isAgentRoute, isBrokerRoute])
+  }, [isAgentRoute, isBrokerRoute, isAdminRoute])
 
-  // Fetch unread messages (property inquiries)
+  // Fetch unread messages (property inquiries) - only for agent/broker, not admin
   useEffect(() => {
     const fetchUnreadMessages = async () => {
       if (!isAgentRoute && !isBrokerRoute) return
@@ -231,8 +231,8 @@ function AppHeader() {
     router.push('/')
   }
 
-  // Don't show header on admin routes or if not on agent/broker routes
-  if (isAdminRoute || (!isAgentRoute && !isBrokerRoute)) {
+  // Show header on agent, broker, and admin routes
+  if (!isAgentRoute && !isBrokerRoute && !isAdminRoute) {
     return null
   }
 
@@ -250,47 +250,50 @@ function AppHeader() {
 
         {/* Right side: Add Listing button, Bell icon, Divider, Profile */}
         <div className="flex items-center gap-4">
-          {/* Add Listing Button */}
-          <Link
-            href={createListingPath}
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-full shadow-md hover:bg-blue-700 transition-colors"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              style={{ width: '20px', height: '20px' }}
+          {/* Add Listing Button - only show for agent/broker, not admin */}
+          {!isAdminRoute && (
+            <Link
+              href={createListingPath}
+              className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-full shadow-md hover:bg-blue-700 transition-colors"
             >
-              {/* Roof — V/caret shape stroked */}
-              <path
-                d="M2 12 L12 2 L22 12"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                style={{ width: '20px', height: '20px' }}
+              >
+                {/* Roof — V/caret shape stroked */}
+                <path
+                  d="M2 12 L12 2 L22 12"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
 
-              {/* House body — pentagon with peaked top matching the caret angle */}
-              <path d="M3.5 22 L3.5 15 L12 6 L20.5 15 L20.5 22 Z" />
+                {/* House body — pentagon with peaked top matching the caret angle */}
+                <path d="M3.5 22 L3.5 15 L12 6 L20.5 15 L20.5 22 Z" />
 
-              {/* Door cutout */}
-              <rect x="9.5" y="16.5" width="5" height="5.5" fill="#3B82F6" />
-            </svg>
-            <span>Add Listing</span>
-          </Link>
+                {/* Door cutout */}
+                <rect x="9.5" y="16.5" width="5" height="5.5" fill="#3B82F6" />
+              </svg>
+              <span>Add Listing</span>
+            </Link>
+          )}
 
-          {/* Bell Icon with Notification Dropdown */}
-          <div className="relative" ref={notificationRef}>
-            <button
-              onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
-              className="relative flex items-center justify-center w-10 h-10 text-gray-600 hover:text-blue-600 transition-colors"
-              aria-label="Notifications"
-            >
-              <FiBell className="text-xl" />
-              {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-              )}
-            </button>
+          {/* Bell Icon with Notification Dropdown - only show for agent/broker, not admin */}
+          {!isAdminRoute && (
+            <div className="relative" ref={notificationRef}>
+              <button
+                onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
+                className="relative flex items-center justify-center w-10 h-10 text-gray-600 hover:text-blue-600 transition-colors"
+                aria-label="Notifications"
+              >
+                <FiBell className="text-xl" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                )}
+              </button>
 
             {/* Notification Dropdown */}
             {showNotificationDropdown && (
@@ -365,10 +368,11 @@ function AppHeader() {
                 )}
               </div>
             )}
-          </div>
-
-          {/* Divider */}
-          <div className="h-8 w-px bg-gray-300" />
+            </div>
+          )}
+          
+          {/* Divider - only show if we have notifications or add listing button */}
+          {!isAdminRoute && <div className="h-8 w-px bg-gray-300" />}
 
           {/* Profile Section */}
           <div className="relative" ref={profileRef}>
