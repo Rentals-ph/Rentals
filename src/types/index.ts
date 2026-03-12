@@ -33,6 +33,7 @@ export interface Property {
   agent?: User | null
   rent_manager?: RentManager | null // Legacy support
   published_at: string | null
+  views_count?: number | null
   created_at?: string | null
   updated_at?: string | null
 }
