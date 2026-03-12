@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import AppSidebar from '@/components/common/AppSidebar'
 import FlippableBusinessCard from '@/components/common/digital/FlippableBusinessCard'
 import { agentsApi } from '@/api'
 import type { Agent } from '@/api/endpoints/agents'
@@ -87,48 +86,45 @@ export default function BrokerDigitalCard() {
   const licenseNumber = agent?.prc_license_number || ''
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit">
-      <AppSidebar />
-
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4 md:pt-15"> {/* broker-main */}
-        {/* Broker Header */}
-        <header className="broker-header flex items-center justify-between gap-4 mb-6 md:flex-col md:items-start">
-          <div className="broker-header-left flex items-center gap-3 md:w-full md:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 m-0 mb-1">Digital Business Card</h1>
-              <p className="text-sm text-gray-400 m-0">Share your professional contact information.</p>
-            </div>
-            <button type="button" className="w-11 h-11 rounded-xl border-0 bg-white flex items-center justify-center text-gray-600 text-xl cursor-pointer transition-all duration-200 shadow-sm hover:bg-gray-50 hover:text-blue-600 flex-shrink-0" aria-label="Notifications">
-              <FiBell />
-            </button>
+    // Render inside broker dashboard layout (sidebar + main offset already applied).
+    <div className="-m-6 md:-m-4 p-8 min-h-[calc(100vh-var(--header-height,80px))] lg:p-6 md:p-4 md:pt-15 bg-gray-100 font-outfit"> {/* broker-main */}
+      {/* Broker Header */}
+      <header className="broker-header flex items-center justify-between gap-4 mb-6 md:flex-col md:items-start">
+        <div className="broker-header-left flex items-center gap-3 md:w-full md:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 m-0 mb-1">Digital Business Card</h1>
+            <p className="text-sm text-gray-400 m-0">Share your professional contact information.</p>
           </div>
-        </header>
-
-        <div className="mt-2">
-          {loading ? (
-            <div className="p-8 text-center text-gray-500">Loading card...</div>
-          ) : (
-            <div className="flex justify-center items-start">
-              <FlippableBusinessCard
-                firstName={firstName}
-                lastName={lastName}
-                fullName={fullName}
-                title={title}
-                sinceYear={sinceYear}
-                phone={phone}
-                email={email}
-                image={brokerImage}
-                initials={brokerInitials}
-                profileUrl={agent?.id ? `/agents/${agent.id}` : undefined}
-                companyName={companyName}
-                companyImage={companyImage}
-                officeAddress={officeAddress}
-                licenseNumber={licenseNumber}
-              />
-            </div>
-          )}
+          <button type="button" className="w-11 h-11 rounded-xl border-0 bg-white flex items-center justify-center text-gray-600 text-xl cursor-pointer transition-all duration-200 shadow-sm hover:bg-gray-50 hover:text-blue-600 flex-shrink-0" aria-label="Notifications">
+            <FiBell />
+          </button>
         </div>
-      </main>
+      </header>
+
+      <div className="mt-2">
+        {loading ? (
+          <div className="p-8 text-center text-gray-500">Loading card...</div>
+        ) : (
+          <div className="flex justify-center items-start">
+            <FlippableBusinessCard
+              firstName={firstName}
+              lastName={lastName}
+              fullName={fullName}
+              title={title}
+              sinceYear={sinceYear}
+              phone={phone}
+              email={email}
+              image={brokerImage}
+              initials={brokerInitials}
+              profileUrl={agent?.id ? `/agents/${agent.id}` : undefined}
+              companyName={companyName}
+              companyImage={companyImage}
+              officeAddress={officeAddress}
+              licenseNumber={licenseNumber}
+            />
+          </div>
+        )}
+      </div>
     </div>
   )
 }

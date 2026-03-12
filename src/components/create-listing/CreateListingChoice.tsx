@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import AppSidebar from '../common/AppSidebar'
 import { getAsset } from '../../utils/assets'
 import type { ReactNode } from 'react'
 
@@ -32,9 +31,8 @@ export function CreateListingChoice({
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit">
-      <AppSidebar />
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4">
+    // Render inside the dashboard layout (sidebar + main offset already applied).
+    <div className="-m-6 md:-m-4 min-h-[calc(100vh-var(--header-height,80px))] bg-gray-100 font-outfit p-8 lg:p-6 md:p-4">
         {header}
 
         <div className="grid grid-cols-2 gap-6 my-4 mb-8 max-[900px]:grid-cols-1">
@@ -208,7 +206,6 @@ style={{
             </div>
           </div>
         </div>
-      </main>
     </div>
   )
 }

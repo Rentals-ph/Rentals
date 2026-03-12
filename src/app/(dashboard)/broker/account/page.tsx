@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import AppSidebar from '@/components/common/AppSidebar'
 import AccountSettings, { 
   ProfileData, 
   EditFormData, 
@@ -102,27 +101,23 @@ export default function BrokerAccount() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit">
-      <AppSidebar />
-      <main className="main-with-sidebar flex-1 min-h-screen">
-        <div className="px-4 sm:px-6 md:px-10 lg:px-[150px] py-8 lg:py-6 md:py-4 md:pt-15">
-          <header className="mb-7">
-            <h1 className="text-2xl font-bold text-gray-900 m-0 mb-1 md:text-xl">Account Settings</h1>
-            <p className="text-sm text-gray-400 m-0">Manage your account information and preferences.</p>
-          </header>
+    // Render inside broker dashboard layout (sidebar + main offset already applied).
+    <div className="-m-6 md:-m-4 bg-gray-100 font-outfit px-4 sm:px-6 md:px-10 lg:px-[150px] py-8 lg:py-6 md:py-4 md:pt-15 min-h-[calc(100vh-var(--header-height,80px))]">
+      <header className="mb-7">
+        <h1 className="text-2xl font-bold text-gray-900 m-0 mb-1 md:text-xl">Account Settings</h1>
+        <p className="text-sm text-gray-400 m-0">Manage your account information and preferences.</p>
+      </header>
 
-          <AccountSettings
-            userType="broker"
-            profileData={profileData}
-            editFormData={editFormData}
-            loading={loading}
-            onEditFormChange={handleEditChange}
-            onEditSubmit={handleEditSubmit}
-            onPasswordSubmit={handlePasswordSubmit}
-            cancelRoute="/broker"
-          />
-        </div>
-      </main>
+      <AccountSettings
+        userType="broker"
+        profileData={profileData}
+        editFormData={editFormData}
+        loading={loading}
+        onEditFormChange={handleEditChange}
+        onEditSubmit={handleEditSubmit}
+        onPasswordSubmit={handlePasswordSubmit}
+        cancelRoute="/broker"
+      />
     </div>
   )
 }

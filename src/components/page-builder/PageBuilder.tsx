@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useCallback, useEffect, useMemo } from 'react'
-import AppSidebar from '@/components/common/AppSidebar'
 import { pageBuilderApi } from '@/api'
 import type { PageBuilderData } from '@/api'
 
@@ -1307,12 +1306,10 @@ export default function PageBuilder({ userType }: PageBuilderProps) {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden font-outfit">
-
-      {/* ── App Sidebar ── */}
-      <AppSidebar />
-
-      <div className="main-with-sidebar flex flex-col flex-1 overflow-hidden">
+    // Render inside the dashboard layout (sidebar + main offset already applied).
+    // Do NOT render AppSidebar/main-with-sidebar here, or you’ll get a double sidebar.
+    <div className="-m-6 md:-m-4 flex h-[calc(100vh-var(--header-height,80px))] bg-gray-100 overflow-hidden font-outfit">
+      <div className="flex flex-col flex-1 overflow-hidden">
 
         {/* ── Top Toolbar ── */}
         <header className="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200 z-20 shrink-0 shadow-sm">

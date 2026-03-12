@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import AppSidebar from '@/components/common/AppSidebar'
 import { messagesApi } from '@/api'
 import type { Message } from '@/api/endpoints/messages'
 import { 
@@ -170,10 +169,8 @@ export default function BrokerInbox() {
   })
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-outfit"> {/* broker-dashboard */}
-      <AppSidebar />
-
-      <main className="main-with-sidebar flex-1 p-8 min-h-screen lg:p-6 md:p-4 md:pt-15"> {/* broker-main */}
+    // Render inside broker dashboard layout (sidebar + main offset already applied).
+    <div className="-m-6 md:-m-4 p-8 min-h-[calc(100vh-var(--header-height,80px))] lg:p-6 md:p-4 md:pt-15 bg-gray-100 font-outfit"> {/* broker-main */}
         {/* Broker Header */}
         <header className="flex items-center justify-between mb-7 md:flex-col md:items-start md:gap-3.5"> {/* broker-header */}
           <div className="flex flex-col gap-1"> {/* broker-header-left */}
@@ -449,7 +446,6 @@ export default function BrokerInbox() {
             </div>
           )}
         </div>
-      </main>
     </div>
   )
 }

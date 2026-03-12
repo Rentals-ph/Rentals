@@ -20,7 +20,6 @@
 
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import AppSidebar from '@/components/common/AppSidebar'
 import LocationMap from '@/components/agent/LocationMap'
 import { useListingConversation } from '@/hooks/useListingConversation'
 import type { ListingFormData } from '@/hooks/useListingConversation'
@@ -417,7 +416,7 @@ function CoPilotPanel({
     setIsLoading(true)
     try {
       const res = await listingAssistantApi.processMessage(value, conversationId)
-      const nextStep = res.current_step ?? null
+      const nextStep = res.current_step ?? currentStep ?? null
       setCurrentStep(nextStep)
       setMessages(p => [...p, {
         id:        `a-${Date.now()}`,
@@ -430,7 +429,7 @@ function CoPilotPanel({
         await onBulkFill(res.extracted_data)
       }
     } catch { /* silently ignore */ } finally { setIsLoading(false) }
-  }, [conversationId, onBulkFill])
+  }, [conversationId, currentStep, onBulkFill])
 
   /** Send a user message (from text input or quick-reply button) */
   const sendMessage = useCallback(async (text: string) => {
@@ -459,7 +458,7 @@ function CoPilotPanel({
     setIsLoading(true)
     try {
       const res = await listingAssistantApi.processMessage(trimmed, conversationId)
-      const nextStep = res.current_step ?? null
+      const nextStep = res.current_step ?? currentStep ?? null
       setCurrentStep(nextStep)
       setMessages(p => [...p, {
         id:        `a-${Date.now()}`,
@@ -479,7 +478,7 @@ function CoPilotPanel({
         timestamp: new Date().toISOString(),
       }])
     } finally { setIsLoading(false) }
-  }, [conversationId, isLoading, onBulkFill, onGenerateDescription])
+  }, [conversationId, currentStep, isLoading, onBulkFill, onGenerateDescription])
 
   // Field completion status for the status panel
   const fieldStatuses: Array<{ label: string; value: string | null; warn?: boolean }> = [
@@ -754,30 +753,29 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
   // ── Loading guard ─────────────────────────────────────────────────────────────
   if (isInitializing) {
     return (
-      <div className="flex h-screen overflow-hidden bg-gray-100">
-        <AppSidebar />
-        <main className="main-with-sidebar flex-1 flex items-center justify-center">
+      <div className="flex h-[calc(100vh-var(--header-height,80px))] overflow-hidden bg-gray-100 -m-6 md:-m-4">
+        <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
             <div className="w-10 h-10 border-4 border-blue-50 border-t-blue-600 rounded-full animate-spin" />
             <p className="text-gray-500 text-sm">Setting up your listing session…</p>
           </div>
-        </main>
+        </div>
       </div>
     )
   }
 
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-100">
-      <AppSidebar />
-      <main className="main-with-sidebar flex-1 flex flex-col min-h-0 overflow-hidden">
+    // Render inside the dashboard layout (sidebar + main offset already applied).
+    <div className="-m-6 md:-m-4 flex h-[calc(100vh-var(--header-height,80px))] overflow-hidden bg-gray-100">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
 
         
-        {/* 2-col content */}
-        <div className="flex flex-1 min-h-0 overflow-hidden">
+        {/* 2-col content (form left, assistant right) */}
+        <div className="flex flex-1 min-h-0 overflow-hidden gap-6 px-8 py-7">
 
-          {/* ── Form area ── */}
-          <div className="flex-1 min-h-0 overflow-y-auto px-8 py-7">
+          {/* ── Form area (scrolls) ── */}
+          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
 
             {/* Error banner */}
             {hookError && (
@@ -1153,21 +1151,23 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
             </div>
           </div>
 
-          {/* ── AI Co-Pilot Panel ── */}
+          {/* ── AI Co-Pilot Panel (right column) ── */}
           {coPilotOpen ? (
-            <div className="w-[360px] flex-shrink-0 flex flex-col min-h-0 overflow-hidden border-l border-gray-200 bg-gray-100">
-              <div className="p-4 min-h-0 flex flex-col">
-                <div className="relative bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm flex flex-col min-h-0">
-                  {/* Collapse handle (mirrors sidebar overflow button, but on left) */}
-                  <button
-                    type="button"
-                    onClick={() => setCoPilotOpen(false)}
-                    className="absolute -left-4 top-6 w-9 h-9 rounded-full text-gray-600 hover:text-gray-900 bg-white shadow-md border border-gray-200 hover:bg-gray-50 transition-colors z-20 flex items-center justify-center"
-                    aria-label="Collapse listing assistant"
-                    title="Collapse"
-                  >
-                    <FiChevronRight className="text-lg" />
-                  </button>
+            <div className="w-[360px] flex-shrink-0 flex flex-col min-h-0 overflow-visible">
+              {/* Outer wrapper is overflow-visible so collapse handle isn't clipped */}
+              <div className="relative overflow-visible flex flex-col min-h-0">
+                {/* Collapse handle (mirrors sidebar overflow button, but on left) */}
+                <button
+                  type="button"
+                  onClick={() => setCoPilotOpen(false)}
+                  className="absolute -left-4 top-6 w-9 h-9 rounded-full text-gray-600 hover:text-gray-900 bg-white shadow-md border border-gray-200 hover:bg-gray-50 transition-colors z-20 flex items-center justify-center"
+                  aria-label="Collapse listing assistant"
+                  title="Collapse"
+                >
+                  <FiChevronRight className="text-lg" />
+                </button>
+                {/* Inner card keeps rounded corners/clipping */}
+                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm flex flex-col min-h-0">
                   <CoPilotPanel
                     conversationId={conversationId}
                     formData={formData}
@@ -1179,25 +1179,27 @@ export default function UnifiedListingForm({ role }: UnifiedListingFormProps) {
               </div>
             </div>
           ) : (
-            <button
-              onClick={() => setCoPilotOpen(true)}
-              className="w-10 flex-shrink-0 bg-gray-50 border-l border-gray-200 flex flex-col items-center justify-center gap-3 hover:bg-gray-100 transition-colors"
-              title="Open AI Co-Pilot"
-            >
-              <span className="inline-block w-[7px] h-[7px] rounded-full bg-blue-500 animate-pulse" />
-              <span
-                className="text-[10px] text-gray-400 font-semibold tracking-widest"
-                style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+            <div className="w-16 flex-shrink-0 flex items-start justify-center pt-6 overflow-visible">
+              <button
+                type="button"
+                onClick={() => setCoPilotOpen(true)}
+                className="relative w-12 h-12 rounded-full bg-white border border-gray-200 shadow-md hover:bg-gray-50 transition-colors flex items-center justify-center"
+                title="Open Rentals Assist"
+                aria-label="Open listing assistant"
               >
-                AI CO-PILOT
-              </span>
-              <FiZap className="w-3.5 h-3.5 text-blue-500" />
-            </button>
+                <img
+                  src={getAsset('LOGO_AI') || '/assets/logos/rentals-ai-logo.png'}
+                  alt="Rentals Assist"
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+                <span className="absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full bg-blue-500 animate-pulse" />
+              </button>
+            </div>
           )}
 
         </div>
 
-      </main>
+      </div>
 
       {/* ── Success Modal ── */}
       {showSuccessModal && (
