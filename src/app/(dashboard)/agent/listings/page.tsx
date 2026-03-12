@@ -16,6 +16,7 @@ import {
 import { ASSETS } from '@/utils/assets'
 import { resolvePropertyImage } from '@/utils/imageResolver'
 import PropertiesMap from '@/components/agent/PropertiesMap'
+import HorizontalPropertyCard from '@/components/common/cards/HorizontalPropertyCard'
 
 type ListingStatus = 'active' | 'rented' | 'hidden'
 
@@ -344,31 +345,32 @@ export default function AgentMyListings() {
         </div>
 
         {/* Main Content: Two Column Layout */}
-        <div className="flex flex-col lg:flex-row  gap-4 sm:gap-5">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-5 h-[500px] lg:h-[calc(100vh-200px)]">
           {/* Left: Property Listings */}
-          <div className="flex-1 lg:flex-[0_0_40%] lg:max-w-[40%] flex flex-col gap-4">
-            {loading ? (
-              <>
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-                    <div className="h-48 bg-gray-200 animate-pulse" />
-                    <div className="p-4 space-y-2">
-                      <span className="block h-4 w-24 rounded bg-gray-200 animate-pulse" />
-                      <span className="block h-5 w-full rounded bg-gray-200 animate-pulse" />
-                      <span className="block h-3 w-2/3 rounded bg-gray-100 animate-pulse" />
+          <div className="flex-1 lg:flex-[0_0_50%] lg:max-w-[50%] flex flex-col h-full">
+            <div className="flex-1 overflow-y-auto lg:sticky lg:top-4 pr-2 space-y-3 h-full [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:hover:bg-gray-400">
+              {loading ? (
+                <>
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                      <div className="h-32 bg-gray-200 animate-pulse" />
+                      <div className="p-3 space-y-2">
+                        <span className="block h-3 w-20 rounded bg-gray-200 animate-pulse" />
+                        <span className="block h-4 w-full rounded bg-gray-200 animate-pulse" />
+                        <span className="block h-3 w-2/3 rounded bg-gray-100 animate-pulse" />
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </>
-            ) : listings.length === 0 ? (
-              <div className="p-8 text-center text-sm text-gray-600 bg-white rounded-xl border border-gray-200">
-                {selectedFilter === 'all' 
-                  ? 'No listings yet. Create your first listing!'
-                  : `No ${selectedFilter} properties found.`
-                }
-              </div>
-            ) : (
-              listings.map((l) => {
+                  ))}
+                </>
+              ) : listings.length === 0 ? (
+                <div className="p-6 text-center text-sm text-gray-600 bg-white rounded-lg border border-gray-200">
+                  {selectedFilter === 'all' 
+                    ? 'No listings yet. Create your first listing!'
+                    : `No ${selectedFilter} properties found.`
+                  }
+                </div>
+              ) : (
+                listings.map((l) => {
                 const property = l.property
                 const priceTypeLabel = property?.price_type
                   ? property.price_type.charAt(0).toUpperCase() + property.price_type.slice(1).toLowerCase()
@@ -383,71 +385,53 @@ export default function AgentMyListings() {
                 const bathrooms = property?.bathrooms ?? 0
                 const area = property?.area ? `${property.area}${property.floor_area_unit || 'sqm'}` : 'N/A'
                 const description = property?.description || 'Beautiful property with modern amenities and stunning views.'
+                
+                // Extract price and price unit from priceLabel
+                const priceMatch = priceLabel?.match(/P\s*([\d,]+)\.00\/(.+)/)
+                const price = priceMatch ? priceMatch[1].replace(/,/g, '') : (property?.price?.toString() || '0')
+                const priceUnit = priceMatch ? `/${priceMatch[2]}` : '/monthly'
 
                 return (
-                  <div key={l.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                    <div className="relative">
-                      <div className="relative h-48 sm:h-56 overflow-hidden bg-gray-100">
-                        <img
-                          src={l.image}
-                          alt={l.title}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src = ASSETS.PLACEHOLDER_PROPERTY_MAIN
-                          }}
-                        />
-                        <div className="absolute top-3 left-3">
-                          <span className="bg-blue-600 text-white text-xs font-semibold uppercase px-3 py-1 rounded">
-                            {property?.type || 'Property'}
-                          </span>
-                        </div>
-                      </div>
+                  <div key={l.id} className="relative">
+                    <div className="[&_article]:h-[200px] [&_article]:sm:h-[220px]">
+                      <HorizontalPropertyCard
+                        id={l.id}
+                        propertyType={property?.type || 'Property'}
+                        listingType={property?.listing_type || null}
+                        price={`P ${property?.price?.toLocaleString('en-US') || '0'}.00`}
+                        priceUnit={priceUnit}
+                        title={l.title}
+                        description={description}
+                        image={l.image}
+                        images={property?.images_url || property?.images ? (property.images_url || property.images?.map(img => resolvePropertyImage(img, property.id))) : undefined}
+                        bedrooms={bedrooms}
+                        bathrooms={bathrooms}
+                        propertySize={area}
+                        location={l.address}
+                        city={property?.city || null}
+                        streetAddress={property?.street_address || null}
+                        stateProvince={property?.state_province || null}
+                      />
                     </div>
-                    
-                    <div className="p-4 sm:p-5">
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                        <FiMapPin className="text-gray-400 flex-shrink-0" />
-                        <span className="truncate">{l.address}</span>
-                      </div>
-                      
-                      <div className="flex items-center gap-1 text-sm text-gray-600 mb-3">
-                        <FiCamera className="text-gray-400" />
-                        <span>{property?.views_count ?? l.views ?? 0}</span>
-                      </div>
-                      
-                      <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">{l.title}</h3>
-                      
-                      {priceLabel && (
-                        <p className="text-xl font-bold text-blue-600 mb-3">{priceLabel}</p>
-                      )}
-                      
-                      <p className="text-sm text-gray-600 mb-4 line-clamp-3">
-                        {description}
-                        <span className="text-blue-600 cursor-pointer hover:underline"> see more</span>
-                      </p>
-                      
-                      <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-                        <span>{bedrooms}</span>
-                        <span>{bathrooms}</span>
-                        <span>{area}</span>
-                      </div>
-                      
-                      <button
-                        className="w-full bg-blue-600 text-white font-semibold py-2.5 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-                        type="button"
-                        onClick={() => handleEditClick(l.id)}
-                      >
-                        EDIT
-                      </button>
-                    </div>
+                    <button
+                      className="absolute right-4 bottom-4 z-10 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-blue-600 shadow-sm ring-1 ring-blue-100 transition hover:bg-blue-50"
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleEditClick(l.id)
+                      }}
+                    >
+                      EDIT
+                    </button>
                   </div>
                 )
               })
-            )}
-
+              )}
+            </div>
+            
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-4">
+              <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-gray-200">
                 {getPaginationPages().map((page, idx) => (
                   page === 'ellipsis' ? (
                     <span key={`ellipsis-${idx}`} className="px-2 text-gray-500">...</span>
@@ -456,7 +440,7 @@ export default function AgentMyListings() {
                       key={page}
                       type="button"
                       onClick={() => setCurrentPage(page)}
-                      className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                      className={`px-3 py-1.5 rounded-lg font-medium text-xs transition-colors ${
                         currentPage === page
                           ? 'bg-blue-600 text-white'
                           : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
@@ -471,8 +455,8 @@ export default function AgentMyListings() {
           </div>
 
           {/* Right: Map */}
-          <div className="lg:flex-[0_0_60%] lg:max-w-[60%] flex-shrink-0">
-            <div className="bg-white rounded-xl overflow-hidden border border-gray-200 h-[500px] lg:h-[calc(100vh-200px)] lg:sticky lg:top-4">
+          <div className="lg:flex-[0_0_50%] lg:max-w-[50%] flex-shrink-0 h-full min-h-[500px] lg:min-h-0">
+            <div className="bg-white rounded-xl overflow-hidden border border-gray-200 h-full lg:sticky lg:top-4">
               <PropertiesMap 
                 properties={properties}
                 agentId={currentAgentId}
