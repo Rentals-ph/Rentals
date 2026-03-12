@@ -370,9 +370,10 @@ export default function AgentDetailsPage() {
                       const images = (p.images_url && p.images_url.length > 0) ? [mainImg, ...(p.images_url || []).filter((u): u is string => !!u && u !== mainImg)] : undefined
                       const agentImage = agent.image || agent.avatar || agent.profile_image
                       const agentImageUrl = agentImage ? getAgentImageUrl(agentImage) : undefined
+                      const priceUnit = p.listing_type === 'for_sale' ? undefined : (formatPriceType(p.price_type) ? `/${formatPriceType(p.price_type)}` : '/mo')
                       return (
                         <div key={p.id} className="min-w-0 w-full [&>article]:min-w-0 [&>article]:w-full [&>article]:max-w-full">
-                          <HorizontalPropertyCard id={p.id} propertyType={p.type} date={formatDate(p.published_at)} price={formatPrice(p.price)} priceUnit="/monthly" title={p.title} description={p.description || undefined} image={mainImg} images={images} rentManagerName={agentName} rentManagerRole="Agent" rentManagerImage={agentImageUrl} rentManagerEmail={agentEmail} rentManagerWhatsApp={agentWhatsApp} bedrooms={p.bedrooms} bathrooms={p.bathrooms} parking={0} propertySize={propertySize} location={p.location} city={p.city} streetAddress={p.street_address} stateProvince={p.state_province} />
+                          <HorizontalPropertyCard id={p.id} propertyType={p.type} listingType={p.listing_type as 'for_rent' | 'for_sale' | null} date={formatDate(p.published_at)} price={formatPrice(p.price)} priceUnit={priceUnit} title={p.title} description={p.description || undefined} image={mainImg} images={images} rentManagerName={agentName} rentManagerRole="Agent" rentManagerImage={agentImageUrl} rentManagerEmail={agentEmail} rentManagerWhatsApp={agentWhatsApp} companyImage={companyImage || undefined} bedrooms={p.bedrooms} bathrooms={p.bathrooms} parking={0} propertySize={propertySize} location={p.location} city={p.city} streetAddress={p.street_address} stateProvince={p.state_province} />
                         </div>
                       )
                     })

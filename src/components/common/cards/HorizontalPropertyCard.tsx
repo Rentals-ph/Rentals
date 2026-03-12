@@ -9,6 +9,7 @@ import SharePopup, { type SharePlatform } from '../misc/SharePopup'
 interface HorizontalPropertyCardProps {
   id?: number | string
   propertyType?: string
+  listingType?: 'for_rent' | 'for_sale' | null
   date?: string
   price?: string
   priceUnit?: string
@@ -35,6 +36,7 @@ interface HorizontalPropertyCardProps {
 function HorizontalPropertyCard({
   id,
   propertyType = 'Apartment',
+  listingType,
   date = 'Sat 05, 2024',
   price = '$ 25000.00',
   priceUnit = '/monthly',
@@ -321,7 +323,11 @@ function HorizontalPropertyCard({
         {/* Price */}
         <div className="flex items-baseline gap-[8px]">
           <p className="text-[#387CFF] text-[24px] sm:text-[28px] font-medium leading-[1.26]">{price}</p>
-          <span className="text-[#FE8E0A] text-[16px] sm:text-[18px] font-medium leading-[1.26]">{priceUnit}</span>
+          {listingType === 'for_sale' ? (
+            <span className="text-[#22C55E] text-[13px] sm:text-[14px] font-semibold leading-[1.26] uppercase tracking-wide">For Sale</span>
+          ) : (
+            <span className="text-[#FE8E0A] text-[16px] sm:text-[18px] font-medium leading-[1.26]">{priceUnit}</span>
+          )}
         </div>
 
         {/* Description */}

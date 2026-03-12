@@ -242,10 +242,18 @@ function PropertiesContent() {
 
   // Client-side filtering for additional filters (listing type, bathrooms, bedrooms, price range)
   const filteredProperties = properties.filter(property => {
-    // Listing type filter
+    // Listing type filter - match the logic from FeaturedProperties component
+    // Check if listing_type is explicitly set, otherwise fall back to price_type
+    const hasListingType = property.listing_type === 'for_rent' || property.listing_type === 'for_sale'
     const listingTypeMatch = listingTypeFilter === 'all' ||
-      (listingTypeFilter === 'for_rent' && (property.listing_type === 'for_rent' || (!property.listing_type && !!property.price_type))) ||
-      (listingTypeFilter === 'for_sale' && (property.listing_type === 'for_sale' || (!property.listing_type && !property.price_type)))
+      (listingTypeFilter === 'for_rent' && (
+        property.listing_type === 'for_rent' || 
+        (!hasListingType && property.price_type)
+      )) ||
+      (listingTypeFilter === 'for_sale' && (
+        property.listing_type === 'for_sale' || 
+        (!hasListingType && !property.price_type)
+      ))
 
     const bathMatch = !minBaths || property.bathrooms >= parseInt(minBaths)
     const bedMatch = !minBeds || property.bedrooms >= parseInt(minBeds)
@@ -317,10 +325,18 @@ function PropertiesContent() {
     
     // Apply client-side filters (listing_type, bathrooms, bedrooms, price, amenities)
     filtered = filtered.filter(property => {
-      // Listing type filter
+      // Listing type filter - match the logic from FeaturedProperties component
+      // Check if listing_type is explicitly set, otherwise fall back to price_type
+      const hasListingType = property.listing_type === 'for_rent' || property.listing_type === 'for_sale'
       const listingTypeMatch = listingTypeFilter === 'all' || 
-        (listingTypeFilter === 'for_rent' && (property.listing_type === 'for_rent' || (!property.listing_type && property.price_type))) ||
-        (listingTypeFilter === 'for_sale' && (property.listing_type === 'for_sale' || (!property.listing_type && !property.price_type)))
+        (listingTypeFilter === 'for_rent' && (
+          property.listing_type === 'for_rent' || 
+          (!hasListingType && property.price_type)
+        )) ||
+        (listingTypeFilter === 'for_sale' && (
+          property.listing_type === 'for_sale' || 
+          (!hasListingType && !property.price_type)
+        ))
       
       const bathMatch = !minBaths || property.bathrooms >= parseInt(minBaths)
       const bedMatch = !minBeds || property.bedrooms >= parseInt(minBeds)
@@ -403,12 +419,13 @@ function PropertiesContent() {
   const paginatedProperties = sortedProperties
 
   // Reset to page 1 when filters change (that trigger API calls); clear chat results so list reflects filters
+  // Note: listingTypeFilter is NOT included here because it's a client-side filter, not an API filter
   useEffect(() => {
     setCurrentPage(1)
     setHasMore(true)
     setProperties([])
     setChatResults(null)
-  }, [selectedLocation, selectedType, searchQuery, listingTypeFilter])
+  }, [selectedLocation, selectedType, searchQuery])
 
   // Reset when switching view modes (to start infinite scroll from beginning)
   const prevViewMode = useRef(viewMode)
@@ -1458,9 +1475,24 @@ function PropertiesContent() {
                 description="Try adjusting your filters, location, or search terms to see more listings."
                 action={
                   <>
-                    <EmptyStateAction href="/properties" primary={false}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setListingTypeFilter('all')
+                        setSelectedType('All Types')
+                        setSelectedLocation('')
+                        setSearchQuery('')
+                        setMinBaths('')
+                        setMinBeds('')
+                        setPriceMin('')
+                        setPriceMax('')
+                        setSelectedAmenities([])
+                        setSubCategory('all')
+                      }}
+                      className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all hover:opacity-90 active:scale-[0.98] bg-white text-rental-blue-600 border-2 border-rental-blue-200 hover:bg-rental-blue-50"
+                    >
                       View all properties
-                    </EmptyStateAction>
+                    </button>
                     <button
                       type="button"
                       onClick={() => setIsSidebarOpen(true)}
