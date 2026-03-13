@@ -12,7 +12,7 @@ import {
 // Stats data (summary from report when available)
 const getStatsFromReport = (
   rows: TeamProductivityRow[],
-  conversionStats?: { conversion_rate: number; average_response_time_display: string }
+  conversionStats?: { conversion_rate: number; total_conversions: number; average_response_time_display: string; average_response_time_minutes?: number }
 ) => {
   const totalInquiries = rows.reduce((s, r) => s + r.total_inquiries, 0)
   const totalListings = rows.reduce((s, r) => s + r.total_listings, 0)
@@ -399,7 +399,7 @@ export default function ReportsPage() {
               <div className="flex items-center justify-center"> {/* rp-bar-container */}
                 <svg viewBox="0 0 400 260" className="w-full h-auto max-w-[400px]"> {/* rp-bar-chart */}
                   {/* Y-axis labels */}
-                  {barChartData.yAxisLabels.map((value, index) => {
+                  {barChartData.yAxisLabels?.map((value, index) => {
                     const yPos = 222 - (index * 50)
                     return (
                       <text key={value} x="35" y={yPos} fontSize="11" fill="#9CA3AF" textAnchor="end">
@@ -409,7 +409,7 @@ export default function ReportsPage() {
                   })}
 
                   {/* Grid lines */}
-                  {barChartData.yAxisLabels.map((_, index) => {
+                  {barChartData.yAxisLabels?.map((_, index) => {
                     const yPos = 222 - (index * 50)
                     return (
                       <line

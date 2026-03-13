@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\PageBuilderController;
+use App\Http\Controllers\Api\Shared\PageBuilderController;
 use App\Http\Controllers\StorageController;
 
 Route::get('/', function () {

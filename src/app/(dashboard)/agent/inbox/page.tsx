@@ -1,6 +1,6 @@
 'use client'
 
-import InboxPage from '@/components/dashboard/InboxPage'
+import InboxPage from '@/shared/components/dashboard/InboxPage'
 
 export default function AgentInbox() {
   return (

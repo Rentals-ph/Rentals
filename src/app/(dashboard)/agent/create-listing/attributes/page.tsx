@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCreateListing } from '@/contexts/CreateListingContext'
 import {
@@ -8,51 +8,7 @@ import {
   FiArrowRight,
   FiCheck
 } from 'react-icons/fi'
-
-function ProgressRing({ percent }: { percent: number }) {
-  const { radius, stroke, normalizedRadius, circumference, strokeDashoffset } = useMemo(() => {
-    const r = 26
-    const s = 6
-    const nr = r - s / 2
-    const c = nr * 2 * Math.PI
-    const offset = c - (percent / 100) * c
-    return {
-      radius: r,
-      stroke: s,
-      normalizedRadius: nr,
-      circumference: c,
-      strokeDashoffset: offset
-    }
-  }, [percent])
-
-  return (
-    <div className="aclc-progress">
-      <svg height={radius * 2} width={radius * 2} className="aclc-progress-svg">
-        <circle
-          stroke="#E5E7EB"
-          fill="transparent"
-          strokeWidth={stroke}
-          r={normalizedRadius}
-          cx={radius}
-          cy={radius}
-        />
-        <circle
-          stroke="#2563EB"
-          fill="transparent"
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          strokeDasharray={`${circumference} ${circumference}`}
-          style={{ strokeDashoffset }}
-          r={normalizedRadius}
-          cx={radius}
-          cy={radius}
-          className="aclc-progress-ring"
-        />
-      </svg>
-      <div className="aclc-progress-text">{percent}%</div>
-    </div>
-  )
-}
+import { ProgressRing } from '@/shared/components/ui'
 
 export default function AgentCreateListingAttributes() {
   const router = useRouter()

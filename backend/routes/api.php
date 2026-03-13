@@ -1,15 +1,15 @@
 <?php
 
-use App\Http\Controllers\Api\PropertyController;
-use App\Http\Controllers\Api\TestimonialController;
-use App\Http\Controllers\Api\BlogController;
-use App\Http\Controllers\Api\NewsController;
-use App\Http\Controllers\Api\AgentController;
-use App\Http\Controllers\Api\AdminController;
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\BrokerController;
-use App\Http\Controllers\Api\MessageController;
-use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\Shared\PropertyController;
+use App\Http\Controllers\Api\Shared\TestimonialController;
+use App\Http\Controllers\Api\Shared\BlogController;
+use App\Http\Controllers\Api\Shared\NewsController;
+use App\Http\Controllers\Api\Agent\AgentController;
+use App\Http\Controllers\Api\Admin\AdminController;
+use App\Http\Controllers\Api\Shared\AuthController;
+use App\Http\Controllers\Api\Broker\BrokerController;
+use App\Http\Controllers\Api\Shared\MessageController;
+use App\Http\Controllers\Api\Shared\ContactController;
 use App\Http\Controllers\PropertySearchController;
 use App\Http\Controllers\GroqChatController;
 use App\Http\Controllers\ListingAssistantController;
@@ -217,8 +217,8 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // Page Builder routes
-use App\Http\Controllers\Api\PageBuilderController;
-use App\Http\Controllers\Api\UploadController;
+use App\Http\Controllers\Api\Shared\PageBuilderController;
+use App\Http\Controllers\Api\Shared\UploadController;
 // Public route for viewing published pages by slug
 Route::get('/page/{slug}', [PageBuilderController::class, 'showBySlug']);
 // Public route for getting page builder by slug (for editing)
@@ -239,11 +239,11 @@ Route::middleware('auth:sanctum')->group(function () {
 // =============================================================================
 // TWO-TIER TENANT SYSTEM
 // =============================================================================
-use App\Http\Controllers\Api\TenantAuthController;
-use App\Http\Controllers\Api\ChatRoomController;
-use App\Http\Controllers\Api\ReviewController;
-use App\Http\Controllers\Api\SavedPropertyController;
-use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\Tenant\TenantAuthController;
+use App\Http\Controllers\Api\Tenant\ChatRoomController;
+use App\Http\Controllers\Api\Tenant\ReviewController;
+use App\Http\Controllers\Api\Tenant\SavedPropertyController;
+use App\Http\Controllers\Api\Tenant\NotificationController;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Guest sessions (Tier 1)
@@ -330,15 +330,15 @@ Route::middleware('auth:sanctum')->prefix('notifications')->group(function () {
 // =============================================================================
 // ANALYTICS & ENGAGEMENT
 // =============================================================================
-use App\Http\Controllers\Api\PropertyViewController;
-use App\Http\Controllers\Api\ProfileViewController;
-use App\Http\Controllers\Api\BlogViewController;
-use App\Http\Controllers\Api\BlogLikeController;
-use App\Http\Controllers\Api\BlogCommentController;
-use App\Http\Controllers\Api\BlogCommentLikeController;
-use App\Http\Controllers\Api\NewsViewController;
-use App\Http\Controllers\Api\NewsLikeController;
-use App\Http\Controllers\Api\NewsCommentController;
+use App\Http\Controllers\Api\Analytics\PropertyViewController;
+use App\Http\Controllers\Api\Analytics\ProfileViewController;
+use App\Http\Controllers\Api\Analytics\BlogViewController;
+use App\Http\Controllers\Api\Analytics\BlogLikeController;
+use App\Http\Controllers\Api\Analytics\BlogCommentController;
+use App\Http\Controllers\Api\Analytics\BlogCommentLikeController;
+use App\Http\Controllers\Api\Analytics\NewsViewController;
+use App\Http\Controllers\Api\Analytics\NewsLikeController;
+use App\Http\Controllers\Api\Analytics\NewsCommentController;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Property views
@@ -400,7 +400,7 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
 });
 
 // Downloadables routes
-use App\Http\Controllers\Api\DownloadableController;
+use App\Http\Controllers\Api\Shared\DownloadableController;
 // Public route for agents/brokers to get active downloadables
 Route::get('/downloadables', [DownloadableController::class, 'index']);
 // Public route for downloading files

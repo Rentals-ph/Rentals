@@ -3,16 +3,9 @@
 import { useState, useEffect } from 'react'
 import DashboardHeader from '@/components/common/dashboard/DashboardHeader'
 import { adminApi, type AdminProperty, type CreatePropertyData, type UpdatePropertyData } from '@/api'
-import { agentsApi } from '@/api'
+import { agentsApi, type Agent } from '@/api'
 import { toast } from '@/utils/toast'
 import { FiRefreshCw, FiPlus, FiEdit2, FiTrash2, FiX } from 'react-icons/fi'
-
-interface Agent {
-  id: number
-  first_name: string
-  last_name: string
-  email: string
-}
 
 export default function PropertiesPage() {
   const [filter, setFilter] = useState('all')

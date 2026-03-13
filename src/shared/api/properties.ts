@@ -1,0 +1,219 @@
+import apiClient from '@/api/client'
+import type { Property } from '@/shared/types'
+import type { PaginatedResponse } from '@/api/types'
+
+/**
+ * Properties API endpoints
+ */
+
+export interface GetPropertiesParams {
+  type?: string
+  location?: string
+  search?: string
+  page?: number
+  per_page?: number
+  agent_id?: number
+  /** Optional listing type filter: 'for_rent' or 'for_sale' */
+  listing_type?: string
+}
+
+export const propertiesApi = {
+  /**
+   * Get featured properties
+   */
+  getFeatured: async (params?: { listing_type?: string }): Promise<Property[]> => {
+    const response = await apiClient.get<Property[]>('/properties/featured', { params })
+    return response.data
+  },
+
+  /**
+   * Get all properties with optional filters
+   */
+  getAll: async (params?: GetPropertiesParams): Promise<Property[] | PaginatedResponse<Property>> => {
+    const response = await apiClient.get<Property[] | PaginatedResponse<Property>>('/properties', { params })
+    
+    // Backend returns paginated response with data, current_page, per_page, total, last_page
+    if (Array.isArray(response.data)) {
+      return response.data
+    }
+    
+    // Return paginated response if it exists
+    return response.data
+  },
+
+  /**
+   * Get property by ID
+   */
+  getById: async (id: number): Promise<Property> => {
+    const response = await apiClient.get<Property>(`/properties/${id}`)
+    return response.data
+  },
+
+  /**
+   * Record a view for a property.
+   * Uses guest.session middleware on the backend so it works for
+   * authenticated users, guest sessions, and anonymous visitors.
+   */
+  recordView: async (
+    id: number,
+  ): Promise<{ views_count: number; already_viewed: boolean }> => {
+    const response = await apiClient.post<{
+      success: boolean
+      data: { views_count: number; already_viewed: boolean }
+    }>(`/properties/${id}/views`)
+
+    return response.data.data
+  },
+
+  /**
+   * Get the cached view count for a property.
+   */
+  getViewCount: async (id: number): Promise<number> => {
+    const response = await apiClient.get<{
+      success: boolean
+      data: { views_count: number }
+    }>(`/properties/${id}/views`)
+
+    return response.data.data.views_count
+  },
+
+  /**
+   * Create a new property (requires authentication)
+   */
+  create: async (propertyData: FormData): Promise<{ success: boolean; message: string; data: Property }> => {
+    const response = await apiClient.post<{ success: boolean; message: string; data: Property }>('/properties', propertyData)
+    return response.data
+  },
+
+  /**
+   * Create multiple properties at once (bulk create - requires authentication)
+   */
+  bulkCreate: async (properties: Partial<Property>[]): Promise<{ success: boolean; message: string; data: Property[]; created_count: number }> => {
+    const response = await apiClient.post<{ success: boolean; message: string; data: Property[]; created_count: number }>('/properties/bulk', {
+      properties,
+    })
+    return response.data
+  },
+
+  /**
+   * Get properties by agent ID (all pages, no pagination meta)
+   */
+  getByAgentId: async (agentId: number): Promise<Property[]> => {
+    try {
+      const response = await apiClient.get<Property[] | PaginatedResponse<Property>>('/properties', {
+        params: { agent_id: agentId },
+      })
+
+      if (Array.isArray(response.data)) {
+        return response.data
+      }
+
+      const paginatedResponse = response.data as PaginatedResponse<Property>
+      if (paginatedResponse?.data && Array.isArray(paginatedResponse.data)) {
+        return paginatedResponse.data
+      }
+
+      console.warn('Unexpected response structure from /properties endpoint:', response.data)
+      return []
+    } catch (error: any) {
+      console.error('Error fetching properties by agent ID:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Get properties by agent ID with pagination (returns data + pagination meta)
+   */
+  getByAgentIdPaginated: async (
+    agentId: number,
+    page: number = 1,
+    perPage: number = 3
+  ): Promise<PaginatedResponse<Property>> => {
+    const response = await apiClient.get<PaginatedResponse<Property>>('/properties', {
+      params: { agent_id: agentId, page, per_page: perPage },
+    })
+
+    const raw = response.data as any
+    if (raw?.data && Array.isArray(raw.data)) {
+      return {
+        data: raw.data,
+        current_page: raw.current_page ?? page,
+        last_page: raw.last_page ?? 1,
+        per_page: raw.per_page ?? perPage,
+        total: raw.total ?? 0,
+        from: raw.from ?? 0,
+        to: raw.to ?? 0,
+      }
+    }
+
+    return {
+      data: [],
+      current_page: 1,
+      last_page: 1,
+      per_page: perPage,
+      total: 0,
+      from: 0,
+      to: 0,
+    }
+  },
+
+  /**
+   * Update a property (requires authentication - agents can only update their own properties)
+   */
+  update: async (id: number, propertyData: FormData | Partial<Property>): Promise<{ success: boolean; message: string; data: Property }> => {
+    try {
+      // Debug: Log FormData contents
+      if (propertyData instanceof FormData) {
+        console.log('Sending FormData with keys:', Array.from(propertyData.keys()))
+        for (const [key, value] of propertyData.entries()) {
+          if (value instanceof File) {
+            console.log(`${key}: [File] ${value.name} (${value.size} bytes, type: ${value.type})`)
+          } else {
+            console.log(`${key}: ${value}`)
+          }
+        }
+        
+        // For FormData, use POST with _method=PUT (Laravel method spoofing)
+        // This ensures FormData is parsed correctly, especially for file uploads
+        // Don't append _method if it already exists
+        if (!propertyData.has('_method')) {
+          propertyData.append('_method', 'PUT')
+        }
+        
+        const response = await apiClient.post<{ success: boolean; message: string; data: Property }>(`/properties/${id}`, propertyData, {
+          headers: {
+            // Don't set Content-Type - let browser set it with boundary for multipart/form-data
+          }
+        })
+        return response.data
+      }
+      
+      // For JSON data, use PUT directly
+      const response = await apiClient.put<{ success: boolean; message: string; data: Property }>(`/properties/${id}`, propertyData, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error: any) {
+      console.error('API call error:', error)
+      if (error.response?.data) {
+        console.error('Validation errors:', error.response.data)
+        console.error('Response status:', error.response.status)
+        console.error('Response headers:', error.response.headers)
+      }
+      throw error
+    }
+  },
+
+  /**
+   * Delete a property (requires authentication - agents can only delete their own properties)
+   */
+  delete: async (id: number): Promise<{ success: boolean; message: string }> => {
+    try {
+      const response = await apiClient.delete<{ success: boolean; message: string }>(`/properties/${id}`)
+      return response.data
+    } catch (error: any) {
+      console.error('API call error:', error)
+      throw error
+    }
+  },
+}

@@ -11,7 +11,7 @@ import { HorizontalPropertyCardSkeleton } from '@/components/common/HorizontalPr
 import PublicPropertiesMap, { type PublicPropertiesMapHandle } from '@/components/common/PublicPropertiesMap'
 import { EmptyState, EmptyStateAction } from '@/components/common'
 // import './page.css' // Removed - converted to Tailwind
-import { propertiesApi } from '@/api/endpoints/properties'
+import { propertiesApi } from '@/shared/api'
 import type { Property } from '@/types'
 import { ASSETS } from '@/utils/assets'
 import { resolveAgentAvatar } from '@/utils/imageResolver'

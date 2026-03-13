@@ -6,7 +6,7 @@ import EditPropertyModal from '@/components/agent/EditPropertyModal'
 import PropertyMapPopupCard from '@/components/common/PropertyMapPopupCard'
 import { propertiesApi, agentsApi, messagesApi } from '@/api'
 import type { Property } from '@/types'
-import type { Message } from '@/api/endpoints/messages'
+import type { Message } from '@/shared/api'
 import { ASSETS } from '@/utils/assets'
 
 import { 

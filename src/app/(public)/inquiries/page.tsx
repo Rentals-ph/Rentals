@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { messagesApi, propertiesApi } from '@/api'
-import type { Message, InquiryConversation } from '@/api/endpoints/messages'
+import type { Message, InquiryConversation } from '@/shared/api'
 import type { Property } from '@/types'
 import {
   FiSearch,
@@ -124,9 +124,9 @@ export default function CustomerInquiries() {
           // Update local conversation state to reflect read status without triggering full refresh
           setConversations(prev => prev.map(conv => 
             conv.id === conversationId 
-              ? { ...conv, latestMessage: conv.latestMessage ? { ...conv.latestMessage, is_read: true } : null }
+              ? { ...conv, latestMessage: conv.latestMessage ? { ...conv.latestMessage, is_read: true } : undefined }
               : conv
-          ))
+          ) as InquiryConversation[])
         } catch (error) {
           // Ignore errors when marking as read
           console.error('Error marking conversation as read:', error)
@@ -163,7 +163,7 @@ export default function CustomerInquiries() {
         sender_email: customerEmail,
         sender_phone: undefined,
         message: replyText.trim(),
-        type: selectedConversation.type,
+        type: selectedConversation.type === 'team_invitation' ? 'general' : selectedConversation.type,
         subject: selectedConversation.subject ?? undefined,
       })
       

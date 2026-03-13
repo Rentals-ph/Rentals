@@ -1,5 +1,5 @@
 // Layout
-export { Navbar, Footer, PageHeader } from './layout'
+export { Navbar, Footer } from './layout'
 
 // Home
 export {

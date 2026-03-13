@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import LocationMap from '@/components/agent/LocationMap'
 import { useCreateListing } from '@/contexts/CreateListingContext'
@@ -11,52 +11,8 @@ import {
   FiCheck
 } from 'react-icons/fi'
 import { philippinesProvinces, getCitiesByProvince } from '@/data/philippinesLocations'
+import { ProgressRing } from '@/shared/components/ui'
 // import '../AgentCreateListingCategory.css' // Converted to Tailwind
-
-function ProgressRing({ percent }: { percent: number }) {
-  const { radius, stroke, normalizedRadius, circumference, strokeDashoffset } = useMemo(() => {
-    const r = 26
-    const s = 6
-    const nr = r - s / 2
-    const c = nr * 2 * Math.PI
-    const offset = c - (percent / 100) * c
-    return {
-      radius: r,
-      stroke: s,
-      normalizedRadius: nr,
-      circumference: c,
-      strokeDashoffset: offset
-    }
-  }, [percent])
-
-  return (
-    <div className="relative w-13 h-13 flex-shrink-0"> {/* aclc-progress */}
-      <svg height={radius * 2} width={radius * 2} className="-rotate-90"> {/* aclc-progress-svg */}
-        <circle
-          stroke="#E5E7EB"
-          fill="transparent"
-          strokeWidth={stroke}
-          r={normalizedRadius}
-          cx={radius}
-          cy={radius}
-        />
-        <circle
-          stroke="#2563EB"
-          fill="transparent"
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          strokeDasharray={`${circumference} ${circumference}`}
-          style={{ strokeDashoffset }}
-          r={normalizedRadius}
-          cx={radius}
-          cy={radius}
-          className="transition-all duration-250 ease-in" // aclc-progress-ring
-        />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-900">{percent}%</div> {/* aclc-progress-text */}
-    </div>
-  )
-}
 
 export default function AgentCreateListingLocation() {
   const router = useRouter()

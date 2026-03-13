@@ -86,7 +86,7 @@ export interface CreatePropertyData {
   is_featured?: boolean
 }
 
-export interface UpdatePropertyData extends CreatePropertyData {
+export interface UpdatePropertyData extends Omit<CreatePropertyData, 'title'> {
   title?: string
 }
 
