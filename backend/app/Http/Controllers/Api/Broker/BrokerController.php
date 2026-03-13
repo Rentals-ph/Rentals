@@ -626,7 +626,7 @@ class BrokerController extends Controller
     }
 
     /**
-     * Invite an already-registered agent to the broker's pool (adds them to Available Agents).
+     * Invite an already-registered agent to the broker's pool (sends invitation that requires acceptance).
      */
     public function inviteAgent(Request $request): JsonResponse
     {
@@ -646,23 +646,93 @@ class BrokerController extends Controller
 
         $agent = User::where('id', $validated['agent_id'])->where('role', 'agent')->firstOrFail();
 
-        if ($broker->managedAgents()->where('users.id', $agent->id)->exists()) {
+        // Check if agent is already in broker's pool (accepted invitation)
+        if ($agent->created_by_broker_id === $broker->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'This agent is already in your pool.',
             ], 422);
         }
 
-        $agent->created_by_broker_id = $broker->id;
-        $agent->save();
+        // Check if there's already a pending invitation (agent hasn't accepted yet)
+        $existingInvitation = \App\Models\Message::where('sender_id', $broker->id)
+            ->where('recipient_id', $agent->id)
+            ->where('type', 'broker_invitation')
+            ->where('is_read', false)
+            ->latest()
+            ->first();
 
-        $subscription->increment('agents_used');
+        // If there's an unread invitation, check if agent has accepted
+        if ($existingInvitation) {
+            $agentCheck = User::find($agent->id);
+            // If agent hasn't accepted (created_by_broker_id is not set), invitation is still pending
+            if ($agentCheck->created_by_broker_id !== $broker->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An invitation has already been sent to this agent. Please wait for their response.',
+                ], 422);
+            }
+        }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Agent added to your pool.',
-            'data' => $agent,
-        ]);
+        DB::beginTransaction();
+        try {
+            // Create or find conversation for broker invitations
+            $conversation = \App\Models\InquiryConversation::firstOrCreate(
+                [
+                    'agent_id' => $agent->id,
+                    'broker_id' => $broker->id,
+                    'customer_email' => $agent->email,
+                    'type' => 'general',
+                ],
+                [
+                    'customer_name' => $agent->first_name . ' ' . $agent->last_name,
+                    'subject' => 'Broker Invitation',
+                    'last_message_at' => now(),
+                ]
+            );
+
+            // Create invitation message
+            $invitationMessage = \App\Models\Message::create([
+                'sender_id' => $broker->id,
+                'recipient_id' => $agent->id,
+                'conversation_id' => $conversation->id,
+                'sender_name' => $broker->first_name . ' ' . $broker->last_name,
+                'sender_email' => $broker->email,
+                'subject' => "Invitation to Join " . ($broker->company_name ?: $broker->first_name . ' ' . $broker->last_name) . "'s Team",
+                'message' => "You have been invited to join " . ($broker->company_name ?: $broker->first_name . ' ' . $broker->last_name) . "'s agent pool. Please accept or reject this invitation.",
+                'type' => 'broker_invitation',
+                'metadata' => [
+                    'broker_id' => $broker->id,
+                    'broker_name' => $broker->first_name . ' ' . $broker->last_name,
+                    'broker_company' => $broker->company_name,
+                    'invitation_type' => 'broker_pool',
+                ],
+                'is_read' => false,
+            ]);
+
+            // Update conversation last message time
+            $conversation->update(['last_message_at' => now()]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Invitation sent to agent successfully. They will need to accept it before being added to your pool.',
+                'data' => [
+                    'agent' => $agent,
+                    'invitation_message_id' => $invitationMessage->id,
+                ],
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error sending broker invitation: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send invitation',
+                'error' => config('app.debug') ? $e->getMessage() : 'An error occurred',
+            ], 500);
+        }
     }
 
     /**

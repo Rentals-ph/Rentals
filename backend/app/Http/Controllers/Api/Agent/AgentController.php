@@ -1086,7 +1086,7 @@ class AgentController extends Controller
     }
 
     /**
-     * Accept a team invitation
+     * Accept a team invitation or broker pool invitation
      */
     public function acceptTeamInvitation(Request $request, int $messageId): JsonResponse
     {
@@ -1102,24 +1102,89 @@ class AgentController extends Controller
 
             $message = Message::where('id', $messageId)
                 ->where('recipient_id', $user->id)
-                ->where('type', 'team_invitation')
-                ->firstOrFail();
-
-            if (!$message->metadata || !isset($message->metadata['team_member_id'])) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid invitation message',
-                ], 422);
-            }
-
-            $teamMemberId = $message->metadata['team_member_id'];
-            $teamMember = \App\Models\TeamMember::where('id', $teamMemberId)
-                ->where('agent_id', $user->id)
-                ->where('invitation_status', 'pending')
+                ->whereIn('type', ['team_invitation', 'broker_invitation'])
                 ->firstOrFail();
 
             \Illuminate\Support\Facades\DB::beginTransaction();
             try {
+                // Handle broker pool invitation
+                if ($message->type === 'broker_invitation') {
+                    if (!$message->metadata || !isset($message->metadata['broker_id'])) {
+                        throw new \Exception('Invalid broker invitation message');
+                    }
+
+                    $brokerId = $message->metadata['broker_id'];
+                    $broker = \App\Models\User::findOrFail($brokerId);
+
+                    // Check if agent is already in this broker's pool
+                    if ($user->created_by_broker_id === $brokerId) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'You have already accepted this invitation.',
+                        ], 422);
+                    }
+
+                    // Check subscription limits
+                    $subscription = $broker->activeSubscription;
+                    if (!$subscription || !$subscription->canAddAgent()) {
+                        throw new \Exception('Broker has reached their agent limit.');
+                    }
+
+                    // Add agent to broker's pool
+                    $user->created_by_broker_id = $brokerId;
+                    $user->save();
+
+                    // Increment subscription usage
+                    $subscription->increment('agents_used');
+
+                    // Mark message as read
+                    $message->markAsRead();
+
+                    // Create acceptance reply message
+                    $conversation = $message->conversation;
+                    if ($conversation) {
+                        $brokerName = $message->metadata['broker_name'] ?? $broker->first_name . ' ' . $broker->last_name;
+                        \App\Models\Message::create([
+                            'sender_id' => $user->id,
+                            'recipient_id' => $message->sender_id,
+                            'conversation_id' => $conversation->id,
+                            'sender_name' => $user->first_name . ' ' . $user->last_name,
+                            'sender_email' => $user->email,
+                            'subject' => 'Re: ' . $message->subject,
+                            'message' => "I have accepted your invitation to join {$brokerName}'s agent pool.",
+                            'type' => 'general',
+                            'is_read' => false,
+                        ]);
+
+                        $conversation->update(['last_message_at' => now()]);
+                    }
+
+                    \Illuminate\Support\Facades\DB::commit();
+
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Broker invitation accepted successfully. You have been added to their agent pool.',
+                        'data' => [
+                            'broker' => $broker,
+                            'agent' => $user,
+                        ],
+                    ]);
+                }
+
+                // Handle team invitation (existing logic)
+                if (!$message->metadata || !isset($message->metadata['team_member_id'])) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid invitation message',
+                    ], 422);
+                }
+
+                $teamMemberId = $message->metadata['team_member_id'];
+                $teamMember = \App\Models\TeamMember::where('id', $teamMemberId)
+                    ->where('agent_id', $user->id)
+                    ->where('invitation_status', 'pending')
+                    ->firstOrFail();
+
                 // Update team member status
                 $teamMember->update([
                     'invitation_status' => 'accepted',
@@ -1165,7 +1230,7 @@ class AgentController extends Controller
                 'message' => 'Invitation not found',
             ], 404);
         } catch (\Exception $e) {
-            Log::error('Error accepting team invitation: ' . $e->getMessage());
+            Log::error('Error accepting invitation: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
@@ -1192,24 +1257,61 @@ class AgentController extends Controller
 
             $message = Message::where('id', $messageId)
                 ->where('recipient_id', $user->id)
-                ->where('type', 'team_invitation')
-                ->firstOrFail();
-
-            if (!$message->metadata || !isset($message->metadata['team_member_id'])) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid invitation message',
-                ], 422);
-            }
-
-            $teamMemberId = $message->metadata['team_member_id'];
-            $teamMember = \App\Models\TeamMember::where('id', $teamMemberId)
-                ->where('agent_id', $user->id)
-                ->where('invitation_status', 'pending')
+                ->whereIn('type', ['team_invitation', 'broker_invitation'])
                 ->firstOrFail();
 
             \Illuminate\Support\Facades\DB::beginTransaction();
             try {
+                // Handle broker pool invitation rejection
+                if ($message->type === 'broker_invitation') {
+                    if (!$message->metadata || !isset($message->metadata['broker_id'])) {
+                        throw new \Exception('Invalid broker invitation message');
+                    }
+
+                    // Mark message as read
+                    $message->markAsRead();
+
+                    // Create rejection reply message
+                    $conversation = $message->conversation;
+                    if ($conversation) {
+                        $brokerName = $message->metadata['broker_name'] ?? 'the broker';
+                        \App\Models\Message::create([
+                            'sender_id' => $user->id,
+                            'recipient_id' => $message->sender_id,
+                            'conversation_id' => $conversation->id,
+                            'sender_name' => $user->first_name . ' ' . $user->last_name,
+                            'sender_email' => $user->email,
+                            'subject' => 'Re: ' . $message->subject,
+                            'message' => "I have declined your invitation to join {$brokerName}'s agent pool.",
+                            'type' => 'general',
+                            'is_read' => false,
+                        ]);
+
+                        $conversation->update(['last_message_at' => now()]);
+                    }
+
+                    \Illuminate\Support\Facades\DB::commit();
+
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Broker invitation rejected',
+                    ]);
+                }
+
+                // Handle team invitation rejection (existing logic)
+                if (!$message->metadata || !isset($message->metadata['team_member_id'])) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid invitation message',
+                    ], 422);
+                }
+
+                $teamMemberId = $message->metadata['team_member_id'];
+                $teamMember = \App\Models\TeamMember::where('id', $teamMemberId)
+                    ->where('agent_id', $user->id)
+                    ->where('invitation_status', 'pending')
+                    ->firstOrFail();
+
                 // Update team member status
                 $teamMember->update([
                     'invitation_status' => 'rejected',

@@ -15,7 +15,7 @@ export interface Message {
   sender_phone: string | null
   subject: string | null
   message: string
-  type: 'contact' | 'property_inquiry' | 'general' | 'team_invitation' | 'team_invitation'
+  type: 'contact' | 'property_inquiry' | 'general' | 'team_invitation' | 'broker_invitation' | 'broker_invitation'
   metadata?: {
     team_id?: number
     team_name?: string
@@ -48,7 +48,7 @@ export interface InquiryConversation {
   customer_email: string
   customer_name: string
   property_id: number | null
-  type: 'contact' | 'property_inquiry' | 'general' | 'team_invitation'
+  type: 'contact' | 'property_inquiry' | 'general' | 'team_invitation' | 'broker_invitation'
   subject: string | null
   last_message_at: string | null
   created_at: string

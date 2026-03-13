@@ -15,7 +15,7 @@ import {
   FiSend,
 } from 'react-icons/fi'
 
-type MessageTypeFilter = 'all' | 'contact' | 'property_inquiry' | 'general' | 'team_invitation'
+type MessageTypeFilter = 'all' | 'contact' | 'property_inquiry' | 'general' | 'team_invitation' | 'broker_invitation'
 
 type InboxPageProps = {
   registrationStatusKey: string
@@ -255,12 +255,12 @@ export default function InboxPage({
   }
 
   const filteredConversations = conversations.filter((conv) => {
-    // For team_invitation filter, check if any message in conversation is team_invitation
-    if (activeFilter === 'team_invitation') {
-      const hasTeamInvitation = conversationMessages.some(
-        (m) => m.conversation_id === conv.id && m.type === 'team_invitation'
+    // For invitation filters, check if any message in conversation matches the type
+    if (activeFilter === 'team_invitation' || activeFilter === 'broker_invitation') {
+      const hasInvitation = conversationMessages.some(
+        (m) => m.conversation_id === conv.id && m.type === activeFilter
       )
-      if (!hasTeamInvitation) return false
+      if (!hasInvitation) return false
     } else if (activeFilter !== 'all' && conv.type !== activeFilter) {
       return false
     }
@@ -364,7 +364,7 @@ export default function InboxPage({
 
             {/* Filter chips */}
             <div className="flex gap-2 px-4 pb-3 border-b border-gray-100 overflow-x-auto">
-              {(['all', 'property_inquiry', 'contact', 'general', 'team_invitation'] as MessageTypeFilter[]).map(
+              {(['all', 'property_inquiry', 'contact', 'general', 'team_invitation', 'broker_invitation'] as MessageTypeFilter[]).map(
                 (filter) => (
                   <button
                     key={filter}
@@ -513,7 +513,7 @@ export default function InboxPage({
                               }`}
                             >
                               <p className="whitespace-pre-line">{msg.message}</p>
-                              {msg.type === 'team_invitation' && !fromOwner && msg.metadata && (
+                              {(msg.type === 'team_invitation' || msg.type === 'broker_invitation') && !fromOwner && msg.metadata && (
                                 <div className="mt-3 flex gap-2">
                                   <button
                                     onClick={() => handleAcceptInvitation(msg.id)}
@@ -552,8 +552,8 @@ export default function InboxPage({
                   )}
                 </div>
 
-                {/* Message input - Hide for team invitations */}
-                {!conversationMessages.some((m) => m.type === 'team_invitation' && !m.is_read && !isFromOwner(m)) && (
+                {/* Message input - Hide for pending invitations */}
+                {!conversationMessages.some((m) => (m.type === 'team_invitation' || m.type === 'broker_invitation') && !m.is_read && !isFromOwner(m)) && (
                   <div className="border-t border-gray-200 bg-white px-6 py-4">
                     <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-2">
                       <input

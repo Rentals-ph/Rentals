@@ -163,7 +163,7 @@ export default function CustomerInquiries() {
         sender_email: customerEmail,
         sender_phone: undefined,
         message: replyText.trim(),
-        type: selectedConversation.type === 'team_invitation' ? 'general' : selectedConversation.type,
+        type: (selectedConversation.type === 'team_invitation' || selectedConversation.type === 'broker_invitation') ? 'general' : selectedConversation.type,
         subject: selectedConversation.subject ?? undefined,
       })
       
