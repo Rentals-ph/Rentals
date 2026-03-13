@@ -207,6 +207,11 @@ Route::post('/messages', [MessageController::class, 'store']); // Public - anyon
 Route::get('/messages/customer/{email}', [MessageController::class, 'getCustomerInquiries']); // Public - get customer inquiries by email
 Route::get('/conversations/{id}/messages', [MessageController::class, 'getConversationMessages']); // Public - get conversation messages (with email param for customers)
 Route::put('/conversations/{id}/mark-read', [MessageController::class, 'markConversationAsReadForCustomer']); // Public - mark conversation as read for customer
+
+// Protected conversation routes (agent/broker only)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::delete('/conversations/{id}', [MessageController::class, 'deleteConversation']); // Delete conversation
+});
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/messages', [MessageController::class, 'index']);
     Route::get('/messages/{id}', [MessageController::class, 'show']);

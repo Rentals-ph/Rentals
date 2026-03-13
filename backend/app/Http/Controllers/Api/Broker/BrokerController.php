@@ -13,6 +13,7 @@ use App\Models\Message;
 use App\Models\PropertyView;
 use App\Models\BrokerPlan;
 use App\Models\BrokerSubscription;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -358,9 +359,10 @@ class BrokerController extends Controller
             ], 404);
         }
 
-        // Check if agent is already in the team
+        // Check if agent is already in the team (active member)
         $existingMember = TeamMember::where('team_id', $team->id)
             ->where('agent_id', $agent->id)
+            ->where('is_active', true)
             ->first();
         
         if ($existingMember) {
@@ -368,6 +370,42 @@ class BrokerController extends Controller
                 'success' => false,
                 'message' => 'Agent is already a member of this team.',
             ], 422);
+        }
+
+        // Check if there's already a pending invitation for this team
+        $pendingInvitation = TeamMember::where('team_id', $team->id)
+            ->where('agent_id', $agent->id)
+            ->where('invitation_status', 'pending')
+            ->first();
+        
+        if ($pendingInvitation) {
+            // Check if there's an unread invitation message
+            if ($pendingInvitation->invitation_message_id) {
+                $unreadMessage = \App\Models\Message::where('id', $pendingInvitation->invitation_message_id)
+                    ->where('is_read', false)
+                    ->first();
+                
+                if ($unreadMessage) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'A pending invitation has already been sent to this agent for this team. Please wait for their response.',
+                    ], 422);
+                }
+            }
+        }
+
+        // If there's a rejected invitation, delete it so we can create a new one
+        $rejectedInvitation = TeamMember::where('team_id', $team->id)
+            ->where('agent_id', $agent->id)
+            ->where('invitation_status', 'rejected')
+            ->first();
+        
+        if ($rejectedInvitation) {
+            // Delete the rejected invitation and its message if exists
+            if ($rejectedInvitation->invitation_message_id) {
+                \App\Models\Message::where('id', $rejectedInvitation->invitation_message_id)->delete();
+            }
+            $rejectedInvitation->delete();
         }
 
         DB::beginTransaction();
@@ -395,6 +433,27 @@ class BrokerController extends Controller
                     'last_message_at' => now(),
                 ]
             );
+
+            // Check if there's already an unread team invitation message for this specific team
+            $existingInvitationMessage = \App\Models\Message::where('conversation_id', $conversation->id)
+                ->where('sender_id', $broker->id)
+                ->where('recipient_id', $agent->id)
+                ->where('type', 'team_invitation')
+                ->where('is_read', false)
+                ->get()
+                ->filter(function ($msg) use ($team) {
+                    $metadata = $msg->metadata ?? [];
+                    return isset($metadata['team_id']) && $metadata['team_id'] == $team->id;
+                })
+                ->first();
+
+            if ($existingInvitationMessage) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'A pending invitation for this team has already been sent. Please wait for the agent to respond.',
+                ], 422);
+            }
 
             // Create invitation message
             $invitationMessage = \App\Models\Message::create([
@@ -709,6 +768,22 @@ class BrokerController extends Controller
                 ],
                 'is_read' => false,
             ]);
+
+            // Create notification for the agent
+            UserNotification::notify(
+                $agent->id,
+                'broker_invitation',
+                "Invitation from " . ($broker->company_name ?: $broker->first_name . ' ' . $broker->last_name),
+                "You have been invited to join " . ($broker->company_name ?: $broker->first_name . ' ' . $broker->last_name) . "'s agent pool.",
+                [
+                    'broker_id' => $broker->id,
+                    'broker_name' => $broker->first_name . ' ' . $broker->last_name,
+                    'broker_company' => $broker->company_name,
+                    'message_id' => $invitationMessage->id,
+                    'conversation_id' => $conversation->id,
+                    'invitation_type' => 'broker_pool',
+                ]
+            );
 
             // Update conversation last message time
             $conversation->update(['last_message_at' => now()]);

@@ -255,5 +255,18 @@ export const messagesApi = {
       throw error
     }
   },
+
+  /**
+   * Delete a conversation
+   */
+  deleteConversation: async (conversationId: number): Promise<{ success: boolean; message: string }> => {
+    try {
+      const response = await apiClient.delete<{ success: boolean; message: string }>(`/conversations/${conversationId}`)
+      return response.data
+    } catch (error: any) {
+      console.error('API call error:', error)
+      throw error
+    }
+  },
 }
 

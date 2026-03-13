@@ -13,6 +13,8 @@ import {
   FiDroplet,
   FiMaximize,
   FiSend,
+  FiTrash2,
+  FiMoreVertical,
 } from 'react-icons/fi'
 
 type MessageTypeFilter = 'all' | 'contact' | 'property_inquiry' | 'general' | 'team_invitation' | 'broker_invitation'
@@ -44,6 +46,8 @@ export default function InboxPage({
   const [replyText, setReplyText] = useState('')
   const [isSendingReply, setIsSendingReply] = useState(false)
   const [processingInvitation, setProcessingInvitation] = useState<number | null>(null)
+  const [deletingConversationId, setDeletingConversationId] = useState<number | null>(null)
+  const [showDeleteMenu, setShowDeleteMenu] = useState<number | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -83,6 +87,20 @@ export default function InboxPage({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [conversationMessages])
+
+  // Close delete menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showDeleteMenu !== null) {
+        const target = event.target as HTMLElement
+        if (!target.closest('.delete-menu-container')) {
+          setShowDeleteMenu(null)
+        }
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showDeleteMenu])
 
   const loadPropertyForConversation = async (conversation: InquiryConversation | null) => {
     if (!conversation || !conversation.property_id) {
@@ -193,6 +211,28 @@ export default function InboxPage({
       alert(error.message || 'Failed to reject invitation')
     } finally {
       setProcessingInvitation(null)
+    }
+  }
+
+  const handleDeleteConversation = async (conversationId: number) => {
+    if (!confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
+      return
+    }
+    setDeletingConversationId(conversationId)
+    setShowDeleteMenu(null)
+    try {
+      await messagesApi.deleteConversation(conversationId)
+      await fetchConversations()
+      // If the deleted conversation was selected, clear selection
+      if (selectedConversation?.id === conversationId) {
+        setSelectedConversation(null)
+        setConversationMessages([])
+      }
+    } catch (error: any) {
+      console.error('Error deleting conversation:', error)
+      alert(error?.response?.data?.message || error.message || 'Failed to delete conversation')
+    } finally {
+      setDeletingConversationId(null)
     }
   }
 
@@ -402,48 +442,81 @@ export default function InboxPage({
                   const conversationUnreadCount = getConversationUnreadCount(conv)
 
                   return (
-                    <button
+                    <div
                       key={conv.id}
-                      type="button"
-                      onClick={() => handleSelectConversation(conv)}
-                      className={`flex w-full items-center gap-3 px-4 py-3 text-left transition ${
+                      className={`group relative flex w-full items-center gap-3 px-4 py-3 transition ${
                         isSelected ? 'bg-[#f5f7fb]' : 'hover:bg-gray-50'
                       }`}
                     >
-                      <div className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold uppercase text-white">
-                        {getInitials(conv.customer_name)}
-                        {conversationUnreadCount > 0 && (
-                          <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-red-500">
-                            <span className="text-[8px] font-bold text-white">
-                              {conversationUnreadCount > 9 ? '9+' : conversationUnreadCount}
-                            </span>
-                          </span>
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="truncate text-sm font-semibold text-gray-900">
-                            {conv.customer_name}
-                          </p>
-                          {conv.latestMessage && (
-                            <span className="flex-shrink-0 text-[10px] font-medium text-gray-400">
-                              {formatDate(conv.latestMessage.created_at)}
+                      <button
+                        type="button"
+                        onClick={() => handleSelectConversation(conv)}
+                        className="flex flex-1 items-center gap-3 text-left"
+                      >
+                        <div className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold uppercase text-white">
+                          {getInitials(conv.customer_name)}
+                          {conversationUnreadCount > 0 && (
+                            <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-red-500">
+                              <span className="text-[8px] font-bold text-white">
+                                {conversationUnreadCount > 9 ? '9+' : conversationUnreadCount}
+                              </span>
                             </span>
                           )}
                         </div>
-                        <p className="mt-0.5 line-clamp-1 text-xs text-gray-500">
-                          {conv.property?.title || conv.subject || 'General inquiry'}
-                        </p>
-                        <p className="mt-0.5 line-clamp-1 text-xs text-gray-400">
-                          {conv.customer_email}
-                        </p>
-                        {conv.latestMessage && (
-                          <p className="mt-0.5 line-clamp-1 text-xs text-gray-400">
-                            {conv.latestMessage.message}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="truncate text-sm font-semibold text-gray-900">
+                              {conv.customer_name}
+                            </p>
+                            {conv.latestMessage && (
+                              <span className="flex-shrink-0 text-[10px] font-medium text-gray-400">
+                                {formatDate(conv.latestMessage.created_at)}
+                              </span>
+                            )}
+                          </div>
+                          <p className="mt-0.5 line-clamp-1 text-xs text-gray-500">
+                            {conv.property?.title || conv.subject || 'General inquiry'}
                           </p>
+                          <p className="mt-0.5 line-clamp-1 text-xs text-gray-400">
+                            {conv.customer_email}
+                          </p>
+                          {conv.latestMessage && (
+                            <p className="mt-0.5 line-clamp-1 text-xs text-gray-400">
+                              {conv.latestMessage.message}
+                            </p>
+                          )}
+                        </div>
+                      </button>
+                      <div className="relative flex-shrink-0 delete-menu-container">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setShowDeleteMenu(showDeleteMenu === conv.id ? null : conv.id)
+                          }}
+                          className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 opacity-0 transition-opacity hover:bg-gray-200 hover:text-gray-600 group-hover:opacity-100"
+                          title="Delete conversation"
+                        >
+                          <FiMoreVertical className="h-4 w-4" />
+                        </button>
+                        {showDeleteMenu === conv.id && (
+                          <div className="absolute right-0 top-full z-10 mt-1 w-40 rounded-md border border-gray-200 bg-white shadow-lg">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteConversation(conv.id)
+                              }}
+                              disabled={deletingConversationId === conv.id}
+                              className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
+                            >
+                              <FiTrash2 className="h-4 w-4" />
+                              {deletingConversationId === conv.id ? 'Deleting...' : 'Delete'}
+                            </button>
+                          </div>
                         )}
                       </div>
-                    </button>
+                    </div>
                   )
                 })
               )}
@@ -473,6 +546,29 @@ export default function InboxPage({
                           'General inquiry'}
                       </p>
                     </div>
+                  </div>
+                  <div className="relative flex-shrink-0 delete-menu-container">
+                    <button
+                      type="button"
+                      onClick={() => setShowDeleteMenu(showDeleteMenu === selectedConversation.id ? null : selectedConversation.id)}
+                      className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                      title="Delete conversation"
+                    >
+                      <FiMoreVertical className="h-4 w-4" />
+                    </button>
+                    {showDeleteMenu === selectedConversation.id && (
+                      <div className="absolute right-0 top-full z-10 mt-1 w-40 rounded-md border border-gray-200 bg-white shadow-lg">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteConversation(selectedConversation.id)}
+                          disabled={deletingConversationId === selectedConversation.id}
+                          className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
+                        >
+                          <FiTrash2 className="h-4 w-4" />
+                          {deletingConversationId === selectedConversation.id ? 'Deleting...' : 'Delete Conversation'}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
 

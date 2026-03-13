@@ -734,6 +734,79 @@ class MessageController extends Controller
     }
 
     /**
+     * Delete a conversation (agent/broker only).
+     */
+    #[OA\Delete(
+        path: "/conversations/{id}",
+        summary: "Delete a conversation",
+        tags: ["Messages"],
+        security: [["sanctum" => []]],
+        parameters: [
+            new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer")),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Conversation deleted successfully"),
+            new OA\Response(response: 404, description: "Conversation not found"),
+            new OA\Response(response: 403, description: "Unauthorized access"),
+        ]
+    )]
+    public function deleteConversation(Request $request, $id): JsonResponse
+    {
+        try {
+            $user = $request->user();
+            
+            if (!$user || (!$user->isAgent() && !$user->isBroker())) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized. Agent or Broker authentication required.',
+                ], 403);
+            }
+
+            $conversation = InquiryConversation::findOrFail($id);
+
+            // Check if user has access to this conversation
+            $hasAccess = false;
+            
+            if ($user->isAgent() && $conversation->agent_id && (int)$conversation->agent_id === (int)$user->id) {
+                $hasAccess = true;
+            } elseif ($user->isBroker() && $conversation->broker_id && (int)$conversation->broker_id === (int)$user->id) {
+                $hasAccess = true;
+            }
+
+            if (!$hasAccess) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access to conversation',
+                ], 403);
+            }
+
+            // Delete all messages in the conversation (cascade should handle this, but being explicit)
+            Message::where('conversation_id', $id)->delete();
+
+            // Delete the conversation
+            $conversation->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Conversation deleted successfully',
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Conversation not found',
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Error deleting conversation: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete conversation',
+                'error' => config('app.debug') ? $e->getMessage() : 'An error occurred',
+            ], 500);
+        }
+    }
+
+    /**
      * Reply to a customer inquiry (agent/broker only).
      */
     #[OA\Post(
