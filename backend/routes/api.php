@@ -115,6 +115,9 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     // Agent/user management (no approval flow - agents are created by brokers)
     Route::get('/agents', [AdminController::class, 'getAllAgents']);
     Route::get('/agents/{id}', [AdminController::class, 'getAgentDetails']);
+    Route::post('/agents', [AdminController::class, 'createUser']); // Create agent via user endpoint
+    Route::put('/agents/{id}', [AdminController::class, 'updateUser']); // Update agent via user endpoint
+    Route::delete('/agents/{id}', [AdminController::class, 'deleteUser']); // Delete agent via user endpoint
     
     // User CRUD
     Route::get('/users', [AdminController::class, 'getAllUsers']);
@@ -122,6 +125,14 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::post('/users', [AdminController::class, 'createUser']);
     Route::put('/users/{id}', [AdminController::class, 'updateUser']);
     Route::delete('/users/{id}', [AdminController::class, 'deleteUser']);
+    
+    // Property CRUD
+    Route::get('/properties', [AdminController::class, 'getAllProperties']);
+    Route::get('/properties/{identifier}', [AdminController::class, 'getPropertyDetails']);
+    Route::post('/properties', [AdminController::class, 'createProperty']);
+    Route::put('/properties/{identifier}', [AdminController::class, 'updateProperty']);
+    Route::post('/properties/{identifier}', [AdminController::class, 'updateProperty']); // POST alias for FormData
+    Route::delete('/properties/{identifier}', [AdminController::class, 'deleteProperty']);
 });
 
 // Public company profile — /companies/{slug} or /companies/{id}

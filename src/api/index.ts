@@ -20,6 +20,8 @@ export { brokerApi } from './endpoints/broker'
 export type { TeamProductivityRow } from './endpoints/broker'
 export { downloadablesApi } from './endpoints/downloadables'
 export type { Downloadable } from './endpoints/downloadables'
+export { adminApi } from './endpoints/admin'
+export type { AdminAgent, AdminProperty, CreateAgentData, UpdateAgentData, CreatePropertyData, UpdatePropertyData } from './endpoints/admin'
 
 // Export types from endpoints
 export type { GetPropertiesParams } from './endpoints/properties'

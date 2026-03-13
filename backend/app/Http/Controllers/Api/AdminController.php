@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Property;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use OpenApi\Attributes as OA;
 
@@ -542,6 +544,211 @@ class AdminController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'User deleted successfully',
+        ]);
+    }
+
+    /**
+     * Get all properties (admin only).
+     */
+    public function getAllProperties(Request $request): JsonResponse
+    {
+        $this->ensureAdmin($request);
+
+        $status = $request->query('status');
+        $draftStatus = $request->query('draft_status');
+        $agentId = $request->query('agent_id');
+
+        $query = Property::with('agent');
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        if ($draftStatus) {
+            $query->where('draft_status', $draftStatus);
+        }
+
+        if ($agentId) {
+            $query->where('agent_id', $agentId);
+        }
+
+        $properties = $query->orderBy('created_at', 'desc')->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $properties,
+        ]);
+    }
+
+    /**
+     * Get a specific property's details (admin only).
+     */
+    public function getPropertyDetails(Request $request, $identifier): JsonResponse
+    {
+        $this->ensureAdmin($request);
+
+        $property = is_numeric($identifier)
+            ? Property::with('agent')->findOrFail($identifier)
+            : Property::with('agent')->where('slug', $identifier)->firstOrFail();
+
+        return response()->json([
+            'success' => true,
+            'data' => $property,
+        ]);
+    }
+
+    /**
+     * Create a new property (admin only).
+     */
+    public function createProperty(Request $request): JsonResponse
+    {
+        $this->ensureAdmin($request);
+
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'type' => 'nullable|string|max:255',
+            'listing_type' => 'nullable|string|in:for_rent,for_sale',
+            'price' => 'nullable|numeric|min:0',
+            'price_type' => 'nullable|string|in:monthly,yearly,per_sqm,total',
+            'bedrooms' => 'nullable|integer|min:0',
+            'bathrooms' => 'nullable|integer|min:0',
+            'garage' => 'nullable|integer|min:0',
+            'area' => 'nullable|numeric|min:0',
+            'lot_area' => 'nullable|numeric|min:0',
+            'city' => 'nullable|string|max:255',
+            'state_province' => 'nullable|string|max:255',
+            'street_address' => 'nullable|string|max:255',
+            'agent_id' => 'nullable|exists:users,id',
+            'status' => 'nullable|string|in:available,rented,under_negotiation,unlisted',
+            'draft_status' => 'nullable|string|in:draft,published',
+            'is_featured' => 'nullable|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $property = Property::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'type' => $request->type,
+            'listing_type' => $request->listing_type,
+            'price' => $request->price,
+            'price_type' => $request->price_type,
+            'bedrooms' => $request->bedrooms,
+            'bathrooms' => $request->bathrooms,
+            'garage' => $request->garage,
+            'area' => $request->area,
+            'lot_area' => $request->lot_area,
+            'city' => $request->city,
+            'state_province' => $request->state_province,
+            'street_address' => $request->street_address,
+            'agent_id' => $request->agent_id,
+            'status' => $request->status ?? 'available',
+            'draft_status' => $request->draft_status ?? 'draft',
+            'is_featured' => $request->is_featured ?? false,
+        ]);
+
+        $property->load('agent');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Property created successfully',
+            'data' => $property,
+        ], 201);
+    }
+
+    /**
+     * Update a property (admin only).
+     */
+    public function updateProperty(Request $request, $identifier): JsonResponse
+    {
+        $this->ensureAdmin($request);
+
+        $property = is_numeric($identifier)
+            ? Property::findOrFail($identifier)
+            : Property::where('slug', $identifier)->firstOrFail();
+
+        $validator = Validator::make($request->all(), [
+            'title' => 'sometimes|required|string|max:255',
+            'description' => 'nullable|string',
+            'type' => 'nullable|string|max:255',
+            'listing_type' => 'nullable|string|in:for_rent,for_sale',
+            'price' => 'nullable|numeric|min:0',
+            'price_type' => 'nullable|string|in:monthly,yearly,per_sqm,total',
+            'bedrooms' => 'nullable|integer|min:0',
+            'bathrooms' => 'nullable|integer|min:0',
+            'garage' => 'nullable|integer|min:0',
+            'area' => 'nullable|numeric|min:0',
+            'lot_area' => 'nullable|numeric|min:0',
+            'city' => 'nullable|string|max:255',
+            'state_province' => 'nullable|string|max:255',
+            'street_address' => 'nullable|string|max:255',
+            'agent_id' => 'nullable|exists:users,id',
+            'status' => 'nullable|string|in:available,rented,under_negotiation,unlisted',
+            'draft_status' => 'nullable|string|in:draft,published',
+            'is_featured' => 'nullable|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $property->update($request->only([
+            'title',
+            'description',
+            'type',
+            'listing_type',
+            'price',
+            'price_type',
+            'bedrooms',
+            'bathrooms',
+            'garage',
+            'area',
+            'lot_area',
+            'city',
+            'state_province',
+            'street_address',
+            'agent_id',
+            'status',
+            'draft_status',
+            'is_featured',
+        ]));
+
+        $property->load('agent');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Property updated successfully',
+            'data' => $property->fresh(),
+        ]);
+    }
+
+    /**
+     * Delete a property (admin only).
+     */
+    public function deleteProperty(Request $request, $identifier): JsonResponse
+    {
+        $this->ensureAdmin($request);
+
+        $property = is_numeric($identifier)
+            ? Property::findOrFail($identifier)
+            : Property::where('slug', $identifier)->firstOrFail();
+
+        $property->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Property deleted successfully',
         ]);
     }
 }

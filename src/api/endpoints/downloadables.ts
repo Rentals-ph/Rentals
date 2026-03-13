@@ -58,11 +58,8 @@ export const downloadablesApi = {
     formData.append('file', data.file)
     if (data.category) formData.append('category', data.category)
 
-    const response = await apiClient.post<{ success: boolean; data: Downloadable; message?: string }>('/admin/downloadables', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    // Don't set Content-Type - let browser set it automatically with boundary for FormData
+    const response = await apiClient.post<{ success: boolean; data: Downloadable; message?: string }>('/admin/downloadables', formData)
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.message || 'Failed to create downloadable')
     }
@@ -115,35 +112,64 @@ export const downloadablesApi = {
       headers['Authorization'] = `Bearer ${token}`
     }
 
-    const response = await fetch(`${API_BASE_URL}/downloadables/${id}/download`, {
-      method: 'GET',
-      headers,
-    })
+    try {
+      const response = await fetch(`${API_BASE_URL}/downloadables/${id}/download`, {
+        method: 'GET',
+        headers,
+      })
 
-    if (!response.ok) {
-      throw new Error('Failed to download file')
-    }
-
-    const blob = await response.blob()
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    
-    // Get filename from Content-Disposition header or use default
-    const contentDisposition = response.headers.get('Content-Disposition')
-    let filename = `downloadable-${id}`
-    if (contentDisposition) {
-      const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition)
-      if (matches && matches[1]) {
-        filename = matches[1].replace(/['"]/g, '')
+      if (!response.ok) {
+        // Try to get error message from response
+        let errorMessage = 'Failed to download file'
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.message || errorMessage
+        } catch {
+          // If response is not JSON, use status text
+          errorMessage = response.statusText || errorMessage
+        }
+        throw new Error(errorMessage)
       }
+
+      const blob = await response.blob()
+      
+      // Check if blob is actually an error response (JSON error)
+      if (blob.type === 'application/json') {
+        const text = await blob.text()
+        try {
+          const errorData = JSON.parse(text)
+          throw new Error(errorData.message || 'Failed to download file')
+        } catch {
+          throw new Error('Failed to download file: Invalid response')
+        }
+      }
+
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      
+      // Get filename from Content-Disposition header or use default
+      const contentDisposition = response.headers.get('Content-Disposition')
+      let filename = `downloadable-${id}`
+      if (contentDisposition) {
+        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition)
+        if (matches && matches[1]) {
+          filename = matches[1].replace(/['"]/g, '')
+        }
+      }
+      
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error: any) {
+      // Re-throw with better error message
+      if (error instanceof Error) {
+        throw error
+      }
+      throw new Error('Failed to download file: ' + (error?.message || 'Unknown error'))
     }
-    
-    a.download = filename
-    document.body.appendChild(a)
-    a.click()
-    window.URL.revokeObjectURL(url)
-    document.body.removeChild(a)
   },
 }
 

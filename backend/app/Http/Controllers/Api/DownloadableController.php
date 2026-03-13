@@ -17,20 +17,32 @@ class DownloadableController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $category = $request->query('category');
-        
-        $query = Downloadable::where('is_active', true);
-        
-        if ($category) {
-            $query->where('category', $category);
+        try {
+            $category = $request->query('category');
+            
+            $query = Downloadable::where('is_active', true);
+            
+            if ($category) {
+                $query->where('category', $category);
+            }
+            
+            $downloadables = $query->orderBy('created_at', 'desc')->get();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $downloadables,
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            // If table doesn't exist, return empty array instead of error
+            if (str_contains($e->getMessage(), "doesn't exist")) {
+                \Log::warning('Downloadables table does not exist. Please run migrations.');
+                return response()->json([
+                    'success' => true,
+                    'data' => [],
+                ]);
+            }
+            throw $e;
         }
-        
-        $downloadables = $query->orderBy('created_at', 'desc')->get();
-        
-        return response()->json([
-            'success' => true,
-            'data' => $downloadables,
-        ]);
     }
 
     /**
@@ -47,20 +59,32 @@ class DownloadableController extends Controller
             ], 403);
         }
 
-        $category = $request->query('category');
-        
-        $query = Downloadable::query();
-        
-        if ($category) {
-            $query->where('category', $category);
+        try {
+            $category = $request->query('category');
+            
+            $query = Downloadable::query();
+            
+            if ($category) {
+                $query->where('category', $category);
+            }
+            
+            $downloadables = $query->orderBy('created_at', 'desc')->get();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $downloadables,
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            // If table doesn't exist, return empty array instead of error
+            if (str_contains($e->getMessage(), "doesn't exist")) {
+                \Log::warning('Downloadables table does not exist. Please run migrations.');
+                return response()->json([
+                    'success' => true,
+                    'data' => [],
+                ]);
+            }
+            throw $e;
         }
-        
-        $downloadables = $query->orderBy('created_at', 'desc')->get();
-        
-        return response()->json([
-            'success' => true,
-            'data' => $downloadables,
-        ]);
     }
 
     /**
@@ -93,7 +117,7 @@ class DownloadableController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'file' => 'required|file|max:10240', // Max 10MB
+            'file' => 'required|file|max:51200', // Max 50MB (in KB)
             'category' => 'nullable|string|max:100',
         ]);
 
@@ -105,18 +129,46 @@ class DownloadableController extends Controller
             ], 422);
         }
 
-        $file = $request->file('file');
-        $originalName = $file->getClientOriginalName();
-        $fileName = Str::random(40) . '_' . time() . '.' . $file->getClientOriginalExtension();
-        $filePath = 'downloadables/' . $fileName;
-        
-        // Store file in public storage
-        $storedPath = $file->storeAs('downloadables', $fileName, 'public');
-        
-        if (!$storedPath) {
+        if (!$request->hasFile('file')) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to upload file',
+                'message' => 'No file uploaded',
+                'errors' => ['file' => ['The file field is required.']],
+            ], 422);
+        }
+
+        $file = $request->file('file');
+        
+        // Check if file upload was successful
+        if (!$file->isValid()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File upload failed',
+                'errors' => ['file' => ['The file failed to upload. Error: ' . $file->getError()]],
+            ], 422);
+        }
+
+        $originalName = $file->getClientOriginalName();
+        $fileName = Str::random(40) . '_' . time() . '.' . $file->getClientOriginalExtension();
+        
+        // Store file in public storage
+        try {
+            $storedPath = $file->storeAs('downloadables', $fileName, 'public');
+            
+            if (!$storedPath) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to store file',
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            \Log::error('File storage error', [
+                'error' => $e->getMessage(),
+                'file_name' => $originalName,
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to store file: ' . $e->getMessage(),
             ], 500);
         }
 
@@ -157,7 +209,7 @@ class DownloadableController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
-            'file' => 'sometimes|file|max:10240',
+            'file' => 'sometimes|file|max:51200', // Max 50MB (in KB)
             'category' => 'nullable|string|max:100',
             'is_active' => 'sometimes|boolean',
         ]);
@@ -233,23 +285,66 @@ class DownloadableController extends Controller
      */
     public function download(int $id): \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
     {
-        $downloadable = Downloadable::where('id', $id)
-            ->where('is_active', true)
-            ->firstOrFail();
+        try {
+            $downloadable = Downloadable::where('id', $id)
+                ->where('is_active', true)
+                ->firstOrFail();
 
-        $filePath = storage_path('app/public/' . $downloadable->file_path);
-        
-        if (!file_exists($filePath)) {
+            // Try multiple possible file paths
+            $filePath = storage_path('app/public/' . $downloadable->file_path);
+            
+            // If file doesn't exist, try with Storage facade
+            if (!file_exists($filePath)) {
+                if (Storage::disk('public')->exists($downloadable->file_path)) {
+                    // Use Storage to get the file
+                    $filePath = Storage::disk('public')->path($downloadable->file_path);
+                } else {
+                    \Log::error('Downloadable file not found', [
+                        'id' => $id,
+                        'file_path' => $downloadable->file_path,
+                        'storage_path' => $filePath,
+                    ]);
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'File not found',
+                    ], 404);
+                }
+            }
+
+            if (!file_exists($filePath)) {
+                \Log::error('Downloadable file does not exist', [
+                    'id' => $id,
+                    'file_path' => $downloadable->file_path,
+                    'checked_path' => $filePath,
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'File not found on server',
+                ], 404);
+            }
+
+            // Increment download count
+            $downloadable->incrementDownloadCount();
+
+            return response()->download($filePath, $downloadable->file_name, [
+                'Content-Type' => $downloadable->file_type ?? 'application/octet-stream',
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'File not found',
+                'message' => 'Downloadable not found',
             ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error downloading file', [
+                'id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to download file: ' . $e->getMessage(),
+            ], 500);
         }
-
-        // Increment download count
-        $downloadable->incrementDownloadCount();
-
-        return response()->download($filePath, $downloadable->file_name);
     }
 }
 
