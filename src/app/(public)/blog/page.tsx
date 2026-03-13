@@ -178,11 +178,11 @@ export default function BlogPage() {
                 <div className="absolute bottom-4 left-4 flex items-center gap-2 z-10">
                   <button className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-2.5 py-1.5 rounded-full text-sm font-semibold text-gray-700 hover:bg-white transition-colors">
                     <FiHeart className="w-3.5 h-3.5 text-red-500" />
-                    <span className="text-xs">{blogs[0].likes ?? 374}</span>
+                    <span className="text-xs">{blogs[0].likes_count ?? blogs[0].likes ?? 0}</span>
                   </button>
                   <button className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-2.5 py-1.5 rounded-full text-sm font-semibold text-gray-700 hover:bg-white transition-colors">
                     <FiMessageCircle className="w-3.5 h-3.5 text-blue-500" />
-                    <span className="text-xs">{blogs[0].comments ?? 23}</span>
+                    <span className="text-xs">{blogs[0].comments_count ?? blogs[0].comments ?? 0}</span>
                   </button>
                   <button className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-2.5 py-1.5 rounded-full text-sm font-semibold text-gray-700 hover:bg-white transition-colors">
                     <FiShare2 className="w-3.5 h-3.5 text-gray-600" />
@@ -265,11 +265,11 @@ export default function BlogPage() {
                     <div className="absolute bottom-4 left-4 flex items-center gap-2 z-10">
                       <button className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-2.5 py-1.5 rounded-full text-sm font-semibold text-gray-700 hover:bg-white transition-colors">
                         <FiHeart className="w-3.5 h-3.5 text-red-500" />
-                        <span className="text-xs">{blogs[4].likes ?? 374}</span>
+                        <span className="text-xs">{blogs[4].likes_count ?? blogs[4].likes ?? 0}</span>
                       </button>
                       <button className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-2.5 py-1.5 rounded-full text-sm font-semibold text-gray-700 hover:bg-white transition-colors">
                         <FiMessageCircle className="w-3.5 h-3.5 text-blue-500" />
-                        <span className="text-xs">{blogs[4].comments ?? 23}</span>
+                        <span className="text-xs">{blogs[4].comments_count ?? blogs[4].comments ?? 0}</span>
                       </button>
                       <button className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-2.5 py-1.5 rounded-full text-sm font-semibold text-gray-700 hover:bg-white transition-colors">
                         <FiShare2 className="w-3.5 h-3.5 text-gray-600" />
