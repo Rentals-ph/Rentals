@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Footer from '@/components/layout/Footer'
 import { ASSETS } from '@/utils/assets'
+import { contactApi } from '@/api'
 
 export default function ContactUsPage() {
   const [formData, setFormData] = useState({
@@ -12,6 +13,8 @@ export default function ContactUsPage() {
     subject: '',
     message: '',
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({ type: null, message: '' })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -20,9 +23,37 @@ export default function ContactUsPage() {
     })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Form submitted:', formData)
+    setIsSubmitting(true)
+    setSubmitStatus({ type: null, message: '' })
+
+    try {
+      await contactApi.submit({
+        name: formData.firstName,
+        email: formData.email,
+        phone: formData.phone || null,
+        subject: formData.subject,
+        message: formData.message,
+      })
+
+      setSubmitStatus({ type: 'success', message: 'Thank you for contacting us! We will get back to you soon.' })
+      setFormData({
+        firstName: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: '',
+      })
+    } catch (error: any) {
+      console.error('Error submitting contact form:', error)
+      setSubmitStatus({
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to send message. Please try again.',
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -142,6 +173,17 @@ export default function ContactUsPage() {
                   </h2>
                 </div>
                 <div className="px-5 sm:px-6 py-5 sm:py-6 md:py-7">
+                  {submitStatus.type && (
+                    <div
+                      className={`mb-4 p-3 rounded-md text-sm font-outfit ${
+                        submitStatus.type === 'success'
+                          ? 'bg-green-50 text-green-800 border border-green-200'
+                          : 'bg-red-50 text-red-800 border border-red-200'
+                      }`}
+                    >
+                      {submitStatus.message}
+                    </div>
+                  )}
                   <form className="flex flex-col gap-3 sm:gap-4" onSubmit={handleSubmit}>
                     <div className="flex flex-col gap-1.5 sm:gap-2">
                       <label htmlFor="firstName" className="font-outfit text-xs sm:text-sm font-semibold text-gray-800">
@@ -225,9 +267,10 @@ export default function ContactUsPage() {
 
                     <button
                       type="submit"
-                      className="mt-1 min-h-[44px] w-full rounded-md bg-[#2563EB] px-6 py-2.5 font-outfit text-sm sm:text-base font-semibold text-white transition-colors hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#2563EB]"
+                      disabled={isSubmitting}
+                      className="mt-1 min-h-[44px] w-full rounded-md bg-[#2563EB] px-6 py-2.5 font-outfit text-sm sm:text-base font-semibold text-white transition-colors hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Send Message
+                      {isSubmitting ? 'Sending...' : 'Send Message'}
                     </button>
                   </form>
                 </div>

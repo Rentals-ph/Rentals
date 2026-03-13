@@ -220,6 +220,7 @@ function AppSidebar() {
       <NavLink href="/admin/agents" icon={FiUsers} label="Agents" active={isActive('/admin/agents')} />
       <NavLink href="/admin/properties" icon={FiLayers} label="Properties" active={isActive('/admin/properties')} />
       <NavLink href="/admin/blogs" icon={FiBookOpen} label="Blogs" active={isActive('/admin/blogs')} />
+      <NavLink href="/admin/contact-inquiries" icon={FiMessageCircle} label="Contact Inquiries" active={isActive('/admin/contact-inquiries')} />
       <NavLink href="/admin/downloadables" icon={FiDownload} label="Downloadables" active={isActive('/admin/downloadables')} />
     </>
   )

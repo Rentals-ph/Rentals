@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BrokerController;
 use App\Http\Controllers\Api\MessageController;
+use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\PropertySearchController;
 use App\Http\Controllers\GroqChatController;
 use App\Http\Controllers\ListingAssistantController;
@@ -135,6 +136,12 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::put('/properties/{identifier}', [AdminController::class, 'updateProperty']);
     Route::post('/properties/{identifier}', [AdminController::class, 'updateProperty']); // POST alias for FormData
     Route::delete('/properties/{identifier}', [AdminController::class, 'deleteProperty']);
+    
+    // Contact inquiries management
+    Route::get('/contact-inquiries', [ContactController::class, 'index']);
+    Route::get('/contact-inquiries/{id}', [ContactController::class, 'show']);
+    Route::post('/contact-inquiries/{id}/read', [ContactController::class, 'markAsRead']);
+    Route::delete('/contact-inquiries/{id}', [ContactController::class, 'destroy']);
 });
 
 // Public company profile — /companies/{slug} or /companies/{id}
@@ -191,6 +198,9 @@ Route::middleware('auth:sanctum')->prefix('broker')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/properties/{slug}/status', [PropertyController::class, 'updateStatus']);
 });
+
+// Contact inquiry routes (public)
+Route::post('/contact', [ContactController::class, 'submit']);
 
 // Message routes
 Route::post('/messages', [MessageController::class, 'store']); // Public - anyone can send a message

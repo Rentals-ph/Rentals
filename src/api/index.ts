@@ -22,6 +22,8 @@ export { downloadablesApi } from './endpoints/downloadables'
 export type { Downloadable } from './endpoints/downloadables'
 export { adminApi } from './endpoints/admin'
 export type { AdminAgent, AdminProperty, CreateAgentData, UpdateAgentData, CreatePropertyData, UpdatePropertyData } from './endpoints/admin'
+export { contactApi } from './endpoints/contact'
+export type { ContactInquiry, SubmitContactData, GetContactInquiriesParams } from './endpoints/contact'
 
 // Export types from endpoints
 export type { GetPropertiesParams } from './endpoints/properties'
