@@ -15,7 +15,7 @@ export default function AdminLayout({
         <AppHeader />
         <div className="flex flex-1 min-h-0">
           <AppSidebar />
-          <main className="main-with-sidebar flex-1 min-h-screen p-6 lg:p-6 md:p-4 md:pt-14 md:pb-6">
+          <main className="main-with-sidebar z-10 flex-1 min-h-screen p-6 lg:p-6 md:p-4 md:pt-14 md:pb-6">
             {children}
           </main>
         </div>
