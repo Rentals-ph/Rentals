@@ -15,7 +15,7 @@ import {
   FiSend,
 } from 'react-icons/fi'
 
-type MessageTypeFilter = 'all' | 'contact' | 'property_inquiry' | 'general'
+type MessageTypeFilter = 'all' | 'contact' | 'property_inquiry' | 'general' | 'team_invitation'
 
 type InboxPageProps = {
   registrationStatusKey: string
@@ -43,6 +43,7 @@ export default function InboxPage({
   const [activeProperty, setActiveProperty] = useState<Property | null>(null)
   const [replyText, setReplyText] = useState('')
   const [isSendingReply, setIsSendingReply] = useState(false)
+  const [processingInvitation, setProcessingInvitation] = useState<number | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -160,6 +161,41 @@ export default function InboxPage({
     setReplyText('')
   }
 
+  const handleAcceptInvitation = async (messageId: number) => {
+    setProcessingInvitation(messageId)
+    try {
+      await messagesApi.acceptTeamInvitation(messageId)
+      await fetchConversations()
+      if (selectedConversation) {
+        await fetchConversationMessages(selectedConversation.id)
+      }
+    } catch (error: any) {
+      console.error('Error accepting invitation:', error)
+      alert(error.message || 'Failed to accept invitation')
+    } finally {
+      setProcessingInvitation(null)
+    }
+  }
+
+  const handleRejectInvitation = async (messageId: number) => {
+    if (!confirm('Are you sure you want to reject this team invitation?')) {
+      return
+    }
+    setProcessingInvitation(messageId)
+    try {
+      await messagesApi.rejectTeamInvitation(messageId)
+      await fetchConversations()
+      if (selectedConversation) {
+        await fetchConversationMessages(selectedConversation.id)
+      }
+    } catch (error: any) {
+      console.error('Error rejecting invitation:', error)
+      alert(error.message || 'Failed to reject invitation')
+    } finally {
+      setProcessingInvitation(null)
+    }
+  }
+
   const handleSendReply = async () => {
     if (!replyText.trim() || !selectedConversation || !conversationMessages.length) return
 
@@ -219,7 +255,13 @@ export default function InboxPage({
   }
 
   const filteredConversations = conversations.filter((conv) => {
-    if (activeFilter !== 'all' && conv.type !== activeFilter) {
+    // For team_invitation filter, check if any message in conversation is team_invitation
+    if (activeFilter === 'team_invitation') {
+      const hasTeamInvitation = conversationMessages.some(
+        (m) => m.conversation_id === conv.id && m.type === 'team_invitation'
+      )
+      if (!hasTeamInvitation) return false
+    } else if (activeFilter !== 'all' && conv.type !== activeFilter) {
       return false
     }
     if (searchQuery) {
@@ -322,7 +364,7 @@ export default function InboxPage({
 
             {/* Filter chips */}
             <div className="flex gap-2 px-4 pb-3 border-b border-gray-100 overflow-x-auto">
-              {(['all', 'property_inquiry', 'contact', 'general'] as MessageTypeFilter[]).map(
+              {(['all', 'property_inquiry', 'contact', 'general', 'team_invitation'] as MessageTypeFilter[]).map(
                 (filter) => (
                   <button
                     key={filter}
@@ -471,6 +513,24 @@ export default function InboxPage({
                               }`}
                             >
                               <p className="whitespace-pre-line">{msg.message}</p>
+                              {msg.type === 'team_invitation' && !fromOwner && msg.metadata && (
+                                <div className="mt-3 flex gap-2">
+                                  <button
+                                    onClick={() => handleAcceptInvitation(msg.id)}
+                                    disabled={processingInvitation === msg.id}
+                                    className="flex-1 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-50"
+                                  >
+                                    {processingInvitation === msg.id ? 'Processing...' : 'Accept'}
+                                  </button>
+                                  <button
+                                    onClick={() => handleRejectInvitation(msg.id)}
+                                    disabled={processingInvitation === msg.id}
+                                    className="flex-1 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                                  >
+                                    {processingInvitation === msg.id ? 'Processing...' : 'Reject'}
+                                  </button>
+                                </div>
+                              )}
                               <p
                                 className={`mt-1.5 text-[10px] font-medium ${
                                   fromOwner ? 'text-blue-100' : 'text-gray-400'
@@ -492,32 +552,34 @@ export default function InboxPage({
                   )}
                 </div>
 
-                {/* Message input */}
-                <div className="border-t border-gray-200 bg-white px-6 py-4">
-                  <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-2">
-                    <input
-                      type="text"
-                      placeholder="Type your message..."
-                      value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault()
-                          handleSendReply()
-                        }
-                      }}
-                      className="flex-1 border-none bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleSendReply}
-                      disabled={isSendingReply || !replyText.trim()}
-                      className="flex h-9 w-9 items-center justify-center rounded-md bg-[#2563eb] text-white transition-colors hover:bg-[#1d4ed8] disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      <FiSend className="h-4 w-4" />
-                    </button>
+                {/* Message input - Hide for team invitations */}
+                {!conversationMessages.some((m) => m.type === 'team_invitation' && !m.is_read && !isFromOwner(m)) && (
+                  <div className="border-t border-gray-200 bg-white px-6 py-4">
+                    <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-2">
+                      <input
+                        type="text"
+                        placeholder="Type your message..."
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault()
+                            handleSendReply()
+                          }
+                        }}
+                        className="flex-1 border-none bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleSendReply}
+                        disabled={isSendingReply || !replyText.trim()}
+                        className="flex h-9 w-9 items-center justify-center rounded-md bg-[#2563eb] text-white transition-colors hover:bg-[#1d4ed8] disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        <FiSend className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
               </>
             ) : (
               <div className="flex flex-1 items-center justify-center px-6 py-10 text-center text-sm text-gray-500">

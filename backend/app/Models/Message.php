@@ -20,6 +20,7 @@ class Message extends Model
         'subject',
         'message',
         'type',
+        'metadata',
         'is_read',
         'read_at',
     ];
@@ -27,6 +28,7 @@ class Message extends Model
     protected $casts = [
         'is_read' => 'boolean',
         'read_at' => 'datetime',
+        'metadata' => 'array',
     ];
 
     /**

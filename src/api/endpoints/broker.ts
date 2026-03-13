@@ -367,6 +367,46 @@ export const brokerApi = {
     const response = await apiClient.get<{ success: boolean; data: TeamProductivityRow[] }>('/broker/reports/team-productivity')
     return response.data.data ?? []
   },
+
+  /**
+   * Get property type distribution for reports
+   */
+  getPropertyTypeDistribution: async (): Promise<{
+    type: string
+    count: number
+    percentage: number
+  }[]> => {
+    const response = await apiClient.get<{ success: boolean; data: Array<{ type: string; count: number; percentage: number }>; total: number }>('/broker/reports/property-type-distribution')
+    return response.data.data ?? []
+  },
+
+  /**
+   * Get location performance for reports
+   */
+  getLocationPerformance: async (): Promise<{
+    city: string
+    property_count: number
+    total_views: number
+    inquiry_count: number
+    performance_score: number
+  }[]> => {
+    const response = await apiClient.get<{ success: boolean; data: Array<{ city: string; property_count: number; total_views: number; inquiry_count: number; performance_score: number }> }>('/broker/reports/location-performance')
+    return response.data.data ?? []
+  },
+
+  /**
+   * Get conversion rate and response time statistics
+   */
+  getConversionAndResponseStats: async (): Promise<{
+    conversion_rate: number
+    total_inquiries: number
+    total_conversions: number
+    average_response_time_minutes: number
+    average_response_time_display: string
+  }> => {
+    const response = await apiClient.get<{ success: boolean; data: { conversion_rate: number; total_inquiries: number; total_conversions: number; average_response_time_minutes: number; average_response_time_display: string } }>('/broker/reports/conversion-stats')
+    return response.data.data ?? { conversion_rate: 0, total_inquiries: 0, total_conversions: 0, average_response_time_minutes: 0, average_response_time_display: '—' }
+  },
 }
 
 export interface TeamProductivityRow {

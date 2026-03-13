@@ -106,6 +106,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/agents/me', [AgentController::class, 'update']);
     Route::post('/agents/me', [AgentController::class, 'update']); // Support POST with _method=PUT for FormData
     Route::get('/agents/dashboard/stats', [AgentController::class, 'dashboardStats']);
+    Route::post('/agents/team-invitations/{messageId}/accept', [AgentController::class, 'acceptTeamInvitation']);
+    Route::post('/agents/team-invitations/{messageId}/reject', [AgentController::class, 'rejectTeamInvitation']);
 });
 // Primary: /agents/{slug}  — also accepts numeric IDs for backward compat
 Route::get('/agents/{identifier}', [AgentController::class, 'getById']);
@@ -175,6 +177,9 @@ Route::middleware('auth:sanctum')->prefix('broker')->group(function () {
 
     // Reports
     Route::get('/reports/team-productivity', [BrokerController::class, 'teamProductivityReport']);
+    Route::get('/reports/property-type-distribution', [BrokerController::class, 'getPropertyTypeDistribution']);
+    Route::get('/reports/location-performance', [BrokerController::class, 'getLocationPerformance']);
+    Route::get('/reports/conversion-stats', [BrokerController::class, 'getConversionAndResponseStats']);
     
     // Subscription management
     Route::post('/subscribe', [BrokerController::class, 'subscribeToPlan']);

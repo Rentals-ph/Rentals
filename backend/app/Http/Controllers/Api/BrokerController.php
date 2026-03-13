@@ -372,11 +372,56 @@ class BrokerController extends Controller
 
         DB::beginTransaction();
         try {
-            TeamMember::create([
+            // Create a pending team member invitation
+            $teamMember = TeamMember::create([
                 'team_id' => $team->id,
                 'agent_id' => $agent->id,
                 'role' => $role,
+                'invitation_status' => 'pending',
+                'is_active' => false, // Not active until accepted
             ]);
+
+            // Create or find conversation for team invitations
+            $conversation = \App\Models\InquiryConversation::firstOrCreate(
+                [
+                    'agent_id' => $agent->id,
+                    'broker_id' => $broker->id,
+                    'customer_email' => $agent->email,
+                    'type' => 'general',
+                ],
+                [
+                    'customer_name' => $agent->first_name . ' ' . $agent->last_name,
+                    'subject' => 'Team Invitation',
+                    'last_message_at' => now(),
+                ]
+            );
+
+            // Create invitation message
+            $invitationMessage = \App\Models\Message::create([
+                'sender_id' => $broker->id,
+                'recipient_id' => $agent->id,
+                'conversation_id' => $conversation->id,
+                'sender_name' => $broker->first_name . ' ' . $broker->last_name,
+                'sender_email' => $broker->email,
+                'subject' => "Team Invitation: {$team->name}",
+                'message' => "You have been invited to join the team '{$team->name}' by {$broker->first_name} {$broker->last_name}. Please accept or reject this invitation.",
+                'type' => 'team_invitation',
+                'metadata' => [
+                    'team_id' => $team->id,
+                    'team_name' => $team->name,
+                    'team_member_id' => $teamMember->id,
+                    'role' => $role,
+                    'broker_id' => $broker->id,
+                    'broker_name' => $broker->first_name . ' ' . $broker->last_name,
+                ],
+                'is_read' => false,
+            ]);
+
+            // Update team member with invitation message ID
+            $teamMember->update(['invitation_message_id' => $invitationMessage->id]);
+
+            // Update conversation last message time
+            $conversation->update(['last_message_at' => now()]);
 
             // Note: agents_used is incremented when creating agents, not when assigning to team
 
@@ -384,15 +429,15 @@ class BrokerController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Agent assigned to team successfully',
+                'message' => 'Team invitation sent to agent successfully',
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error assigning agent to team: ' . $e->getMessage());
+            Log::error('Error sending team invitation: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to assign agent to team',
+                'message' => 'Failed to send team invitation',
                 'error' => config('app.debug') ? $e->getMessage() : 'An error occurred',
             ], 500);
         }
@@ -816,6 +861,217 @@ class BrokerController extends Controller
         return response()->json([
             'success' => true,
             'data' => $rows,
+        ]);
+    }
+
+    /**
+     * Get property type distribution for reports
+     */
+    public function getPropertyTypeDistribution(Request $request): JsonResponse
+    {
+        $broker = $this->ensureBroker($request);
+
+        $agentIds = $broker->managedAgents()->pluck('id')->push($broker->id)->unique()->values()->all();
+
+        // Get property type distribution
+        $distribution = Property::whereIn('agent_id', $agentIds)
+            ->selectRaw('type, count(*) as count')
+            ->groupBy('type')
+            ->pluck('count', 'type')
+            ->toArray();
+
+        $total = array_sum($distribution);
+        
+        // Normalize property types and calculate percentages
+        $normalizedTypes = [
+            'condo' => 0,
+            'house' => 0,
+            'studio' => 0,
+            'apartment' => 0,
+            'commercial' => 0,
+        ];
+
+        foreach ($distribution as $type => $count) {
+            $normalizedType = strtolower($type ?? '');
+            if (in_array($normalizedType, ['condo', 'condominium', 'condos'])) {
+                $normalizedTypes['condo'] += $count;
+            } elseif (in_array($normalizedType, ['house', 'houses', 'home', 'homes'])) {
+                $normalizedTypes['house'] += $count;
+            } elseif (in_array($normalizedType, ['studio', 'studios'])) {
+                $normalizedTypes['studio'] += $count;
+            } elseif (in_array($normalizedType, ['apartment', 'apartments'])) {
+                $normalizedTypes['apartment'] += $count;
+            } elseif (in_array($normalizedType, ['commercial', 'office', 'warehouse', 'shop'])) {
+                $normalizedTypes['commercial'] += $count;
+            }
+        }
+
+        // Calculate percentages
+        $result = [];
+        foreach ($normalizedTypes as $type => $count) {
+            $percentage = $total > 0 ? ($count / $total) * 100 : 0;
+            $result[] = [
+                'type' => ucfirst($type === 'condo' ? 'condos' : ($type . 's')),
+                'count' => $count,
+                'percentage' => round($percentage, 2),
+            ];
+        }
+
+        // Sort by count descending
+        usort($result, fn($a, $b) => $b['count'] - $a['count']);
+
+        return response()->json([
+            'success' => true,
+            'data' => $result,
+            'total' => $total,
+        ]);
+    }
+
+    /**
+     * Get location performance for reports
+     */
+    public function getLocationPerformance(Request $request): JsonResponse
+    {
+        $broker = $this->ensureBroker($request);
+
+        $agentIds = $broker->managedAgents()->pluck('id')->push($broker->id)->unique()->values()->all();
+
+        // Get location performance (based on inquiries/views per city)
+        $locationData = Property::whereIn('agent_id', $agentIds)
+            ->selectRaw('city, count(*) as property_count, sum(views_count) as total_views')
+            ->whereNotNull('city')
+            ->where('city', '!=', '')
+            ->groupBy('city')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'city' => $item->city,
+                    'property_count' => (int) $item->property_count,
+                    'total_views' => (int) $item->total_views,
+                    'inquiry_count' => 0, // Will be calculated below
+                ];
+            })
+            ->keyBy('city')
+            ->toArray();
+
+        // Get inquiry counts by city (from messages with property_id)
+        $propertyIds = Property::whereIn('agent_id', $agentIds)->pluck('id')->all();
+        if (!empty($propertyIds)) {
+            $inquiriesByProperty = Message::whereIn('property_id', $propertyIds)
+                ->selectRaw('property_id, count(*) as count')
+                ->groupBy('property_id')
+                ->pluck('count', 'property_id')
+                ->toArray();
+
+            $propertiesByCity = Property::whereIn('agent_id', $agentIds)
+                ->whereIn('id', array_keys($inquiriesByProperty))
+                ->select('id', 'city')
+                ->get()
+                ->groupBy('city');
+
+            foreach ($propertiesByCity as $city => $properties) {
+                $cityInquiries = 0;
+                foreach ($properties as $property) {
+                    $cityInquiries += $inquiriesByProperty[$property->id] ?? 0;
+                }
+                if (isset($locationData[$city])) {
+                    $locationData[$city]['inquiry_count'] = $cityInquiries;
+                }
+            }
+        }
+
+        // Calculate performance score (combination of views and inquiries)
+        $result = [];
+        foreach ($locationData as $city => $data) {
+            $performanceScore = $data['total_views'] + ($data['inquiry_count'] * 10); // Weight inquiries more
+            $result[] = [
+                'city' => $city,
+                'property_count' => $data['property_count'],
+                'total_views' => $data['total_views'],
+                'inquiry_count' => $data['inquiry_count'],
+                'performance_score' => $performanceScore,
+            ];
+        }
+
+        // Sort by performance score descending and take top 10
+        usort($result, fn($a, $b) => $b['performance_score'] - $a['performance_score']);
+        $result = array_slice($result, 0, 10);
+
+        return response()->json([
+            'success' => true,
+            'data' => $result,
+        ]);
+    }
+
+    /**
+     * Get conversion rate and response time statistics
+     */
+    public function getConversionAndResponseStats(Request $request): JsonResponse
+    {
+        $broker = $this->ensureBroker($request);
+
+        $agentIds = $broker->managedAgents()->pluck('id')->push($broker->id)->unique()->values()->all();
+
+        // Get total inquiries
+        $totalInquiries = Message::whereIn('recipient_id', $agentIds)->count();
+
+        // Get total conversions (properties that were rented/sold)
+        // This is a simplified calculation - you might want to track actual conversions differently
+        $totalConversions = Property::whereIn('agent_id', $agentIds)
+            ->whereIn('status', ['rented', 'sold'])
+            ->count();
+
+        // Calculate conversion rate
+        $conversionRate = $totalInquiries > 0 ? ($totalConversions / $totalInquiries) * 100 : 0;
+
+        // Calculate average response time
+        // Get messages and their replies to calculate response time
+        $conversationIds = \App\Models\InquiryConversation::where(function($q) use ($broker) {
+            if ($broker->isBroker()) {
+                $q->where('broker_id', $broker->id);
+            }
+        })->orWhereIn('agent_id', $agentIds)->pluck('id')->all();
+
+        $averageResponseTime = 0;
+        if (!empty($conversationIds)) {
+            $messages = Message::whereIn('conversation_id', $conversationIds)
+                ->whereIn('recipient_id', $agentIds)
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            $responseTimes = [];
+            foreach ($messages as $message) {
+                // Find the next message in the same conversation from the agent/broker
+                $reply = Message::where('conversation_id', $message->conversation_id)
+                    ->where('sender_id', $message->recipient_id)
+                    ->where('created_at', '>', $message->created_at)
+                    ->orderBy('created_at', 'asc')
+                    ->first();
+
+                if ($reply) {
+                    $responseTime = $message->created_at->diffInMinutes($reply->created_at);
+                    $responseTimes[] = $responseTime;
+                }
+            }
+
+            if (!empty($responseTimes)) {
+                $averageResponseTime = round(array_sum($responseTimes) / count($responseTimes), 1);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'conversion_rate' => round($conversionRate, 2),
+                'total_inquiries' => $totalInquiries,
+                'total_conversions' => $totalConversions,
+                'average_response_time_minutes' => $averageResponseTime,
+                'average_response_time_display' => $averageResponseTime > 0 
+                    ? ($averageResponseTime < 60 
+                        ? round($averageResponseTime) + ' min' 
+                        : round($averageResponseTime / 60, 1) + ' hrs')
+                    : '—',
+            ],
         ]);
     }
 }

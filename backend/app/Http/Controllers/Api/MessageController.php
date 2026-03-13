@@ -59,7 +59,7 @@ class MessageController extends Controller
                 'sender_phone' => 'nullable|string|max:20',
                 'subject' => 'nullable|string|max:255',
                 'message' => 'required|string',
-                'type' => 'nullable|string|in:contact,property_inquiry,general',
+                'type' => 'nullable|string|in:contact,property_inquiry,general,team_invitation',
             ]);
 
             if ($validator->fails()) {

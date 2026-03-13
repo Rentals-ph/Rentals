@@ -15,7 +15,15 @@ export interface Message {
   sender_phone: string | null
   subject: string | null
   message: string
-  type: 'contact' | 'property_inquiry' | 'general'
+  type: 'contact' | 'property_inquiry' | 'general' | 'team_invitation' | 'team_invitation'
+  metadata?: {
+    team_id?: number
+    team_name?: string
+    team_member_id?: number
+    role?: string
+    broker_id?: number
+    broker_name?: string
+  } | null
   is_read: boolean
   read_at: string | null
   created_at: string
@@ -40,7 +48,7 @@ export interface InquiryConversation {
   customer_email: string
   customer_name: string
   property_id: number | null
-  type: 'contact' | 'property_inquiry' | 'general'
+  type: 'contact' | 'property_inquiry' | 'general' | 'team_invitation'
   subject: string | null
   last_message_at: string | null
   created_at: string
@@ -215,6 +223,32 @@ export const messagesApi = {
       const response = await apiClient.put<{ success: boolean; message: string; count: number }>(`/conversations/${conversationId}/mark-read`, null, {
         params: { email: customerEmail }
       })
+      return response.data
+    } catch (error: any) {
+      console.error('API call error:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Accept a team invitation
+   */
+  acceptTeamInvitation: async (messageId: number): Promise<{ success: boolean; message: string; data?: any }> => {
+    try {
+      const response = await apiClient.post<{ success: boolean; message: string; data?: any }>(`/agents/team-invitations/${messageId}/accept`)
+      return response.data
+    } catch (error: any) {
+      console.error('API call error:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Reject a team invitation
+   */
+  rejectTeamInvitation: async (messageId: number): Promise<{ success: boolean; message: string }> => {
+    try {
+      const response = await apiClient.post<{ success: boolean; message: string }>(`/agents/team-invitations/${messageId}/reject`)
       return response.data
     } catch (error: any) {
       console.error('API call error:', error)

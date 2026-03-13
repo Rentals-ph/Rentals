@@ -540,6 +540,24 @@ class AgentController extends Controller
             }
         }
         
+        // Get team information for agents
+        $teamInfo = null;
+        if ($user->isAgent()) {
+            $activeTeamMember = $user->teamMemberships()
+                ->where('invitation_status', 'accepted')
+                ->where('is_active', true)
+                ->with('team')
+                ->first();
+            
+            if ($activeTeamMember && $activeTeamMember->team) {
+                $teamInfo = [
+                    'id' => $activeTeamMember->team->id,
+                    'name' => $activeTeamMember->team->name,
+                    'role' => $activeTeamMember->role,
+                ];
+            }
+        }
+        
         return response()->json([
             'success' => true,
             'data' => [
@@ -564,6 +582,7 @@ class AgentController extends Controller
                 'city' => $user->city,
                 'state' => $user->state,
                 'office_address' => $user->office_address,
+                'team' => $teamInfo,
             ],
         ]);
     }
@@ -633,6 +652,24 @@ class AgentController extends Controller
             }
         }
         
+        // Get team information for agents
+        $teamInfo = null;
+        if ($agent->isAgent()) {
+            $activeTeamMember = $agent->teamMemberships()
+                ->where('invitation_status', 'accepted')
+                ->where('is_active', true)
+                ->with('team')
+                ->first();
+            
+            if ($activeTeamMember && $activeTeamMember->team) {
+                $teamInfo = [
+                    'id' => $activeTeamMember->team->id,
+                    'name' => $activeTeamMember->team->name,
+                    'role' => $activeTeamMember->role,
+                ];
+            }
+        }
+        
         return response()->json([
             'success' => true,
             'data' => [
@@ -654,6 +691,7 @@ class AgentController extends Controller
                 'profile_image'   => $imageUrl,
                 'avatar'          => $imageUrl,
                 'properties_count' => $agent->properties()->count(),
+                'team'            => $teamInfo,
             ],
         ]);
     }
@@ -1042,6 +1080,183 @@ class AgentController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while updating your profile',
+                'error' => config('app.debug') ? $e->getMessage() : 'An error occurred',
+            ], 500);
+        }
+    }
+
+    /**
+     * Accept a team invitation
+     */
+    public function acceptTeamInvitation(Request $request, int $messageId): JsonResponse
+    {
+        try {
+            $user = $request->user();
+            
+            if (!$user || !$user->isAgent()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized. Agent authentication required.',
+                ], 403);
+            }
+
+            $message = Message::where('id', $messageId)
+                ->where('recipient_id', $user->id)
+                ->where('type', 'team_invitation')
+                ->firstOrFail();
+
+            if (!$message->metadata || !isset($message->metadata['team_member_id'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid invitation message',
+                ], 422);
+            }
+
+            $teamMemberId = $message->metadata['team_member_id'];
+            $teamMember = \App\Models\TeamMember::where('id', $teamMemberId)
+                ->where('agent_id', $user->id)
+                ->where('invitation_status', 'pending')
+                ->firstOrFail();
+
+            \Illuminate\Support\Facades\DB::beginTransaction();
+            try {
+                // Update team member status
+                $teamMember->update([
+                    'invitation_status' => 'accepted',
+                    'is_active' => true,
+                    'joined_at' => now(),
+                ]);
+
+                // Mark message as read
+                $message->markAsRead();
+
+                // Create acceptance reply message
+                $conversation = $message->conversation;
+                if ($conversation) {
+                    \App\Models\Message::create([
+                        'sender_id' => $user->id,
+                        'recipient_id' => $message->sender_id,
+                        'conversation_id' => $conversation->id,
+                        'sender_name' => $user->first_name . ' ' . $user->last_name,
+                        'sender_email' => $user->email,
+                        'subject' => 'Re: ' . $message->subject,
+                        'message' => "I have accepted your invitation to join the team '{$message->metadata['team_name']}'.",
+                        'type' => 'general',
+                        'is_read' => false,
+                    ]);
+
+                    $conversation->update(['last_message_at' => now()]);
+                }
+
+                \Illuminate\Support\Facades\DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Team invitation accepted successfully',
+                    'data' => $teamMember->load('team'),
+                ]);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\DB::rollBack();
+                throw $e;
+            }
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invitation not found',
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Error accepting team invitation: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to accept invitation',
+                'error' => config('app.debug') ? $e->getMessage() : 'An error occurred',
+            ], 500);
+        }
+    }
+
+    /**
+     * Reject a team invitation
+     */
+    public function rejectTeamInvitation(Request $request, int $messageId): JsonResponse
+    {
+        try {
+            $user = $request->user();
+            
+            if (!$user || !$user->isAgent()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized. Agent authentication required.',
+                ], 403);
+            }
+
+            $message = Message::where('id', $messageId)
+                ->where('recipient_id', $user->id)
+                ->where('type', 'team_invitation')
+                ->firstOrFail();
+
+            if (!$message->metadata || !isset($message->metadata['team_member_id'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid invitation message',
+                ], 422);
+            }
+
+            $teamMemberId = $message->metadata['team_member_id'];
+            $teamMember = \App\Models\TeamMember::where('id', $teamMemberId)
+                ->where('agent_id', $user->id)
+                ->where('invitation_status', 'pending')
+                ->firstOrFail();
+
+            \Illuminate\Support\Facades\DB::beginTransaction();
+            try {
+                // Update team member status
+                $teamMember->update([
+                    'invitation_status' => 'rejected',
+                ]);
+
+                // Mark message as read
+                $message->markAsRead();
+
+                // Create rejection reply message
+                $conversation = $message->conversation;
+                if ($conversation) {
+                    \App\Models\Message::create([
+                        'sender_id' => $user->id,
+                        'recipient_id' => $message->sender_id,
+                        'conversation_id' => $conversation->id,
+                        'sender_name' => $user->first_name . ' ' . $user->last_name,
+                        'sender_email' => $user->email,
+                        'subject' => 'Re: ' . $message->subject,
+                        'message' => "I have declined your invitation to join the team '{$message->metadata['team_name']}'.",
+                        'type' => 'general',
+                        'is_read' => false,
+                    ]);
+
+                    $conversation->update(['last_message_at' => now()]);
+                }
+
+                \Illuminate\Support\Facades\DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Team invitation rejected',
+                ]);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\DB::rollBack();
+                throw $e;
+            }
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invitation not found',
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Error rejecting team invitation: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to reject invitation',
                 'error' => config('app.debug') ? $e->getMessage() : 'An error occurred',
             ], 500);
         }

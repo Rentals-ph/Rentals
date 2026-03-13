@@ -251,7 +251,7 @@ function AppSidebar() {
       {/* Sidebar */}
       <aside
         ref={sidebarRef}
-        className={`w-[280px] max-[480px]:w-[260px] fixed left-0 overflow-visible z-[1000] md:-translate-x-full md:transition-transform md:duration-300 md:ease-in-out transition-[width] duration-200 ${
+        className={`w-[280px] max-[480px]:w-[260px] fixed left-0 overflow-visible z-[10] md:-translate-x-full md:transition-transform md:duration-300 md:ease-in-out transition-[width] duration-200 ${
           isCollapsed ? 'md:w-[72px]' : 'lg:w-60'
         } ${isMobileMenuOpen ? 'md:translate-x-0' : ''}`}
         style={{ 

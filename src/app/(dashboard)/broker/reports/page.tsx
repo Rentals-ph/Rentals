@@ -10,7 +10,10 @@ import {
 // import './page.css' // Removed - converted to Tailwind
 
 // Stats data (summary from report when available)
-const getStatsFromReport = (rows: TeamProductivityRow[]) => {
+const getStatsFromReport = (
+  rows: TeamProductivityRow[],
+  conversionStats?: { conversion_rate: number; average_response_time_display: string }
+) => {
   const totalInquiries = rows.reduce((s, r) => s + r.total_inquiries, 0)
   const totalListings = rows.reduce((s, r) => s + r.total_listings, 0)
   const ratio = totalListings > 0 ? (totalInquiries / totalListings).toFixed(1) : '0'
@@ -27,8 +30,8 @@ const getStatsFromReport = (rows: TeamProductivityRow[]) => {
     {
       icon: 'conversion' as const,
       label: 'Conversion Rate',
-      value: '—',
-      change: 'Track over time',
+      value: conversionStats?.conversion_rate ? `${conversionStats.conversion_rate.toFixed(1)}%` : '—',
+      change: conversionStats?.conversion_rate ? `${conversionStats.total_conversions} conversions` : 'Track over time',
       changeColor: 'green',
       iconBg: '#FEF3C7',
       iconColor: '#F59E0B',
@@ -36,8 +39,8 @@ const getStatsFromReport = (rows: TeamProductivityRow[]) => {
     {
       icon: 'response' as const,
       label: 'Average Response Time',
-      value: '—',
-      change: 'Track over time',
+      value: conversionStats?.average_response_time_display || '—',
+      change: conversionStats?.average_response_time_minutes ? 'Based on replies' : 'Track over time',
       changeColor: 'green',
       iconBg: '#D1FAE5',
       iconColor: '#10B981',
@@ -82,21 +85,51 @@ function StatIcon({ type }: { type: string }) {
 export default function ReportsPage() {
   const [selectedRows, setSelectedRows] = useState<number[]>([])
   const [productivityData, setProductivityData] = useState<TeamProductivityRow[]>([])
+  const [propertyTypeDistribution, setPropertyTypeDistribution] = useState<Array<{ type: string; count: number; percentage: number }>>([])
+  const [locationPerformance, setLocationPerformance] = useState<Array<{ city: string; property_count: number; total_views: number; inquiry_count: number; performance_score: number }>>([])
+  const [conversionStats, setConversionStats] = useState<{ conversion_rate: number; total_inquiries: number; total_conversions: number; average_response_time_minutes: number; average_response_time_display: string } | null>(null)
   const [loading, setLoading] = useState(true)
+  const [chartsLoading, setChartsLoading] = useState(true)
 
   useEffect(() => {
     let cancelled = false
-    brokerApi.getTeamProductivityReport().then((data) => {
-      if (!cancelled) setProductivityData(Array.isArray(data) ? data : [])
-    }).catch(() => {
-      if (!cancelled) setProductivityData([])
-    }).finally(() => {
-      if (!cancelled) setLoading(false)
-    })
+    
+    const fetchData = async () => {
+      try {
+        const [productivity, types, locations, stats] = await Promise.all([
+          brokerApi.getTeamProductivityReport(),
+          brokerApi.getPropertyTypeDistribution(),
+          brokerApi.getLocationPerformance(),
+          brokerApi.getConversionAndResponseStats(),
+        ])
+        
+        if (!cancelled) {
+          setProductivityData(Array.isArray(productivity) ? productivity : [])
+          setPropertyTypeDistribution(types)
+          setLocationPerformance(locations)
+          setConversionStats(stats)
+        }
+      } catch (error) {
+        console.error('Error fetching reports data:', error)
+        if (!cancelled) {
+          setProductivityData([])
+          setPropertyTypeDistribution([])
+          setLocationPerformance([])
+          setConversionStats(null)
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+          setChartsLoading(false)
+        }
+      }
+    }
+
+    fetchData()
     return () => { cancelled = true }
   }, [])
 
-  const statsData = getStatsFromReport(productivityData)
+  const statsData = getStatsFromReport(productivityData, conversionStats || undefined)
   const allSelected = selectedRows.length === productivityData.length && productivityData.length > 0
 
   const toggleSelectAll = () => {
@@ -112,6 +145,67 @@ export default function ReportsPage() {
       prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i]
     )
   }
+
+  // Helper function to generate pie chart segments
+  const generatePieChartSegments = () => {
+    if (propertyTypeDistribution.length === 0) return []
+    
+    const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899']
+    const circumference = 2 * Math.PI * 70 // radius = 70
+    let offset = 0
+    
+    return propertyTypeDistribution.map((item, index) => {
+      const percentage = item.percentage / 100
+      const dashArray = `${percentage * circumference} ${circumference}`
+      const dashOffset = index === 0 ? 0 : -offset
+      offset += percentage * circumference
+      
+      return {
+        ...item,
+        color: colors[index % colors.length],
+        dashArray,
+        dashOffset,
+      }
+    })
+  }
+
+  // Helper function to generate bar chart data
+  const generateBarChartData = () => {
+    if (locationPerformance.length === 0) return { bars: [], maxValue: 0 }
+    
+    const maxScore = Math.max(...locationPerformance.map(l => l.performance_score))
+    const maxValue = Math.ceil(maxScore / 1000) * 1000 // Round up to nearest 1000
+    
+    const colors = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#EC4899', '#14B8A6', '#F97316', '#6366F1', '#A855F7']
+    const barWidth = 40
+    const barSpacing = 65
+    const chartHeight = 222
+    const chartWidth = 380
+    const paddingLeft = 45
+    const paddingBottom = 38
+    
+    return {
+      bars: locationPerformance.slice(0, 5).map((location, index) => {
+        const height = maxValue > 0 ? (location.performance_score / maxValue) * (chartHeight - paddingBottom) : 0
+        const x = paddingLeft + (index * barSpacing)
+        const y = chartHeight - paddingBottom - height
+        
+        return {
+          ...location,
+          x,
+          y,
+          width: barWidth,
+          height,
+          color: colors[index % colors.length],
+        }
+      }),
+      maxValue,
+      yAxisLabels: [0, maxValue * 0.25, maxValue * 0.5, maxValue * 0.75, maxValue].map(v => Math.round(v)),
+    }
+  }
+
+  const pieSegments = generatePieChartSegments()
+  const barChartData = generateBarChartData()
 
   return (
     <> 
@@ -247,96 +341,116 @@ export default function ReportsPage() {
           {/* Listing Distribution - Pie Chart */}
           <div className="bg-white rounded-[14px] p-6 shadow-sm"> {/* rp-chart-card */}
             <h4 className="text-base font-bold text-gray-900 mb-5 m-0">Listing Distribution</h4> {/* rp-chart-title */}
-            <div className="flex items-center justify-center"> {/* rp-pie-container */}
-              <svg viewBox="0 0 200 200" className="w-[200px] h-[200px]"> {/* rp-pie-chart */}
-                {/* Condos - 50% - Blue */}
-                <circle cx="100" cy="100" r="70" fill="none" stroke="#3B82F6" strokeWidth="35"
-                  strokeDasharray={`${0.50 * 439.82} 439.82`}
-                  transform="rotate(-90 100 100)" />
-                {/* Houses - 22.4% - Green */}
-                <circle cx="100" cy="100" r="70" fill="none" stroke="#10B981" strokeWidth="35"
-                  strokeDasharray={`${0.224 * 439.82} 439.82`}
-                  strokeDashoffset={`${-0.50 * 439.82}`}
-                  transform="rotate(-90 100 100)" />
-                {/* Studios - 18.8% - Orange */}
-                <circle cx="100" cy="100" r="70" fill="none" stroke="#F59E0B" strokeWidth="35"
-                  strokeDasharray={`${0.188 * 439.82} 439.82`}
-                  strokeDashoffset={`${-(0.50 + 0.224) * 439.82}`}
-                  transform="rotate(-90 100 100)" />
-                {/* Apartments - 8.82% - Red */}
-                <circle cx="100" cy="100" r="70" fill="none" stroke="#EF4444" strokeWidth="35"
-                  strokeDasharray={`${0.0882 * 439.82} 439.82`}
-                  strokeDashoffset={`${-(0.50 + 0.224 + 0.188) * 439.82}`}
-                  transform="rotate(-90 100 100)" />
-                {/* Labels */}
-                <text x="125" y="70" fontSize="7" fontWeight="700" fill="#fff">Houses</text>
-                <text x="128" y="80" fontSize="6" fill="#fff">22.4%</text>
-                <text x="80" y="105" fontSize="8" fontWeight="700" fill="#fff">Condos</text>
-                <text x="90" y="115" fontSize="7" fill="#fff">50%</text>
-                <text x="50" y="145" fontSize="7" fontWeight="700" fill="#fff">Studios</text>
-                <text x="55" y="155" fontSize="6" fill="#fff">18.8%</text>
-                <text x="100" y="175" fontSize="6" fontWeight="700" fill="#fff">Apartments</text>
-                <text x="110" y="183" fontSize="5" fill="#fff">8.82%</text>
-              </svg>
-            </div>
-            <div className="mt-5 flex flex-col gap-2.5"> {/* rp-pie-legend */}
-              <div className="flex items-center gap-2 text-sm text-gray-700"> {/* rp-legend-item */}
-                <span className="w-3 h-3 rounded-full" style={{ background: '#3B82F6' }}></span> {/* rp-legend-dot */}
-                Condos
+            {chartsLoading ? (
+              <div className="flex items-center justify-center h-[200px]">
+                <div className="text-sm text-gray-500">Loading chart data...</div>
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-700"> {/* rp-legend-item */}
-                <span className="w-3 h-3 rounded-full" style={{ background: '#10B981' }}></span> {/* rp-legend-dot */}
-                Houses
+            ) : pieSegments.length === 0 ? (
+              <div className="flex items-center justify-center h-[200px]">
+                <div className="text-sm text-gray-500">No property data available</div>
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-700"> {/* rp-legend-item */}
-                <span className="w-3 h-3 rounded-full" style={{ background: '#F59E0B' }}></span> {/* rp-legend-dot */}
-                Studios
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-700"> {/* rp-legend-item */}
-                <span className="w-3 h-3 rounded-full" style={{ background: '#EF4444' }}></span> {/* rp-legend-dot */}
-                Apartments
-              </div>
-            </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-center"> {/* rp-pie-container */}
+                  <svg viewBox="0 0 200 200" className="w-[200px] h-[200px]"> {/* rp-pie-chart */}
+                    {pieSegments.map((segment, index) => (
+                      <circle
+                        key={segment.type}
+                        cx="100"
+                        cy="100"
+                        r="70"
+                        fill="none"
+                        stroke={segment.color}
+                        strokeWidth="35"
+                        strokeDasharray={segment.dashArray}
+                        strokeDashoffset={segment.dashOffset}
+                        transform="rotate(-90 100 100)"
+                      />
+                    ))}
+                  </svg>
+                </div>
+                <div className="mt-5 flex flex-col gap-2.5"> {/* rp-pie-legend */}
+                  {pieSegments.map((segment) => (
+                    <div key={segment.type} className="flex items-center justify-between text-sm text-gray-700"> {/* rp-legend-item */}
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full" style={{ background: segment.color }}></span> {/* rp-legend-dot */}
+                        {segment.type}
+                      </div>
+                      <span className="font-medium">{segment.count} ({segment.percentage.toFixed(1)}%)</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
           {/* Location Performance - Bar Chart */}
           <div className="bg-white rounded-[14px] p-6 shadow-sm"> {/* rp-chart-card */}
             <h4 className="text-base font-bold text-gray-900 mb-5 m-0">Location Performance</h4> {/* rp-chart-title */}
-            <div className="flex items-center justify-center"> {/* rp-bar-container */}
-              <svg viewBox="0 0 400 260" className="w-full h-auto max-w-[400px]"> {/* rp-bar-chart */}
-                {/* Y-axis labels */}
-                <text x="35" y="30" fontSize="11" fill="#9CA3AF" textAnchor="end">4000</text>
-                <text x="35" y="80" fontSize="11" fill="#9CA3AF" textAnchor="end">3000</text>
-                <text x="35" y="130" fontSize="11" fill="#9CA3AF" textAnchor="end">2000</text>
-                <text x="35" y="180" fontSize="11" fill="#9CA3AF" textAnchor="end">1000</text>
-                <text x="35" y="225" fontSize="11" fill="#9CA3AF" textAnchor="end">0</text>
+            {chartsLoading ? (
+              <div className="flex items-center justify-center h-[260px]">
+                <div className="text-sm text-gray-500">Loading chart data...</div>
+              </div>
+            ) : barChartData.bars.length === 0 ? (
+              <div className="flex items-center justify-center h-[260px]">
+                <div className="text-sm text-gray-500">No location data available</div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center"> {/* rp-bar-container */}
+                <svg viewBox="0 0 400 260" className="w-full h-auto max-w-[400px]"> {/* rp-bar-chart */}
+                  {/* Y-axis labels */}
+                  {barChartData.yAxisLabels.map((value, index) => {
+                    const yPos = 222 - (index * 50)
+                    return (
+                      <text key={value} x="35" y={yPos} fontSize="11" fill="#9CA3AF" textAnchor="end">
+                        {value.toLocaleString()}
+                      </text>
+                    )
+                  })}
 
-                {/* Grid lines */}
-                <line x1="45" y1="27" x2="380" y2="27" stroke="#F3F4F6" strokeWidth="1" />
-                <line x1="45" y1="77" x2="380" y2="77" stroke="#F3F4F6" strokeWidth="1" />
-                <line x1="45" y1="127" x2="380" y2="127" stroke="#F3F4F6" strokeWidth="1" />
-                <line x1="45" y1="177" x2="380" y2="177" stroke="#F3F4F6" strokeWidth="1" />
-                <line x1="45" y1="222" x2="380" y2="222" stroke="#F3F4F6" strokeWidth="1" />
+                  {/* Grid lines */}
+                  {barChartData.yAxisLabels.map((_, index) => {
+                    const yPos = 222 - (index * 50)
+                    return (
+                      <line
+                        key={index}
+                        x1="45"
+                        y1={yPos - 5}
+                        x2="380"
+                        y2={yPos - 5}
+                        stroke="#F3F4F6"
+                        strokeWidth="1"
+                      />
+                    )
+                  })}
+                  <line x1="45" y1="222" x2="380" y2="222" stroke="#F3F4F6" strokeWidth="1" />
 
-                {/* Cebu - ~3200 */}
-                <rect x="60" y="62" width="40" height="160" rx="4" fill="#3B82F6" />
-                {/* Makati - ~2600 */}
-                <rect x="125" y="92" width="40" height="130" rx="4" fill="#10B981" />
-                {/* BGC - ~2800 */}
-                <rect x="190" y="82" width="40" height="140" rx="4" fill="#F59E0B" />
-                {/* Davao - ~1800 */}
-                <rect x="255" y="132" width="40" height="90" rx="4" fill="#8B5CF6" />
-                {/* Manila - ~900 */}
-                <rect x="320" y="177" width="40" height="45" rx="4" fill="#EF4444" />
-
-                {/* X-axis labels */}
-                <text x="80" y="245" fontSize="11" fill="#9CA3AF" textAnchor="middle">Cebu</text>
-                <text x="145" y="245" fontSize="11" fill="#9CA3AF" textAnchor="middle">Makati</text>
-                <text x="210" y="245" fontSize="11" fill="#9CA3AF" textAnchor="middle">BGC</text>
-                <text x="275" y="245" fontSize="11" fill="#9CA3AF" textAnchor="middle">Davao</text>
-                <text x="340" y="245" fontSize="11" fill="#9CA3AF" textAnchor="middle">Manila</text>
-              </svg>
-            </div>
+                  {/* Bars */}
+                  {barChartData.bars.map((bar, index) => (
+                    <g key={bar.city}>
+                      <rect
+                        x={bar.x}
+                        y={bar.y}
+                        width={bar.width}
+                        height={bar.height}
+                        rx="4"
+                        fill={bar.color}
+                      />
+                      {/* X-axis labels */}
+                      <text
+                        x={bar.x + bar.width / 2}
+                        y="245"
+                        fontSize="11"
+                        fill="#9CA3AF"
+                        textAnchor="middle"
+                      >
+                        {bar.city.length > 8 ? bar.city.substring(0, 7) + '...' : bar.city}
+                      </text>
+                    </g>
+                  ))}
+                </svg>
+              </div>
+            )}
           </div>
         </div>
     </>

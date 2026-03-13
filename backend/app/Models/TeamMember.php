@@ -15,6 +15,8 @@ class TeamMember extends Model
         'role',
         'is_active',
         'joined_at',
+        'invitation_status',
+        'invitation_message_id',
     ];
 
     protected $casts = [
@@ -36,5 +38,13 @@ class TeamMember extends Model
     public function agent()
     {
         return $this->belongsTo(User::class, 'agent_id');
+    }
+
+    /**
+     * Get the invitation message
+     */
+    public function invitationMessage()
+    {
+        return $this->belongsTo(Message::class, 'invitation_message_id');
     }
 }

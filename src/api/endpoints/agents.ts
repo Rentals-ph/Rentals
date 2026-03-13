@@ -59,6 +59,11 @@ export interface Agent {
   image_path?: string | null
   avatar?: string | null
   profile_image?: string | null
+  team?: {
+    id: number
+    name: string
+    role: string
+  } | null
   created_at?: string | null
   updated_at?: string | null
 }

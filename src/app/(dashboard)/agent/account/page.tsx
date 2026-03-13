@@ -269,6 +269,11 @@ export default function AgentAccount() {
                   <div className="mt-2 ml-2">
                     <p className="m-0 text-sm font-semibold text-gray-900">{fullName}</p>
                     <p className="m-0 text-xs text-gray-500">{role}</p>
+                    {agent?.team && (
+                      <p className="m-0 text-xs text-blue-600 font-medium mt-1">
+                        Team: {agent.team.name} ({agent.team.role})
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -341,6 +346,15 @@ export default function AgentAccount() {
                     <input type="text" name="companyName" value={form.companyName} onChange={onChange} disabled={!isEditMode} className={`w-full ${INPUT}`} placeholder="Enter your company name" />
                   </Field>
                 </div>
+                {agent?.team && (
+                  <div className="sm:col-span-2">
+                    <Field label="Team">
+                      <div className="px-4 py-3 border border-blue-200 rounded-xl bg-blue-50 text-blue-900 font-medium">
+                        {agent.team.name} - {agent.team.role}
+                      </div>
+                    </Field>
+                  </div>
+                )}
                 <div className="sm:col-span-2">
                   <Field label="Company Logo">
                     <div className="space-y-3">
