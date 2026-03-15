@@ -8,7 +8,7 @@ import {
   getSiteUrl,
   getDefaultOgImage,
 } from '@/shared/config/seo'
-import { PublicPageLoading } from '@/components/ui/PublicPageLoading'
+import { PublicPageLoading } from '@/shared/components/ui/PublicPageLoading'
 import '../index.css'
 
 const siteUrl = getSiteUrl()
