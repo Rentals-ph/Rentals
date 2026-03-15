@@ -303,6 +303,3 @@ export const brokerApi = {
   },
 }
 
-// Re-export TeamProductivityRow from types
-export type { TeamProductivityRow } from '../types/broker'
-
