@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\Tenant;
 
 use App\Http\Controllers\Controller;
-use App\Models\Property;
-use App\Models\SavedProperty;
+use App\Domain\Properties\Models\Property;
+use App\Domain\Properties\Models\SavedProperty;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;

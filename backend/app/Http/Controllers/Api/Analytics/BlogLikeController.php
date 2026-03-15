@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\Analytics;
 
 use App\Http\Controllers\Controller;
-use App\Models\Blog;
-use App\Models\BlogLike;
+use App\Domain\Content\Models\Blog;
+use App\Domain\Content\Models\BlogLike;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;

@@ -4,8 +4,14 @@ namespace App\Http\Controllers\Api\Shared;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Concerns\FormatsValidationErrors;
-use App\Models\Property;
-use App\Services\ImageService;
+use App\Domain\Properties\Models\Property;
+use App\Domain\Properties\Services\ImageService;
+use App\Http\Requests\Properties\CreatePropertyRequest;
+use App\Http\Requests\Properties\BulkCreatePropertyRequest;
+use App\Http\Requests\Properties\UpdatePropertyRequest;
+use App\Http\Requests\Properties\UpdatePropertyStatusRequest;
+use App\Http\Resources\PropertyResource;
+use App\Http\Resources\PropertyCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -152,7 +158,7 @@ class PropertyController extends Controller
 
         // Image URL is automatically included via model accessor (getImageUrlAttribute)
 
-        return response()->json($properties);
+        return new PropertyCollection($properties);
     }
 
     #[OA\Get(
@@ -192,7 +198,7 @@ class PropertyController extends Controller
             ? Property::with('agent')->findOrFail($identifier)
             : Property::with('agent')->where('slug', $identifier)->firstOrFail();
 
-        return response()->json($property);
+        return new PropertyResource($property);
     }
 
     #[OA\Post(
@@ -249,7 +255,7 @@ class PropertyController extends Controller
             ),
         ]
     )]
-    public function store(Request $request)
+    public function store(CreatePropertyRequest $request)
     {
         try {
             // Get authenticated user - middleware ensures user is authenticated
@@ -273,33 +279,7 @@ class PropertyController extends Controller
                 }
             }
 
-            $validated = $request->validate([
-                'title' => 'required|string|max:255',
-                'slug'  => 'nullable|string|max:255|unique:properties,slug|regex:/^[a-z0-9-]+$/',
-                'description' => 'required|string',
-                'type' => 'required|string|max:255',
-                'price' => 'required|numeric|min:0',
-                'listing_type' => 'nullable|string|in:for_rent,for_sale',
-                'price_type' => 'nullable|string|in:Monthly,Weekly,Daily,Yearly,monthly,weekly,daily,yearly',
-                'bedrooms' => 'required|integer|min:0',
-                'bathrooms' => 'required|integer|min:0',
-                'garage' => 'nullable|integer|min:0',
-                'area' => 'nullable|integer|min:0',
-                'lot_area' => 'nullable|integer|min:0',
-                'floor_area_unit' => 'nullable|string|in:Square Meters,Square Feet',
-                'amenities' => 'nullable|string',
-                'furnishing' => 'nullable|string|in:Fully Furnished,Semi Furnished,Unfurnished',
-                'image' => 'nullable|file|mimetypes:image/jpeg,image/png,image/gif,image/webp|max:10240',
-                'images' => 'nullable|array',
-                'images.*' => 'file|mimetypes:image/jpeg,image/png,image/gif,image/webp|max:10240',
-                'video_url' => 'nullable|url|max:500',
-                'latitude' => 'nullable|string|max:50',
-                'longitude' => 'nullable|string|max:50',
-                'country' => 'nullable|string|max:100',
-                'state_province' => 'nullable|string|max:100',
-                'city' => 'nullable|string|max:100',
-                'street_address' => 'nullable|string',
-            ]);
+            $validated = $request->validated();
 
             // Resolve listing_type — default to for_rent
             $listingType = $validated['listing_type'] ?? 'for_rent';
@@ -408,7 +388,7 @@ class PropertyController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Property created successfully',
-                'data' => $property,
+                'data' => new PropertyResource($property),
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationErrorResponse($e);
@@ -499,7 +479,7 @@ class PropertyController extends Controller
             ),
         ]
     )]
-    public function bulkStore(Request $request)
+    public function bulkStore(BulkCreatePropertyRequest $request)
     {
         try {
             $user = $request->user();
@@ -522,15 +502,7 @@ class PropertyController extends Controller
                 }
             }
 
-            $request->validate([
-                'properties' => 'required|array|min:1|max:50', // Limit to 50 at a time
-                'properties.*.title' => 'required|string|max:255',
-                'properties.*.description' => 'required|string',
-                'properties.*.type' => 'required|string|max:255',
-                'properties.*.price' => 'required|numeric|min:0',
-                'properties.*.bedrooms' => 'required|integer|min:0',
-                'properties.*.bathrooms' => 'required|integer|min:0',
-            ]);
+            $request->validated(); // Validation handled by BulkCreatePropertyRequest
 
             $properties = $request->input('properties');
             $createdProperties = [];
@@ -580,7 +552,7 @@ class PropertyController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => count($createdProperties) . ' properties created successfully',
-                'data' => $createdProperties,
+                'data' => PropertyResource::collection($createdProperties),
                 'created_count' => count($createdProperties),
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -724,36 +696,7 @@ class PropertyController extends Controller
 
             // Validate the request data
             // Use 'sometimes' to only validate fields that are present in the request
-            $validated = $request->validate([
-                'title' => 'sometimes|string|max:255',
-                'slug'  => 'nullable|string|max:255|unique:properties,slug,' . $property->id . '|regex:/^[a-z0-9-]+$/',
-                'description' => 'sometimes|string',
-                'type' => 'sometimes|string|max:255',
-                'price' => 'sometimes|numeric|min:0',
-                'listing_type' => 'nullable|string|in:for_rent,for_sale',
-                'price_type' => 'nullable|string|in:Monthly,Weekly,Daily,Yearly,monthly,weekly,daily,yearly',
-                'bedrooms' => 'sometimes|integer|min:0',
-                'bathrooms' => 'sometimes|integer|min:0',
-                'garage' => 'nullable|integer|min:0',
-                'area' => 'nullable|integer|min:0',
-                'lot_area' => 'nullable|integer|min:0',
-                'floor_area_unit' => 'nullable|string|in:Square Meters,Square Feet',
-                'amenities' => 'nullable|string',
-                'furnishing' => 'nullable|string|in:Fully Furnished,Semi Furnished,Unfurnished',
-                'image' => 'nullable|file|mimetypes:image/jpeg,image/png,image/gif,image/webp|max:10240',
-                'images' => 'nullable|array',
-                'images.*' => 'file|mimetypes:image/jpeg,image/png,image/gif,image/webp|max:10240',
-                'keep_images' => 'nullable|string', // JSON array of image paths to keep
-                'video_url' => 'nullable|url|max:500',
-                'latitude' => 'nullable|string|max:50',
-                'longitude' => 'nullable|string|max:50',
-                'country' => 'nullable|string|max:100',
-                'state_province' => 'nullable|string|max:100',
-                'city' => 'nullable|string|max:100',
-                'street_address' => 'nullable|string',
-                'is_featured' => 'nullable|boolean',
-                'published_at' => 'nullable|date',
-            ]);
+            $validated = $request->validated();
 
             // Resolve listing_type for this update (use new value or existing)
             $updateListingType = $validated['listing_type'] ?? $property->listing_type ?? 'for_rent';
@@ -958,7 +901,7 @@ class PropertyController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Property updated successfully',
-                'data' => $property,
+                'data' => new PropertyResource($property),
             ], 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
@@ -1038,9 +981,7 @@ class PropertyController extends Controller
                 ], 403);
             }
 
-            $validated = $request->validate([
-                'status' => 'required|string|in:' . implode(',', \App\Models\Property::STATUSES),
-            ]);
+            $validated = $request->validated(); // Validation handled by UpdatePropertyStatusRequest
 
             $property->update(['status' => $validated['status']]);
 

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\Agent;
 
 use App\Http\Controllers\Controller;
-use App\Models\Message;
-use App\Models\User;
-use App\Models\PropertyView;
+use App\Domain\Messaging\Models\Message;
+use App\Domain\Users\Models\User;
+use App\Domain\Properties\Models\PropertyView;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;

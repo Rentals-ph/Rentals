@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Property;
-use App\Models\Conversation;
-use App\Services\GroqService;
-use App\Services\ConversationService;
+use App\Domain\Properties\Models\Property;
+use App\Domain\Messaging\Models\Conversation;
+use App\Domain\AI\Services\GroqService;
+use App\Domain\Messaging\Services\ConversationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;

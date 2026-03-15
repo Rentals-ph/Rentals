@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\Analytics;
 
 use App\Http\Controllers\Controller;
-use App\Models\News;
-use App\Models\NewsComment;
+use App\Domain\Content\Models\News;
+use App\Domain\Content\Models\NewsComment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
@@ -72,16 +72,12 @@ class NewsCommentController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function store(Request $request, int $news): JsonResponse
+    public function store(CreateNewsCommentRequest $request, int $news): JsonResponse
     {
         $article = News::findOrFail($news);
 
-        $validated = $request->validate([
-            'content'   => 'required|string|max:2000',
-            'parent_id' => 'nullable|integer|exists:news_comments,id',
-            'name'      => 'nullable|string|max:255',
-            'email'     => 'nullable|email|max:255',
-        ]);
+        // Validation handled by CreateNewsCommentRequest
+        $validated = $request->validated();
 
         $user         = $request->user();
         $guestSession = $request->attributes->get('guestSession');

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\Analytics;
 
 use App\Http\Controllers\Controller;
-use App\Models\ProfileView;
-use App\Models\User;
+use App\Domain\Users\Models\ProfileView;
+use App\Domain\Users\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;

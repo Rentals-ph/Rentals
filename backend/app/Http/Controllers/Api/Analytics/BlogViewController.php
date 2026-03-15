@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\Analytics;
 
 use App\Http\Controllers\Controller;
-use App\Models\Blog;
-use App\Models\BlogView;
+use App\Domain\Content\Models\Blog;
+use App\Domain\Content\Models\BlogView;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;

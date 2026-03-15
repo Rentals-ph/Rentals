@@ -3,7 +3,12 @@
 namespace App\Http\Controllers\Api\Shared;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Domain\Users\Models\User;
+use App\Http\Requests\Users\RegisterRequest;
+use App\Http\Requests\Users\LoginRequest;
+use App\Http\Requests\Users\SendVerificationEmailRequest;
+use App\Http\Requests\Users\VerifyEmailRequest;
+use App\Http\Requests\Users\CheckVerificationStatusRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
@@ -69,24 +74,10 @@ class AuthController extends Controller
             ),
         ]
     )]
-    public function register(Request $request): JsonResponse
+    public function register(RegisterRequest $request): JsonResponse
     {
         try {
-            // Validate the request data
-            $validator = Validator::make($request->all(), [
-                'email' => 'required|string|email|max:255|unique:users,email',
-                'password' => 'required|string|min:8',
-                'name' => 'nullable|string|max:255',
-                'role' => 'nullable|string|in:broker', // Agents are created by brokers; no self-registration
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors(),
-                ], 422);
-            }
+            // Validation handled by RegisterRequest
 
             // Normalize email for consistent verification check (define before using!)
             $emailForRegistration = strtolower(trim($request->email));
@@ -275,22 +266,10 @@ class AuthController extends Controller
             ),
         ]
     )]
-    public function login(Request $request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
         try {
-            // Validate the request data
-            $validator = Validator::make($request->all(), [
-                'email' => 'required|string|email',
-                'password' => 'required|string',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors(),
-                ], 422);
-            }
+            // Validation handled by LoginRequest
 
             // Find the user by email (can be agent or admin)
             $user = User::where('email', $request->email)->first();
@@ -405,7 +384,7 @@ class AuthController extends Controller
     /**
      * Send email verification
      */
-    public function sendVerificationEmail(Request $request): JsonResponse
+    public function sendVerificationEmail(SendVerificationEmailRequest $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -529,15 +508,11 @@ class AuthController extends Controller
     /**
      * Verify email with token
      */
-    public function verifyEmail(Request $request): JsonResponse
+    public function verifyEmail(VerifyEmailRequest $request): JsonResponse
     {
         try {
-            $validator = Validator::make($request->all(), [
-                'email' => 'required|string|email|max:255',
-                'token' => 'required|string',
-            ]);
-
-            if ($validator->fails()) {
+            // Validation handled by VerifyEmailRequest
+            if (false) { // Remove validation check
                 $errors = $validator->errors();
                 $errorMessages = $errors->all();
                 
@@ -547,13 +522,7 @@ class AuthController extends Controller
                     'errors' => $errorMessages,
                 ]);
                 
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed: ' . implode(', ', $errorMessages),
-                    'errors' => $errors,
-                ], 422);
-            }
-
+            // Validation handled by VerifyEmailRequest
             $email = trim($request->email);
             $token = trim($request->token);
 
@@ -664,7 +633,7 @@ class AuthController extends Controller
     /**
      * Check email verification status
      */
-    public function checkVerificationStatus(Request $request): JsonResponse
+    public function checkVerificationStatus(CheckVerificationStatusRequest $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [

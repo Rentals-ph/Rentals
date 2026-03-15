@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\GroqService;
+use App\Domain\AI\Services\GroqService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;

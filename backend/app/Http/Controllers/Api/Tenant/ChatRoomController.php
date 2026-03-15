@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api\Tenant;
 
 use App\Http\Controllers\Controller;
-use App\Models\ChatMessage;
-use App\Models\ChatRoom;
-use App\Models\GuestSession;
-use App\Models\Property;
-use App\Models\User;
-use App\Models\UserNotification;
+use App\Domain\Messaging\Models\ChatMessage;
+use App\Domain\Messaging\Models\ChatRoom;
+use App\Domain\Users\Models\GuestSession;
+use App\Domain\Properties\Models\Property;
+use App\Domain\Users\Models\User;
+use App\Domain\Messaging\Models\UserNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

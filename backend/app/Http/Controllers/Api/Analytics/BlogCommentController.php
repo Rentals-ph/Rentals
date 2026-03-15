@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\Analytics;
 
 use App\Http\Controllers\Controller;
-use App\Models\Blog;
-use App\Models\BlogComment;
+use App\Domain\Content\Models\Blog;
+use App\Domain\Content\Models\BlogComment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
@@ -89,16 +89,12 @@ class BlogCommentController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function store(Request $request, int $blog): JsonResponse
+    public function store(CreateBlogCommentRequest $request, int $blog): JsonResponse
     {
         $post = Blog::findOrFail($blog);
 
-        $validated = $request->validate([
-            'content'   => 'required|string|max:2000',
-            'parent_id' => 'nullable|integer|exists:blog_comments,id',
-            'name'      => 'nullable|string|max:255',
-            'email'     => 'nullable|email|max:255',
-        ]);
+        // Validation handled by CreateBlogCommentRequest
+        $validated = $request->validated();
 
         $user         = $request->user();
         $guestSession = $request->attributes->get('guestSession');

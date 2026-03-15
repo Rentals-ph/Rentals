@@ -2,7 +2,7 @@
 
 namespace App\Traits;
 
-use App\Models\Media;
+use App\Domain\Properties\Models\Media;
 
 trait HasMedia
 {

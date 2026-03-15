@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\Analytics;
 
 use App\Http\Controllers\Controller;
-use App\Models\BlogComment;
-use App\Models\BlogCommentLike;
+use App\Domain\Content\Models\BlogComment;
+use App\Domain\Content\Models\BlogCommentLike;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;

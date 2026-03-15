@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ListingAssistantConversation;
-use App\Models\Property;
-use App\Services\ListingAssistantService;
+use App\Domain\AI\Models\ListingAssistantConversation;
+use App\Domain\Properties\Models\Property;
+use App\Domain\AI\Services\ListingAssistantService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;

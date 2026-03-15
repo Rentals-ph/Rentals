@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Concerns;
 
-use App\Models\User;
+use App\Domain\Users\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 

@@ -1,15 +1,15 @@
 <?php
 
-use App\Http\Controllers\Api\Shared\PropertyController;
-use App\Http\Controllers\Api\Shared\TestimonialController;
-use App\Http\Controllers\Api\Shared\BlogController;
-use App\Http\Controllers\Api\Shared\NewsController;
+use App\Http\Controllers\Api\Public\PropertyController;
+use App\Http\Controllers\Api\Public\TestimonialController;
+use App\Http\Controllers\Api\Public\BlogController;
+use App\Http\Controllers\Api\Public\NewsController;
 use App\Http\Controllers\Api\Agent\AgentController;
 use App\Http\Controllers\Api\Admin\AdminController;
-use App\Http\Controllers\Api\Shared\AuthController;
+use App\Http\Controllers\Api\Public\AuthController;
 use App\Http\Controllers\Api\Broker\BrokerController;
-use App\Http\Controllers\Api\Shared\MessageController;
-use App\Http\Controllers\Api\Shared\ContactController;
+use App\Http\Controllers\Api\Public\MessageController;
+use App\Http\Controllers\Api\Public\ContactController;
 use App\Http\Controllers\PropertySearchController;
 use App\Http\Controllers\GroqChatController;
 use App\Http\Controllers\ListingAssistantController;
@@ -222,8 +222,8 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // Page Builder routes
-use App\Http\Controllers\Api\Shared\PageBuilderController;
-use App\Http\Controllers\Api\Shared\UploadController;
+use App\Http\Controllers\Api\Public\PageBuilderController;
+use App\Http\Controllers\Api\Public\UploadController;
 // Public route for viewing published pages by slug
 Route::get('/page/{slug}', [PageBuilderController::class, 'showBySlug']);
 // Public route for getting page builder by slug (for editing)
@@ -405,7 +405,7 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
 });
 
 // Downloadables routes
-use App\Http\Controllers\Api\Shared\DownloadableController;
+use App\Http\Controllers\Api\Public\DownloadableController;
 // Public route for agents/brokers to get active downloadables
 Route::get('/downloadables', [DownloadableController::class, 'index']);
 // Public route for downloading files

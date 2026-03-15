@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\Tenant;
 
 use App\Http\Controllers\Controller;
-use App\Models\GuestSession;
-use App\Models\TenantProfile;
-use App\Models\User;
+use App\Domain\Users\Models\GuestSession;
+use App\Domain\Users\Models\TenantProfile;
+use App\Domain\Users\Models\User;
 use App\Mail\EmailVerificationMail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

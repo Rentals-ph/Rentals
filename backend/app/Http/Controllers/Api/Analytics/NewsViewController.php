@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\Analytics;
 
 use App\Http\Controllers\Controller;
-use App\Models\News;
-use App\Models\NewsView;
+use App\Domain\Content\Models\News;
+use App\Domain\Content\Models\NewsView;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
