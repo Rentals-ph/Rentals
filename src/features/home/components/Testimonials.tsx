@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { TestimonialCard, TestimonialCardSkeleton } from "@/shared/components/cards"
 import { Pagination } from "@/shared/components/misc"
-import { testimonialsApi } from "@/api/endpoints/testimonials"
+import { testimonialsApi } from "@/shared/api"
 import type { Testimonial } from "@/shared/types"
 import { ASSETS } from "@/shared/utils/assets"
 import { FadeInOnView } from "@/shared/components/ui"

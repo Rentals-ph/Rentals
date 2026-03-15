@@ -1,5 +1,4 @@
-import apiClient from '../client'
-import api from '@/lib/api'
+import apiClient from '@/api/client'
 
 export interface Downloadable {
   id: number

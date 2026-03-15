@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { SimplePropertyCard } from '@/shared/components/cards'
 import { brokerApi } from '@/api'
-import type { Team, TeamMember } from '@/api/endpoints/broker'
+import type { Team, TeamMember } from '@/features/broker'
 import type { Property } from '@/shared/types'
 import { resolvePropertyImage } from '@/shared/utils/image'
 import {

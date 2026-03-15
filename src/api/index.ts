@@ -1,36 +1,38 @@
 /**
  * API Module Index
  * Central export point for all API endpoints
+ * 
+ * All endpoint functions now live in their respective feature modules.
+ * This file only exports the API client and types for backward compatibility.
  */
 
 export { default as apiClient } from './client'
 export * from './types'
 
-// Export all API endpoints
-// Shared APIs (moved to shared/api)
-export { propertiesApi, authApi, messagesApi } from '../shared/api'
-// Feature-specific APIs
-export { blogsApi } from './endpoints/blogs'
-export { newsApi } from './endpoints/news'
-export { testimonialsApi } from './endpoints/testimonials'
-export { agentsApi } from './endpoints/agents'
-export { pageBuilderApi } from './endpoints/pageBuilder'
-export { listingAssistantApi } from './endpoints/listingAssistant'
-export { brokerApi } from './endpoints/broker'
-export type { TeamProductivityRow } from './endpoints/broker'
-export { downloadablesApi } from './endpoints/downloadables'
-export type { Downloadable } from './endpoints/downloadables'
-export { adminApi } from './endpoints/admin'
-export type { AdminAgent, AdminProperty, CreateAgentData, UpdateAgentData, CreatePropertyData, UpdatePropertyData } from './endpoints/admin'
-export { contactApi } from './endpoints/contact'
-export type { ContactInquiry, SubmitContactData, GetContactInquiriesParams } from './endpoints/contact'
+// Re-export all APIs from their feature locations for backward compatibility
+// Shared APIs
+export { propertiesApi, authApi, messagesApi, contactApi, downloadablesApi, testimonialsApi } from '../shared/api'
+export type { GetPropertiesParams, Message, SendMessageData, GetMessagesParams, LoginCredentials, LoginResponse, ContactInquiry, SubmitContactData, GetContactInquiriesParams, Downloadable } from '../shared/api'
 
-// Export types from endpoints
-// Shared API types (moved to shared/api)
-export type { GetPropertiesParams, Message, SendMessageData, GetMessagesParams, LoginCredentials, LoginResponse } from '../shared/api'
-// Feature-specific API types
-export type { GetBlogsParams, CreateBlogData, UpdateBlogData } from './endpoints/blogs'
-export type { GetNewsParams, News } from './endpoints/news'
-export type { Agent, AgentRegistrationData, AgentRegistrationResponse } from './endpoints/agents'
-export type { PageBuilderData, PageBuilderResponse } from './endpoints/pageBuilder'
+// Feature-specific APIs
+export { blogsApi } from '../features/blog'
+export type { GetBlogsParams, CreateBlogData, UpdateBlogData } from '../features/blog/api'
+
+export { newsApi } from '../features/blog'
+export type { GetNewsParams, News } from '../features/blog/newsApi'
+
+export { agentsApi } from '../features/agents'
+export type { Agent, AgentRegistrationResponse } from '../features/agents'
+export type { AgentRegistrationData } from '../features/agents/api'
+
+export { pageBuilderApi } from '../features/page-builder'
+export type { PageBuilderData, PageBuilderResponse } from '../features/page-builder/api'
+
+export { listingAssistantApi } from '../features/listing-assistant'
+
+export { brokerApi } from '../features/broker'
+export type { TeamProductivityRow, Broker, Company, Team, TeamMember, CustomStat, Award, BrokerDashboard } from '../features/broker'
+
+export { adminApi } from '../features/admin'
+export type { AdminAgent, AdminProperty, CreateAgentData, UpdateAgentData, CreatePropertyData, UpdatePropertyData } from '../features/admin'
 

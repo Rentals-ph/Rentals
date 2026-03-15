@@ -1,5 +1,5 @@
-import apiClient from '../client'
-import type { Property } from '../../shared/types'
+import apiClient from '@/api/client'
+import type { Property } from '@/shared/types'
 import type {
   CustomStat,
   Award,
@@ -9,8 +9,8 @@ import type {
   BrokerDashboard,
   Broker,
   TeamProductivityRow,
-} from '../types/broker'
-import type { PaginatedResponse } from '../types/shared'
+} from '@/api/types/broker'
+import type { PaginatedResponse } from '@/api/types'
 
 /**
  * Broker API endpoints
@@ -26,10 +26,10 @@ export type {
   BrokerDashboard,
   Broker,
   TeamProductivityRow,
-} from '../types/broker'
+} from '@/api/types/broker'
 
 // Re-export PaginatedResponse from shared
-export type { PaginatedResponse } from '../types/shared'
+export type { PaginatedResponse } from '@/api/types'
 
 
 export const brokerApi = {

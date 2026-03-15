@@ -7,7 +7,7 @@ import AccountSettings, {
   PasswordFormData 
 } from '@/shared/components/dashboard/AccountSettings'
 import { brokerApi } from '@/api'
-import type { Broker } from '@/api/endpoints/broker'
+import type { Broker } from '@/features/broker'
 import { ASSETS } from '@/shared/utils/assets'
 import { resolveAgentAvatar } from '@/shared/utils/image'
 import { toast, ToastContainer } from '@/shared/utils/toast'

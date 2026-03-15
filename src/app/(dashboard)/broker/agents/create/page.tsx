@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { brokerApi } from '@/api'
-import type { Company } from '@/api/endpoints/broker'
+import type { Company } from '@/features/broker'
 import { FiUser, FiMail, FiPhone, FiLock, FiBriefcase } from 'react-icons/fi'
 
 export default function CreateAgentPage() {

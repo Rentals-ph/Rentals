@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { brokerApi, propertiesApi } from '@/api'
-import type { Company, CustomStat, Award } from '@/api/endpoints/broker'
+import type { Company, CustomStat, Award } from '@/features/broker'
 import type { Property } from '@/shared/types'
 import {
   FiMail,

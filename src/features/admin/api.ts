@@ -1,4 +1,4 @@
-import apiClient from '../client'
+import apiClient from '@/api/client'
 import type {
   AdminAgent,
   AdminProperty,
@@ -6,7 +6,7 @@ import type {
   UpdateAgentData,
   CreatePropertyData,
   UpdatePropertyData,
-} from '../types/admin'
+} from '@/api/types/admin'
 
 /**
  * Admin API endpoints
@@ -20,7 +20,7 @@ export type {
   UpdateAgentData,
   CreatePropertyData,
   UpdatePropertyData,
-} from '../types/admin'
+} from '@/api/types/admin'
 
 export const adminApi = {
   /**
