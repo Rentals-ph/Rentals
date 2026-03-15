@@ -6,11 +6,11 @@ import Link from 'next/link'
 import Footer from '@/components/layout/Footer'
 import { EmptyState, EmptyStateAction } from '@/shared/components/misc'
 import { blogsApi } from '@/api'
-import type { Blog } from '@/types'
+import type { Blog } from '@/shared/types'
 import type { BlogComment } from '@/features/blog'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 import { FiHeart, FiMessageCircle, FiShare2, FiThumbsUp, FiCornerUpRight } from 'react-icons/fi'
-import { toast, ToastContainer } from '@/utils/toast'
+import { toast, ToastContainer } from '@/shared/utils/toast'
 
 export default function BlogDetailsPage() {
   const params = useParams()

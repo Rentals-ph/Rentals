@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { downloadablesApi } from '@/api'
 import type { Downloadable } from '@/api'
 import { FiDownload, FiFileText, FiLoader } from 'react-icons/fi'
-import { toast, ToastContainer } from '@/utils/toast'
+import { toast, ToastContainer } from '@/shared/utils/toast'
 
 export default function DownloadablesPage() {
   const [downloadables, setDownloadables] = useState<Downloadable[]>([])

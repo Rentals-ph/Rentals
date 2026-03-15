@@ -6,7 +6,7 @@ import Footer from '@/components/layout/Footer'
 import { EmptyState, EmptyStateAction } from '@/shared/components/misc'
 import { pageBuilderApi } from '@/api'
 import type { PageBuilderData } from '@/api'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 import {
   FiMail, FiPhone, FiMessageCircle, FiGlobe, FiStar, FiHeart,
 } from 'react-icons/fi'

@@ -7,6 +7,7 @@ use App\Domain\Content\Models\News;
 use App\Domain\Properties\Services\ImageService;
 use App\Http\Requests\Content\CreateNewsRequest;
 use App\Http\Requests\Content\UpdateNewsRequest;
+use App\Http\Resources\NewsResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use OpenApi\Attributes as OA;
@@ -39,17 +40,13 @@ class NewsController extends Controller
                 $perPage = $request->get('per_page', 10);
                 $news = $query->paginate($perPage);
                 
-                // Image URL is automatically included via model accessor (getImageUrlAttribute)
-                
-                return response()->json($news);
+                return NewsResource::collection($news)->response();
             }
             
             // Return all news if no pagination requested
             $news = $query->get();
             
-            // Image URL is automatically included via model accessor (getImageUrlAttribute)
-            
-            return response()->json($news);
+            return NewsResource::collection($news);
         } catch (\Exception $e) {
             \Log::error('Error fetching news: ' . $e->getMessage());
             return response()->json([
@@ -96,7 +93,7 @@ class NewsController extends Controller
             ? News::findOrFail($identifier)
             : News::where('slug', $identifier)->firstOrFail();
 
-        return response()->json($news);
+        return new NewsResource($news);
     }
 
     #[OA\Post(
@@ -161,7 +158,7 @@ class NewsController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'News article created successfully',
-            'data' => $news,
+            'data' => new NewsResource($news),
         ], 201);
     }
 
@@ -241,7 +238,7 @@ class NewsController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'News article updated successfully',
-            'data' => $news->fresh(),
+            'data' => new NewsResource($news->fresh()),
         ], 200);
     }
 

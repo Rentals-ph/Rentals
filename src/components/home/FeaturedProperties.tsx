@@ -6,9 +6,9 @@ import { VerticalPropertyCard, VerticalPropertyCardSkeleton } from '@/shared/com
 import { Pagination } from '@/shared/components/misc'
 import { FadeInOnView } from '@/shared/components/ui'
 import { propertiesApi } from '../../api'
-import type { Property } from '../../types'
+import type { Property } from '../../shared/types'
 import type { PaginatedResponse } from '../../api/types'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 import { resolveAgentAvatar } from '@/shared/utils/image'
 
 const FeaturedProperties = () => {

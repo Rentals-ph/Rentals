@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Public;
 
 use App\Http\Controllers\Controller;
 use App\Domain\Content\Models\Testimonial;
+use App\Http\Resources\TestimonialResource;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
@@ -27,7 +28,7 @@ class TestimonialController extends Controller
     public function index()
     {
         $testimonials = Testimonial::latest()->get();
-        return response()->json($testimonials);
+        return TestimonialResource::collection($testimonials);
     }
 }
 

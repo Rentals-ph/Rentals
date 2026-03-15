@@ -5,8 +5,8 @@ import Footer from '@/components/layout/Footer'
 import { VerticalPropertyCard, VerticalPropertyCardSkeleton, HorizontalPropertyCard, HorizontalPropertyCardSkeleton } from '@/shared/components/cards'
 import { EmptyState, EmptyStateAction } from '@/shared/components/misc'
 import { useSavedProperties } from '@/shared/hooks'
-import type { Property } from '@/types'
-import { ASSETS } from '@/utils/assets'
+import type { Property } from '@/shared/types'
+import { ASSETS } from '@/shared/utils/assets'
 import { resolveAgentAvatar } from '@/shared/utils/image'
 
 export default function SavedListingsPage() {

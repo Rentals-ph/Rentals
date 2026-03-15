@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import LocationMap from '../agent/LocationMap'
-import { useCreateListing } from '../../contexts/CreateListingContext'
+import { useCreateListing } from '../../features/listings/CreateListingContext'
 import { FiChevronDown, FiArrowRight } from 'react-icons/fi'
 import { api } from '../../lib/api'
 import { getFallbackDescription } from '@/shared/utils/format'

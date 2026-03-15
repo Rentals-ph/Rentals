@@ -4,8 +4,8 @@
  */
 
 import React from 'react'
-import { getAsset } from '@/utils/assets'
-import type { ListingAssistantMessage } from '../../types/listingAssistant'
+import { getAsset } from '@/shared/utils/assets'
+import type { ListingAssistantMessage } from '../../features/listing-assistant/types'
 
 interface MessageButton {
   label: string

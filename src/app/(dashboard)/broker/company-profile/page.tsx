@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { brokerApi, propertiesApi } from '@/api'
 import type { Company, CustomStat, Award } from '@/api/endpoints/broker'
-import type { Property } from '@/types'
+import type { Property } from '@/shared/types'
 import {
   FiMail,
   FiPhone,
@@ -20,7 +20,7 @@ import {
 } from 'react-icons/fi'
 import { FaWhatsapp } from 'react-icons/fa'
 import { resolvePropertyImage } from '@/shared/utils/image'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 
 export default function CompanyProfilePage() {
   const [company, setCompany] = useState<Company | null>(null)

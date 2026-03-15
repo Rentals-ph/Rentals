@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import { agentsApi, propertiesApi } from '@/api'
 import type { Agent } from '@/features/agents'
-import type { Property } from '@/types'
-import { ASSETS } from '@/utils/assets'
+import type { Property } from '@/shared/types'
+import { ASSETS } from '@/shared/utils/assets'
 import { resolveAgentAvatar, resolvePropertyImage } from '@/shared/utils/image'
 import {
   FiMail,

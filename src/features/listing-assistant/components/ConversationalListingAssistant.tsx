@@ -5,7 +5,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, Fragment } from 'react'
 import 'leaflet/dist/leaflet.css'
-import { getAsset } from '@/utils/assets'
+import { getAsset } from '@/shared/utils/assets'
 import { MessageBubble, TypingIndicator } from './MessageBubble'
 import { LocationPicker } from './LocationPicker'
 import { InlineLocationMap } from './InlineLocationMap'

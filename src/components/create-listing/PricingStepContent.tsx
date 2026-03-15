@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useCreateListing } from '../../contexts/CreateListingContext'
+import { useCreateListing } from '../../features/listings/CreateListingContext'
 import { FiArrowLeft, FiArrowRight, FiDollarSign } from 'react-icons/fi'
 
 export interface PricingStepContentProps {

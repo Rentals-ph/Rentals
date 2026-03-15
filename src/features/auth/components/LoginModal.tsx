@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { authApi } from '@/api'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 
 interface LoginModalProps {
   isOpen: boolean

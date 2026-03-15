@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import type { FieldStatus } from '../../types/listingAssistant'
+import type { FieldStatus } from '../../features/listing-assistant/types'
 
 interface FieldStatusBadgeProps {
   status: FieldStatus

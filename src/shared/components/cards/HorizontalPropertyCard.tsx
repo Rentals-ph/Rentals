@@ -2,11 +2,11 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 import { FiChevronLeft, FiChevronRight, FiMail, FiMapPin } from 'react-icons/fi'
 import SharePopup, { type SharePlatform } from '../misc/SharePopup'
 import { useSavedProperties } from '@/shared/hooks'
-import type { Property } from '@/types'
+import type { Property } from '@/shared/types'
 
 interface HorizontalPropertyCardProps {
   id?: number | string

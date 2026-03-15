@@ -16,7 +16,7 @@ import type {
   ProcessMessageResponse,
   UploadedImage,
   DescriptionTemplate,
-} from '../../types/listingAssistant'
+} from '../../features/listing-assistant/types'
 
 interface ListingAssistantChatProps {
   onListingSubmitted?: (propertyId: number) => void

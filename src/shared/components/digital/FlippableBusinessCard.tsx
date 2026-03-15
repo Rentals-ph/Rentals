@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 import { FiMapPin, FiPhone, FiMail } from 'react-icons/fi'
 import { HiOutlineOfficeBuilding } from 'react-icons/hi'
 import DigitalBusinessCard from './DigitalBusinessCard'

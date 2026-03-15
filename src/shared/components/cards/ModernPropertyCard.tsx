@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { FiMapPin } from 'react-icons/fi'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 import { resolvePropertyImage } from '@/shared/utils/image'
 
 interface ModernPropertyCardProps {

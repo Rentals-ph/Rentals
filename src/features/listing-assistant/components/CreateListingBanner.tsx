@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import Link from 'next/link'
 import { FiPlus, FiArrowRight } from 'react-icons/fi'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 
 const BANNER_BACKGROUNDS: string[] = [
   ASSETS.BG_HERO_LANDING,

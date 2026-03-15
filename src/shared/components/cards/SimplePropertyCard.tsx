@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { FiMapPin } from 'react-icons/fi'
 import { FiHeart } from 'react-icons/fi'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 
 interface SimplePropertyCardProps {
   id?: number | string

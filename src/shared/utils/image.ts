@@ -10,7 +10,7 @@
  * This file consolidates all image-related utilities for better organization.
  */
 
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 import { getApiBaseUrl } from '../config/api'
 
 // ============================================================================

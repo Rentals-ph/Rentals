@@ -5,8 +5,8 @@ import { use } from 'react'
 import { useRouter } from 'next/navigation'
 import { DashboardHeader } from '@/features/dashboard'
 import { blogsApi } from '@/api'
-import type { Blog } from '@/types'
-import { toast, ToastContainer } from '@/utils/toast'
+import type { Blog } from '@/shared/types'
+import { toast, ToastContainer } from '@/shared/utils/toast'
 import { FiArrowLeft, FiImage, FiSave } from 'react-icons/fi'
 
 export default function EditBlogPage({ params }: { params: Promise<{ id: string }> }) {

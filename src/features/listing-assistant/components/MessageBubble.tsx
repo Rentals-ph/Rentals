@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import { getAsset } from '@/utils/assets'
+import { getAsset } from '@/shared/utils/assets'
 import type { ListingAssistantMessage } from '../types'
 
 interface MessageButton {

@@ -1,5 +1,5 @@
 import apiClient from '../client'
-import type { Property } from '../../types'
+import type { Property } from '../../shared/types'
 import type {
   CustomStat,
   Award,

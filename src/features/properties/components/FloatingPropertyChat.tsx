@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { getAsset } from '@/utils/assets'
+import { getAsset } from '@/shared/utils/assets'
 import { api, type PropertySearchResponse, type ConversationMessage } from '@/lib/api'
 import type { Property } from '../types'
 import { formatAIMessage } from '@/shared/utils/format'

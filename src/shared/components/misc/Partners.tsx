@@ -1,4 +1,4 @@
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 
 const Partners = () => {
   return (

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { agentsApi, propertiesApi, messagesApi } from '@/api'
 import { brokerApi } from '@/api'
 import type { Agent } from '@/features/agents'
-import type { Property } from '@/types'
+import type { Property } from '@/shared/types'
 import {
   FiUsers,
   FiHome,

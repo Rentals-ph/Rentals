@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { blogsApi } from '@/api'
 import type { CreateBlogData } from '@/api'
-import { toast, ToastContainer } from '@/utils/toast'
+import { toast, ToastContainer } from '@/shared/utils/toast'
 
 const TARGET_PLATFORMS = [
   'Apply Na',

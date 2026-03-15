@@ -8,9 +8,9 @@ import AccountSettings, {
 } from '@/shared/components/dashboard/AccountSettings'
 import { brokerApi } from '@/api'
 import type { Broker } from '@/api/endpoints/broker'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 import { resolveAgentAvatar } from '@/shared/utils/image'
-import { toast, ToastContainer } from '@/utils/toast'
+import { toast, ToastContainer } from '@/shared/utils/toast'
 
 export default function BrokerAccount() {
   const [loading, setLoading] = useState(true)

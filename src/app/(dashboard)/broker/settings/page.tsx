@@ -6,7 +6,7 @@ import AccountSettings, {
   EditFormData, 
   PasswordFormData 
 } from '@/shared/components/dashboard/AccountSettings'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 import { 
   FiBell,
   FiPlus

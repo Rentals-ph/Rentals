@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useMemo, useRef, Suspense, lazy } from "react"
 import { useRouter } from 'next/navigation'
-import { ASSETS, getAsset } from "@/utils/assets"
+import { ASSETS, getAsset } from "@/shared/utils/assets"
 import { api, type PropertySearchResponse, type ConversationMessage } from "@/lib/api"
-import { Property } from "@/types"
+import { Property } from "@/shared/types"
 import { getImageUrl } from "@/shared/utils/image"
 import { formatAIMessage } from "@/shared/utils/format"
 import { SimplePropertyCardSkeleton } from "@/shared/components/cards"

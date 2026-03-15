@@ -14,16 +14,8 @@ export {
   Partners,
 } from './home'
 
-// Common (see common/ subfolders: cards, dashboard, modals, maps, digital, misc)
-export {
-  VerticalPropertyCard,
-  HorizontalPropertyCard,
-  Pagination,
-  TestimonialCard,
-  BlogCard,
-  LoginModal,
-  RegisterModal,
-} from './common'
+// Common components moved to @/shared/components
+// Use @/shared/components instead
 
 // Agent
 export {

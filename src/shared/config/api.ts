@@ -50,18 +50,18 @@ export const getApiBaseUrl = (): string => {
   // Use Railway only when we're in the browser on a production host (e.g. rentals.ph or Vercel)
   // On the server (SSR) we never use Railway by hostname — so 192.168.1.48:3000 SSR uses local backend
   if (isProductionHost && (isProduction || process.env.VERCEL)) {
-    return `${RAILWAY_API_URL}/api`
+    return `${RAILWAY_API_URL}/api/v1`
   }
   
   // Use Railway if explicitly set via env
   if (useRemoteApi) {
-    return `${RAILWAY_API_URL}/api`
+    return `${RAILWAY_API_URL}/api/v1`
   }
   
   // Local development (localhost or LAN IP like 192.168.1.48:3000): use localhost:8000 so the
   // backend only needs to listen on 127.0.0.1. For other-device testing, set
-  // NEXT_PUBLIC_API_BASE_URL=http://YOUR_IP:8000/api and run backend on 0.0.0.0:8000.
-  return `${LOCAL_API_URL}/api`
+  // NEXT_PUBLIC_API_BASE_URL=http://YOUR_IP:8000/api/v1 and run backend on 0.0.0.0:8000.
+  return `${LOCAL_API_URL}/api/v1`
 }
 
 // For Vite proxy configuration
@@ -79,7 +79,7 @@ export const getProxyTarget = (): string => {
 
 // Export constants for reference
 export const API_URLS = {
-  LOCAL: `${LOCAL_API_URL}/api`,
-  RAILWAY: `${RAILWAY_API_URL}/api`,
+  LOCAL: `${LOCAL_API_URL}/api/v1`,
+  RAILWAY: `${RAILWAY_API_URL}/api/v1`,
 } as const
 

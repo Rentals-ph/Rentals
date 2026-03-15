@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { authApi } from '@/api'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 
 interface RegisterModalProps {
   isOpen: boolean

@@ -17,7 +17,7 @@ import type {
   UploadImagesResponse,
   DeleteImageResponse,
   DescriptionTemplate,
-} from '../../types/listingAssistant'
+} from '../../features/listing-assistant/types'
 
 const BASE_PATH = '/listing/assistant'
 

@@ -1,7 +1,7 @@
 'use client'
 
 import Footer from '@/components/layout/Footer'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 
 export default function AboutPage() {
   return (

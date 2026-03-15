@@ -8,7 +8,7 @@ import { FadeInOnView } from '@/shared/components/ui'
 import { propertiesApi } from '@/features/properties'
 import type { Property } from '@/features/properties'
 import type { PaginatedResponse } from '@/api/types'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 import { resolveAgentAvatar } from '@/shared/utils/image'
 
 const FeaturedProperties = () => {

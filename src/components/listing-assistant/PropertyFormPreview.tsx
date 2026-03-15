@@ -12,7 +12,7 @@ import type {
   FieldStatus,
   PropertyType,
   DescriptionTemplate,
-} from '../../types/listingAssistant'
+} from '../../features/listing-assistant/types'
 import {
   FIELD_LABELS,
   PROPERTY_TYPE_LABELS,
@@ -23,7 +23,7 @@ import {
   DESCRIPTION_TEMPLATES,
   formatPrice,
   getFieldStatus,
-} from '../../types/listingAssistant'
+} from '../../features/listing-assistant/types'
 
 interface PropertyFormPreviewProps {
   data: ExtractedPropertyData

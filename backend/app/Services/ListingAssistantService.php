@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\ListingAssistantConversation;
+use App\Domain\AI\Models\ListingAssistantConversation;
 use OpenAI;
 use Exception;
 use Illuminate\Support\Facades\Log;

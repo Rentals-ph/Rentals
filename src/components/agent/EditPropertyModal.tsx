@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { propertiesApi } from '../../api'
-import type { Property } from '../../types'
+import type { Property } from '../../shared/types'
 import { FiX, FiTrash2, FiSave, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import LocationMap from './LocationMap'
 import './EditPropertyModal.css'

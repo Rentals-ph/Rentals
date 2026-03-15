@@ -8,8 +8,8 @@ import PopularRentManagers from '@/components/rent-managers/PopularRentManagers'
 import { RentManagerCardSkeleton, AgentCard } from '@/shared/components/cards'
 import { EmptyState, EmptyStateAction } from '@/shared/components/misc'
 import { agentsApi, propertiesApi } from '@/api'
-import { ASSETS } from '@/utils/assets'
-import type { Property } from '@/types'
+import { ASSETS } from '@/shared/utils/assets'
+import type { Property } from '@/shared/types'
 
 interface AgentInfo {
   id: number

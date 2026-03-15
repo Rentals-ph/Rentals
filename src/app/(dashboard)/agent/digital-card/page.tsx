@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import FlippableBusinessCard from '@/shared/components/digital/FlippableBusinessCard'
 import { agentsApi } from '@/api'
 import type { Agent } from '@/features/agents'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 
 // import './page.css' // Removed - converted to Tailwind
 

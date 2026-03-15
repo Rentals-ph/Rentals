@@ -13,8 +13,26 @@ use App\Http\Controllers\Api\Public\ContactController;
 use App\Http\Controllers\PropertySearchController;
 use App\Http\Controllers\GroqChatController;
 use App\Http\Controllers\ListingAssistantController;
+use App\Http\Controllers\Api\Public\PageBuilderController;
+use App\Http\Controllers\Api\Public\UploadController;
+use App\Http\Controllers\Api\Tenant\TenantAuthController;
+use App\Http\Controllers\Api\Tenant\ChatRoomController;
+use App\Http\Controllers\Api\Tenant\ReviewController;
+use App\Http\Controllers\Api\Tenant\SavedPropertyController;
+use App\Http\Controllers\Api\Tenant\NotificationController;
+use App\Http\Controllers\Api\Analytics\PropertyViewController;
+use App\Http\Controllers\Api\Analytics\ProfileViewController;
+use App\Http\Controllers\Api\Analytics\BlogViewController;
+use App\Http\Controllers\Api\Analytics\BlogLikeController;
+use App\Http\Controllers\Api\Analytics\BlogCommentController;
+use App\Http\Controllers\Api\Analytics\BlogCommentLikeController;
+use App\Http\Controllers\Api\Analytics\NewsViewController;
+use App\Http\Controllers\Api\Analytics\NewsLikeController;
+use App\Http\Controllers\Api\Analytics\NewsCommentController;
+use App\Http\Controllers\Api\Public\DownloadableController;
 use Illuminate\Support\Facades\Route;
 
+Route::prefix('v1')->group(function () {
 Route::get('/properties/featured', [PropertyController::class, 'featured']);
 Route::get('/properties', [PropertyController::class, 'index']);
 // Primary: /properties/{slug}  — also accepts numeric IDs for backward compat
@@ -222,8 +240,6 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // Page Builder routes
-use App\Http\Controllers\Api\Public\PageBuilderController;
-use App\Http\Controllers\Api\Public\UploadController;
 // Public route for viewing published pages by slug
 Route::get('/page/{slug}', [PageBuilderController::class, 'showBySlug']);
 // Public route for getting page builder by slug (for editing)
@@ -244,11 +260,6 @@ Route::middleware('auth:sanctum')->group(function () {
 // =============================================================================
 // TWO-TIER TENANT SYSTEM
 // =============================================================================
-use App\Http\Controllers\Api\Tenant\TenantAuthController;
-use App\Http\Controllers\Api\Tenant\ChatRoomController;
-use App\Http\Controllers\Api\Tenant\ReviewController;
-use App\Http\Controllers\Api\Tenant\SavedPropertyController;
-use App\Http\Controllers\Api\Tenant\NotificationController;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Guest sessions (Tier 1)
@@ -335,15 +346,6 @@ Route::middleware('auth:sanctum')->prefix('notifications')->group(function () {
 // =============================================================================
 // ANALYTICS & ENGAGEMENT
 // =============================================================================
-use App\Http\Controllers\Api\Analytics\PropertyViewController;
-use App\Http\Controllers\Api\Analytics\ProfileViewController;
-use App\Http\Controllers\Api\Analytics\BlogViewController;
-use App\Http\Controllers\Api\Analytics\BlogLikeController;
-use App\Http\Controllers\Api\Analytics\BlogCommentController;
-use App\Http\Controllers\Api\Analytics\BlogCommentLikeController;
-use App\Http\Controllers\Api\Analytics\NewsViewController;
-use App\Http\Controllers\Api\Analytics\NewsLikeController;
-use App\Http\Controllers\Api\Analytics\NewsCommentController;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Property views
@@ -405,7 +407,6 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
 });
 
 // Downloadables routes
-use App\Http\Controllers\Api\Public\DownloadableController;
 // Public route for agents/brokers to get active downloadables
 Route::get('/downloadables', [DownloadableController::class, 'index']);
 // Public route for downloading files
@@ -419,4 +420,4 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::put('/downloadables/{id}', [DownloadableController::class, 'update']);
     Route::delete('/downloadables/{id}', [DownloadableController::class, 'destroy']);
 });
-
+});

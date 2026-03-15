@@ -5,9 +5,9 @@ import Link from 'next/link'
 import { EditPropertyModal } from '@/features/agents'
 import { PropertyMapPopupCard } from '@/shared/components/maps'
 import { propertiesApi, agentsApi, messagesApi } from '@/api'
-import type { Property } from '@/types'
+import type { Property } from '@/shared/types'
 import type { Message } from '@/shared/api'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 
 import { 
   FiHome, 

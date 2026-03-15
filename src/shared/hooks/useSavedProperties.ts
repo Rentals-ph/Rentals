@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import type { Property } from '@/types'
+import type { Property } from '@/shared/types'
 
 const STORAGE_KEY = 'rental_ph_saved_properties'
 

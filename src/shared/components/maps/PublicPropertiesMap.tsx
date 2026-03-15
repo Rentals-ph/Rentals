@@ -4,8 +4,8 @@ import { useEffect, useRef, useState, useMemo, forwardRef, useImperativeHandle }
 import { createPortal } from 'react-dom'
 import 'leaflet/dist/leaflet.css'
 import type { Map as LeafletMap, Marker, TileLayer } from 'leaflet'
-import type { Property } from '@/types'
-import { ASSETS } from '@/utils/assets'
+import type { Property } from '@/shared/types'
+import { ASSETS } from '@/shared/utils/assets'
 import { resolvePropertyImage } from '@/shared/utils/image'
 
 function formatPrice(price: number): string {

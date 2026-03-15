@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 import { FiMail, FiPhone } from 'react-icons/fi'
 import { FaWhatsapp } from 'react-icons/fa'
 

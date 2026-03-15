@@ -6,7 +6,7 @@ import { resolveAgentAvatar } from "@/shared/utils/image"
 import { FadeInOnView } from "@/shared/components/ui"
 import { AgentCard } from "@/shared/components/cards"
 import { Pagination } from "@/shared/components/misc"
-import type { Property } from "@/types"
+import type { Property } from "@/shared/types"
 import type { PaginatedResponse } from "@/api/types"
 
 interface AgentSummary {

@@ -1,5 +1,5 @@
 import apiClient from '../client'
-import type { Testimonial } from '../../types'
+import type { Testimonial } from '../../shared/types'
 
 /**
  * Testimonials API endpoints

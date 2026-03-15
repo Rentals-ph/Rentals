@@ -26,7 +26,7 @@ import type { ListingFormData } from '@/shared/hooks'
 import { LISTING_ROLE_CONFIG } from '@/shared/config/listing'
 import { philippinesProvinces, getCitiesByProvince } from '@/shared/data/locations'
 import { listingAssistantApi } from '@/features/listing-assistant'
-import { getAsset } from '@/utils/assets'
+import { getAsset } from '@/shared/utils/assets'
 import type { ListingAssistantMessage, DescriptionTemplate } from '@/features/listing-assistant'
 import { DESCRIPTION_TEMPLATES } from '@/features/listing-assistant'
 import {

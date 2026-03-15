@@ -1,5 +1,5 @@
 import apiClient from '../client'
-import type { Blog } from '../../types'
+import type { Blog } from '../../shared/types'
 import type { PaginatedResponse } from '../types'
 
 /**

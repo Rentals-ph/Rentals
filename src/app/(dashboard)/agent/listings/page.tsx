@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { EditPropertyModal } from '@/features/agents'
 import { propertiesApi, agentsApi } from '@/api'
-import type { Property } from '@/types'
+import type { Property } from '@/shared/types'
 import {
   FiCheckCircle,
   FiEye,
@@ -13,7 +13,7 @@ import {
   FiSlash,
   FiCamera
 } from 'react-icons/fi'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 import { resolvePropertyImage, resolveAgentAvatar } from '@/shared/utils/image'
 import { PropertiesMap } from '@/features/agents'
 import { VerticalPropertyCard } from '@/shared/components/cards'

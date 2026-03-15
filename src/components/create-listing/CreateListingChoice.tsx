@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getAsset } from '../../utils/assets'
+import { getAsset } from '../../shared/utils/assets'
 import type { ReactNode } from 'react'
 
 export interface CreateListingChoiceProps {

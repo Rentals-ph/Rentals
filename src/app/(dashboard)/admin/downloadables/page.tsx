@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { DashboardHeader } from '@/features/dashboard'
 import { downloadablesApi } from '@/api'
 import type { Downloadable } from '@/api'
-import { toast, ToastContainer } from '@/utils/toast'
+import { toast, ToastContainer } from '@/shared/utils/toast'
 import { FiPlus, FiEdit3, FiTrash2, FiDownload, FiX, FiFileText, FiUpload } from 'react-icons/fi'
 
 export default function AdminDownloadablesPage() {

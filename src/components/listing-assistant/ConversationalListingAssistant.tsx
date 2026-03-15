@@ -5,7 +5,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, Fragment } from 'react'
 import 'leaflet/dist/leaflet.css'
-import { getAsset } from '@/utils/assets'
+import { getAsset } from '@/shared/utils/assets'
 import { MessageBubble, TypingIndicator } from './MessageBubble'
 import { LocationPicker } from './LocationPicker'
 import { InlineLocationMap } from './InlineLocationMap'
@@ -15,7 +15,7 @@ import type {
   ListingAssistantMessage,
   DataWarning,
   UploadedImage,
-} from '../../types/listingAssistant'
+} from '../../features/listing-assistant/types'
 import {
   PROPERTY_TYPE_LABELS,
   FURNISHING_LABELS,
@@ -28,7 +28,7 @@ import {
   FurnishingStatus,
   ListingStatus,
   DescriptionTemplate,
-} from '../../types/listingAssistant'
+} from '../../features/listing-assistant/types'
 
 interface ConversationalListingAssistantProps {
   onListingSubmitted?: (propertyId: number) => void

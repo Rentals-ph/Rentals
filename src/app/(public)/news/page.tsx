@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Footer from '@/components/layout/Footer'
 import { newsApi } from '@/api'
 import type { News } from '@/features/blog'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 import { FiSearch, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 
 export default function NewsPage() {

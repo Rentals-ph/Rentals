@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { DashboardHeader } from '@/features/dashboard'
 import { contactApi } from '@/api'
 import type { ContactInquiry } from '@/api/endpoints/contact'
-import { toast, ToastContainer } from '@/utils/toast'
+import { toast, ToastContainer } from '@/shared/utils/toast'
 import { FiMail, FiPhone, FiMessageSquare, FiCheck, FiTrash2, FiEye, FiEyeOff, FiCalendar } from 'react-icons/fi'
 
 export default function AdminContactInquiriesPage() {

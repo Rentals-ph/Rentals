@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\Conversation;
-use App\Models\ConversationContext;
-use App\Models\ConversationMessage;
-use App\Models\Property;
+use App\Domain\Messaging\Models\Conversation;
+use App\Domain\Messaging\Models\ConversationContext;
+use App\Domain\Messaging\Models\ConversationMessage;
+use App\Domain\Properties\Models\Property;
+use App\Domain\AI\Services\GroqService;
 use Illuminate\Support\Collection;
 
 class ConversationService

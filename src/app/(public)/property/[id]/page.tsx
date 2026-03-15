@@ -9,8 +9,8 @@ import SharePopup, { type SharePlatform, type ShareOption } from '@/shared/compo
 import PropertyLocationMap from '@/shared/components/maps/PropertyLocationMap'
 import { EmptyState, EmptyStateAction } from '@/shared/components/misc'
 import { propertiesApi, messagesApi, agentsApi } from '../../../../api'
-import type { Property } from '../../../../types'
-import { ASSETS } from '../../../../utils/assets'
+import type { Property } from '../../../../shared/types'
+import { ASSETS } from '../../../../shared/utils/assets'
 import { resolveAgentAvatar, resolveImageUrl } from '@/shared/utils/image'
 
 export default function PropertyDetailsPage() {

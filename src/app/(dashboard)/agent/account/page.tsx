@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { agentsApi } from '@/api'
 import type { Agent } from '@/features/agents'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 import { resolveAgentAvatar } from '@/shared/utils/image'
 import {
   FiUser, FiEdit3, FiLock, FiMail, FiPhone, FiMapPin,

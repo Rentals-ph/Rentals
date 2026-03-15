@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation'
 import { AppSidebar } from '@/features/dashboard'
 import { DashboardHeader } from '@/features/dashboard'
 import { blogsApi } from '@/api'
-import type { Blog } from '@/types'
-import { toast, ToastContainer } from '@/utils/toast'
+import type { Blog } from '@/shared/types'
+import { toast, ToastContainer } from '@/shared/utils/toast'
 import { FiPlus, FiEdit3, FiTrash2, FiEye, FiCalendar } from 'react-icons/fi'
 
 export default function AdminBlogsPage() {

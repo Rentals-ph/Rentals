@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react'
 import { VerticalPropertyCard, VerticalPropertyCardSkeleton } from '@/shared/components/cards'
 import { propertiesApi } from '../../api'
-import type { Property } from '../../types'
+import type { Property } from '../../shared/types'
 import type { PaginatedResponse } from '../../api/types'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 import { resolveAgentAvatar } from '@/shared/utils/image'
 
 function PropertiesForRent() {

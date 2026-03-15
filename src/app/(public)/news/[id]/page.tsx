@@ -7,7 +7,7 @@ import Footer from '@/components/layout/Footer'
 import { EmptyState, EmptyStateAction } from '@/shared/components/misc'
 import { newsApi } from '@/api'
 import type { News } from '@/features/blog'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 
 export default function NewsDetailsPage() {
   const params = useParams()

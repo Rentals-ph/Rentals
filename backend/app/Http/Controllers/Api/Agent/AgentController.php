@@ -365,7 +365,7 @@ class AgentController extends Controller
                     $avatarPath = $agent->avatar ?? $agent->image_path;
                     if ($avatarPath) {
                         try {
-                            $imageUrl = \App\Services\ImageService::url($avatarPath);
+                            $imageUrl = \App\Domain\Properties\Services\ImageService::url($avatarPath);
                         } catch (\Exception $e) {
                             \Log::warning('Error generating image URL for agent ' . $agent->id . ': ' . $e->getMessage());
                             $imageUrl = null;
@@ -377,7 +377,7 @@ class AgentController extends Controller
                     $companyImage = $agent->getFirstMedia('company');
                     if ($companyImage) {
                         try {
-                            $companyImageUrl = \App\Services\ImageService::url($companyImage->path);
+                            $companyImageUrl = \App\Domain\Properties\Services\ImageService::url($companyImage->path);
                         } catch (\Exception $e) {
                             \Log::warning('Error generating company image URL for agent ' . $agent->id . ': ' . $e->getMessage());
                         }
@@ -526,7 +526,7 @@ class AgentController extends Controller
         $imageUrl = null;
         $avatarPath = $user->avatar ?? $user->image_path;
         if ($avatarPath) {
-            $imageUrl = \App\Services\ImageService::url($avatarPath);
+            $imageUrl = \App\Domain\Properties\Services\ImageService::url($avatarPath);
         }
         
         // Get company image from media table
@@ -534,7 +534,7 @@ class AgentController extends Controller
         $companyImage = $user->getFirstMedia('company');
         if ($companyImage) {
             try {
-                $companyImageUrl = \App\Services\ImageService::url($companyImage->path);
+                $companyImageUrl = \App\Domain\Properties\Services\ImageService::url($companyImage->path);
             } catch (\Exception $e) {
                 \Log::warning('Error generating company image URL for user ' . $user->id . ': ' . $e->getMessage());
             }
@@ -638,7 +638,7 @@ class AgentController extends Controller
         $imageUrl = null;
         $avatarPath = $agent->avatar ?? $agent->image_path;
         if ($avatarPath) {
-            $imageUrl = \App\Services\ImageService::url($avatarPath);
+            $imageUrl = \App\Domain\Properties\Services\ImageService::url($avatarPath);
         }
         
         // Get company image from media table
@@ -646,7 +646,7 @@ class AgentController extends Controller
         $companyImage = $agent->getFirstMedia('company');
         if ($companyImage) {
             try {
-                $companyImageUrl = \App\Services\ImageService::url($companyImage->path);
+                $companyImageUrl = \App\Domain\Properties\Services\ImageService::url($companyImage->path);
             } catch (\Exception $e) {
                 \Log::warning('Error generating company image URL for agent ' . $agent->id . ': ' . $e->getMessage());
             }
@@ -881,7 +881,7 @@ class AgentController extends Controller
                         // Delete old image file if exists (use raw to bypass accessor)
                         $oldImagePath = $user->getRawOriginal('image_path');
                         if ($oldImagePath) {
-                            \App\Services\ImageService::delete($oldImagePath);
+                            \App\Domain\Properties\Services\ImageService::delete($oldImagePath);
                         }
 
                         // Remove old avatar media record
@@ -1040,7 +1040,7 @@ class AgentController extends Controller
             $avatarPath = $user->avatar ?? $user->image_path;
             if ($avatarPath) {
                 try {
-                    $imageUrl = \App\Services\ImageService::url($avatarPath);
+                    $imageUrl = \App\Domain\Properties\Services\ImageService::url($avatarPath);
                 } catch (\Exception $e) {
                     \Log::warning('Error generating image URL for user ' . $user->id . ': ' . $e->getMessage());
                 }

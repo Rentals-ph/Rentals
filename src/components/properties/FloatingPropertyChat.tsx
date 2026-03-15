@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { getAsset } from '@/utils/assets'
+import { getAsset } from '@/shared/utils/assets'
 import { api, type PropertySearchResponse, type ConversationMessage } from '@/lib/api'
-import { Property } from '@/types'
+import { Property } from '@/shared/types'
 import { formatAIMessage } from '@/shared/utils/format'
 
 const CONVERSATION_ID_KEY = 'rentals_ph_conversation_id'

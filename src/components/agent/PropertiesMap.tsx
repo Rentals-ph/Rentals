@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import type { Map, Marker } from 'leaflet'
-import type { Property } from '@/types'
+import type { Property } from '@/shared/types'
 
 interface PropertiesMapProps {
   properties: Property[]

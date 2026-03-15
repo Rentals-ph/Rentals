@@ -11,7 +11,7 @@ import {
   type ImageUploadResult 
 } from '@/shared/utils/image'
 import { StoragePaths, getImageUrl } from '@/shared/utils/image'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 
 export interface ImageUploaderProps {
   entityType: 'users' | 'properties' | 'posts' | 'agents' | 'testimonials'

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { messagesApi, propertiesApi } from '@/api'
 import type { Message, InquiryConversation } from '@/shared/api'
-import type { Property } from '@/types'
+import type { Property } from '@/shared/types'
 import {
   FiSearch,
   FiRefreshCw,
@@ -13,7 +13,7 @@ import {
   FiMaximize,
 } from 'react-icons/fi'
 import Link from 'next/link'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 
 export default function CustomerInquiries() {
   const [conversations, setConversations] = useState<InquiryConversation[]>([])

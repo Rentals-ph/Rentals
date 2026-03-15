@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Navbar, { SIDEBAR_WIDTH, SIDEBAR_WIDTH_SM } from './Navbar'
-import { PublicSidebarProvider, type OpenSidebar } from '@/contexts/PublicSidebarContext'
+import { PublicSidebarProvider, type OpenSidebar } from '@/features/dashboard/PublicSidebarContext'
 
 function useMobileLayout() {
   const [isMobile, setIsMobile] = useState(false)

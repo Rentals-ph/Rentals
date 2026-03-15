@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { DashboardHeader } from '@/features/dashboard'
 import api from '@/lib/api'
 import { blogsApi, downloadablesApi, brokerApi, propertiesApi, agentsApi } from '@/api'
-import type { Blog } from '@/types'
-import type { Property } from '@/types'
+import type { Blog } from '@/shared/types'
+import type { Property } from '@/shared/types'
 import { 
   FiUsers, 
   FiHome, 

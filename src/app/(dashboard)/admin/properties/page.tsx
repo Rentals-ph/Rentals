@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { DashboardHeader } from '@/features/dashboard'
 import { adminApi, type AdminProperty, type CreatePropertyData, type UpdatePropertyData } from '@/api'
 import { agentsApi, type Agent } from '@/api'
-import { toast } from '@/utils/toast'
+import { toast } from '@/shared/utils/toast'
 import { FiRefreshCw, FiPlus, FiEdit2, FiTrash2, FiX } from 'react-icons/fi'
 
 export default function PropertiesPage() {

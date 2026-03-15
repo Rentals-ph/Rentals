@@ -9,11 +9,11 @@ import { PublicPropertiesMap, type PublicPropertiesMapHandle } from '@/shared/co
 import { EmptyState, EmptyStateAction } from '@/shared/components/misc'
 // import './page.css' // Removed - converted to Tailwind
 import { propertiesApi } from '@/shared/api'
-import type { Property } from '@/types'
-import { ASSETS } from '@/utils/assets'
+import type { Property } from '@/shared/types'
+import { ASSETS } from '@/shared/utils/assets'
 import { resolveAgentAvatar } from '@/shared/utils/image'
 import { PopularSearches } from '@/features/home'
-import { usePublicSidebar } from '@/contexts/PublicSidebarContext'
+import { usePublicSidebar } from '@/features/dashboard/PublicSidebarContext'
 import { FloatingPropertyChat } from '@/features/properties'
 
 function PropertiesContent() {

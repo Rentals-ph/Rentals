@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Footer from '@/components/layout/Footer'
-import { ASSETS } from '@/utils/assets'
+import { ASSETS } from '@/shared/utils/assets'
 import { contactApi } from '@/api'
 
 export default function ContactUsPage() {

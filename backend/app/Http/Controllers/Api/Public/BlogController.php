@@ -7,6 +7,7 @@ use App\Domain\Content\Models\Blog;
 use App\Domain\Properties\Services\ImageService;
 use App\Http\Requests\Content\CreateBlogRequest;
 use App\Http\Requests\Content\UpdateBlogRequest;
+use App\Http\Resources\BlogResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use OpenApi\Attributes as OA;
@@ -39,17 +40,13 @@ class BlogController extends Controller
                 $perPage = $request->get('per_page', 10);
                 $blogs = $query->paginate($perPage);
                 
-                // Image URL is automatically included via model accessor (getImageUrlAttribute)
-                
-                return response()->json($blogs);
+                return BlogResource::collection($blogs)->response();
             }
             
             // Return all blogs if no pagination requested
             $blogs = $query->get();
             
-            // Image URL is automatically included via model accessor (getImageUrlAttribute)
-            
-            return response()->json($blogs);
+            return BlogResource::collection($blogs);
         } catch (\Exception $e) {
             \Log::error('Error fetching blogs: ' . $e->getMessage());
             \Log::error('Stack trace: ' . $e->getTraceAsString());
@@ -97,7 +94,7 @@ class BlogController extends Controller
             ? Blog::findOrFail($identifier)
             : Blog::where('slug', $identifier)->firstOrFail();
 
-        return response()->json($blog);
+        return new BlogResource($blog);
     }
 
     #[OA\Post(
@@ -162,7 +159,7 @@ class BlogController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Blog created successfully',
-            'data' => $blog,
+            'data' => new BlogResource($blog),
         ], 201);
     }
 
@@ -242,7 +239,7 @@ class BlogController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Blog updated successfully',
-            'data' => $blog->fresh(),
+            'data' => new BlogResource($blog->fresh()),
         ], 200);
     }
 

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { EditPropertyModal } from '@/features/agents'
 import { brokerApi } from '@/api'
-import type { Property } from '@/types'
+import type { Property } from '@/shared/types'
 import {
   FiCheckCircle,
   FiHome,
