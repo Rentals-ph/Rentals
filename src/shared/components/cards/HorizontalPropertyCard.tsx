@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ASSETS } from '@/shared/utils/assets'
 import { FiChevronLeft, FiChevronRight, FiMail, FiMapPin } from 'react-icons/fi'
 import SharePopup, { type SharePlatform } from '../misc/SharePopup'
-import { useSavedProperties } from '@/shared/hooks'
+import { useSavedProperties } from '@/features/properties'
 import type { Property } from '@/shared/types'
 
 interface HorizontalPropertyCardProps {
