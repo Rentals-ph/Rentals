@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { getAsset } from '@/utils/assets'
 import { api, type PropertySearchResponse, type ConversationMessage } from '@/lib/api'
 import { Property } from '@/types'
-import { formatAIMessage } from '@/utils/formatAIMessage'
+import { formatAIMessage } from '@/shared/utils/format'
 
 const CONVERSATION_ID_KEY = 'rentals_ph_conversation_id'
 const FALLBACK_SUGGESTED_PROMPTS = [

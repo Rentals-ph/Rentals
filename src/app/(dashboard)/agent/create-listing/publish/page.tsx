@@ -4,11 +4,9 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCreateListing } from '@/contexts/CreateListingContext'
 import api from '@/lib/api'
-import { compressImage } from '@/utils/imageCompression'
-import { uploadWithProgress } from '@/utils/uploadProgress'
-import { uploadPropertyMainImage } from '@/utils/imageUpload'
-import { getApiBaseUrl } from '@/config/api'
-import { formatPrice } from '@/utils/format'
+import { compressImage, uploadWithProgress, uploadPropertyMainImage } from '@/shared/utils/image'
+import { getApiBaseUrl } from '@/shared/config/api'
+import { formatPrice } from '@/shared/utils/format'
 
 import {
   FiCheck,

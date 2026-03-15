@@ -5,7 +5,7 @@ import { SimplePropertyCard } from '@/components/common/cards'
 import { brokerApi } from '@/api'
 import type { Team, TeamMember } from '@/api/endpoints/broker'
 import type { Property } from '@/types'
-import { resolvePropertyImage } from '@/utils/imageResolver'
+import { resolvePropertyImage } from '@/shared/utils/image'
 import {
   DndContext,
   DragOverlay,

@@ -10,7 +10,7 @@ import {
   FiCheck
 } from 'react-icons/fi'
 import { api } from '@/lib/api'
-import { getFallbackDescription } from '@/utils/aiDescription'
+import { getFallbackDescription } from '@/shared/utils/format'
 import { ProgressRing } from '@/shared/components/ui'
 // import '../AgentCreateListingCategory.css' // Converted to Tailwind
 

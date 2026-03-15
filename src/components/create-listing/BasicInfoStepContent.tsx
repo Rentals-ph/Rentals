@@ -6,7 +6,7 @@ import LocationMap from '../agent/LocationMap'
 import { useCreateListing } from '../../contexts/CreateListingContext'
 import { FiChevronDown, FiArrowRight } from 'react-icons/fi'
 import { api } from '../../lib/api'
-import { getFallbackDescription } from '../../utils/aiDescription'
+import { getFallbackDescription } from '@/shared/utils/format'
 
 export interface BasicInfoStepContentProps {
   /** Path to navigate to on Next (e.g. /agent/create-listing/visuals-features or /broker/create-listing/visuals-features) */

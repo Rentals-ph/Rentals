@@ -11,7 +11,7 @@ import { EmptyState, EmptyStateAction } from '../../../../components/common'
 import { propertiesApi, messagesApi, agentsApi } from '../../../../api'
 import type { Property } from '../../../../types'
 import { ASSETS } from '../../../../utils/assets'
-import { resolveAgentAvatar, resolveImageUrl } from '../../../../utils/imageResolver'
+import { resolveAgentAvatar, resolveImageUrl } from '@/shared/utils/image'
 
 export default function PropertyDetailsPage() {
   const params = useParams()

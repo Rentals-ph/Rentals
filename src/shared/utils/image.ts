@@ -11,7 +11,7 @@
  */
 
 import { ASSETS } from '@/utils/assets'
-import { getApiBaseUrl } from '@/config/api'
+import { getApiBaseUrl } from '../config/api'
 
 // ============================================================================
 // STORAGE PATH UTILITIES

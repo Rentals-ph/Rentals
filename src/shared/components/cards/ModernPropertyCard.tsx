@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { FiMapPin } from 'react-icons/fi'
 import { ASSETS } from '@/utils/assets'
-import { resolvePropertyImage } from '@/utils/imageResolver'
+import { resolvePropertyImage } from '@/shared/utils/image'
 
 interface ModernPropertyCardProps {
   id?: number | string

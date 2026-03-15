@@ -1,32 +1,15 @@
 /**
  * API Types Index
- * Re-export all API types from here
+ * Central export point for all API types
+ * 
+ * Re-exports shared types and role-specific types
  */
 
-/**
- * Common API response types
- */
+// Re-export shared/common types
+export * from './shared'
 
-export interface ApiResponse<T = any> {
-  success: boolean
-  message?: string
-  data?: T
-  errors?: Record<string, string[]>
-}
-
-export interface PaginatedResponse<T> {
-  data: T[]
-  current_page: number
-  last_page: number
-  per_page: number
-  total: number
-  from: number
-  to: number
-}
-
-export interface ApiError {
-  message: string
-  errors?: Record<string, string[]>
-  status?: number
-}
+// Role-specific types can be added here as they're organized
+// export * from './admin'
+// export * from './agent'
+// export * from './broker'
 

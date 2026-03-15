@@ -19,7 +19,7 @@ import {
   FiEyeOff,
 } from 'react-icons/fi'
 import { FaWhatsapp } from 'react-icons/fa'
-import { resolvePropertyImage } from '@/utils/imageResolver'
+import { resolvePropertyImage } from '@/shared/utils/image'
 import { ASSETS } from '@/utils/assets'
 
 export default function CompanyProfilePage() {

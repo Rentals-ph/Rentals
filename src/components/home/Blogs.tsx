@@ -7,7 +7,7 @@ import { blogsApi } from '../../api'
 import type { Blog } from '../../types'
 import { ASSETS } from '@/utils/assets'
 import FadeInOnView from '@/components/common/FadeInOnView'
-import { resolveAgentAvatar } from '@/utils/imageResolver'
+import { resolveAgentAvatar } from '@/shared/utils/image'
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 
 const Blogs = () => {

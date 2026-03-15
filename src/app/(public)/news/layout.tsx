@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { buildPageMetadata } from '@/config/seo'
+import { buildPageMetadata } from '@/shared/config/seo'
 
 export const metadata: Metadata = buildPageMetadata({
   title: 'News',

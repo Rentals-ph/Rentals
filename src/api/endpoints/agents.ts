@@ -1,27 +1,12 @@
 import apiClient from '../client'
+import type { AgentRegistrationData } from '@/shared/forms/types/agent'
 
 /**
  * Agents API endpoints
  */
 
-export interface AgentRegistrationData {
-  firstName: string
-  lastName: string
-  email: string
-  password: string
-  phone?: string
-  dateOfBirth?: string
-  agencyName?: string
-  officeAddress?: string
-  city?: string
-  state?: string
-  zipCode?: string
-  prcLicenseNumber: string
-  licenseType: 'broker' | 'salesperson'
-  expirationDate: string
-  yearsOfExperience?: string
-  agreeToTerms: boolean
-}
+// Re-export for backward compatibility
+export type { AgentRegistrationData } from '@/shared/forms/types/agent'
 
 export interface AgentRegistrationResponse {
   success: boolean

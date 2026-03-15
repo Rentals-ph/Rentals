@@ -5,7 +5,7 @@ import { agentsApi, propertiesApi } from '@/api'
 import type { Agent } from '@/api/endpoints/agents'
 import type { Property } from '@/types'
 import { ASSETS } from '@/utils/assets'
-import { resolveAgentAvatar, resolvePropertyImage } from '@/utils/imageResolver'
+import { resolveAgentAvatar, resolvePropertyImage } from '@/shared/utils/image'
 import {
   FiMail,
   FiPhone,

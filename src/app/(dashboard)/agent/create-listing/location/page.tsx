@@ -10,7 +10,7 @@ import {
   FiArrowRight,
   FiCheck
 } from 'react-icons/fi'
-import { philippinesProvinces, getCitiesByProvince } from '@/data/philippinesLocations'
+import { philippinesProvinces, getCitiesByProvince } from '@/shared/data/locations'
 import { ProgressRing } from '@/shared/components/ui'
 // import '../AgentCreateListingCategory.css' // Converted to Tailwind
 

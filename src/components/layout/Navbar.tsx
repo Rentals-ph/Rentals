@@ -7,7 +7,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { FiUser, FiLogOut, FiChevronDown, FiHome, FiMenu, FiX, FiInfo, FiLayers, FiUsers, FiBook, FiRss, FiMail, FiMessageCircle, FiHeart } from 'react-icons/fi'
 import { ASSETS } from '@/utils/assets'
 import { agentsApi, messagesApi } from '@/api'
-import { resolveAgentAvatar } from '@/utils/imageResolver'
+import { resolveAgentAvatar } from '@/shared/utils/image'
 import LoginModal from '@/components/common/LoginModal'
 import RegisterModal from '@/components/common/RegisterModal'
 

@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { ASSETS } from '@/utils/assets'
-import { resolveAgentAvatar } from '@/utils/imageResolver'
+import { resolveAgentAvatar } from '@/shared/utils/image'
 
 interface AgentCardProps {
   id: number

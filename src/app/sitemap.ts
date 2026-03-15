@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
-import { getSiteUrl } from '@/config/seo'
-import { getApiBaseUrl } from '@/config/api'
+import { getSiteUrl } from '@/shared/config/seo'
+import { getApiBaseUrl } from '@/shared/config/api'
 
 const BASE = getSiteUrl()
 

@@ -7,7 +7,7 @@ import { propertiesApi } from '../../api'
 import type { Property } from '../../types'
 import type { PaginatedResponse } from '../../api/types'
 import { ASSETS } from '@/utils/assets'
-import { resolveAgentAvatar } from '@/utils/imageResolver'
+import { resolveAgentAvatar } from '@/shared/utils/image'
 
 function PropertiesForRent() {
   const [properties, setProperties] = useState<Property[]>([])

@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { agentsApi, messagesApi } from '@/api'
 import type { Message } from '@/shared/api'
 import { ASSETS } from '@/utils/assets'
-import { resolveAgentAvatar } from '@/utils/imageResolver'
+import { resolveAgentAvatar } from '@/shared/utils/image'
 import { FiBell, FiLogOut, FiUser, FiX } from 'react-icons/fi'
 
 function AppHeader() {

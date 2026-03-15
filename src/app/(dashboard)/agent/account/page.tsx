@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { agentsApi } from '@/api'
 import type { Agent } from '@/api/endpoints/agents'
 import { ASSETS } from '@/utils/assets'
-import { resolveAgentAvatar } from '@/utils/imageResolver'
+import { resolveAgentAvatar } from '@/shared/utils/image'
 import {
   FiUser, FiEdit3, FiLock, FiMail, FiPhone, FiMapPin,
   FiSend, FiBriefcase, FiStar, FiHome, FiAward, FiCamera,

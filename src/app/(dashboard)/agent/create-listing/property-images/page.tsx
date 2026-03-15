@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCreateListing } from '@/contexts/CreateListingContext'
-import { createThumbnail } from '@/utils/imageCompression'
+import { createThumbnail } from '@/shared/utils/image'
 
 import {
   FiArrowLeft,

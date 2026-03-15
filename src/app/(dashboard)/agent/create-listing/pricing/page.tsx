@@ -3,9 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCreateListing } from '@/contexts/CreateListingContext'
-import { compressImage } from '@/utils/imageCompression'
-import { uploadWithProgress } from '@/utils/uploadProgress'
-import { getApiBaseUrl } from '@/config/api'
+import { compressImage, uploadWithProgress } from '@/shared/utils/image'
+import { getApiBaseUrl } from '@/shared/config/api'
 
 import {
   FiArrowLeft,

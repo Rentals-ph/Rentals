@@ -9,8 +9,8 @@ import {
   uploadUserAvatar,
   uploadAgentAvatar,
   type ImageUploadResult 
-} from '@/utils/imageUpload'
-import { StoragePaths, getImageUrl } from '@/utils/storage'
+} from '@/shared/utils/image'
+import { StoragePaths, getImageUrl } from '@/shared/utils/image'
 import { ASSETS } from '@/utils/assets'
 
 export interface ImageUploaderProps {

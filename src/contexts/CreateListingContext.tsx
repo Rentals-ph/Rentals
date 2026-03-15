@@ -1,43 +1,11 @@
 'use client'
 
 import { createContext, useContext, useState, ReactNode } from 'react'
+import type { CreateListingData } from '@/shared/forms/types/property'
+import { DEFAULT_LISTING_FORM_DATA } from '@/shared/forms/types/property'
 
-export interface CreateListingData {
-  // Category
-  category: string
-  
-  // Details
-  title: string
-  description: string
-  bedrooms: number
-  bathrooms: number
-  garage: number
-  floorArea: number
-  floorUnit: 'Square Meters' | 'Square Feet'
-  lotArea: number
-  
-  // Location
-  country: string
-  state: string
-  city: string
-  street: string
-  latitude: string
-  longitude: string
-  zoom: string
-  
-  // Property Images
-  images: File[]
-  videoUrl: string
-  
-  // Pricing
-  listingType: 'for_rent' | 'for_sale'
-  price: string
-  priceType: 'Monthly' | 'Weekly' | 'Daily' | 'Yearly'
-  
-  // Attributes
-  amenities: string[]
-  furnishing?: string
-}
+// Re-export for backward compatibility
+export type { CreateListingData } from '@/shared/forms/types/property'
 
 interface CreateListingContextType {
   data: CreateListingData
@@ -46,29 +14,9 @@ interface CreateListingContextType {
 }
 
 const defaultData: CreateListingData = {
-  category: '',
-  title: '',
-  description: '',
-  bedrooms: 0,
-  bathrooms: 0,
-  garage: 0,
-  floorArea: 1,
-  floorUnit: 'Square Meters',
-  lotArea: 0,
-  country: 'Philippines',
-  state: '',
-  city: '',
-  street: '',
-  latitude: '17.586030',
-  longitude: '120.628619',
-  zoom: '15',
-  images: [],
-  videoUrl: '',
-  listingType: 'for_rent',
-  price: '',
-  priceType: 'Monthly',
-  amenities: [],
-  furnishing: undefined,
+  ...DEFAULT_LISTING_FORM_DATA,
+  // Ensure uploadedImages is not included in context (it's conversation-specific)
+  uploadedImages: [],
 }
 
 const CreateListingContext = createContext<CreateListingContextType | undefined>(undefined)

@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios'
-import { getApiBaseUrl } from '../config/api'
+import { getApiBaseUrl } from '../shared/config/api'
 
 // Get API base URL (respects USE_LOCAL_API env var to switch between local and remote)
 const API_BASE_URL = getApiBaseUrl()

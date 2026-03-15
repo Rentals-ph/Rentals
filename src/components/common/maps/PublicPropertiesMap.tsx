@@ -6,7 +6,7 @@ import 'leaflet/dist/leaflet.css'
 import type { Map as LeafletMap, Marker, TileLayer } from 'leaflet'
 import type { Property } from '@/types'
 import { ASSETS } from '@/utils/assets'
-import { resolvePropertyImage } from '@/utils/imageResolver'
+import { resolvePropertyImage } from '@/shared/utils/image'
 
 function formatPrice(price: number): string {
   return `₱${price.toLocaleString('en-US')}`

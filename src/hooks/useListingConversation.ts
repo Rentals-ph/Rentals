@@ -16,72 +16,15 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { listingAssistantApi } from '@/api/endpoints/listingAssistant'
 import type { ExtractedPropertyData } from '@/types/listingAssistant'
-import { LISTING_ROLE_CONFIG } from '@/config/listingRoles'
-import { compressImages } from '@/utils/imageCompression'
+import { LISTING_ROLE_CONFIG } from '@/shared/config/listing'
+import { compressImages } from '@/shared/utils/image'
+import type { ListingFormData } from '@/shared/forms/types/property'
+import { DEFAULT_LISTING_FORM_DATA } from '@/shared/forms/types/property'
 
-// ─── Form Data Shape ─────────────────────────────────────────────────────────
-// Field names mirror CreateListingContext.CreateListingData so the manual form
-// needs zero changes when rewired to this hook.
-export interface ListingFormData {
-  // Category
-  category: string
-  // Details
-  title: string
-  description: string
-  bedrooms: number
-  bathrooms: number
-  garage: number
-  floorArea: number
-  floorUnit: 'Square Meters' | 'Square Feet'
-  lotArea: number
-  // Location
-  country: string
-  state: string
-  city: string
-  street: string
-  latitude: string
-  longitude: string
-  zoom: string
-  // Images (File[] kept in local state – uploaded separately via uploadImages())
-  images: File[]
-  // Images already uploaded to the conversation (URLs returned from the API)
-  uploadedImages: Array<{ path: string; url: string; original_name: string; size: number; mime_type: string }>
-  videoUrl: string
-  // Pricing
-  listingType: 'for_rent' | 'for_sale'
-  price: string
-  priceType: 'Monthly' | 'Weekly' | 'Daily' | 'Yearly'
-  // Attributes
-  amenities: string[]
-  furnishing?: string
-}
+// Re-export for backward compatibility
+export type { ListingFormData } from '@/shared/forms/types/property'
 
-const DEFAULT_FORM_DATA: ListingFormData = {
-  category: '',
-  title: '',
-  description: '',
-  bedrooms: 0,
-  bathrooms: 0,
-  garage: 0,
-  floorArea: 1,
-  floorUnit: 'Square Meters',
-  lotArea: 0,
-  country: 'Philippines',
-  state: '',
-  city: '',
-  street: '',
-  latitude: '17.586030',
-  longitude: '120.628619',
-  zoom: '15',
-  images: [],
-  uploadedImages: [],
-  videoUrl: '',
-  listingType: 'for_rent',
-  price: '',
-  priceType: 'Monthly',
-  amenities: [],
-  furnishing: undefined,
-}
+const DEFAULT_FORM_DATA: ListingFormData = DEFAULT_LISTING_FORM_DATA
 
 // ─── Field Mapping Helpers ────────────────────────────────────────────────────
 

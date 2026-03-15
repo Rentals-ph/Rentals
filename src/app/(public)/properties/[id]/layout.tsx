@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import { getApiBaseUrl } from '@/config/api'
-import { getSiteUrl, getDefaultOgImage, SITE_NAME } from '@/config/seo'
+import { getApiBaseUrl } from '@/shared/config/api'
+import { getSiteUrl, getDefaultOgImage, SITE_NAME } from '@/shared/config/seo'
 
 type Props = { params: Promise<{ id: string }>; children: React.ReactNode }
 

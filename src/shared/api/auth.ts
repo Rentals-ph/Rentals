@@ -1,14 +1,12 @@
 import apiClient from '@/api/client'
+import type { LoginCredentials, RegisterCredentials } from '@/shared/forms/types/auth'
 
 /**
  * Authentication API endpoints
  */
 
-export interface LoginCredentials {
-  email: string
-  password: string
-  remember?: boolean
-}
+// Re-export for backward compatibility
+export type { LoginCredentials, RegisterCredentials } from '@/shared/forms/types/auth'
 
 export interface LoginResponse {
   success: boolean
@@ -45,13 +43,6 @@ export interface LoginResponse {
     }
   }
   errors?: Record<string, string[]>
-}
-
-export interface RegisterCredentials {
-  email: string
-  password: string
-  name?: string
-  role?: 'agent' | 'broker'
 }
 
 export interface RegisterResponse {

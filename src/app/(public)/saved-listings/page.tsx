@@ -10,7 +10,7 @@ import { EmptyState, EmptyStateAction } from '@/components/common'
 import { useSavedProperties } from '@/hooks/useSavedProperties'
 import type { Property } from '@/types'
 import { ASSETS } from '@/utils/assets'
-import { resolveAgentAvatar } from '@/utils/imageResolver'
+import { resolveAgentAvatar } from '@/shared/utils/image'
 
 export default function SavedListingsPage() {
   const { savedProperties } = useSavedProperties()

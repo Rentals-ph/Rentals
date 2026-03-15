@@ -9,7 +9,7 @@ import AccountSettings, {
 import { brokerApi } from '@/api'
 import type { Broker } from '@/api/endpoints/broker'
 import { ASSETS } from '@/utils/assets'
-import { resolveAgentAvatar } from '@/utils/imageResolver'
+import { resolveAgentAvatar } from '@/shared/utils/image'
 import { toast, ToastContainer } from '@/utils/toast'
 
 export default function BrokerAccount() {

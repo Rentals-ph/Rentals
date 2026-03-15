@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { agentsApi, propertiesApi } from "@/api"
-import { resolveAgentAvatar } from "@/utils/imageResolver"
+import { resolveAgentAvatar } from "@/shared/utils/image"
 import FadeInOnView from "@/components/common/FadeInOnView"
 import { AgentCard } from "@/components/common/cards"
 import { Pagination } from "@/components/common"

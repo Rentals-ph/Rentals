@@ -7,7 +7,7 @@ import {
   SITE_KEYWORDS,
   getSiteUrl,
   getDefaultOgImage,
-} from '@/config/seo'
+} from '@/shared/config/seo'
 import { PublicPageLoading } from '@/components/ui/PublicPageLoading'
 import '../index.css'
 

@@ -11,36 +11,10 @@ import {
 } from 'react-icons/fi'
 
 // Types
-export interface ProfileData {
-  name: string
-  email: string
-  phone: string
-  role: string
-  avatar: string
-}
+import type { ProfileData, EditFormData, PasswordFormData } from '@/shared/forms/types/account'
 
-export interface EditFormData {
-  firstName: string
-  lastName: string
-  email: string
-  countryCode: string
-  contactNumber: string
-  whatsapp?: string
-  facebook?: string
-  aboutYourself: string
-  addressLine1: string
-  country: string
-  region: string
-  province: string
-  city: string
-  companyName?: string
-}
-
-export interface PasswordFormData {
-  currentPassword: string
-  newPassword: string
-  confirmPassword: string
-}
+// Re-export for backward compatibility
+export type { ProfileData, EditFormData, PasswordFormData } from '@/shared/forms/types/account'
 
 export interface AccountSettingsProps {
   userType: 'agent' | 'broker'

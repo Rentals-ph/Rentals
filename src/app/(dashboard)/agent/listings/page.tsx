@@ -14,7 +14,7 @@ import {
   FiCamera
 } from 'react-icons/fi'
 import { ASSETS } from '@/utils/assets'
-import { resolvePropertyImage, resolveAgentAvatar } from '@/utils/imageResolver'
+import { resolvePropertyImage, resolveAgentAvatar } from '@/shared/utils/image'
 import PropertiesMap from '@/components/agent/PropertiesMap'
 import VerticalPropertyCard from '@/components/common/VerticalPropertyCard'
 

@@ -10,7 +10,7 @@ import {
   FiSearch,
   FiSlash,
 } from 'react-icons/fi'
-import { resolvePropertyImage } from '@/utils/imageResolver'
+import { resolvePropertyImage } from '@/shared/utils/image'
 import PropertiesMap from '@/components/agent/PropertiesMap'
 import PropertyMapPopupCard from '@/components/common/PropertyMapPopupCard'
 
