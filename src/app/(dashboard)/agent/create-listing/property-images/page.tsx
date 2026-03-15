@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { useCreateListing } from '@/contexts/CreateListingContext'
+import { useCreateListing } from '@/features/listings'
 import { createThumbnail } from '@/shared/utils/image'
 
 import {

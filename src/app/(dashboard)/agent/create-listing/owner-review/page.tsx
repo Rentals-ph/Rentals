@@ -3,7 +3,7 @@
 import {
   CreateListingStepLayout,
   OwnerReviewStepContent,
-} from '@/components/create-listing'
+} from '@/features/listings'
 
 const STEP_LABELS = [
   'Basic Information',

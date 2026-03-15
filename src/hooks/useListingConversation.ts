@@ -14,8 +14,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { listingAssistantApi } from '@/api/endpoints/listingAssistant'
-import type { ExtractedPropertyData } from '@/types/listingAssistant'
+import { listingAssistantApi } from '@/features/listing-assistant'
+import type { ExtractedPropertyData } from '@/features/listing-assistant'
 import { LISTING_ROLE_CONFIG } from '@/shared/config/listing'
 import { compressImages } from '@/shared/utils/image'
 import type { ListingFormData } from '@/shared/forms/types/property'

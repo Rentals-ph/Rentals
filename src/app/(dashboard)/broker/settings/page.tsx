@@ -5,7 +5,7 @@ import AccountSettings, {
   ProfileData, 
   EditFormData, 
   PasswordFormData 
-} from '@/components/common/AccountSettings'
+} from '@/shared/components/dashboard/AccountSettings'
 import { ASSETS } from '@/utils/assets'
 import { 
   FiBell,

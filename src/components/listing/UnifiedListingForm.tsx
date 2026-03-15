@@ -20,15 +20,15 @@
 
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import LocationMap from '@/components/agent/LocationMap'
-import { useListingConversation } from '@/hooks/useListingConversation'
-import type { ListingFormData } from '@/hooks/useListingConversation'
+import { LocationMap } from '@/features/agents'
+import { useListingConversation } from '@/shared/hooks'
+import type { ListingFormData } from '@/shared/hooks'
 import { LISTING_ROLE_CONFIG } from '@/shared/config/listing'
 import { philippinesProvinces, getCitiesByProvince } from '@/shared/data/locations'
-import { listingAssistantApi } from '@/api/endpoints/listingAssistant'
+import { listingAssistantApi } from '@/features/listing-assistant'
 import { getAsset } from '@/utils/assets'
-import type { ListingAssistantMessage, DescriptionTemplate } from '@/types/listingAssistant'
-import { DESCRIPTION_TEMPLATES } from '@/types/listingAssistant'
+import type { ListingAssistantMessage, DescriptionTemplate } from '@/features/listing-assistant'
+import { DESCRIPTION_TEMPLATES } from '@/features/listing-assistant'
 import {
   FiCheck,
   FiChevronDown,

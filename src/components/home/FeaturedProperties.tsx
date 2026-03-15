@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { VerticalPropertyCard, Pagination } from '@/components/common'
-import FadeInOnView from '@/components/common/FadeInOnView'
-import { VerticalPropertyCardSkeleton } from '../common/VerticalPropertyCardSkeleton'
+import { VerticalPropertyCard, VerticalPropertyCardSkeleton } from '@/shared/components/cards'
+import { Pagination } from '@/shared/components/misc'
+import { FadeInOnView } from '@/shared/components/ui'
 import { propertiesApi } from '../../api'
 import type { Property } from '../../types'
 import type { PaginatedResponse } from '../../api/types'

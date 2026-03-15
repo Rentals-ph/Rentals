@@ -8,8 +8,7 @@ import { FiUser, FiLogOut, FiChevronDown, FiHome, FiMenu, FiX, FiInfo, FiLayers,
 import { ASSETS } from '@/utils/assets'
 import { agentsApi, messagesApi } from '@/api'
 import { resolveAgentAvatar } from '@/shared/utils/image'
-import LoginModal from '@/components/common/LoginModal'
-import RegisterModal from '@/components/common/RegisterModal'
+import { LoginModal, RegisterModal } from '@/features/auth'
 
 export const SIDEBAR_WIDTH = 240
 export const SIDEBAR_WIDTH_SM = 264

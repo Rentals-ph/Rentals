@@ -1,6 +1,6 @@
 'use client'
 
-import { CreateListingProvider } from '@/contexts/CreateListingContext'
+import { CreateListingProvider } from '@/features/listings'
 
 export default function CreateListingLayout({
   children,

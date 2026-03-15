@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { SimplePropertyCard } from '@/components/common/cards'
+import { SimplePropertyCard } from '@/shared/components/cards'
 import { brokerApi } from '@/api'
 import type { Team, TeamMember } from '@/api/endpoints/broker'
 import type { Property } from '@/types'

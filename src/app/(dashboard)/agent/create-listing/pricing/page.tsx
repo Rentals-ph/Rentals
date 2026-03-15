@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useCreateListing } from '@/contexts/CreateListingContext'
+import { useCreateListing } from '@/features/listings'
 import { compressImage, uploadWithProgress } from '@/shared/utils/image'
 import { getApiBaseUrl } from '@/shared/config/api'
 

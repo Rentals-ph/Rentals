@@ -1,8 +1,8 @@
 'use client'
 
-import { ProtectedRoute } from '@/components/common'
-import AppSidebar from '@/components/common/AppSidebar'
-import AppHeader from '@/shared/components/dashboard/AppHeader'
+import { ProtectedRoute } from '@/features/auth'
+import { AppSidebar } from '@/features/dashboard'
+import { AppHeader } from '@/features/dashboard'
 
 // Note: revalidate and dynamic exports are not allowed in Client Components
 // These need to be in Server Components only

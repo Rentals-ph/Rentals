@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import DashboardHeader from '@/shared/components/dashboard/DashboardHeader'
+import { DashboardHeader } from '@/features/dashboard'
 import api from '@/lib/api'
 import { blogsApi, downloadablesApi, brokerApi, propertiesApi, agentsApi } from '@/api'
 import type { Blog } from '@/types'

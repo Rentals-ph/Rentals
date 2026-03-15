@@ -1,6 +1,6 @@
 'use client'
 
-import { CreateListingStepLayout, BasicInfoStepContent } from '@/components/create-listing'
+import { CreateListingStepLayout, BasicInfoStepContent } from '@/features/listings'
 
 const STEP_LABELS = [
   'Basic Information',

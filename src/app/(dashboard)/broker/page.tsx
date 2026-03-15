@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { agentsApi, propertiesApi, messagesApi } from '@/api'
 import { brokerApi } from '@/api'
-import type { Agent } from '@/api/endpoints/agents'
+import type { Agent } from '@/features/agents'
 import type { Property } from '@/types'
 import {
   FiUsers,
@@ -16,7 +16,7 @@ import {
   FiLayers,
   FiMail,
 } from 'react-icons/fi'
-import { CreateListingBanner } from '@/components/listing-assistant'
+import { CreateListingBanner } from '@/features/listing-assistant'
 
 // Mock data for Top Performers (display like image: name, deals closed, amount)
 const topPerformersMock = [

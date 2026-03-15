@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { BlogCardSkeleton } from '../common/BlogCardSkeleton'
+import { BlogCardSkeleton } from '@/shared/components/cards'
 import { blogsApi } from '../../api'
 import type { Blog } from '../../types'
 import { ASSETS } from '@/utils/assets'
-import FadeInOnView from '@/components/common/FadeInOnView'
+import { FadeInOnView } from '@/shared/components/ui'
 import { resolveAgentAvatar } from '@/shared/utils/image'
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 

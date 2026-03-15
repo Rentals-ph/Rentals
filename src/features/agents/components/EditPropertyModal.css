@@ -1,0 +1,560 @@
+.edit-property-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.edit-property-modal {
+  background: #FFFFFF;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.edit-property-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.edit-property-modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.edit-property-modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #6B7280;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.edit-property-modal-close:hover {
+  background-color: #F3F4F6;
+  color: #111827;
+}
+
+.edit-property-page-indicator {
+  padding: 12px 20px;
+  border-bottom: 1px solid #E5E7EB;
+  background-color: #F9FAFB;
+}
+
+.edit-property-page-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.edit-property-page-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.edit-property-page-tab:hover {
+  background-color: #F3F4F6;
+}
+
+.edit-property-page-tab.active {
+  background-color: #EFF6FF;
+}
+
+.edit-property-page-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 12px;
+  background-color: #E5E7EB;
+  color: #6B7280;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.edit-property-page-tab.active .edit-property-page-number {
+  background-color: #2563EB;
+  color: #FFFFFF;
+}
+
+.edit-property-page-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6B7280;
+  transition: color 0.2s;
+}
+
+.edit-property-page-tab.active .edit-property-page-label {
+  color: #2563EB;
+}
+
+.edit-property-page-connector {
+  width: 32px;
+  height: 2px;
+  background-color: #E5E7EB;
+  flex-shrink: 0;
+}
+
+.edit-property-modal-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+  max-height: calc(92vh - 140px);
+}
+
+.edit-property-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.edit-property-section {
+  margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.edit-property-section:last-child {
+  margin-bottom: 0;
+}
+
+.edit-property-section h3 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+/* Form Grid Layouts - Compact Agent Design */
+.edit-property-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.edit-property-form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.edit-property-form-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(100px, 1fr));
+  gap: 12px;
+  width: fit-content;
+  max-width: 450px;
+  box-sizing: border-box;
+}
+
+.edit-property-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.edit-property-form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.edit-property-form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* Input Styling - Compact Agent Theme */
+.edit-property-form-group input,
+.edit-property-form-group textarea,
+.edit-property-form-group select {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  background-color: #FFFFFF;
+  color: #111827;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+
+.edit-property-form-group input:focus,
+.edit-property-form-group textarea:focus,
+.edit-property-form-group select:focus {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.edit-property-form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+  padding: 10px 12px;
+  height: auto;
+}
+
+/* Compact inputs for numbers */
+.edit-property-form-group input[type="number"].compact {
+  max-width: 130px;
+  width: 100%;
+}
+
+/* Responsive adjustments for form grids */
+@media (max-width: 768px) {
+  .edit-property-form-grid,
+  .edit-property-form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .edit-property-form-grid-compact {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+
+  .edit-property-form-group input[type="number"].compact {
+    max-width: 100%;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .edit-property-form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Select wrapper for custom styling */
+.edit-property-select-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.edit-property-select-wrap select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 32px;
+}
+
+.edit-property-select-caret {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #6B7280;
+  font-size: 10px;
+}
+
+.edit-property-form-group small {
+  font-size: 11px;
+  color: #6B7280;
+  margin-top: 2px;
+}
+
+.edit-property-image-preview {
+  margin-bottom: 8px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #E5E7EB;
+  max-width: 320px;
+  width: 100%;
+}
+
+.edit-property-image-preview img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.edit-property-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-top: 1px solid #E5E7EB;
+  background-color: #F9FAFB;
+  gap: 12px;
+}
+
+.edit-property-modal-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-property-cancel-btn,
+.edit-property-save-btn,
+.edit-property-delete-btn,
+.edit-property-nav-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+}
+
+.edit-property-nav-btn {
+  background-color: #2563EB;
+  color: #FFFFFF;
+}
+
+.edit-property-nav-btn:hover {
+  background-color: #1D4ED8;
+}
+
+.edit-property-cancel-btn {
+  background-color: #FFFFFF;
+  color: #374151;
+  border: 1px solid #D1D5DB;
+}
+
+.edit-property-cancel-btn:hover {
+  background-color: #F9FAFB;
+  border-color: #9CA3AF;
+}
+
+.edit-property-save-btn {
+  background-color: #2563EB;
+  color: #FFFFFF;
+}
+
+.edit-property-save-btn:hover:not(:disabled) {
+  background-color: #1D4ED8;
+}
+
+.edit-property-save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.edit-property-delete-btn {
+  background-color: #FEF2F2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+}
+
+.edit-property-delete-btn:hover:not(:disabled) {
+  background-color: #FEE2E2;
+  border-color: #F87171;
+}
+
+.edit-property-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .edit-property-modal {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .edit-property-modal-overlay {
+    padding: 0;
+  }
+
+  .edit-property-modal-header,
+  .edit-property-modal-content,
+  .edit-property-modal-footer {
+    padding: 12px 16px;
+  }
+  
+  .edit-property-page-indicator {
+    padding: 10px 16px;
+  }
+
+  .edit-property-page-tabs {
+    gap: 6px;
+  }
+
+  .edit-property-page-tab {
+    padding: 6px 10px;
+  }
+
+  .edit-property-page-number {
+    width: 22px;
+    height: 22px;
+    font-size: 11px;
+  }
+
+  .edit-property-page-label {
+    font-size: 12px;
+  }
+
+  .edit-property-page-connector {
+    width: 16px;
+  }
+
+  .edit-property-modal-content {
+    max-height: calc(100vh - 160px);
+  }
+
+  .edit-property-form-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .edit-property-form-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .edit-property-modal-footer {
+    flex-wrap: wrap;
+  }
+}
+
+/* Tablet - 2 columns */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .edit-property-form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .edit-property-modal-footer {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .edit-property-delete-btn {
+    width: auto;
+  }
+
+  .edit-property-modal-actions {
+    width: auto;
+  }
+}
+
+/* Location Map Styles - Compact */
+.location-map-container {
+  margin-top: 12px;
+}
+
+.location-map-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.location-map-header h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.location-map-get-current-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: #3B82F6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.location-map-get-current-btn:hover:not(:disabled) {
+  background-color: #2563EB;
+}
+
+.location-map-get-current-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.location-map-error {
+  padding: 10px;
+  background-color: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: 6px;
+  color: #DC2626;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.location-map-info {
+  margin-bottom: 10px;
+}
+
+.location-map-info p {
+  margin: 0 0 6px 0;
+  font-size: 13px;
+  color: #6B7280;
+  line-height: 1.4;
+}
+
+.location-map-coordinates {
+  padding: 6px 10px;
+  background-color: #F3F4F6;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #374151;
+  font-family: monospace;
+}
+
+.location-map {
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  overflow: hidden;
+}
+

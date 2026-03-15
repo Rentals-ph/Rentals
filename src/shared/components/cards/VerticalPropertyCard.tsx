@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ASSETS } from '@/utils/assets'
 import { FiMail, FiMapPin } from 'react-icons/fi'
 import SharePopup, { type SharePlatform } from '../misc/SharePopup'
-import { useSavedProperties } from '@/hooks/useSavedProperties'
+import { useSavedProperties } from '@/shared/hooks'
 import type { Property } from '@/types'
 
 interface VerticalPropertyCardProps {

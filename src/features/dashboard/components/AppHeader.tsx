@@ -1,0 +1,447 @@
+'use client'
+
+import { useEffect, useState, useRef } from 'react'
+import Link from 'next/link'
+import { useRouter, usePathname } from 'next/navigation'
+import { agentsApi, messagesApi } from '@/api'
+import type { Message } from '@/shared/api'
+import { ASSETS } from '@/utils/assets'
+import { resolveAgentAvatar } from '@/shared/utils/image'
+import { FiBell, FiLogOut, FiUser, FiX } from 'react-icons/fi'
+
+function AppHeader() {
+  const router = useRouter()
+  const pathname = usePathname()
+  const [userName, setUserName] = useState<string>('')
+  const [userAvatar, setUserAvatar] = useState<string>(ASSETS.PLACEHOLDER_PROFILE)
+  const [isVerified, setIsVerified] = useState<boolean>(false)
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false)
+  const [showNotificationDropdown, setShowNotificationDropdown] = useState(false)
+  const [unreadMessages, setUnreadMessages] = useState<Message[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [loadingNotifications, setLoadingNotifications] = useState(false)
+  const profileRef = useRef<HTMLDivElement>(null)
+  const notificationRef = useRef<HTMLDivElement>(null)
+
+  // Determine if we're on agent, broker, or admin routes
+  const isAgentRoute = pathname?.startsWith('/agent')
+  const isBrokerRoute = pathname?.startsWith('/broker')
+  const isAdminRoute = pathname?.startsWith('/admin')
+
+  // Determine create listing path and inbox path based on route
+  const createListingPath = isBrokerRoute ? '/broker/create-listing' : '/agent/create-listing'
+  const inboxPath = isBrokerRoute ? '/broker/inbox' : '/agent/inbox'
+  const accountPath = isBrokerRoute ? '/broker/account' : isAdminRoute ? '/admin' : '/agent/account'
+  const roleLabel = isAdminRoute ? 'Admin' : isBrokerRoute ? 'Broker' : isVerified ? 'Rent Manager' : 'Property Agent'
+  const defaultName = isAdminRoute ? 'Admin' : isBrokerRoute ? 'Broker' : 'Agent'
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!isAgentRoute && !isBrokerRoute && !isAdminRoute) return
+
+      try {
+        // Get stored data first
+        const storedName = localStorage.getItem('user_name') || localStorage.getItem('agent_name') || ''
+        const storedAgentId = localStorage.getItem('agent_id')
+        
+        // Set name from localStorage immediately
+        if (storedName) {
+          setUserName(storedName)
+        }
+
+        const role = typeof window !== 'undefined' ? (localStorage.getItem('user_role') || localStorage.getItem('agent_role')) : null
+        const isAgent = role === 'agent'
+
+        // /agents/me is only for users with role 'agent'; brokers/admins get 403
+        if (isAgent && (isAgentRoute || isBrokerRoute)) {
+          try {
+            const agentData = await agentsApi.getCurrent()
+            
+            // Update name
+            if (agentData.first_name && agentData.last_name) {
+              const fullName = `${agentData.first_name} ${agentData.last_name}`
+              setUserName(fullName)
+              localStorage.setItem('agent_name', fullName)
+              localStorage.setItem('user_name', fullName)
+            } else if (agentData.full_name) {
+              setUserName(agentData.full_name)
+              localStorage.setItem('agent_name', agentData.full_name)
+              localStorage.setItem('user_name', agentData.full_name)
+            }
+            
+            // Update avatar and verification status
+            if (agentData.id) {
+              const avatarImage = resolveAgentAvatar(
+                agentData.image || agentData.avatar || agentData.profile_image,
+                agentData.id
+              )
+              setUserAvatar(avatarImage)
+              setIsVerified(agentData.verified || false)
+              localStorage.setItem('agent_id', agentData.id.toString())
+            }
+          } catch (error) {
+            console.error('Error fetching agent data in AppHeader:', error)
+            // Fallback to stored agent ID for avatar
+            if (storedAgentId) {
+              const avatarImage = resolveAgentAvatar(null, parseInt(storedAgentId))
+              setUserAvatar(avatarImage)
+            }
+          }
+        } else {
+          // For brokers/admins we rely on localStorage only (no /agents/me call)
+          if (storedAgentId) {
+            const avatarImage = resolveAgentAvatar(null, parseInt(storedAgentId))
+            setUserAvatar(avatarImage)
+          }
+        }
+      } catch (error) {
+        console.error('Error in fetchUserData:', error)
+        // Fallback to localStorage values
+        const storedName = localStorage.getItem('user_name') || localStorage.getItem('agent_name') || ''
+        const storedAgentId = localStorage.getItem('agent_id')
+        if (storedName) setUserName(storedName)
+        if (storedAgentId) {
+          const avatarImage = resolveAgentAvatar(null, parseInt(storedAgentId))
+          setUserAvatar(avatarImage)
+        }
+      }
+    }
+    fetchUserData()
+  }, [isAgentRoute, isBrokerRoute, isAdminRoute])
+
+  // Fetch unread messages (property inquiries) - only for agent/broker, not admin
+  useEffect(() => {
+    const fetchUnreadMessages = async () => {
+      if (!isAgentRoute && !isBrokerRoute) return
+      
+      try {
+        setLoadingNotifications(true)
+        const response = await messagesApi.getAll({ is_read: false })
+        // Filter for property inquiries only and exclude messages where user is the sender
+        const userEmail = typeof window !== 'undefined' ? localStorage.getItem('user_email') : null
+        const inquiries = response.data.filter(msg => 
+          msg.type === 'property_inquiry' && 
+          msg.sender_email !== userEmail && 
+          msg.sender_id !== (typeof window !== 'undefined' ? parseInt(localStorage.getItem('agent_id') || '0') : 0)
+        )
+        setUnreadMessages(inquiries.slice(0, 5)) // Show latest 5
+        // Count only property inquiries for the badge
+        setUnreadCount(inquiries.length)
+      } catch (error) {
+        console.error('Error fetching unread messages:', error)
+      } finally {
+        setLoadingNotifications(false)
+      }
+    }
+
+    fetchUnreadMessages()
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchUnreadMessages, 30000)
+    return () => clearInterval(interval)
+  }, [isAgentRoute, isBrokerRoute])
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setShowProfileDropdown(false)
+      }
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+        setShowNotificationDropdown(false)
+      }
+    }
+
+    if (showProfileDropdown || showNotificationDropdown) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showProfileDropdown, showNotificationDropdown])
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await messagesApi.markAllAsRead()
+      // Refresh messages to update the list
+      const response = await messagesApi.getAll({ is_read: false })
+      const inquiries = response.data.filter(msg => msg.type === 'property_inquiry')
+      setUnreadMessages(inquiries.slice(0, 5))
+      setUnreadCount(inquiries.length)
+    } catch (error) {
+      console.error('Error marking all as read:', error)
+    }
+  }
+
+  const handleNotificationClick = async (message: Message) => {
+    // Mark as read if not already read
+    if (!message.is_read) {
+      try {
+        await messagesApi.markAsRead(message.id)
+        // Update local state
+        setUnreadMessages(prev => prev.map(msg => 
+          msg.id === message.id ? { ...msg, is_read: true } : msg
+        ))
+        setUnreadCount(prev => Math.max(0, prev - 1))
+      } catch (error: any) {
+        // If message not found or unauthorized, just remove it from the list
+        if (error?.response?.status === 404 || error?.response?.status === 403) {
+          setUnreadMessages(prev => prev.filter(msg => msg.id !== message.id))
+          setUnreadCount(prev => Math.max(0, prev - 1))
+        } else {
+          console.error('Error marking message as read:', error)
+        }
+      }
+    }
+    setShowNotificationDropdown(false)
+    router.push(inboxPath)
+  }
+
+  const formatTime = (dateString: string): string => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+
+    if (diffMins < 1) return 'Just now'
+    if (diffMins < 60) return `${diffMins}m ago`
+    if (diffHours < 24) return `${diffHours}h ago`
+    if (diffDays < 7) return `${diffDays}d ago`
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined })
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('user_token')
+    localStorage.removeItem('user_name')
+    localStorage.removeItem('user_email')
+    localStorage.removeItem('user_phone')
+    localStorage.removeItem('user_avatar')
+    localStorage.removeItem('user_role')
+    localStorage.removeItem('agent_id')
+    localStorage.removeItem('agent_name')
+    localStorage.removeItem('agent_status')
+    localStorage.removeItem('agent_registration_status')
+    localStorage.removeItem('broker_status')
+    localStorage.removeItem('broker_registration_status')
+    localStorage.removeItem('unread_messages_count')
+    setShowProfileDropdown(false)
+    router.push('/')
+  }
+
+  // Show header on agent, broker, and admin routes
+  if (!isAgentRoute && !isBrokerRoute && !isAdminRoute) {
+    return null
+  }
+
+  return (
+    <header className="w-full bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div className="flex items-center justify-between px-6 py-4 md:px-8 md:py-4">
+        {/* Logo on the left */}
+        <Link href="/" className="flex items-center flex-shrink-0">
+          <img
+            src={ASSETS.LOGO_HERO_MAIN}
+            alt="Rentals.ph logo"
+            className="h-10 md:h-12 w-auto"
+          />
+        </Link>
+
+        {/* Right side: Add Listing button, Bell icon, Divider, Profile */}
+        <div className="flex items-center gap-4">
+          {/* Add Listing Button - only show for agent/broker, not admin */}
+          {!isAdminRoute && (
+            <Link
+              href={createListingPath}
+              className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-full shadow-md hover:bg-blue-700 transition-colors"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                style={{ width: '20px', height: '20px' }}
+              >
+                {/* Roof — V/caret shape stroked */}
+                <path
+                  d="M2 12 L12 2 L22 12"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+
+                {/* House body — pentagon with peaked top matching the caret angle */}
+                <path d="M3.5 22 L3.5 15 L12 6 L20.5 15 L20.5 22 Z" />
+
+                {/* Door cutout */}
+                <rect x="9.5" y="16.5" width="5" height="5.5" fill="#3B82F6" />
+              </svg>
+              <span>Add Listing</span>
+            </Link>
+          )}
+
+          {/* Bell Icon with Notification Dropdown - only show for agent/broker, not admin */}
+          {!isAdminRoute && (
+            <div className="relative" ref={notificationRef}>
+              <button
+                onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
+                className="relative flex items-center justify-center w-10 h-10 text-gray-600 hover:text-blue-600 transition-colors"
+                aria-label="Notifications"
+              >
+                <FiBell className="text-xl" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                )}
+              </button>
+
+            {/* Notification Dropdown */}
+            {showNotificationDropdown && (
+              <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white border border-gray-200 rounded-lg shadow-xl z-50 max-h-[500px] flex flex-col">
+                {/* Header */}
+                <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                  <h3 className="text-sm font-semibold text-gray-900 m-0">Notifications</h3>
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={handleMarkAllAsRead}
+                      className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                      type="button"
+                    >
+                      Mark all as read
+                    </button>
+                  )}
+                </div>
+
+                {/* Messages List */}
+                <div className="overflow-y-auto flex-1">
+                  {loadingNotifications ? (
+                    <div className="p-4 text-center text-sm text-gray-500">Loading...</div>
+                  ) : unreadMessages.length === 0 ? (
+                    <div className="p-6 text-center text-sm text-gray-500">
+                      <FiBell className="text-2xl text-gray-300 mx-auto mb-2" />
+                      <p className="m-0">No new inquiries</p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-gray-100">
+                      {unreadMessages.map((message) => (
+                        <button
+                          key={message.id}
+                          onClick={() => handleNotificationClick(message)}
+                          className="w-full text-left p-4 hover:bg-gray-50 transition-colors"
+                          type="button"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <p className="text-xs font-semibold text-gray-900 truncate m-0">
+                                  {message.sender_email}
+                                </p>
+                                {!message.is_read && (
+                                  <span className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0"></span>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-600 line-clamp-2 m-0 mb-1">
+                                {message.message}
+                              </p>
+                              <p className="text-xs text-gray-400 m-0">
+                                {formatTime(message.created_at)}
+                              </p>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer - View All */}
+                {unreadMessages.length > 0 && (
+                  <div className="p-3 border-t border-gray-200">
+                    <Link
+                      href={inboxPath}
+                      onClick={() => setShowNotificationDropdown(false)}
+                      className="block text-center text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      View all messages
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
+            </div>
+          )}
+          
+          {/* Divider - only show if we have notifications or add listing button */}
+          {!isAdminRoute && <div className="h-8 w-px bg-gray-300" />}
+
+          {/* Profile Section */}
+          <div className="relative" ref={profileRef}>
+            <button
+              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+              className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+            >
+              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-500 to-blue-700 ring-2 ring-white shadow-md">
+                <img
+                  src={userAvatar}
+                  alt={userName || 'User'}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement
+                    target.style.display = 'none'
+                    if (target.nextElementSibling) {
+                      ;(target.nextElementSibling as HTMLElement).style.display = 'flex'
+                    }
+                  }}
+                />
+                <div className="w-full h-full hidden items-center justify-center text-white font-semibold text-sm">
+                  {userName
+                    ? userName
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .toUpperCase()
+                        .slice(0, 2)
+                    : 'U'}
+                </div>
+              </div>
+              <div className="flex flex-col items-start hidden md:flex">
+                <span className="text-sm font-semibold text-gray-900">
+                  {userName || defaultName}
+                </span>
+                <span className="text-xs text-gray-500">
+                  {roleLabel}
+                </span>
+              </div>
+            </button>
+
+            {/* Profile Dropdown */}
+            {showProfileDropdown && (
+              <div className="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-1.5 min-w-[160px] z-50">
+                <button
+                  className="flex items-center w-full gap-2.5 px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors"
+                  onClick={() => {
+                    router.push(accountPath)
+                    setShowProfileDropdown(false)
+                  }}
+                >
+                  <FiUser className="text-lg flex-shrink-0" />
+                  <span>Account</span>
+                </button>
+                <button
+                  className="flex items-center w-full gap-2.5 px-3.5 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
+                  onClick={handleLogout}
+                >
+                  <FiLogOut className="text-lg flex-shrink-0" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
+  )
+}
+
+export default AppHeader
+

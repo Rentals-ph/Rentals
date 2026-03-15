@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import LocationMap from '@/components/agent/LocationMap'
-import { useCreateListing } from '@/contexts/CreateListingContext'
+import { LocationMap } from '@/features/agents'
+import { useCreateListing } from '@/features/listings'
 import {
   FiChevronDown,
   FiArrowLeft,

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCreateListing } from '../../contexts/CreateListingContext'
 import { compressImage, uploadWithProgress } from '@/shared/utils/image'
-import { formatPrice } from '../../utils/format'
+import { formatPrice } from '@/shared/utils/format'
 import { getApiBaseUrl } from '@/shared/config/api'
 import {
   FiArrowLeft,

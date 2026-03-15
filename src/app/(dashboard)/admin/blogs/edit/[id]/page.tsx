@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { use } from 'react'
 import { useRouter } from 'next/navigation'
-import DashboardHeader from '@/shared/components/dashboard/DashboardHeader'
+import { DashboardHeader } from '@/features/dashboard'
 import { blogsApi } from '@/api'
 import type { Blog } from '@/types'
 import { toast, ToastContainer } from '@/utils/toast'

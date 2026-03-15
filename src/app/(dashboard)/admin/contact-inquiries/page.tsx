@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import DashboardHeader from '@/shared/components/dashboard/DashboardHeader'
+import { DashboardHeader } from '@/features/dashboard'
 import { contactApi } from '@/api'
 import type { ContactInquiry } from '@/api/endpoints/contact'
 import { toast, ToastContainer } from '@/utils/toast'

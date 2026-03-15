@@ -1,8 +1,8 @@
 'use client'
 
-import AppSidebar from '@/components/common/AppSidebar'
+import { AppSidebar } from '@/features/dashboard'
 import { useRouter } from 'next/navigation'
-import { SimpleBlogModal } from '@/components/blog-editor/SimpleBlogModal'
+import { SimpleBlogModal } from '@/shared/components/modals/BlogModal'
 
 export default function CreateBlogPage() {
   const router = useRouter()

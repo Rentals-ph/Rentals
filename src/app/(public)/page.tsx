@@ -1,17 +1,10 @@
 'use client'
 
 import { Suspense } from 'react'
-import Hero from '@/components/home/Hero'
-import FeaturedProperties from '@/components/home/FeaturedProperties'
-import Testimonials from '@/components/home/Testimonials'
-import Blogs from '@/components/home/Blogs'
-import AgentsShowcase from '@/components/home/AgentsShowcase'
-import PopularExplore from '@/components/home/PopularExplore'
+import { Hero, FeaturedProperties, Testimonials, Blogs, AgentsShowcase, PopularExplore } from '@/features/home'
 import Footer from '@/components/layout/Footer'
-import { HeroSkeleton } from '@/components/home/HeroSkeleton'
-import { VerticalPropertyCardSkeleton } from '@/components/common/VerticalPropertyCardSkeleton'
-import { BlogCardSkeleton } from '@/components/common/BlogCardSkeleton'
-import { TestimonialCardSkeleton } from '@/components/common/TestimonialCardSkeleton'
+import { HeroSkeleton } from '@/features/home'
+import { VerticalPropertyCardSkeleton, BlogCardSkeleton, TestimonialCardSkeleton } from '@/shared/components/cards'
 
 /** Featured Properties section skeleton (title + chips + carousel of cards) */
 function FeaturedPropertiesFallback() {

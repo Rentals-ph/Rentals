@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { agentsApi, propertiesApi } from '@/api'
-import type { Agent } from '@/api/endpoints/agents'
+import type { Agent } from '@/features/agents'
 import type { Property } from '@/types'
 import { ASSETS } from '@/utils/assets'
 import { resolveAgentAvatar, resolvePropertyImage } from '@/shared/utils/image'

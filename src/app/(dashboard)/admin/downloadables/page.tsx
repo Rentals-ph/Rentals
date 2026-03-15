@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import DashboardHeader from '@/shared/components/dashboard/DashboardHeader'
+import { DashboardHeader } from '@/features/dashboard'
 import { downloadablesApi } from '@/api'
 import type { Downloadable } from '@/api'
 import { toast, ToastContainer } from '@/utils/toast'

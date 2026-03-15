@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import EditPropertyModal from '@/components/agent/EditPropertyModal'
+import { EditPropertyModal } from '@/features/agents'
 import { propertiesApi, agentsApi } from '@/api'
 import type { Property } from '@/types'
 import {
@@ -15,8 +15,8 @@ import {
 } from 'react-icons/fi'
 import { ASSETS } from '@/utils/assets'
 import { resolvePropertyImage, resolveAgentAvatar } from '@/shared/utils/image'
-import PropertiesMap from '@/components/agent/PropertiesMap'
-import VerticalPropertyCard from '@/components/common/VerticalPropertyCard'
+import { PropertiesMap } from '@/features/agents'
+import { VerticalPropertyCard } from '@/shared/components/cards'
 
 type ListingStatus = 'active' | 'rented' | 'hidden'
 

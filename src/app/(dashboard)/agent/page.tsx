@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import EditPropertyModal from '@/components/agent/EditPropertyModal'
-import PropertyMapPopupCard from '@/components/common/PropertyMapPopupCard'
+import { EditPropertyModal } from '@/features/agents'
+import { PropertyMapPopupCard } from '@/shared/components/maps'
 import { propertiesApi, agentsApi, messagesApi } from '@/api'
 import type { Property } from '@/types'
 import type { Message } from '@/shared/api'

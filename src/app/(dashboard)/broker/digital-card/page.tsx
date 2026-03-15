@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import FlippableBusinessCard from '@/shared/components/digital/FlippableBusinessCard'
 import { agentsApi } from '@/api'
-import type { Agent } from '@/api/endpoints/agents'
+import type { Agent } from '@/features/agents'
 import { ASSETS } from '@/utils/assets'
 import { FiBell } from 'react-icons/fi'
 

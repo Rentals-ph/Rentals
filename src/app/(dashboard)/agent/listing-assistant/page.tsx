@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ConversationalListingAssistant } from '@/components/listing-assistant'
-import VerticalPropertyCard from '@/components/common/VerticalPropertyCard'
-import type { ExtractedPropertyData } from '@/types/listingAssistant'
-import { PROPERTY_TYPE_LABELS } from '@/types/listingAssistant'
-import { formatPrice } from '@/types/listingAssistant'
+import { ConversationalListingAssistant } from '@/features/listing-assistant'
+import { VerticalPropertyCard } from '@/shared/components/cards'
+import type { ExtractedPropertyData } from '@/features/listing-assistant'
+import { PROPERTY_TYPE_LABELS, formatPrice } from '@/features/listing-assistant'
 
 /* Listing assistant only: cap image height so title, price, details stay visible */
 const propertyCardStyles = `

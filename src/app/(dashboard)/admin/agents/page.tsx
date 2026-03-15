@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { AppSidebar, DashboardHeader } from '@/components/common'
+import { AppSidebar, DashboardHeader } from '@/features/dashboard'
 import { adminApi, type AdminAgent, type CreateAgentData, type UpdateAgentData } from '@/api'
 import { toast } from '@/utils/toast'
 import { FiRefreshCw, FiEye, FiX, FiPlus, FiEdit2, FiTrash2 } from 'react-icons/fi'

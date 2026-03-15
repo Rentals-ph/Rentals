@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import VerticalPropertyCard from '../common/VerticalPropertyCard'
-import { VerticalPropertyCardSkeleton } from '../common/VerticalPropertyCardSkeleton'
+import { VerticalPropertyCard, VerticalPropertyCardSkeleton } from '@/shared/components/cards'
 import { propertiesApi } from '../../api'
 import type { Property } from '../../types'
 import type { PaginatedResponse } from '../../api/types'

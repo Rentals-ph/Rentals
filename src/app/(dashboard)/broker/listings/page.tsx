@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import EditPropertyModal from '@/components/agent/EditPropertyModal'
+import { EditPropertyModal } from '@/features/agents'
 import { brokerApi } from '@/api'
 import type { Property } from '@/types'
 import {
@@ -11,8 +11,8 @@ import {
   FiSlash,
 } from 'react-icons/fi'
 import { resolvePropertyImage } from '@/shared/utils/image'
-import PropertiesMap from '@/components/agent/PropertiesMap'
-import PropertyMapPopupCard from '@/components/common/PropertyMapPopupCard'
+import { PropertiesMap } from '@/features/agents'
+import { PropertyMapPopupCard } from '@/shared/components/maps'
 
 type ListingStatus = 'active' | 'rented' | 'hidden'
 

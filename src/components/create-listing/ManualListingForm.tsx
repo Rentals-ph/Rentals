@@ -2,8 +2,8 @@
 
 import { useMemo, useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import LocationMap from '@/components/agent/LocationMap'
-import { useCreateListing } from '@/contexts/CreateListingContext'
+import { LocationMap } from '@/features/agents'
+import { useCreateListing } from '@/features/listings'
 import { createThumbnail, compressImage, uploadWithProgress } from '@/shared/utils/image'
 import { getApiBaseUrl } from '@/shared/config/api'
 import { formatPrice } from '@/shared/utils/format'

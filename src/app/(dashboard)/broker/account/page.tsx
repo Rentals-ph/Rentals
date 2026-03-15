@@ -5,7 +5,7 @@ import AccountSettings, {
   ProfileData, 
   EditFormData, 
   PasswordFormData 
-} from '@/components/common/AccountSettings'
+} from '@/shared/components/dashboard/AccountSettings'
 import { brokerApi } from '@/api'
 import type { Broker } from '@/api/endpoints/broker'
 import { ASSETS } from '@/utils/assets'

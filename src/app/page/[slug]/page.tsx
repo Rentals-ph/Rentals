@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Footer from '@/components/layout/Footer'
-import { EmptyState, EmptyStateAction } from '@/components/common'
+import { EmptyState, EmptyStateAction } from '@/shared/components/misc'
 import { pageBuilderApi } from '@/api'
 import type { PageBuilderData } from '@/api'
 import { ASSETS } from '@/utils/assets'

@@ -1,13 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import TestimonialCard from "../common/TestimonialCard"
-import { TestimonialCardSkeleton } from "../common/TestimonialCardSkeleton"
-import { Pagination } from "../common"
+import { TestimonialCard, TestimonialCardSkeleton } from "@/shared/components/cards"
+import { Pagination } from "@/shared/components/misc"
 import { testimonialsApi } from "../../api"
 import type { Testimonial } from "../../types"
 import { ASSETS } from "@/utils/assets"
-import FadeInOnView from "@/components/common/FadeInOnView"
+import { FadeInOnView } from "@/shared/components/ui"
 
 const Testimonials = () => {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([])

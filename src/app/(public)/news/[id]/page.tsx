@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Footer from '@/components/layout/Footer'
-import { EmptyState, EmptyStateAction } from '@/components/common'
+import { EmptyState, EmptyStateAction } from '@/shared/components/misc'
 import { newsApi } from '@/api'
-import type { News } from '@/api/endpoints/news'
+import type { News } from '@/features/blog'
 import { ASSETS } from '@/utils/assets'
 
 export default function NewsDetailsPage() {

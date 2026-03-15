@@ -1,6 +1,6 @@
 'use client'
 
-import PageBuilder from '@/components/page-builder/PageBuilder'
+import { PageBuilder } from '@/features/page-builder'
 
 export default function AgentPageBuilder() {
   return <PageBuilder userType="agent" />
