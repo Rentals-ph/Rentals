@@ -8,8 +8,8 @@
 // Re-export shared/common types
 export * from './shared'
 
-// Role-specific types can be added here as they're organized
-// export * from './admin'
-// export * from './agent'
-// export * from './broker'
+// Role-specific types
+export * from './admin'
+export * from './agent'
+export * from './broker'
 

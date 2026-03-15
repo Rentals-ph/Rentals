@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import AppSidebar from '@/components/common/AppSidebar'
-import DashboardHeader from '@/components/common/dashboard/DashboardHeader'
+import DashboardHeader from '@/shared/components/dashboard/DashboardHeader'
 import { blogsApi } from '@/api'
 import type { Blog } from '@/types'
 import { toast, ToastContainer } from '@/utils/toast'

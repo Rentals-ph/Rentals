@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import DashboardHeader from '@/components/common/dashboard/DashboardHeader'
+import DashboardHeader from '@/shared/components/dashboard/DashboardHeader'
 import { adminApi, type AdminProperty, type CreatePropertyData, type UpdatePropertyData } from '@/api'
 import { agentsApi, type Agent } from '@/api'
 import { toast } from '@/utils/toast'

@@ -2,7 +2,7 @@
 
 import { ProtectedRoute } from '@/components/common'
 import AppSidebar from '@/components/common/AppSidebar'
-import AppHeader from '@/components/common/dashboard/AppHeader'
+import AppHeader from '@/shared/components/dashboard/AppHeader'
 
 export default function AdminLayout({
   children,

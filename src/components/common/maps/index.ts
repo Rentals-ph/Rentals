@@ -1,4 +1,6 @@
-export { default as PropertyLocationMap } from './PropertyLocationMap'
-export { default as PropertyMapPopupCard } from './PropertyMapPopupCard'
-export { default as PublicPropertiesMap } from './PublicPropertiesMap'
-export type { PublicPropertiesMapHandle } from './PublicPropertiesMap'
+/**
+ * @deprecated This file re-exports from @/shared/components/maps for backward compatibility.
+ * Please use @/shared/components/maps instead.
+ */
+
+export * from '@/shared/components/maps'

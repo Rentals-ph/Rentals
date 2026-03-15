@@ -1,2 +1,6 @@
-export { default as LoginModal } from './LoginModal'
-export { default as RegisterModal } from './RegisterModal'
+/**
+ * @deprecated This file re-exports from @/shared/components/modals for backward compatibility.
+ * Please use @/shared/components/modals instead.
+ */
+
+export * from '@/shared/components/modals'

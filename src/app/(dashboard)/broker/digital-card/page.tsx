@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import FlippableBusinessCard from '@/components/common/digital/FlippableBusinessCard'
+import FlippableBusinessCard from '@/shared/components/digital/FlippableBusinessCard'
 import { agentsApi } from '@/api'
 import type { Agent } from '@/api/endpoints/agents'
 import { ASSETS } from '@/utils/assets'

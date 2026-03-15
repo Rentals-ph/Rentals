@@ -1,3 +1,6 @@
-export { default as DigitalBusinessCard } from './DigitalBusinessCard'
-export { default as DigitalProfileCard } from './DigitalProfileCard'
-export { default as FlippableBusinessCard } from './FlippableBusinessCard'
+/**
+ * @deprecated This file re-exports from @/shared/components/digital for backward compatibility.
+ * Please use @/shared/components/digital instead.
+ */
+
+export * from '@/shared/components/digital'

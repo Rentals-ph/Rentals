@@ -1,8 +1,6 @@
-export { default as Pagination } from './Pagination'
-export type { PaginationProps } from './Pagination'
-export { default as SharePopup } from './SharePopup'
-export type { SharePlatform, ShareOption } from './SharePopup'
-export { default as Partners } from './Partners'
-export { default as ImageUploader } from './ImageUploader'
-export { default as EmptyState, EmptyStateAction } from './EmptyState'
-export type { EmptyStateProps, EmptyStateVariant } from './EmptyState'
+/**
+ * @deprecated This file re-exports from @/shared/components/misc for backward compatibility.
+ * Please use @/shared/components/misc instead.
+ */
+
+export * from '@/shared/components/misc'

@@ -1,15 +1,6 @@
-export { default as VerticalPropertyCard } from './VerticalPropertyCard'
-export { default as HorizontalPropertyCard } from './HorizontalPropertyCard'
-export { VerticalPropertyCardSkeleton } from './VerticalPropertyCardSkeleton'
-export { HorizontalPropertyCardSkeleton } from './HorizontalPropertyCardSkeleton'
-export { default as TestimonialCard } from './TestimonialCard'
-export { TestimonialCardSkeleton } from './TestimonialCardSkeleton'
-export { default as BlogCard } from './BlogCard'
-export { BlogCardSkeleton } from './BlogCardSkeleton'
-export { RentManagerCardSkeleton } from './AgentCardSkeleton'
-export { NewsArticleSkeleton } from './NewsArticleSkeleton'
-export { default as SimplePropertyCard } from './SimplePropertyCard'
-export { SimplePropertyCardSkeleton } from './SimplePropertyCardSkeleton'
-export { default as ModernPropertyCard } from './ModernPropertyCard'
-export { default as SimpleVerticalPropertyCard } from './SimpleVerticalPropertyCard'
-export { default as AgentCard } from './AgentCard'
+/**
+ * @deprecated This file re-exports from @/shared/components/cards for backward compatibility.
+ * Please use @/shared/components/cards instead.
+ */
+
+export * from '@/shared/components/cards'
