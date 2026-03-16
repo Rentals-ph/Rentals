@@ -44,7 +44,8 @@ export default function AgentDetailsPage() {
           if (propertyAgentId === agentId) return true
           const propertyAgent = (p as any).agent
           if (propertyAgent?.id === agentId) return true
-          if (p.rent_manager?.id === agentId) return true
+          // Only check agent, rent_manager is no longer used
+          if (p.agent?.id === agentId) return true
           return false
         })
         setProperties(managerProperties)
@@ -408,7 +409,7 @@ export default function AgentDetailsPage() {
                       const priceUnit = p.listing_type === 'for_sale' ? undefined : (formatPriceType(p.price_type) ? `/${formatPriceType(p.price_type)}` : '/mo')
                       return (
                         <div key={p.id} className="min-w-0 w-full [&>article]:min-w-0 [&>article]:w-full [&>article]:max-w-full">
-                          <HorizontalPropertyCard id={p.id} propertyType={p.type} listingType={p.listing_type as 'for_rent' | 'for_sale' | null} date={formatDate(p.published_at)} price={formatPrice(p.price)} priceUnit={priceUnit} title={p.title} description={p.description || undefined} image={mainImg} images={images} rentManagerName={agentName} rentManagerRole="Agent" rentManagerImage={agentImageUrl} rentManagerEmail={agentEmail} rentManagerWhatsApp={agentWhatsApp} companyImage={companyImage || undefined} bedrooms={p.bedrooms} bathrooms={p.bathrooms} parking={0} propertySize={propertySize} location={p.location} city={p.city} streetAddress={p.street_address} stateProvince={p.state_province} />
+                          <HorizontalPropertyCard id={p.id} propertyType={p.type} listingType={p.listing_type as 'for_rent' | 'for_sale' | null} date={formatDate(p.published_at)} price={formatPrice(p.price)} priceUnit={priceUnit} title={p.title} description={p.description || undefined} image={mainImg} images={images} agentName={agentName} agentRole="Agent" agentImage={agentImageUrl} agentEmail={agentEmail} agentWhatsApp={agentWhatsApp} companyImage={companyImage || undefined} bedrooms={p.bedrooms} bathrooms={p.bathrooms} parking={0} propertySize={propertySize} location={p.location} city={p.city} streetAddress={p.street_address} stateProvince={p.state_province} />
                         </div>
                       )
                     })

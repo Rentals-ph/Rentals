@@ -65,7 +65,7 @@ export default function PropertyDetailsPage() {
           message: `I'm Interested In This Property ${data.title} And I'd Like To Know More Details.`
         }))
 
-        if (data.agent_id && !data.agent && !data.rent_manager) {
+        if (data.agent_id && !data.agent) {
           try {
             const agentData = await agentsApi.getById(data.agent_id)
             setFetchedAgent(agentData)
@@ -103,8 +103,8 @@ export default function PropertyDetailsPage() {
     return priceType.charAt(0).toUpperCase() + priceType.slice(1).toLowerCase()
   }
 
-  const getRentManagerRole = (isOfficial: boolean | undefined): string => {
-    return isOfficial ? 'Rent Manager' : 'Property Specialist'
+  const getAgentRole = (isVerified: boolean | undefined): string => {
+    return isVerified ? 'Rent Manager' : 'Property Specialist'
   }
 
   const getImageUrl = (image: string | null | undefined): string => {
@@ -722,29 +722,27 @@ export default function PropertyDetailsPage() {
               <div className="w-full lg:w-[360px] xl:w-[380px] shrink-0 lg:sticky lg:top-6 self-start">
 
                 {/* Agent Card */}
-                {(property.agent_id || property.agent || property.rent_manager) && (() => {
+                {(property.agent_id || property.agent) && (() => {
                   const agent = property.agent || (fetchedAgent
                     ? { id: fetchedAgent.id, first_name: fetchedAgent.first_name, last_name: fetchedAgent.last_name, full_name: fetchedAgent.full_name, verified: fetchedAgent.verified }
                     : null)
-                  const rentManager = property.rent_manager
                   const displayName = agent
                     ? (agent.first_name && agent.last_name
                       ? `${agent.first_name} ${agent.last_name}`
                       : (agent as { full_name?: string }).full_name || 'Rental.Ph Official')
-                    : (rentManager?.name || 'Rental.Ph Official')
+                    : 'Rental.Ph Official'
                   const role = agent
-                    ? getRentManagerRole((agent as { verified?: boolean }).verified)
-                    : getRentManagerRole(rentManager?.is_official)
-                  const agentId = property.agent_id || agent?.id || rentManager?.id
-                  const isVerified = agent ? (agent as { verified?: boolean }).verified : rentManager?.is_official
+                    ? getAgentRole((agent as { verified?: boolean }).verified)
+                    : 'Property Specialist'
+                  const agentId = property.agent_id || agent?.id
+                  const isVerified = agent ? (agent as { verified?: boolean }).verified : false
                   const baseAgent = property.agent as { phone?: string; email?: string; whatsapp?: string; company_image?: string | null; company_name?: string | null; profile_image?: string | null; image?: string | null; avatar?: string | null; image_path?: string | null } | undefined
-                  const baseRentManager = property.rent_manager as { phone?: string; email?: string; whatsapp?: string; company_image?: string | null; company_name?: string | null; profile_image?: string | null; image?: string | null; avatar?: string | null; image_path?: string | null } | undefined
-                  const contactPhone = baseAgent?.phone || baseRentManager?.phone
-                  const contactEmail = baseAgent?.email || baseRentManager?.email
-                  const contactWhatsApp = baseAgent?.whatsapp || baseRentManager?.whatsapp || contactPhone
-                  const rawCompanyImage = baseAgent?.company_image || baseRentManager?.company_image || null
+                  const contactPhone = baseAgent?.phone
+                  const contactEmail = baseAgent?.email
+                  const contactWhatsApp = baseAgent?.whatsapp || contactPhone
+                  const rawCompanyImage = baseAgent?.company_image || null
                   const companyImage = rawCompanyImage ? resolveImageUrl(rawCompanyImage) : null
-                  const companyName = baseAgent?.company_name || baseRentManager?.company_name || null
+                  const companyName = baseAgent?.company_name || null
                   // Prefer the same image fields used on the Agents page
                   const fetched = fetchedAgent as any
                   let avatarImagePath: string | null =
@@ -756,10 +754,6 @@ export default function PropertyDetailsPage() {
                     fetched?.image ||
                     fetched?.avatar ||
                     fetched?.image_path ||
-                    baseRentManager?.profile_image ||
-                    baseRentManager?.image ||
-                    baseRentManager?.avatar ||
-                    baseRentManager?.image_path ||
                     null
 
                   return (
@@ -1000,33 +994,14 @@ export default function PropertyDetailsPage() {
                       avatar?: string | null
                       image_path?: string | null
                     } | undefined
-                    const baseRentManager = prop.rent_manager as {
-                      id?: number
-                      name?: string | null
-                      is_official?: boolean
-                      phone?: string
-                      email?: string
-                      whatsapp?: string
-                      company_image?: string | null
-                      company_name?: string | null
-                      profile_image?: string | null
-                      image?: string | null
-                      avatar?: string | null
-                      image_path?: string | null
-                    } | undefined
-
-                    // Resolve agent or rent manager avatar consistently with Agents page
+                    // Resolve agent avatar consistently with Agents page
                     const rawAgentImage =
                       baseAgent?.profile_image ||
                       baseAgent?.image ||
                       baseAgent?.avatar ||
                       baseAgent?.image_path ||
-                      baseRentManager?.profile_image ||
-                      baseRentManager?.image ||
-                      baseRentManager?.avatar ||
-                      baseRentManager?.image_path ||
                       null
-                    const agentIdForAvatar = baseAgent?.id || baseRentManager?.id
+                    const agentIdForAvatar = baseAgent?.id
                     const agentImage = agentIdForAvatar
                       ? resolveAgentAvatar(rawAgentImage, agentIdForAvatar)
                       : undefined
@@ -1040,19 +1015,16 @@ export default function PropertyDetailsPage() {
                           title={prop.title}
                           image={mainImg}
                           images={images}
-                          rentManagerName={
+                          agentName={
                             prop.agent?.first_name && prop.agent?.last_name
                               ? `${prop.agent.first_name} ${prop.agent.last_name}`
                               : prop.agent?.full_name ||
-                                prop.rent_manager?.name ||
                                 'Rental.Ph Official'
                           }
-                          rentManagerRole={
-                            prop.agent
-                              ? getRentManagerRole(prop.agent.verified)
-                              : getRentManagerRole(prop.rent_manager?.is_official)
+                          agentRole={
+                            getAgentRole(prop.agent?.verified)
                           }
-                          rentManagerImage={agentImage}
+                          agentImage={agentImage}
                           bedrooms={prop.bedrooms}
                           bathrooms={prop.bathrooms}
                           parking={0}
