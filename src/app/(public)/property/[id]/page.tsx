@@ -8,9 +8,10 @@ import VerticalPropertyCard from '@/shared/components/cards/VerticalPropertyCard
 import SharePopup, { type SharePlatform, type ShareOption } from '@/shared/components/misc/SharePopup'
 import PropertyLocationMap from '@/shared/components/maps/PropertyLocationMap'
 import { EmptyState, EmptyStateAction } from '@/shared/components/misc'
-import { propertiesApi, messagesApi, agentsApi } from '../../../../api'
-import type { Property } from '../../../../shared/types'
-import { ASSETS } from '../../../../shared/utils/assets'
+import { propertiesApi, messagesApi } from '@/shared/api'
+import { agentsApi } from '@/features/agents'
+import type { Property } from '@/shared/types'
+import { ASSETS } from '@/shared/utils/assets'
 import { resolveAgentAvatar, resolveImageUrl } from '@/shared/utils/image'
 
 export default function PropertyDetailsPage() {
@@ -47,9 +48,19 @@ export default function PropertyDetailsPage() {
         const propertyId = parseInt(id)
         if (isNaN(propertyId)) {
           console.error('Invalid property ID')
+          setLoading(false)
           return
         }
         const data = await propertiesApi.getById(propertyId)
+
+        // Check if data is valid
+        if (!data || !data.id) {
+          console.error('Invalid property data received:', data)
+          setLoading(false)
+          return
+        }
+
+        console.log('Property data fetched:', data)
 
         // Record a view for analytics (owner views are ignored by backend)
         try {
@@ -62,28 +73,36 @@ export default function PropertyDetailsPage() {
         setFetchedAgent(null)
         setInquiryData(prev => ({
           ...prev,
-          message: `I'm Interested In This Property ${data.title} And I'd Like To Know More Details.`
+          message: `I'm Interested In This Property ${data.title || 'Property'} And I'd Like To Know More Details.`
         }))
 
+        // Fetch agent if agent_id exists but agent data is not included
         if (data.agent_id && !data.agent) {
           try {
             const agentData = await agentsApi.getById(data.agent_id)
+            console.log('Agent data fetched:', agentData)
             setFetchedAgent(agentData)
-          } catch {
+          } catch (agentError) {
+            console.error('Error fetching agent:', agentError)
             setFetchedAgent(null)
           }
+        } else if (data.agent) {
+          // Agent data is already included in property response
+          console.log('Agent data included in property:', data.agent)
+          setFetchedAgent(null) // Not needed since agent is in property
         }
 
         const allPropertiesResponse = await propertiesApi.getAll()
         const allProperties = Array.isArray(allPropertiesResponse)
           ? allPropertiesResponse
-          : allPropertiesResponse.data || []
+          : (allPropertiesResponse as any)?.data || []
         const similar = allProperties
           .filter((p: Property) => p.id !== propertyId && (p.type === data.type || p.location === data.location))
           .slice(0, 3)
         setSimilarProperties(similar)
       } catch (error) {
         console.error('Error fetching property:', error)
+        setProperty(null)
       } finally {
         setLoading(false)
       }

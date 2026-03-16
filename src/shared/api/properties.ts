@@ -45,8 +45,16 @@ export const propertiesApi = {
    * Get property by ID
    */
   getById: async (id: number): Promise<Property> => {
-    const response = await apiClient.get<Property>(`/properties/${id}`)
-    return response.data
+    const response = await apiClient.get<Property | { success?: boolean; data?: Property; message?: string }>(`/properties/${id}`)
+    // Handle both wrapped and unwrapped responses
+    const data = response.data as any
+    if (data?.data && typeof data.data === 'object' && data.data.id) {
+      return data.data as Property
+    }
+    if (data?.id) {
+      return data as Property
+    }
+    throw new Error(data?.message || 'Invalid property data received')
   },
 
   /**
