@@ -21,11 +21,11 @@ interface VerticalPropertyCardProps {
   description?: string
   image?: string
   images?: string[]
-  rentManagerName?: string
-  rentManagerRole?: string
-  rentManagerImage?: string
-  rentManagerEmail?: string
-  rentManagerWhatsApp?: string
+  agentName?: string
+  agentRole?: string
+  agentImage?: string
+  agentEmail?: string
+  agentWhatsApp?: string
   companyImage?: string
   bedrooms?: number
   bathrooms?: number
@@ -52,11 +52,11 @@ function VerticalPropertyCard({
   description = 'Beautiful corner suite with modern amenities, floor-to-ceiling windows, and stunning city views. Located in the heart of IT Park with easy access to shopping, dining, and transportation....',
   image = ASSETS.PLACEHOLDER_PROPERTY_MAIN,
   images: imagesProp,
-  rentManagerName = 'Isaac Locaylocay',
-  rentManagerRole = 'Rent Manager',
-  rentManagerImage,
-  rentManagerEmail,
-  rentManagerWhatsApp,
+  agentName = 'Isaac Locaylocay',
+  agentRole = 'Rent Manager',
+  agentImage,
+  agentEmail,
+  agentWhatsApp,
   companyImage,
   bedrooms = 4,
   bathrooms = 2,
@@ -196,9 +196,9 @@ function VerticalPropertyCard({
             {title}
           </h3>
           <div className="flex items-center gap-[4px] flex-shrink-0">
-            {rentManagerEmail && (
+            {agentEmail && (
               <a
-                href={`mailto:${rentManagerEmail}`}
+                href={`mailto:${agentEmail}`}
                 onClick={(e) => e.stopPropagation()}
                 className="px-[12px] py-[4px] rounded-[5px] text-[#205ED7] text-[9px] sm:text-[10px] font-medium leading-[1.26] hover:bg-blue-50 transition-colors whitespace-nowrap"
                 style={{ border: '1px solid #205ED7' }}
@@ -206,9 +206,9 @@ function VerticalPropertyCard({
                 Email
               </a>
             )}
-            {rentManagerWhatsApp && (
+            {agentWhatsApp && (
               <a
-                href={`https://wa.me/${rentManagerWhatsApp.replace(/\D/g, '')}`}
+                href={`https://wa.me/${agentWhatsApp.replace(/\D/g, '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
@@ -218,7 +218,7 @@ function VerticalPropertyCard({
                 WhatsApp
               </a>
             )}
-            {!rentManagerEmail && !rentManagerWhatsApp && (
+            {!agentEmail && !agentWhatsApp && (
               <>
                 <a
                   href="#"
@@ -320,8 +320,8 @@ function VerticalPropertyCard({
         {/* Agent section */}
         <div className="flex items-center gap-[8px]">
           <img
-            src={rentManagerImage || ASSETS.PLACEHOLDER_PROFILE}
-            alt={rentManagerName}
+            src={agentImage || ASSETS.PLACEHOLDER_PROFILE}
+            alt={agentName}
             className="w-[36.99px] h-[36.99px] rounded-full object-cover flex-shrink-0"
             onError={(e) => {
               e.currentTarget.src = ASSETS.PLACEHOLDER_PROFILE
@@ -329,7 +329,7 @@ function VerticalPropertyCard({
           />
           <div className="flex-1 min-w-0">
             <p className="text-black text-[12px] sm:text-[13px] font-medium leading-[1.26] truncate">
-              By {rentManagerName}
+              By {agentName}
             </p>
           </div>
           {/* Company image placeholder */}

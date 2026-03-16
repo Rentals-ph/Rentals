@@ -155,8 +155,8 @@ function PropertiesContent() {
   }
 
   // Helper function to get rent manager role
-  const getRentManagerRole = (isOfficial: boolean | undefined): string => {
-    return isOfficial ? 'Rent Manager' : 'Property Specialist'
+  const getAgentRole = (isVerified: boolean | undefined): string => {
+    return isVerified ? 'Rent Manager' : 'Property Specialist'
   }
 
   // Fetch properties from API
@@ -389,7 +389,7 @@ function PropertiesContent() {
       // Featured: properties published in the last 7 days with verified agents
       const isRecent = property.published_at ? 
         (Date.now() - new Date(property.published_at).getTime()) <= 7 * 24 * 60 * 60 * 1000 : false
-      const isVerified = property.agent?.verified || property.rent_manager?.is_official
+      const isVerified = property.agent?.verified
       return isRecent && isVerified
     }
     if (subCategory === 'top') {
@@ -1437,32 +1437,13 @@ function PropertiesContent() {
                           avatar?: string | null
                           image_path?: string | null
                         } | undefined
-                        const baseRentManager = property.rent_manager as {
-                          id?: number
-                          name?: string | null
-                          is_official?: boolean
-                          phone?: string
-                          email?: string
-                          whatsapp?: string
-                          company_image?: string | null
-                          company_name?: string | null
-                          profile_image?: string | null
-                          image?: string | null
-                          avatar?: string | null
-                          image_path?: string | null
-                        } | undefined
-
                         const rawAgentImage =
                           baseAgent?.profile_image ||
                           baseAgent?.image ||
                           baseAgent?.avatar ||
                           baseAgent?.image_path ||
-                          baseRentManager?.profile_image ||
-                          baseRentManager?.image ||
-                          baseRentManager?.avatar ||
-                          baseRentManager?.image_path ||
                           null
-                        const agentIdForAvatar = baseAgent?.id || baseRentManager?.id
+                        const agentIdForAvatar = baseAgent?.id
                         const agentImage = agentIdForAvatar
                           ? resolveAgentAvatar(rawAgentImage, agentIdForAvatar)
                           : undefined
@@ -1484,15 +1465,15 @@ function PropertiesContent() {
                           images: (property.images_url && property.images_url.length > 0)
                             ? [mainImage, ...(property.images_url || []).filter((u): u is string => !!u && u !== mainImage)]
                             : undefined,
-                          rentManagerName: property.agent?.first_name && property.agent?.last_name
+                          agentName: property.agent?.first_name && property.agent?.last_name
                             ? `${property.agent.first_name} ${property.agent.last_name}`
                             : property.agent?.full_name
-                            || property.rent_manager?.name
                             || 'Rental.Ph Official',
-                          rentManagerRole: property.agent
-                            ? getRentManagerRole(property.agent.verified)
-                            : getRentManagerRole(property.rent_manager?.is_official),
-                          rentManagerImage: agentImage,
+                          agentRole: getAgentRole(property.agent?.verified),
+                          agentImage: agentImage,
+                          agentEmail: (property.agent as any)?.email,
+                          agentWhatsApp: (property.agent as any)?.whatsapp,
+                          companyImage: (property.agent as any)?.company_image || (property.agent as any)?.agency_image,
                           bedrooms: property.bedrooms,
                           bathrooms: property.bathrooms,
                           parking: 0, // Parking not in backend model, defaulting to 0

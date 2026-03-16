@@ -169,9 +169,9 @@ const FeaturedProperties = () => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
   }
 
-  // Helper function to get rent manager role
-  const getRentManagerRole = (isOfficial: boolean | undefined): string => {
-    return isOfficial ? 'Rent Manager' : 'Property Specialist'
+  // Helper function to get agent role
+  const getAgentRole = (isVerified: boolean | undefined): string => {
+    return isVerified ? 'Rent Manager' : 'Property Specialist'
   }
 
   // Helper function to get image URL
@@ -337,40 +337,21 @@ const FeaturedProperties = () => {
                   avatar?: string | null
                   image_path?: string | null
                 } | undefined
-                const baseRentManager = property.rent_manager as {
-                  id?: number
-                  name?: string | null
-                  is_official?: boolean
-                  phone?: string
-                  email?: string
-                  whatsapp?: string
-                  company_image?: string | null
-                  company_name?: string | null
-                  profile_image?: string | null
-                  image?: string | null
-                  avatar?: string | null
-                  image_path?: string | null
-                } | undefined
 
                 const rawAgentImage =
                   baseAgent?.profile_image ||
                   baseAgent?.image ||
                   baseAgent?.avatar ||
                   baseAgent?.image_path ||
-                  baseRentManager?.profile_image ||
-                  baseRentManager?.image ||
-                  baseRentManager?.avatar ||
-                  baseRentManager?.image_path ||
                   null
-                const agentIdForAvatar = baseAgent?.id || baseRentManager?.id
+                const agentIdForAvatar = baseAgent?.id
                 const agentImage = agentIdForAvatar
                   ? resolveAgentAvatar(rawAgentImage, agentIdForAvatar)
                   : undefined
                 
-                const rentManagerName = property.agent?.first_name && property.agent?.last_name
+                const agentName = property.agent?.first_name && property.agent?.last_name
                   ? `${property.agent.first_name} ${property.agent.last_name}`
                   : property.agent?.full_name
-                  || property.rent_manager?.name
                   || 'Rental.Ph Official'
                 
                 return (
@@ -390,11 +371,11 @@ const FeaturedProperties = () => {
                       description={property.description}
                       image={mainImage}
                       images={images}
-                      rentManagerName={rentManagerName}
-                      rentManagerRole={getRentManagerRole(property.agent?.verified || property.rent_manager?.is_official)}
-                      rentManagerImage={agentImage}
-                      rentManagerEmail={(property.agent as any)?.email || property.rent_manager?.email}
-                      rentManagerWhatsApp={(property.agent as any)?.whatsapp}
+                      agentName={agentName}
+                      agentRole={getAgentRole(property.agent?.verified)}
+                      agentImage={agentImage}
+                      agentEmail={(property.agent as any)?.email}
+                      agentWhatsApp={(property.agent as any)?.whatsapp}
                       companyImage={(property.agent as any)?.company_image || (property.agent as any)?.agency_image}
                       bedrooms={property.bedrooms}
                       bathrooms={property.bathrooms}

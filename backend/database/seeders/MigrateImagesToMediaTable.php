@@ -2,13 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Models\Blog;
-use App\Models\Company;
-use App\Models\Media;
-use App\Models\News;
-use App\Models\Property;
-use App\Models\Testimonial;
-use App\Models\User;
+use App\Domain\Content\Models\Blog;
+use App\Domain\Users\Models\Company;
+use App\Domain\Properties\Models\Media;
+use App\Domain\Content\Models\News;
+use App\Domain\Properties\Models\Property;
+use App\Domain\Content\Models\Testimonial;
+use App\Domain\Users\Models\User;
 use Illuminate\Database\Seeder;
 
 /**

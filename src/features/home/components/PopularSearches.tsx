@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { FiChevronDown } from 'react-icons/fi'
+import { FadeInOnView } from '@/shared/components/ui'
 
 // Data for popular searches
 const propertyTypeSearches = {
@@ -114,12 +115,18 @@ export default function PopularSearches() {
   return (
     <section className="bg-white min-h-[40vh] sm:min-h-[50vh] flex page-x py-8 sm:py-12 flex-col justify-center">
       <div className="page-w">
-        <h2 className="text-center font-outfit text-xl sm:text-2xl md:text-4xl font-bold text-gray-900 px-2">
-          Popular Real Estate Searches
-        </h2>
+        <FadeInOnView
+          as="div"
+          className="text-center mb-6 sm:mb-8"
+        >
+          <h2 className="text-center font-outfit text-xl sm:text-2xl md:text-4xl font-bold text-gray-900 px-2">
+            Popular Real Estate Searches
+          </h2>
+        </FadeInOnView>
 
         {/* Tabs */}
-        <div className="flex justify-center gap-0 mb-8 sm:mb-10 border-b border-gray-200 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <FadeInOnView as="div" delayMs={120}>
+          <div className="flex justify-center gap-0 mb-8 sm:mb-10 border-b border-gray-200 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <button
             className={`px-4 sm:px-6 md:px-8 py-3 bg-transparent border-none font-outfit text-sm sm:text-base md:text-lg font-medium cursor-pointer relative transition-colors whitespace-nowrap flex-shrink-0 ${
               activeTab === 'type' ? 'text-rental-blue-600 font-semibold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[3px] after:bg-rental-blue-600 after:rounded-t-[3px]' : 'text-gray-500 hover:text-rental-blue-600'
@@ -137,8 +144,10 @@ export default function PopularSearches() {
             By Location
           </button>
         </div>
+        </FadeInOnView>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-x-[60px] md:gap-y-2 items-start">
+        <FadeInOnView as="div" delayMs={220}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-x-[60px] md:gap-y-2 items-start">
           {categories.map(category => {
             const items = (data as any)[category] as { label: string; type: string; location: string }[]
             const isExpanded = showMore[category]
@@ -174,6 +183,7 @@ export default function PopularSearches() {
             )
           })}
         </div>
+        </FadeInOnView>
       </div>
     </section>
   )

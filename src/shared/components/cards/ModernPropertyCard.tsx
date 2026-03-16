@@ -12,9 +12,9 @@ interface ModernPropertyCardProps {
   price?: string
   title?: string
   image?: string
-  rentManagerName?: string
-  rentManagerRole?: string
-  rentManagerImage?: string
+  agentName?: string
+  agentRole?: string
+  agentImage?: string
   bedrooms?: number
   bathrooms?: number
   parking?: number
@@ -29,9 +29,9 @@ function ModernPropertyCard({
   price = '$1200/Month',
   title = 'Azure Residences - 2BR Corner Suite',
   image = ASSETS.PLACEHOLDER_PROPERTY_MAIN,
-  rentManagerName = 'Rental.Ph Official',
-  rentManagerRole = 'Rent Manager',
-  rentManagerImage,
+  agentName = 'Rental.Ph Official',
+  agentRole = 'Rent Manager',
+  agentImage,
   bedrooms = 4,
   bathrooms = 2,
   parking: _parking = 2,
@@ -134,8 +134,8 @@ function ModernPropertyCard({
         <div className="mt-auto flex items-center justify-between pt-2">
           <div className="flex flex-1 items-center gap-2.5 min-w-0">
             <img
-              src={rentManagerImage || ASSETS.PLACEHOLDER_PROFILE}
-              alt={rentManagerName}
+              src={agentImage || ASSETS.PLACEHOLDER_PROFILE}
+              alt={agentName}
               className="h-10 w-10 flex-shrink-0 rounded-full border-2 border-rental-blue-600 bg-white object-cover"
               onError={(e) => {
                 e.currentTarget.src = ASSETS.PLACEHOLDER_PROFILE
@@ -143,10 +143,10 @@ function ModernPropertyCard({
             />
             <div className="flex min-w-0 flex-col gap-0.5">
               <p className="m-0 overflow-hidden text-ellipsis whitespace-nowrap font-outfit text-xs font-semibold leading-tight text-rental-blue-600">
-                {rentManagerName}
+                {agentName}
               </p>
               <p className="m-0 font-outfit text-xs font-normal uppercase leading-tight tracking-wider text-blue-400">
-                {rentManagerRole}
+                {agentRole}
               </p>
             </div>
           </div>
