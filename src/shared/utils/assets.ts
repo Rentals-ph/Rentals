@@ -6,7 +6,7 @@
  */
 
 // Import asset manifest - using require for JSON in Next.js
-const assetManifest = require('../../public/assets/asset-manifest.json');
+const assetManifest = require('../../../public/assets/asset-manifest.json');
 
 type AssetCategory = 'logos' | 'icons' | 'images' | 'backgrounds' | 'decorative' | 'vectors' | 'partners' | 'groups' | 'frames';
 

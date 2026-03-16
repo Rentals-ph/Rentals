@@ -22,8 +22,22 @@ export const propertiesApi = {
    * Get featured properties
    */
   getFeatured: async (params?: { listing_type?: string }): Promise<Property[]> => {
-    const response = await apiClient.get<Property[]>('/properties/featured', { params })
-    return response.data
+    const response = await apiClient.get<Property[] | PaginatedResponse<Property>>('/properties/featured', { params })
+    
+    // Handle both array and paginated response formats
+    if (Array.isArray(response.data)) {
+      return response.data
+    }
+    
+    // If it's a paginated response, extract the data array
+    const paginatedResponse = response.data as PaginatedResponse<Property>
+    if (paginatedResponse?.data && Array.isArray(paginatedResponse.data)) {
+      return paginatedResponse.data
+    }
+    
+    // Fallback to empty array if structure is unexpected
+    console.warn('Unexpected response structure from /properties/featured endpoint:', response.data)
+    return []
   },
 
   /**

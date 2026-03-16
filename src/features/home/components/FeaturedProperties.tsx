@@ -28,14 +28,18 @@ const FeaturedProperties = () => {
   // Derive location options from both featured and all properties (city only), limited to 1-2 word names
   const locations = (() => {
     const set = new Set<string>()
-    featuredProperties.forEach((p) => {
-      const city = p.city?.trim()
-      if (city && isShortCityName(city)) set.add(city)
-    })
-    citiesFromAllProperties.forEach((city) => {
-      const c = city?.trim()
-      if (c && isShortCityName(c)) set.add(c)
-    })
+    if (Array.isArray(featuredProperties)) {
+      featuredProperties.forEach((p) => {
+        const city = p.city?.trim()
+        if (city && isShortCityName(city)) set.add(city)
+      })
+    }
+    if (Array.isArray(citiesFromAllProperties)) {
+      citiesFromAllProperties.forEach((city) => {
+        const c = city?.trim()
+        if (c && isShortCityName(c)) set.add(c)
+      })
+    }
     return ['All Locations', ...Array.from(set).sort((a, b) => a.localeCompare(b))]
   })()
 
@@ -43,14 +47,18 @@ const FeaturedProperties = () => {
   useEffect(() => {
     if (selectedLocation === 'All Locations') return
     const set = new Set<string>()
-    featuredProperties.forEach((p) => {
-      const city = p.city?.trim()
-      if (city && isShortCityName(city)) set.add(city)
-    })
-    citiesFromAllProperties.forEach((city) => {
-      const c = city?.trim()
-      if (c && isShortCityName(c)) set.add(c)
-    })
+    if (Array.isArray(featuredProperties)) {
+      featuredProperties.forEach((p) => {
+        const city = p.city?.trim()
+        if (city && isShortCityName(city)) set.add(city)
+      })
+    }
+    if (Array.isArray(citiesFromAllProperties)) {
+      citiesFromAllProperties.forEach((city) => {
+        const c = city?.trim()
+        if (c && isShortCityName(c)) set.add(c)
+      })
+    }
     const locList = ['All Locations', ...Array.from(set).sort((a, b) => a.localeCompare(b))]
     if (!locList.includes(selectedLocation)) setSelectedLocation('All Locations')
   }, [featuredProperties, citiesFromAllProperties, selectedLocation])
@@ -70,9 +78,16 @@ const FeaturedProperties = () => {
         const data = await propertiesApi.getFeatured(
           listingType ? { listing_type: listingType } : undefined,
         )
-        setFeaturedProperties(data)
+        // Ensure data is always an array
+        const properties = Array.isArray(data) 
+          ? data 
+          : (data as any)?.data && Array.isArray((data as any).data)
+            ? (data as any).data
+            : []
+        setFeaturedProperties(properties)
       } catch (error) {
         console.error('Error fetching featured properties:', error)
+        setFeaturedProperties([])
       } finally {
         setLoading(false)
       }
