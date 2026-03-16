@@ -2,6 +2,7 @@
 
 namespace App\Domain\Users\Models;
 
+use App\Domain\Messaging\Models\Message;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

@@ -18,9 +18,12 @@ const Testimonials = () => {
     const fetchTestimonials = async () => {
       try {
         const data = await testimonialsApi.getAll()
-        setTestimonials(data)
+        // Ensure data is always an array
+        const testimonialsList = Array.isArray(data) ? data : []
+        setTestimonials(testimonialsList)
       } catch (error) {
         console.error('Error fetching testimonials:', error)
+        setTestimonials([])
       } finally {
         setLoading(false)
       }
@@ -42,10 +45,11 @@ const Testimonials = () => {
   }
 
   // Pagination calculations
-  const totalPages = Math.ceil(testimonials.length / itemsPerPage)
+  const testimonialsArray = Array.isArray(testimonials) ? testimonials : []
+  const totalPages = Math.ceil(testimonialsArray.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
-  const paginatedTestimonials = testimonials.slice(startIndex, endIndex)
+  const paginatedTestimonials = testimonialsArray.slice(startIndex, endIndex)
 
   return (
     <section className="bg-[#F5F9FF] w-full py-6 sm:py-10 md:py-14" id="testimonials">

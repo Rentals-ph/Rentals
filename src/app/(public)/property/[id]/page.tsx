@@ -91,7 +91,10 @@ export default function PropertyDetailsPage() {
     fetchProperty()
   }, [id])
 
-  const formatPrice = (price: number): string => {
+  const formatPrice = (price: number | null | undefined): string => {
+    if (price === null || price === undefined || isNaN(price)) {
+      return 'Price not available'
+    }
     return `₱${price.toLocaleString('en-US')}`
   }
 
