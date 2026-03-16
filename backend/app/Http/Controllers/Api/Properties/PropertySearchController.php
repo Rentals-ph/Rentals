@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\Properties;
 
 use App\Domain\Properties\Models\Property;
 use App\Domain\Messaging\Models\Conversation;

@@ -4,7 +4,8 @@ import { Suspense } from 'react'
 import { Hero, FeaturedProperties, Testimonials, Blogs, AgentsShowcase, PopularExplore } from '@/features/home'
 import Footer from '@/components/layout/Footer'
 import { HeroSkeleton } from '@/features/home'
-import { VerticalPropertyCardSkeleton, BlogCardSkeleton, TestimonialCardSkeleton } from '@/shared/components/cards'
+import { VerticalPropertyCardSkeleton, TestimonialCardSkeleton } from '@/shared/components/cards'
+import { BlogCardSkeleton } from '@/features/blog'
 
 /** Featured Properties section skeleton (title + chips + carousel of cards) */
 function FeaturedPropertiesFallback() {

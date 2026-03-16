@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { BlogCardSkeleton } from '@/shared/components/cards'
+import { BlogCardSkeleton } from '@/features/blog'
 import { blogsApi } from '@/features/blog'
 import type { Blog } from '@/features/blog'
 import { ASSETS } from '@/shared/utils/assets'

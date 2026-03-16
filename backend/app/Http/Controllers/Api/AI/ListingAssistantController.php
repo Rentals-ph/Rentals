@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\AI;
 
 use App\Domain\AI\Models\ListingAssistantConversation;
 use App\Domain\Properties\Models\Property;

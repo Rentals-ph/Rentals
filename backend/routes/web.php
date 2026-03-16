@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Public\PageBuilderController;
-use App\Http\Controllers\StorageController;
+use App\Http\Controllers\Api\Public\StorageController;
 
 Route::get('/', function () {
     return response()->json(['message' => 'Rentals.ph API']);

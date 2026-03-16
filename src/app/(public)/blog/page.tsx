@@ -6,7 +6,7 @@ import Footer from '@/components/layout/Footer'
 import { blogsApi } from '@/api'
 import type { Blog } from '@/shared/types'
 import { ASSETS } from '@/shared/utils/assets'
-import { BlogCardSkeleton } from '@/shared/components/cards'
+import { BlogCardSkeleton } from '@/features/blog'
 import { FiHeart, FiMessageCircle, FiShare2 } from 'react-icons/fi'
 
 export default function BlogPage() {
