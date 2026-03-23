@@ -378,7 +378,7 @@ export default function InboxPage({
           </div>
         )}
 
-        <div className="flex min-h-[600px] flex-col overflow-hidden rounded-b-2xl border-t border-gray-200 bg-[#f5f7fb] md:flex-row">
+        <div className="flex min-h-[600px] max-h-[600px] flex-col overflow-hidden rounded-b-2xl border-t border-gray-200 bg-[#f5f7fb] md:flex-row">
           {/* Conversations list - Left sidebar */}
           <div className="flex w-full flex-shrink-0 flex-col border-b border-gray-200 bg-white md:w-[320px] md:border-b-0 md:border-r">
             {/* Search */}
@@ -524,7 +524,7 @@ export default function InboxPage({
           </div>
 
           {/* Chat panel - Right side */}
-          <div className="flex min-h-[600px] flex-1 flex-col bg-white">
+          <div className="flex flex-1 flex-col overflow-hidden bg-white">
             {selectedConversation ? (
               <>
                 {/* Chat header */}

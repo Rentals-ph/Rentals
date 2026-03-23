@@ -3,8 +3,8 @@
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { agentsApi, messagesApi } from '@/api'
-import type { Message } from '@/shared/api'
+import { agentsApi, notificationsApi } from '@/api'
+import type { UserNotification } from '@/shared/api'
 import { ASSETS } from '@/shared/utils/assets'
 import { resolveAgentAvatar } from '@/shared/utils/image'
 import { FiBell, FiLogOut, FiUser, FiX } from 'react-icons/fi'
@@ -17,7 +17,7 @@ function AppHeader() {
   const [isVerified, setIsVerified] = useState<boolean>(false)
   const [showProfileDropdown, setShowProfileDropdown] = useState(false)
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false)
-  const [unreadMessages, setUnreadMessages] = useState<Message[]>([])
+  const [unreadNotifications, setUnreadNotifications] = useState<UserNotification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loadingNotifications, setLoadingNotifications] = useState(false)
   const profileRef = useRef<HTMLDivElement>(null)
@@ -109,34 +109,28 @@ function AppHeader() {
     fetchUserData()
   }, [isAgentRoute, isBrokerRoute, isAdminRoute])
 
-  // Fetch unread messages (property inquiries) - only for agent/broker, not admin
+  // Fetch unread notifications - only for agent/broker, not admin
   useEffect(() => {
-    const fetchUnreadMessages = async () => {
+    const fetchUnreadNotifications = async () => {
       if (!isAgentRoute && !isBrokerRoute) return
       
       try {
         setLoadingNotifications(true)
-        const response = await messagesApi.getAll({ is_read: false })
-        // Filter for property inquiries only and exclude messages where user is the sender
-        const userEmail = typeof window !== 'undefined' ? localStorage.getItem('user_email') : null
-        const inquiries = response.data.filter(msg => 
-          msg.type === 'property_inquiry' && 
-          msg.sender_email !== userEmail && 
-          msg.sender_id !== (typeof window !== 'undefined' ? parseInt(localStorage.getItem('agent_id') || '0') : 0)
-        )
-        setUnreadMessages(inquiries.slice(0, 5)) // Show latest 5
-        // Count only property inquiries for the badge
-        setUnreadCount(inquiries.length)
+        const response = await notificationsApi.getAll({ is_read: false })
+        // Show all unread notifications, prioritizing 'new_message' type
+        const notifications = response.data || []
+        setUnreadNotifications(notifications.slice(0, 5)) // Show latest 5
+        setUnreadCount(response.unread_count || 0)
       } catch (error) {
-        console.error('Error fetching unread messages:', error)
+        console.error('Error fetching unread notifications:', error)
       } finally {
         setLoadingNotifications(false)
       }
     }
 
-    fetchUnreadMessages()
+    fetchUnreadNotifications()
     // Refresh every 30 seconds
-    const interval = setInterval(fetchUnreadMessages, 30000)
+    const interval = setInterval(fetchUnreadNotifications, 30000)
     return () => clearInterval(interval)
   }, [isAgentRoute, isBrokerRoute])
 
@@ -162,34 +156,33 @@ function AppHeader() {
 
   const handleMarkAllAsRead = async () => {
     try {
-      await messagesApi.markAllAsRead()
-      // Refresh messages to update the list
-      const response = await messagesApi.getAll({ is_read: false })
-      const inquiries = response.data.filter(msg => msg.type === 'property_inquiry')
-      setUnreadMessages(inquiries.slice(0, 5))
-      setUnreadCount(inquiries.length)
+      await notificationsApi.markAllAsRead()
+      // Refresh notifications to update the list
+      const response = await notificationsApi.getAll({ is_read: false })
+      setUnreadNotifications(response.data.slice(0, 5))
+      setUnreadCount(response.unread_count || 0)
     } catch (error) {
       console.error('Error marking all as read:', error)
     }
   }
 
-  const handleNotificationClick = async (message: Message) => {
+  const handleNotificationClick = async (notification: UserNotification) => {
     // Mark as read if not already read
-    if (!message.is_read) {
+    if (!notification.is_read) {
       try {
-        await messagesApi.markAsRead(message.id)
+        await notificationsApi.markAsRead(notification.id)
         // Update local state
-        setUnreadMessages(prev => prev.map(msg => 
-          msg.id === message.id ? { ...msg, is_read: true } : msg
+        setUnreadNotifications(prev => prev.map(n => 
+          n.id === notification.id ? { ...n, is_read: true } : n
         ))
         setUnreadCount(prev => Math.max(0, prev - 1))
       } catch (error: any) {
-        // If message not found or unauthorized, just remove it from the list
+        // If notification not found or unauthorized, just remove it from the list
         if (error?.response?.status === 404 || error?.response?.status === 403) {
-          setUnreadMessages(prev => prev.filter(msg => msg.id !== message.id))
+          setUnreadNotifications(prev => prev.filter(n => n.id !== notification.id))
           setUnreadCount(prev => Math.max(0, prev - 1))
         } else {
-          console.error('Error marking message as read:', error)
+          console.error('Error marking notification as read:', error)
         }
       }
     }
@@ -316,17 +309,17 @@ function AppHeader() {
                 <div className="overflow-y-auto flex-1">
                   {loadingNotifications ? (
                     <div className="p-4 text-center text-sm text-gray-500">Loading...</div>
-                  ) : unreadMessages.length === 0 ? (
+                  ) : unreadNotifications.length === 0 ? (
                     <div className="p-6 text-center text-sm text-gray-500">
                       <FiBell className="text-2xl text-gray-300 mx-auto mb-2" />
                       <p className="m-0">No new inquiries</p>
                     </div>
                   ) : (
                     <div className="divide-y divide-gray-100">
-                      {unreadMessages.map((message) => (
+                      {unreadNotifications.map((notification) => (
                         <button
-                          key={message.id}
-                          onClick={() => handleNotificationClick(message)}
+                          key={notification.id}
+                          onClick={() => handleNotificationClick(notification)}
                           className="w-full text-left p-4 hover:bg-gray-50 transition-colors"
                           type="button"
                         >
@@ -334,17 +327,17 @@ function AppHeader() {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
                                 <p className="text-xs font-semibold text-gray-900 truncate m-0">
-                                  {message.sender_email}
+                                  {notification.title}
                                 </p>
-                                {!message.is_read && (
+                                {!notification.is_read && (
                                   <span className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0"></span>
                                 )}
                               </div>
                               <p className="text-sm text-gray-600 line-clamp-2 m-0 mb-1">
-                                {message.message}
+                                {notification.body}
                               </p>
                               <p className="text-xs text-gray-400 m-0">
-                                {formatTime(message.created_at)}
+                                {formatTime(notification.created_at)}
                               </p>
                             </div>
                           </div>
@@ -355,7 +348,7 @@ function AppHeader() {
                 </div>
 
                 {/* Footer - View All */}
-                {unreadMessages.length > 0 && (
+                {unreadNotifications.length > 0 && (
                   <div className="p-3 border-t border-gray-200">
                     <Link
                       href={inboxPath}

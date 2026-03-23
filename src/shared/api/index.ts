@@ -9,4 +9,5 @@ export * from './messages'
 export * from './contact'
 export * from './downloadables'
 export * from './testimonials'
+export * from './notifications'
 

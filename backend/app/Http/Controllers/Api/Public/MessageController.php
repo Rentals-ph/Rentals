@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api\Public;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Messaging\CreateMessageRequest;
+use App\Http\Requests\Messaging\ReplyMessageRequest;
 use App\Domain\Messaging\Models\Message;
+use App\Domain\Messaging\Models\UserNotification;
 use App\Domain\Users\Models\InquiryConversation;
 use App\Domain\Properties\Models\Property;
 use App\Domain\Users\Models\User;
@@ -127,6 +129,16 @@ class MessageController extends Controller
                 'message' => $request->message,
                 'type' => $request->type ?? ($request->property_id ? 'property_inquiry' : 'contact'),
             ]);
+
+            // Notify the recipient
+            $propertyTitle = $request->property_id ? "about property: {$request->subject}" : ($request->subject ?? 'You have received a new message');
+            UserNotification::notify(
+                $request->recipient_id,
+                'new_message',
+                'You received a new inquiry',
+                ($request->sender_name ?? 'Someone') . ' sent you a message ' . $propertyTitle,
+                ['message_id' => $message->id, 'conversation_id' => $conversation->id, 'property_id' => $request->property_id]
+            );
 
             return response()->json([
                 'success' => true,

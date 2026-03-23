@@ -11,8 +11,8 @@ export * from './types'
 
 // Re-export all APIs from their feature locations for backward compatibility
 // Shared APIs
-export { propertiesApi, authApi, messagesApi, contactApi, downloadablesApi, testimonialsApi } from '../shared/api'
-export type { GetPropertiesParams, Message, SendMessageData, GetMessagesParams, LoginCredentials, LoginResponse, ContactInquiry, SubmitContactData, GetContactInquiriesParams, Downloadable } from '../shared/api'
+export { propertiesApi, authApi, messagesApi, contactApi, downloadablesApi, testimonialsApi, notificationsApi } from '../shared/api'
+export type { GetPropertiesParams, Message, SendMessageData, GetMessagesParams, LoginCredentials, LoginResponse, ContactInquiry, SubmitContactData, GetContactInquiriesParams, Downloadable, UserNotification } from '../shared/api'
 
 // Feature-specific APIs
 export { blogsApi } from '../features/blog'
