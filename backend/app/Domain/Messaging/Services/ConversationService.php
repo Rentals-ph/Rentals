@@ -6,6 +6,7 @@ use App\Domain\Messaging\Models\Conversation;
 use App\Domain\Messaging\Models\ConversationContext;
 use App\Domain\Messaging\Models\ConversationMessage;
 use App\Domain\Properties\Models\Property;
+use App\Domain\AI\Services\GroqService;
 use Illuminate\Support\Collection;
 
 class ConversationService
