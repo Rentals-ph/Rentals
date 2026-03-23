@@ -43,6 +43,7 @@ class PropertyResource extends JsonResource
             'is_featured' => $this->is_featured,
             'status' => $this->status,
             'views_count' => $this->views_count,
+            'agent_id' => $this->agent_id,
             'published_at' => $this->published_at?->toDateTimeString(),
             'created_at' => $this->created_at?->toDateTimeString(),
             'updated_at' => $this->updated_at?->toDateTimeString(),
