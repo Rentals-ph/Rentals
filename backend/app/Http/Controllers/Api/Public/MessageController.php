@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Public;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Messaging\CreateMessageRequest;
 use App\Domain\Messaging\Models\Message;
 use App\Domain\Users\Models\InquiryConversation;
 use App\Domain\Properties\Models\Property;
