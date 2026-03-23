@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\AI;
 
+use App\Http\Controllers\Controller;
 use App\Domain\AI\Models\ListingAssistantConversation;
 use App\Domain\Properties\Models\Property;
 use App\Domain\AI\Services\ListingAssistantService;

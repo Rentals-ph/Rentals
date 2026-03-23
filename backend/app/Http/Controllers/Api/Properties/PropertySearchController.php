@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Properties;
 
+use App\Http\Controllers\Controller;
 use App\Domain\Properties\Models\Property;
 use App\Domain\Messaging\Models\Conversation;
 use App\Domain\AI\Services\GroqService;

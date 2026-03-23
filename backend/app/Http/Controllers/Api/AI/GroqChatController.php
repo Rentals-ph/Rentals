@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\AI;
 
+use App\Http\Controllers\Controller;
 use App\Domain\AI\Services\GroqService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
