@@ -305,31 +305,29 @@ You are Rentals Assist, a professional real estate assistant in the Philippines.
 You will be given a user's search query and a list of available properties in JSON format.
 
 Your responsibilities:
-1. Provide helpful and friendly property recommendations based on the user's request
-2. Highlight key features (price, location, bedrooms, amenities) in a structured manner
-3. Be warm, helpful, and enthusiastic - focus on helping the user find what they need
-4. If properties are found, present them positively and helpfully - even if they don't match ALL criteria exactly
-5. If no properties are found, be helpful and suggest alternatives or ask clarifying questions
-6. Always format prices in Philippine Peso (₱) with commas
-7. Use conversation context (preferences, past searches) to personalize recommendations appropriately
+1. Provide a SHORT, conversational message acknowledging the search results
+2. Do NOT include detailed property information (no titles, prices, locations, bedrooms, bathrooms, etc.) in your response
+3. The properties will be displayed separately to the user - your job is just to provide supportive, conversational text
+4. Be warm, helpful, and enthusiastic
+5. Keep your response brief and conversational (2-3 sentences maximum)
 
 Important guidelines:
-- When showing properties, be positive and helpful - focus on what matches their search
-- If properties don't match all criteria exactly, you can mention it briefly but still present them as good options
-- Don't be overly formal or apologetic - be helpful and solution-oriented
-- Use proper spacing between property listings (add blank lines between each property)
-- Structure each property recommendation with clear spacing and organization
-- Be conversational and friendly while remaining professional
+- Your response should be a CONVERSATIONAL MESSAGE ONLY - not a property listing
+- No property details should appear in your response text
+- You can mention the count of properties found (e.g., "Great! I found 5 properties for you")
+- You can add encouraging messages or suggestions for refinement
+- Example good response: "Great news! I found 10 pet-friendly properties in Cebu City. Check out the options below and let me know if you'd like to narrow down the search!"
+- Example bad response: (anything with property titles, prices, or detailed information)
 
-Keep your response under 300 words unless more detail is needed.
+Keep your response under 100 words - just the conversational part!
 PROMPT
                     ],
                     [
                         'role'    => 'user',
                         'content' => ($contextInfo ? "Context from previous conversations:\n{$contextInfo}\n\n" : '') . 
-                                    "User's request: {$userQuery}\n\nFound {$count} matching properties:\n{$propertiesJson}",
+                                    "User's request: {$userQuery}\n\nFound {$count} matching properties.\n\nProvide ONLY a brief conversational message (no property details). The {$count} properties will be shown to the user separately.",
                     ],
-                ], 0.7, 600);
+                ], 0.7, 200);
 
             return $response['choices'][0]['message']['content'];
 
@@ -781,6 +779,199 @@ PROMPT
         $keys = array_map('intval', array_keys($arr));
         sort($keys);
         return $keys === range(0, $n - 1);
+    }
+
+    /**
+     * Generate an AI-powered input label/placeholder for the search field
+     * This creates contextual, dynamic labels based on conversation history and context
+     *
+     * @param string $userQuery The current/previous user query
+     * @param array $conversationHistory Previous messages in the conversation
+     * @param array|null $conversationContext User preferences and context
+     * @return string A short, engaging label for the input field
+     */
+    public function generateInputLabel(
+        string $userQuery = '',
+        array $conversationHistory = [],
+        ?array $conversationContext = null
+    ): string {
+        try {
+            // Build context for the AI
+            $contextInfo = '';
+            if ($conversationContext && !empty($conversationContext)) {
+                $contextInfo = "\n\nUser Preferences:\n" . $this->formatContextForPrompt($conversationContext);
+            }
+
+            if (!empty($conversationHistory)) {
+                // Get the last few messages to understand the conversation flow
+                $recentMessages = array_slice($conversationHistory, -4);
+                $contextInfo .= "\n\nRecent conversation snippet:\n";
+                foreach ($recentMessages as $msg) {
+                    $role = strtoupper($msg['role'] ?? 'USER');
+                    $content = substr($msg['content'] ?? '', 0, 100);
+                    $contextInfo .= "{$role}: {$content}\n";
+                }
+            }
+
+            $response = $this->makeChatRequest([
+                [
+                    'role' => 'system',
+                    'content' => <<<PROMPT
+You are Rentals Assist, a helpful real estate AI assistant.
+
+Generate a SHORT, engaging, contextual input label/placeholder text for the search field.
+This label should guide the user on what to type next to refine their property search.
+
+Requirements:
+- MAXIMUM 50 characters (keep it VERY short)
+- Be conversational and friendly
+- Be contextual based on the user's previous queries and preferences
+- Suggest the next logical step in the conversation
+- Use Philippine context where relevant
+- Make it actionable and inviting
+- DO NOT include quotes or special formatting - just the text
+- Examples of good labels:
+  * "Tell me your budget..."
+  * "Looking for comfort or space?"
+  * "Any specific area in mind?"
+  * "How many bedrooms needed?"
+  * "What's your ideal location?"
+  * "Budget range in mind?"
+  * "City preference?"
+  * "Want furnished or unfurnished?"
+  * "Additional details?"
+  * "Any preferences? (pet-friendly, pool, etc.)"
+
+Return ONLY the label text, nothing else. No quotes, no JSON, no explanations.
+PROMPT
+                ],
+                [
+                    'role' => 'user',
+                    'content' => "Generate an input label based on this context:{$contextInfo}",
+                ],
+            ], 0.9, 100);
+
+            $label = trim($response['choices'][0]['message']['content']);
+            
+            // Remove quotes if present (sometimes AI adds them)
+            $label = trim($label, '"\'');
+            
+            // Ensure it's not too long
+            if (strlen($label) > 50) {
+                $label = substr($label, 0, 47) . '...';
+            }
+
+            return $label ?: 'Tell me what you\'re looking for...';
+
+        } catch (Exception $e) {
+            Log::warning('Groq generateInputLabel failed: ' . $e->getMessage());
+            // Fallback labels
+            $fallbacks = [
+                'What\'s your ideal location?',
+                'How many bedrooms?',
+                'Looking for a specific area?',
+                'Tell me your preferences...',
+                'What\'s your budget?',
+            ];
+            return $fallbacks[array_rand($fallbacks)];
+        }
+    }
+
+    /**
+     * Generate diverse, valid property search queries for input label rotation.
+     * Returns multiple example searches that users might make, all valid for the system.
+     *
+     * @return array Array of 6-8 diverse property search queries
+     * @throws Exception
+     */
+    public function generatePropertySearchQueries(): array
+    {
+        $providerKey = $this->provider === 'gemini' ? env('GEMINI_API_KEY') : ($this->provider === 'groq' ? env('GROQ_API_KEY') : env('OPENAI_API_KEY'));
+        if (empty($providerKey)) {
+            $keyName = $this->provider === 'gemini' ? 'GEMINI_API_KEY' : ($this->provider === 'groq' ? 'GROQ_API_KEY' : 'OPENAI_API_KEY');
+            Log::warning('[generatePropertySearchQueries] AI provider has no API key', ['provider' => $this->provider, 'env_key' => $keyName]);
+            throw new Exception("AI property search queries require {$keyName} to be set in .env");
+        }
+
+        $systemPrompt = <<<PROMPT
+You are a rental property search assistant in the Philippines.
+Generate exactly 8 diverse, specific property search queries that users might naturally ask.
+Each query should:
+- Be a realistic natural language search (what a user would actually type)
+- Mention specific locations in the Philippines (Manila, Makati, BGC, Quezon City, Cebu City, Davao, Pasig, Mandaluyong, Lapulapu, etc.)
+- Include various property types (condo, apartment, house, bedspace, office, commercial)
+- Have different price ranges and bedroom counts
+- Be varied in search intent (latest listings, specific area, budget-focused, specific features like pet-friendly, parking, furnished, etc.)
+- Be between 8-20 words each
+
+Examples of valid searches:
+- "3 bedroom condo in Makati under 100k"
+- "Pet-friendly apartments in BGC with parking"
+- "Latest listings in Cebu City"
+- "Affordable studio apartments in Quezon City"
+- "Furnished 2-bedroom house in Pasig near school"
+- "Office space for rent in Manila CBD"
+- "Bedspace available in Mandaluyong"
+- "Commercial space in Lapulapu City"
+
+Return ONLY a valid JSON array of 8 strings (the searches), no explanation, no markdown.
+Format: ["search 1", "search 2", ..., "search 8"]
+PROMPT;
+
+        $messages = [
+            ['role' => 'system', 'content' => $systemPrompt],
+            ['role' => 'user', 'content' => 'Generate the 8 property search queries now.'],
+        ];
+
+        $response = $this->makeChatRequest($messages, 0.7, 400, 'json_object');
+
+        $content = trim($response['choices'][0]['message']['content'] ?? '');
+        if ($content === '') {
+            Log::warning('[generatePropertySearchQueries] AI returned empty content');
+            throw new Exception('AI returned an empty response for property search queries');
+        }
+
+        Log::debug('[generatePropertySearchQueries] Raw AI content', ['content' => strlen($content) > 500 ? substr($content, 0, 500) . '...' : $content]);
+
+        // Strip markdown code fences if present
+        $content = preg_replace('/^```\w*\n?|\n?```$/u', '', $content);
+        $content = trim($content);
+
+        $decoded = json_decode($content, true);
+        if (!is_array($decoded)) {
+            Log::warning('[generatePropertySearchQueries] Decoded is not array', ['json_error' => json_last_error_msg(), 'content_preview' => substr($content, 0, 200)]);
+            throw new Exception('Expected JSON from AI for property search queries');
+        }
+
+        // Accept raw JSON array ["a","b","c",...] or nested structure
+        $list = null;
+        if ($this->isZeroIndexedArray($decoded) && count($decoded) >= 6) {
+            $list = $decoded;
+        } else {
+            foreach ($decoded as $v) {
+                if (is_array($v) && $this->isZeroIndexedArray($v) && count($v) >= 6) {
+                    $list = $v;
+                    break;
+                }
+            }
+        }
+        
+        if ($list === null) {
+            Log::warning('[generatePropertySearchQueries] No array of 6+ items found in decoded', ['decoded_keys' => array_keys($decoded)]);
+            throw new Exception('Expected JSON array of at least 6 property search queries from AI');
+        }
+
+        // Filter and validate the searches
+        $searches = array_values(array_filter(array_slice($list, 0, 8), function ($v) {
+            return is_string($v) && strlen($v) >= 8 && strlen($v) <= 150;
+        }));
+
+        if (count($searches) < 6) {
+            Log::warning('[generatePropertySearchQueries] Fewer than 6 valid searches after filter', ['list' => $list, 'searches_count' => count($searches)]);
+            throw new Exception('Expected at least 6 valid property search queries from AI');
+        }
+
+        return $searches;
     }
 
     /**

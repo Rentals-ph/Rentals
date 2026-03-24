@@ -120,11 +120,30 @@ class PropertySearchController extends Controller
         $request->validate([
             'query' => ['required', 'string', 'min:1', 'max:500'],
             'conversation_id' => ['nullable', 'string', 'max:100'],
+            // Manual filter parameters (hybrid mode)
+            'bedrooms' => ['nullable', 'integer', 'min:0'],
+            'bathrooms' => ['nullable', 'integer', 'min:0'],
+            'min_price' => ['nullable', 'numeric', 'min:0'],
+            'max_price' => ['nullable', 'numeric', 'min:0'],
+            'property_type' => ['nullable', 'string', 'max:100'],
+            'location' => ['nullable', 'string', 'max:255'],
         ]);
 
         $userQuery = $request->input('query');
         $conversationIdInput = $request->input('conversation_id');
         $userId = $request->user()?->id;
+
+        // Get manual filters from request (for hybrid mode)
+        $manualFilters = [
+            'bedrooms' => $request->input('bedrooms'),
+            'bathrooms' => $request->input('bathrooms'),
+            'min_price' => $request->input('min_price'),
+            'max_price' => $request->input('max_price'),
+            'property_type' => $request->input('property_type'),
+            'location' => $request->input('location'),
+        ];
+        // Remove null values
+        $manualFilters = array_filter($manualFilters, fn($value) => $value !== null);
 
         // ── Step 1: Get or create conversation ──
         $conversation = $this->conversationService->getOrCreateConversation($conversationIdInput, $userId);
@@ -159,6 +178,30 @@ class PropertySearchController extends Controller
             if ($this->isExplicitListingSearch($userQuery)) {
                 $criteria = $this->ensureListingSearchCriteria($userQuery, $criteria);
             }
+            
+            // Merge manual filters with AI-extracted criteria (hybrid mode)
+            // Manual filters take precedence over AI parsing
+            if (!empty($manualFilters)) {
+                if (isset($manualFilters['bedrooms'])) {
+                    $criteria['bedrooms'] = $manualFilters['bedrooms'];
+                }
+                if (isset($manualFilters['bathrooms'])) {
+                    $criteria['bathrooms'] = $manualFilters['bathrooms'];
+                }
+                if (isset($manualFilters['min_price'])) {
+                    $criteria['min_price'] = $manualFilters['min_price'];
+                }
+                if (isset($manualFilters['max_price'])) {
+                    $criteria['max_price'] = $manualFilters['max_price'];
+                }
+                if (isset($manualFilters['property_type'])) {
+                    $criteria['property_type'] = $manualFilters['property_type'];
+                }
+                if (isset($manualFilters['location'])) {
+                    $criteria['location'] = $manualFilters['location'];
+                }
+            }
+            
             $properties = $this->queryProperties($criteria);
             
             // Generate recommendation response with context
@@ -203,6 +246,13 @@ class PropertySearchController extends Controller
                 $this->conversationService->generateTitle($conversation, $this->groqService);
             }
 
+            // Generate contextual input label for next search
+            $inputLabel = $this->groqService->generateInputLabel(
+                $userQuery,
+                $conversationHistory,
+                $conversationContext
+            );
+
             return response()->json([
                 'query' => $userQuery,
                 'criteria' => $criteria,
@@ -212,6 +262,7 @@ class PropertySearchController extends Controller
                 'conversation_id' => $conversationId,
                 'response_type' => 'search',
                 'is_search' => true,
+                'input_label' => $inputLabel,
             ]);
         } else {
             // This is a conversational follow-up - use conversational response
@@ -372,12 +423,20 @@ class PropertySearchController extends Controller
                 $this->conversationService->generateTitle($conversation, $this->groqService);
             }
 
+            // Generate contextual input label for next input
+            $inputLabel = $this->groqService->generateInputLabel(
+                $userQuery,
+                $conversationHistory,
+                $conversationContext
+            );
+
             $response = [
                 'query' => $userQuery,
                 'ai_response' => $aiResponse,
                 'conversation_id' => $conversationId,
                 'response_type' => 'conversational',
                 'is_search' => false,
+                'input_label' => $inputLabel,
             ];
             
             // Always include properties if they were fetched (even for conversational queries)
@@ -724,6 +783,54 @@ class PropertySearchController extends Controller
                 'success' => true,
                 'data' => [
                     'prompts' => $fallback,
+                    'fromAI' => false,
+                ],
+            ]);
+        }
+    }
+
+    /**
+     * Generate diverse property search queries for input label rotation.
+     * Returns multiple valid search examples that users might make.
+     * Publicly callable. No auth required. Uses backend AI provider (Gemini/Groq/OpenAI).
+     */
+    public function propertySearchQueries(): JsonResponse
+    {
+        \Illuminate\Support\Facades\Log::debug('[propertySearchQueries] Request received');
+        
+        // Fallback queries in case AI generation fails
+        $fallback = [
+            '3 bedroom condo in Makati under 100k',
+            'Pet-friendly apartments in BGC with parking',
+            'Latest listings in Cebu City',
+            'Affordable studio apartments in Quezon City',
+            'Furnished 2-bedroom house in Pasig',
+            'Office space for rent in Manila',
+            'Bedspace in Mandaluyong near LRT',
+            'Commercial space in Lapulapu City',
+        ];
+        
+        try {
+            $queries = $this->groqService->generatePropertySearchQueries();
+            \Illuminate\Support\Facades\Log::debug('[propertySearchQueries] AI success', ['count' => count($queries), 'queries' => $queries]);
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'searches' => $queries,
+                    'fromAI' => true,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('[propertySearchQueries] Generation failed', [
+                'message' => $e->getMessage(),
+                'exception' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'searches' => $fallback,
                     'fromAI' => false,
                 ],
             ]);

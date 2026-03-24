@@ -9,6 +9,7 @@ import { getImageUrl } from "@/shared/utils/image"
 import { formatAIMessage } from "@/shared/utils/format"
 import { SimplePropertyCardSkeleton } from "@/shared/components/cards"
 import { FadeInOnView } from "@/shared/components/ui"
+import { TypewriterText } from "@/shared/components/animations/TypewriterText"
 import HeroBanner from "./HeroBanner"
 
 const SimplePropertyCard = lazy(() => import("@/shared/components/cards/SimplePropertyCard"))
@@ -35,7 +36,29 @@ function Hero() {
   ])
   const [conversationId, setConversationId] = useState<string | undefined>()
   const [isLoading, setIsLoading] = useState(false)
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false)
+  // Phase 2 state
+  const [isAILoading, setIsAILoading] = useState(false)
+  // Phase 3: AI search results state (separate from chat mode)
+  const [aiResponse, setAiResponse] = useState<string | null>(null)
+  const [aiResults, setAiResults] = useState<Property[] | null>(null)
+  const [aiTotalCount, setAiTotalCount] = useState(0)
+  const [aiExtractedFilters, setAiExtractedFilters] = useState<Record<string, any> | null>(null)
+  const [aiConversationId, setAiConversationId] = useState<string | undefined>()
+  // AI-generated property search queries for input label rotation
+  const [propertySearchQueries, setPropertySearchQueries] = useState<string[]>([
+    '3 bedroom condo in Makati under 100k',
+    'Pet-friendly apartments in BGC with parking',
+    'Latest listings in Cebu City',
+    'Affordable studio apartments in Quezon City',
+    'Furnished 2-bedroom house in Pasig',
+    'Office space for rent in Manila',
+    'Bedspace in Mandaluyong near LRT',
+    'Commercial space in Lapulapu City',
+  ])
+  const [currentSearchQueryIndex, setCurrentSearchQueryIndex] = useState(0)
+  // AI-generated input labels for contextual guidance
+  const [aiInputLabel, setAiInputLabel] = useState('What are you looking for?')
+  const [chatInputLabel, setChatInputLabel] = useState('Type your message...')
   // Automatically get latest properties from chat messages
   const latestProperties = useMemo(() => {
     // Find the latest message with properties (search from end)
@@ -61,6 +84,44 @@ function Hero() {
 
   const [chatModeSearchQuery, setChatModeSearchQuery] = useState('')
   const [chatModeSortBy, setChatModeSortBy] = useState<string>('recommended')
+
+  // Phase 1: Natural language detection + User mode selection
+  const [searchMode, setSearchMode] = useState<'manual' | 'ai'>('manual')
+  const [userSelectedMode, setUserSelectedMode] = useState<'manual' | 'ai' | null>(null)
+
+  // Detect natural language vs manual search
+  const detectSearchMode = (query: string): 'manual' | 'ai' => {
+    if (!query.trim()) return 'manual'
+    
+    const trimmedQuery = query.trim().toLowerCase()
+    
+    // AI mode if input exceeds 25 characters
+    if (trimmedQuery.length > 25) return 'ai'
+    
+    // AI mode keywords (case-insensitive)
+    const aiKeywords = [
+      'near', 'close to', 'with', 'walking distance', 'quiet', 'safe', 'school',
+      'parking', 'furnished', 'within', 'beside', 'accessible', 'affordable',
+      'spacious', 'cozy', 'good area', 'family', 'pet', 'garden', 'pool', 'gym',
+      'views', 'overlooking'
+    ]
+    
+    for (const keyword of aiKeywords) {
+      if (trimmedQuery.includes(keyword)) return 'ai'
+    }
+    
+    return 'manual'
+  }
+
+  // Update search mode whenever search query changes
+  // If user has selected a mode explicitly, use that; otherwise, auto-detect
+  useMemo(() => {
+    if (userSelectedMode) {
+      setSearchMode(userSelectedMode as 'manual' | 'ai')
+    } else {
+      setSearchMode(detectSearchMode(searchQuery))
+    }
+  }, [searchQuery, userSelectedMode])
 
   const filteredAndSortedProperties = useMemo(() => {
     if (!latestProperties?.properties?.length) return null
@@ -108,11 +169,8 @@ function Hero() {
     return { ...latestProperties, properties: sorted }
   }, [latestProperties, chatModeSearchQuery, chatModeSortBy])
 
-  const [showHistory, setShowHistory] = useState(false)
   const [showResultsOverlay, setShowResultsOverlay] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
-  const [conversations, setConversations] = useState<any[]>([])
-  const [isLoadingConversations, setIsLoadingConversations] = useState(false)
   const router = useRouter()
   const chatMessagesEndRef = useRef<HTMLDivElement>(null)
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null)
@@ -127,6 +185,10 @@ function Hero() {
   const suggestedPromptsFetchedRef = useRef(false)
   const suggestedPromptsInFlightRef = useRef(false)
   const FALLBACK_SUGGESTED_PROMPTS = ['Show me 1-bedroom apartments', 'Find properties under ₱20k', 'Latest listings in Cebu City']
+  
+  // Refs for property search queries fetch
+  const propertySearchQueriesFetchedRef = useRef(false)
+  const propertySearchQueriesInFlightRef = useRef(false)
 
   // Array of background images - prioritize light blue with plant background
   const backgroundImages = [
@@ -169,6 +231,14 @@ function Hero() {
   }
 
   const handleSearch = () => {
+    // Phase 2: Split into two paths based on search mode (considering user selection and auto-detection)
+    if (searchMode === 'ai') {
+      // AI mode: call the API endpoint
+      handleAISearch()
+      return
+    }
+
+    // Manual mode: existing redirect logic
     const params = new URLSearchParams()
     
     if (searchQuery.trim()) {
@@ -202,6 +272,56 @@ function Hero() {
     router.push(`/properties${queryString ? `?${queryString}` : ''}`)
   }
 
+  // Phase 3: AI search handler (also used in hybrid mode)
+  const handleAISearch = async () => {
+    if (!searchQuery.trim()) return
+    
+    console.log('[AI Search] Query submitted:', searchQuery, 'Mode:', userSelectedMode)
+    setIsAILoading(true)
+
+    try {
+      // In hybrid mode, include manual filters
+      const filters = userSelectedMode === 'hybrid' ? {
+        bedrooms: minBeds ? parseInt(minBeds) : undefined,
+        bathrooms: minBaths ? parseInt(minBaths) : undefined,
+        min_price: priceMin ? parseFloat(priceMin) : undefined,
+        max_price: priceMax ? parseFloat(priceMax) : undefined,
+        property_type: propertyType ? propertyTypeMap[propertyType] : undefined,
+        location: location ? locationMap[location] : undefined,
+      } : {}
+
+      const response = await api.searchProperties(searchQuery, aiConversationId, filters)
+      
+      if (response.success && response.data) {
+        const data = response.data
+        console.log('[AI Search] Response:', data)
+        
+        // Store response in state
+        setAiResponse(data.ai_response)
+        setAiResults(data.properties || [])
+        setAiTotalCount(data.count || 0)
+        setAiExtractedFilters(data.criteria || {})
+        // Set AI-generated input label for next search
+        if (data.input_label) {
+          setAiInputLabel(data.input_label)
+        }
+        if (data.conversation_id) {
+          setAiConversationId(data.conversation_id)
+        }
+      } else {
+        console.error('[AI Search] Failed:', response.message)
+        setAiResponse(`Error: ${response.message || 'Search failed'}`)
+        setAiResults([])
+      }
+    } catch (error) {
+      console.error('[AI Search] Error:', error)
+      setAiResponse(`Error: Unable to search`)
+      setAiResults([])
+    } finally {
+      setIsAILoading(false)
+    }
+  }
+
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSearch()
@@ -212,115 +332,6 @@ function Hero() {
     const params = new URLSearchParams()
     params.set('search', search)
     router.push(`/properties?${params.toString()}`)
-  }
-
-  const handleNewConversation = () => {
-    setConversationId(undefined)
-    localStorage.removeItem(CONVERSATION_ID_KEY)
-    setChatMessages([
-      { role: 'assistant', message: 'Hello! I\'m Rentals Assist. How can I help you find the perfect rental property today?' }
-    ])
-    setShowMenu(false)
-    // Keep prefetched suggested prompts; no need to clear or refetch
-  }
-
-  const handleClearContext = async () => {
-    if (!conversationId) return
-    
-    try {
-      const response = await api.clearConversationContext(conversationId)
-      if (response.success) {
-        // Reload conversation to get updated state
-        const convResponse = await api.getConversation(conversationId)
-        if (convResponse.success && convResponse.data) {
-          const conversation = convResponse.data
-          const messages = conversation.messages.map((msg: any) => {
-            const frontendMessage: { role: 'user' | 'assistant'; message: string; properties?: Property[] } = {
-              role: msg.role,
-              message: msg.content,
-            }
-            if (msg.metadata?.properties && Array.isArray(msg.metadata.properties)) {
-              frontendMessage.properties = msg.metadata.properties
-            }
-            return frontendMessage
-          })
-          if (messages.length > 0) {
-            setChatMessages(messages)
-          }
-        }
-        setShowMenu(false)
-      }
-    } catch (error) {
-      console.error('Failed to clear context:', error)
-    }
-  }
-
-  const handleDeleteConversation = async (convId?: string) => {
-    const idToDelete = convId || conversationId
-    if (!idToDelete) return
-    
-    if (!confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
-      return
-    }
-    
-    try {
-      const response = await api.deleteConversation(idToDelete)
-      if (response.success) {
-        // If deleting current conversation, start new one
-        if (idToDelete === conversationId) {
-          handleNewConversation()
-        }
-        // Reload conversations list
-        loadConversations()
-      }
-    } catch (error) {
-      console.error('Failed to delete conversation:', error)
-    }
-  }
-
-  const loadConversations = async () => {
-    setIsLoadingConversations(true)
-    try {
-      const response = await api.listConversations()
-      if (response.success && response.data) {
-        setConversations(response.data)
-      }
-    } catch (error) {
-      console.error('Failed to load conversations:', error)
-    } finally {
-      setIsLoadingConversations(false)
-    }
-  }
-
-  const handleLoadConversation = async (convId: string) => {
-    setConversationId(convId)
-    localStorage.setItem(CONVERSATION_ID_KEY, convId)
-    setIsLoadingHistory(true)
-    setShowHistory(false)
-    
-    try {
-      const response = await api.getConversation(convId)
-      if (response.success && response.data) {
-        const conversation = response.data
-        const messages = conversation.messages.map((msg: any) => {
-          const frontendMessage: { role: 'user' | 'assistant'; message: string; properties?: Property[] } = {
-            role: msg.role,
-            message: msg.content,
-          }
-          if (msg.metadata?.properties && Array.isArray(msg.metadata.properties)) {
-            frontendMessage.properties = msg.metadata.properties
-          }
-          return frontendMessage
-        })
-        if (messages.length > 0) {
-          setChatMessages(messages)
-        }
-      }
-    } catch (error) {
-      console.error('Failed to load conversation:', error)
-    } finally {
-      setIsLoadingHistory(false)
-    }
   }
 
   const handleSendMessage = async (messageOverride?: string) => {
@@ -346,6 +357,11 @@ function Hero() {
         if (searchData.conversation_id) {
           setConversationId(searchData.conversation_id)
           localStorage.setItem(CONVERSATION_ID_KEY, searchData.conversation_id)
+        }
+        
+        // Set chat input label for next message
+        if (searchData.input_label) {
+          setChatInputLabel(searchData.input_label)
         }
         
         // Add assistant message with properties - ALWAYS use properties from API response
@@ -478,55 +494,67 @@ function Hero() {
     return () => { cancelled = true }
   }, [isChatMode])
 
-  // Load conversation history when conversation ID exists and chat mode is opened
+  // Fetch property search queries for input label rotation on component mount
   useEffect(() => {
-    const loadConversationHistory = async () => {
-      if (!isChatMode || !conversationId || isLoadingHistory) return
+    if (propertySearchQueriesFetchedRef.current || propertySearchQueriesInFlightRef.current) return
 
-      setIsLoadingHistory(true)
+    propertySearchQueriesInFlightRef.current = true
+    let cancelled = false
+
+    const DEBUG = process.env.NODE_ENV === 'development'
+    const run = async () => {
+      if (DEBUG) console.log('[propertySearchQueries] Fetching AI-generated search queries...')
       try {
-        const response = await api.getConversation(conversationId)
-        
-        if (response.success && response.data) {
-          const conversation = response.data
-          
-          // Convert backend messages to frontend format
-          const messages = conversation.messages.map((msg: ConversationMessage) => {
-            const frontendMessage: { role: 'user' | 'assistant'; message: string; properties?: Property[] } = {
-              role: msg.role,
-              message: msg.content,
-            }
-            
-            // Extract properties from metadata if available
-            if (msg.metadata?.properties && Array.isArray(msg.metadata.properties)) {
-              frontendMessage.properties = msg.metadata.properties
-            }
-            
-            return frontendMessage
+        const response = await api.getPropertySearchQueries()
+        const raw = response.data
+        // Backend returns { searches: string[], fromAI: boolean }
+        const searches = raw?.searches ?? []
+        const fromAI = raw?.fromAI === true
+        if (DEBUG) {
+          console.log('[propertySearchQueries] Response:', {
+            success: response.success,
+            fromAI,
+            searchesLength: searches.length,
+            searches,
           })
-          
-          // If we have messages, replace the default greeting
-          if (messages.length > 0) {
-            setChatMessages(messages)
-          }
         }
-      } catch (error) {
-        console.error('Failed to load conversation history:', error)
-        // Don't show error to user, just continue with current messages
+        if (!cancelled) {
+          if (response.success && searches.length >= 6) {
+            if (DEBUG) console.log(fromAI ? '[propertySearchQueries] Using AI queries:' : '[propertySearchQueries] Using fallback queries:', searches)
+            setPropertySearchQueries(searches)
+          }
+          propertySearchQueriesFetchedRef.current = true
+        }
+      } catch (err) {
+        if (DEBUG) {
+          console.error('[propertySearchQueries] Request failed:', err instanceof Error ? err.message : err)
+        }
+        if (!cancelled) {
+          propertySearchQueriesFetchedRef.current = true
+        }
       } finally {
-        setIsLoadingHistory(false)
+        propertySearchQueriesInFlightRef.current = false
       }
     }
+    run()
 
-    loadConversationHistory()
-  }, [isChatMode, conversationId])
+    return () => { cancelled = true }
+  }, [])
 
-  // Load conversations list when history panel is opened
+  // Rotate through property search queries every 5 seconds while in AI mode and input is empty
   useEffect(() => {
-    if (showHistory) {
-      loadConversations()
+    if (searchMode !== 'ai' || searchQuery.trim()) {
+      return // Don't rotate if not in AI mode or if there's input
     }
-  }, [showHistory])
+
+    const interval = setInterval(() => {
+      setCurrentSearchQueryIndex((prevIndex) => 
+        (prevIndex + 1) % propertySearchQueries.length
+      )
+    }, 5000) // Change query every 5 seconds
+
+    return () => clearInterval(interval)
+  }, [searchMode, searchQuery, propertySearchQueries])
 
   // Auto-scroll chat to bottom when messages change or loading state changes
   useEffect(() => {
@@ -556,20 +584,17 @@ function Hero() {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (showHistory) {
-          setShowHistory(false)
-        }
         if (showMenu) {
           setShowMenu(false)
         }
       }
     }
 
-    if (showHistory || showMenu) {
+    if (showMenu) {
       window.addEventListener('keydown', handleEscape)
       return () => window.removeEventListener('keydown', handleEscape)
     }
-  }, [showHistory, showMenu])
+  }, [showMenu])
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -617,24 +642,16 @@ function Hero() {
     <section 
       ref={heroSectionRef}
       id="home" 
-      className={`relative mt-0 transition-all duration-500 ease-in-out flex flex-col justify-center items-center ${
-        isChatMode 
-          ? 'min-h-[50vh] sm:min-h-[55vh] pb-[20px] overflow-visible'
-          : 'min-h-[500px] sm:min-h-[600px] md:min-h-[670px] max-h-none sm:max-h-[670px] pb-[200px] overflow-hidden'
-      }`}
+      className="relative mt-0 transition-all duration-500 ease-in-out flex flex-col justify-center items-center min-h-[500px] sm:min-h-[600px] md:min-h-[670px] overflow-hidden"
     >
       {/* Background images with smooth transitions */}
-      <div className={`absolute top-0 left-0 w-full h-full z-0 overflow-hidden transition-all duration-300 ${
-        isChatMode ? 'min-h-0 h-full' : 'min-h-[500px] sm:min-h-[600px] md:min-h-[700px] h-full'
-      }`}>
+      <div className="absolute top-0 left-0 w-full h-full z-0 overflow-hidden transition-all duration-300 min-h-[500px] sm:min-h-[600px] md:min-h-[700px]">
         {backgroundImages.map((imageSrc, index) => (
           <img
             key={index}
             src={imageSrc}
             alt={`Hero background ${index + 1}`}
             className={`w-full h-full object-cover object-center absolute top-0 left-0 transition-all duration-[2000ms] ease-in-out animate-[heroBackgroundAnimation_20s_ease-in-out_infinite] ${
-              isChatMode ? 'min-h-[100dvh] sm:min-h-[900px]' : 'min-h-[500px] sm:min-h-[600px] md:min-h-[700px]'
-            } ${
               index === currentImageIndex ? 'opacity-100 z-[1]' : 'opacity-0'
             }`}
           />
@@ -653,19 +670,11 @@ function Hero() {
         }}
       />
 
-      {/* Hero content - padding-top so "Find your home" is never clipped below navbar; when chat mode fill remaining space below header */}
-      <div className={`flex flex-col items-center justify-center w-full text-center relative z-10 ${
-        isChatMode
-          ? 'min-h-0 pt-2 pb-2 px-3 sm:pt-6 sm:pb-4 sm:px-4 md:pt-0 md:pb-0 flex-1'
-          : 'min-h-[400px] sm:min-h-[500px] pb-8 sm:pt-10 sm:pb-10 md:pt-0 md:pb-0 md:min-h-[600px] md:h-full px-4'
-      }`}>
+      {/* Hero content - stable padding and alignment */}
+      <div className="flex flex-col items-center justify-center w-full text-center relative z-10 px-4 py-8 sm:py-12 md:py-16 pb-24 sm:pb-32 md:pb-40">
         <FadeInOnView>
           <h2
-            className={`font-outfit font-bold text-[#205ED7] mb-0 mt-0 tracking-tight leading-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] ${
-              isChatMode
-                ? 'text-base xs:text-lg sm:text-xl md:text-2xl'
-                : 'text-xl xs:text-2xl mobile:text-3xl mt-20 sm:text-4xl md:text-5xl lg:text-6xl'
-            }`}
+            className="font-outfit font-bold text-[#205ED7] mb-4 mt-12 tracking-tight leading-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] text-xl xs:text-2xl sm:text-4xl md:text-5xl lg:text-6xl"
           >
             {HERO_TITLE.split('').map((char, index) => (
               <span
@@ -685,79 +694,25 @@ function Hero() {
         </FadeInOnView>
         <FadeInOnView delayMs={120}>
           <p
-            className={`max-w-3xl font-outfit drop-shadow-[0_1px_4px_rgba(255,255,255,0.8)] px-1 ${
-              isChatMode ? "mt-1 text-xs sm:text-sm md:text-lg hidden sm:block" : "mt-3 text-sm xs:text-base md:text-xl"
-            }`}
+            className="max-w-3xl font-outfit drop-shadow-[0_1px_4px_rgba(255,255,255,0.8)] px-2 mb-6 text-sm xs:text-base md:text-xl"
           >
             <span className="text-[#FE8E0A]">Trusted Rentals, simplified. Start your journey with </span>
             <span className="font-bold text-[#205ED7]">Rentals.ph.</span>
           </p>
         </FadeInOnView>
 
-        {/* AI Assistant Button - hidden in chat mode (close is in chat header) */}
-        {!isChatMode && (
-          <FadeInOnView delayMs={240}>
-          <button 
-            className="relative font-outfit font-semibold flex items-center justify-center gap-1 transition-all hover:scale-105 active:scale-[0.98] overflow-hidden cursor-pointer rounded-full sm:rounded-[32.5px] shadow-[0_4px_21px_rgba(0,0,0,0.25)] touch-manipulation min-h-[48px] mt-4 sm:mt-6 text-sm sm:text-base md:text-lg h-12 sm:h-[52px] md:h-[55px] px-4 sm:px-6 md:px-7"
-            style={{
-              width: 'auto',
-              maxWidth: 'min(100%, 260px)',
-              backgroundColor: 'var(--ai-button-bg, white)',
-              color: 'var(--ai-button-text, #002978)',
-              borderWidth: '2px',
-              borderStyle: 'solid',
-              borderColor: '#205ED7',
-            }}
-            onClick={() => setIsChatMode(true)}
-            aria-label="Open Rentals Assist"
-          >
-            {/* Orange decorative vector - smaller on mobile so it doesn't overflow */}
-            <svg 
-              className="absolute -bottom-4 -right-0.5 sm:-bottom-5 sm:-right-1 z-0 pointer-events-none w-12 h-12 sm:w-14 sm:h-14 md:w-[68px] md:h-[67px]"
-              viewBox="154 10 68 67" 
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-              preserveAspectRatio="xMidYMid slice"
-            >
-              <path 
-                d="M191.543 40.9593L194.39 38.7754C198.284 35.7874 201.337 31.8399 203.251 27.3204L205.356 22.3506C207.905 16.3331 218.4 12.0101 222.422 10.5451V48.1866C222.422 64.0998 209.522 77 193.609 77H154.263C147.43 77 143.439 69.2957 147.379 63.7138C147.959 62.8912 148.683 62.1793 149.515 61.6119L157.059 56.466C162.195 52.9628 167.918 50.4094 173.955 48.9269L175.99 48.4272C181.636 47.041 186.932 44.4981 191.543 40.9593Z" 
-                fill="var(--ai-button-accent, #FE8E0A)"
-              />
-              <path 
-                d="M222.422 10V48.1866C222.422 64.0998 209.522 77 193.609 77H154.263C147.43 77 143.439 69.2957 147.379 63.7138C147.959 62.8912 148.683 62.1793 149.515 61.6119L157.059 56.466C162.195 52.9628 167.918 50.4094 173.955 48.9269L175.99 48.4272C181.636 47.041 186.932 44.4981 191.543 40.9593L194.39 38.7754C198.284 35.7874 201.337 31.8399 203.251 27.3204C203.98 25.6005 204.669 23.9734 205.356 22.3506C208.527 14.8637 224 10 224 10" 
-                stroke="var(--ai-button-border, #002978)"
-                strokeWidth="2"
-                fill="none"
-              />
-            </svg>
-            
-            {/* Content: logo at start, text centered in remaining space */}
-            <div className="relative z-10 w-full flex items-center justify-start min-w-0 gap-2">
-              <img 
-                src={getAsset('LOGO_AI')} 
-                alt=""
-                className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9"
-              />
-              <span className="flex-1 text-center font-bold text-sm sm:text-base md:text-lg leading-tight pr-6 sm:pr-8 md:pr-10 truncate">
-                Rentals Assist
-              </span>
-            </div>
-          </button>
-          </FadeInOnView>
-        )}
+       
 
         {/* Search bar and filters or Chat container - constrained to same max-width as page; no horizontal overflow */}
         <FadeInOnView
           delayMs={260}
-          className={`mt-2 sm:mt-6 md:mt-8 w-full max-w-7xl mx-auto transition-all duration-500 px-0 sm:px-2 ${
-            isChatMode ? 'flex flex-col w-full' : 'max-h-[400px]'
-          }`}
+          className="w-full max-w-7xl mx-auto transition-all duration-500 px-0 sm:px-2"
           as="div"
         >
           {isChatMode ? (
             <>
               {/* Single rounded container for Chat Mode: header + two-column content; on mobile overflow-visible so inner chat can scroll */}
-              <div className="flex flex-col w-full bg-white/50 rounded-xl sm:rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] min-h-[45vh] sm:min-h-[50vh] overflow-visible md:overflow-hidden">
+              <div className="flex flex-col w-full bg-white/50 rounded-xl sm:rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] min-h-0 h-auto overflow-visible md:overflow-visible flex-1">
                 {/* Inner header: logo, search, notifications, avatar - compact on mobile */}
                 <header className="flex items-center gap-2 sm:gap-4 px-3 py-2.5 sm:px-4 sm:py-3.5 border-b border-gray-200 bg-white flex-shrink-0">
                   <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-shrink-0">
@@ -785,31 +740,47 @@ function Hero() {
                         type="button"
                         className="p-2 min-h-[44px] min-w-[44px] hover:bg-white/80 rounded-lg transition-colors text-gray-600 hover:text-gray-900 touch-manipulation flex items-center justify-center"
                         onClick={() => setShowMenu(!showMenu)}
-                        aria-label="More options"
-                        title="More options"
+                        aria-label="Search history"
+                        title="Search history"
                       >
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <circle cx="12" cy="12" r="1" fill="currentColor"/>
-                          <circle cx="12" cy="5" r="1" fill="currentColor"/>
-                          <circle cx="12" cy="19" r="1" fill="currentColor"/>
+                          <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
+                          <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                          <path d="M11 7v4l3 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </button>
                       {showMenu && (
-                        <div className="absolute top-full right-0 mt-2 w-[min(16rem,calc(100vw-2rem))] max-w-[224px] bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
-                          <button type="button" className="w-full flex items-center gap-3 px-4 py-2 text-left text-gray-700 hover:bg-gray-50 transition-colors font-outfit text-sm" onClick={() => { setShowHistory(true); setShowMenu(false) }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-                            View History
-                          </button>
-                          {conversationId && (
-                            <button type="button" className="w-full flex items-center gap-3 px-4 py-2 text-left text-red-600 hover:bg-red-50 transition-colors font-outfit text-sm" onClick={() => handleDeleteConversation()}>
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                              Delete Conversation
-                            </button>
+                        <div className="absolute top-full right-0 mt-2 w-[min(18rem,calc(100vw-2rem))] max-w-[288px] bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 max-h-[300px] overflow-y-auto">
+                          <div className="px-4 py-2 border-b border-gray-200 flex-shrink-0">
+                            <h4 className="font-outfit text-xs font-semibold text-gray-600 uppercase tracking-wide m-0">Search History</h4>
+                          </div>
+                          {chatMessages
+                            .filter((msg) => msg.role === 'user')
+                            .slice()
+                            .reverse()
+                            .map((msg, index) => (
+                              <button
+                                key={index}
+                                type="button"
+                                className="w-full flex items-start gap-3 px-4 py-2 text-left text-gray-700 hover:bg-gray-50 transition-colors font-outfit text-sm"
+                                onClick={() => {
+                                  setSearchQuery(msg.message);
+                                  setShowMenu(false);
+                                }}
+                                title={msg.message}
+                              >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0 mt-0.5 text-gray-400">
+                                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="currentColor" strokeWidth="2"/>
+                                  <path d="M12 6v6l4 2.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                </svg>
+                                <span className="line-clamp-2 flex-1">{msg.message}</span>
+                              </button>
+                            ))}
+                          {chatMessages.filter((msg) => msg.role === 'user').length === 0 && (
+                            <div className="px-4 py-4 text-center text-gray-500 font-outfit text-sm">
+                              No search history yet
+                            </div>
                           )}
-                          <button type="button" className="w-full flex items-center gap-3 px-4 py-2 text-left text-gray-700 hover:bg-gray-50 transition-colors font-outfit text-sm" onClick={handleNewConversation}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-                            New Conversation
-                          </button>
                         </div>
                       )}
                     </div>
@@ -821,7 +792,7 @@ function Hero() {
                 {/* Two-column content: on mobile only chat is shown; results open in overlay. On md+ both columns side by side. No overflow-hidden so chat messages can scroll on mobile. */}
                 <div className="flex flex-col md:flex-row gap-2 sm:gap-4 flex-1 min-h-0 min-w-0 p-2 sm:p-4 bg-gray-100/50 md:overflow-hidden overflow-visible">
               {/* Left column: Property results - hidden on mobile (shown in overlay instead) */}
-              <div className="hidden md:flex flex-col flex-[3] min-w-0 min-h-0 max-h-[70vh] bg-white rounded-xl sm:rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.06)] overflow-hidden order-1">
+              <div className="hidden md:flex flex-col flex-[3] min-w-0 min-h-0 bg-white rounded-xl sm:rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.06)] overflow-hidden order-1">
                 <div className="flex items-center justify-between gap-2 sm:gap-3 p-3 sm:p-4 border-b border-gray-200 bg-white flex-shrink-0">
                   <h3 className="font-outfit text-sm sm:text-lg font-bold text-gray-900 m-0 truncate">
                     {filteredAndSortedProperties
@@ -908,7 +879,7 @@ function Hero() {
               )}
 
               {/* Chat column: full width on mobile, constrained on md+ */}
-              <div className="flex flex-col flex-[3] min-w-0 min-h-0 max-h-[70vh] md:max-w-[28rem] bg-white rounded-xl sm:rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] overflow-hidden order-2 flex-shrink-0">
+              <div className="flex flex-col flex-[3] min-w-0 min-h-0 md:max-w-[28rem] bg-white rounded-xl sm:rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] overflow-hidden order-2 flex-shrink-0">
                 <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-4 border-b border-gray-200 bg-white flex-shrink-0">
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                     <img src={getAsset('LOGO_AI')} alt="" className="w-7 h-7 sm:w-9 sm:h-9 flex-shrink-0 rounded-full object-cover" />
@@ -921,17 +892,9 @@ function Hero() {
                   className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 space-y-3 min-h-0 bg-white [scrollbar-width:thin] touch-pan-y"
                   style={{ WebkitOverflowScrolling: 'touch' }}
                 >
-                  {isLoadingHistory ? (
-                    <div className="flex items-start gap-2 max-w-[90%] sm:max-w-[85%]">
-                      <img src={getAsset('LOGO_AI')} alt="" className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 rounded-full object-cover" />
-                      <div className="p-3 px-4 bg-white border border-gray-200 rounded-2xl rounded-tl-sm font-outfit text-sm text-gray-600">
-                        <span className="italic animate-pulse">Loading conversation...</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                       <h4 className="font-outfit font-semibold text-gray-900 text-base mb-3">Chat with Rentals Assist</h4>
-                      {chatMessages.map((msg, index) => (
+                  <>
+                    <h4 className="font-outfit font-semibold text-gray-900 text-base mb-3">Chat with Rentals Assist</h4>
+                    {chatMessages.map((msg, index) => (
                         <div key={index} className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                           {msg.role === 'assistant' ? (
                             <div className="flex items-start gap-2 max-w-[90%] sm:max-w-[85%]">
@@ -976,18 +939,28 @@ function Hero() {
                       )}
                       <div ref={chatMessagesEndRef} />
                     </>
-                  )}
                 </div>
                 <div className="border-t border-gray-200 bg-white flex-shrink-0">
                   <form className="flex items-center gap-2 p-3 sm:p-4" onSubmit={handleChatSubmit}>
-                    <input
-                      type="text"
-                      className="flex-1 min-w-0 p-2.5 sm:p-3 px-3 sm:px-4 border border-gray-300 rounded-lg sm:rounded-xl font-outfit text-sm outline-none transition-colors focus:border-rental-blue-500 focus:ring-2 focus:ring-rental-blue-500/20 min-h-[44px]"
-                      placeholder={isLoading ? 'Searching...' : 'Type your message...'}
-                      value={chatMessage}
-                      onChange={(e) => setChatMessage(e.target.value)}
-                      disabled={isLoading}
-                    />
+                    <div className="flex-1 min-w-0 relative">
+                      <input
+                        type="text"
+                        className="w-full p-2.5 sm:p-3 px-3 sm:px-4 border border-gray-300 rounded-lg sm:rounded-xl font-outfit text-sm outline-none transition-colors focus:border-rental-blue-500 focus:ring-2 focus:ring-rental-blue-500/20 min-h-[44px]"
+                        placeholder={isLoading ? 'Searching...' : ''}
+                        value={chatMessage}
+                        onChange={(e) => setChatMessage(e.target.value)}
+                        disabled={isLoading}
+                      />
+                      {!chatMessage && !isLoading && (
+                        <div className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 font-outfit text-sm pointer-events-none">
+                          <TypewriterText 
+                            text={chatInputLabel}
+                            speed={30}
+                            className="text-gray-400 font-outfit text-sm"
+                          />
+                        </div>
+                      )}
+                    </div>
                     <button type="submit" className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-full bg-rental-blue-600 text-white flex items-center justify-center flex-shrink-0 hover:bg-rental-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed touch-manipulation active:scale-95" aria-label="Send message">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </button>
@@ -1074,6 +1047,40 @@ function Hero() {
             </>
           ) : (
             <>
+              {/* Mode Selection Tabs */}
+              <div className="flex gap-2 mb-4 justify-start flex-wrap">
+                <button
+                  onClick={() => setUserSelectedMode('manual')}
+                  className={`px-4 py-2 rounded-full text-sm font-outfit font-medium transition-all ${
+                    userSelectedMode === 'manual'
+                      ? 'bg-gray-800 text-white'
+                      : 'bg-white/40 text-gray-700 border border-gray-300/50 hover:bg-white/60'
+                  }`}
+                >
+                  Manual Mode
+                </button>
+                <button
+                  onClick={() => setUserSelectedMode('ai')}
+                  className={`px-4 py-2 rounded-full text-sm font-outfit font-medium transition-all ${
+                    userSelectedMode === 'ai'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white/40 text-gray-700 border border-gray-300/50 hover:bg-white/60'
+                  }`}
+                >
+                  AI Mode
+                </button>
+                <button
+                  onClick={() => setUserSelectedMode('hybrid')}
+                  className={`px-4 py-2 rounded-full text-sm font-outfit font-medium transition-all ${
+                    userSelectedMode === 'hybrid'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-white/40 text-gray-700 border border-gray-300/50 hover:bg-white/60'
+                  }`}
+                >
+                  Hybrid Refine
+                </button>
+              </div>
+
               {/* Light search bar container */}
               <div className="bg-white/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 w-full shadow-lg">
                 <div className="bg-gray-50/90 rounded-xl sm:rounded-2xl w-full flex flex-col md:flex-row items-stretch md:items-center overflow-hidden shadow-md md:h-auto border-2 border-gray-200" 
@@ -1082,19 +1089,60 @@ function Hero() {
                  borderStyle: 'solid',
                  borderColor: 'rgb(226, 226, 226)',
                 }}>
-                    <input 
-                      type="text" 
-                      className="flex-1 border-none outline-none bg-transparent text-gray-900 font-outfit text-sm sm:text-base font-normal px-4 sm:px-8 min-w-0 md:min-w-[250px] md:h-[57px] h-12 sm:h-auto py-3 sm:py-4 md:py-0 w-full md:w-auto md:border-b-0 border-b border-gray-200" 
-                      placeholder="What are you looking for?"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                    />
+                    {/* Input field with typewriter label */}
+                    <div className="relative flex-1 flex items-center md:min-w-[250px]">
+                      <input 
+                        type="text" 
+                        className="flex-1 border-none outline-none bg-transparent text-gray-900 font-outfit text-sm sm:text-base font-normal px-4 sm:px-8 min-w-0 h-12 sm:h-auto py-3 sm:py-4 md:py-0 md:h-[57px] w-full md:border-b-0 border-b border-gray-200 relative z-10" 
+                        placeholder={
+                          (searchMode === 'ai' && !searchQuery) 
+                            ? ''
+                            : (aiResults && aiResults.length > 0 ? "Refine your search or ask a follow-up..." : "What are you looking for?")
+                        }
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                      />
+                      
+                      {/* Typewriter Label for AI Mode - Rotating Property Searches */}
+                      {searchMode === 'ai' && !searchQuery && (
+                        <div className="absolute left-4 sm:left-8 top-4 text-gray-400 font-outfit text-sm sm:text-base pointer-events-none">
+                          <TypewriterText 
+                            key={currentSearchQueryIndex}
+                            text={propertySearchQueries[currentSearchQueryIndex] || 'Search for properties...'}
+                            speed={25}
+                            className="text-gray-400 font-outfit text-sm sm:text-base"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Mode Badge */}
+                    <div className="px-3 sm:px-4 flex items-center">
+                      {userSelectedMode === 'hybrid' ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-purple-100/60 text-purple-700 font-outfit text-xs font-medium">
+                          <span>✦</span>
+                          <span>AI + Filters</span>
+                        </span>
+                      ) : searchMode === 'ai' ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-blue-100/60 text-blue-700 font-outfit text-xs font-medium">
+                          <span>✦</span>
+                          <span>AI Search</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-gray-200/60 text-gray-600 font-outfit text-xs font-medium">
+                          <span>Filters</span>
+                        </span>
+                      )}
+                    </div>
 
                     <div className="md:block hidden w-px h-[67px] bg-gray-200 flex-shrink-0" />
 
+                    {(searchMode === 'manual' || userSelectedMode === 'hybrid') && (
+                      <>
                     <select 
-                      className="text-gray-700 font-outfit text-base font-normal bg-transparent border-none outline-none cursor-pointer appearance-none md:py-5 py-4 pr-[50px] md:pl-9 pl-5 md:min-w-[180px] w-full md:w-auto transition-colors hover:text-[#205ED7] focus:text-[#205ED7] bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%229%22%20height%3D%226%22%20viewBox%3D%220%200%209%206%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M1%201L4.5%205L8%201%22%20stroke%3D%236b7280%22%20stroke-width%3D%221%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat md:bg-[right_36px_center] bg-[right_20px_center] bg-[length:9px_6px] md:border-b-0 border-b border-gray-200"
+                      className={`text-gray-700 font-outfit text-base font-normal bg-transparent border-none outline-none cursor-pointer appearance-none md:py-5 py-4 pr-[50px] md:pl-9 pl-5 md:min-w-[180px] w-full md:w-auto transition-colors hover:text-[#205ED7] focus:text-[#205ED7] bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%229%22%20height%3D%226%22%20viewBox%3D%220%200%209%206%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M1%201L4.5%205L8%201%22%20stroke%3D%236b7280%22%20stroke-width%3D%221%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat md:bg-[right_36px_center] bg-[right_20px_center] bg-[length:9px_6px] md:border-b-0 border-b border-gray-200`}
+                      
                       value={propertyType}
                       onChange={(e) => setPropertyType(e.target.value)}
                     >
@@ -1109,7 +1157,8 @@ function Hero() {
                     <div className="md:block hidden w-px h-[67px] bg-gray-200 flex-shrink-0" />
                     
                     <select 
-                      className="text-gray-700 font-outfit text-base font-normal bg-transparent border-none outline-none cursor-pointer appearance-none md:py-5 py-4 pr-[50px] md:pl-9 pl-5 md:min-w-[180px] w-full md:w-auto transition-colors hover:text-[#205ED7] focus:text-[#205ED7] bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%229%22%20height%3D%226%22%20viewBox%3D%220%200%209%206%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M1%201L4.5%205L8%201%22%20stroke%3D%236b7280%22%20stroke-width%3D%221%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat md:bg-[right_36px_center] bg-[right_20px_center] bg-[length:9px_6px] md:border-b-0 border-b border-gray-200"
+                      className={`text-gray-700 font-outfit text-base font-normal bg-transparent border-none outline-none cursor-pointer appearance-none md:py-5 py-4 pr-[50px] md:pl-9 pl-5 md:min-w-[180px] w-full md:w-auto transition-colors hover:text-[#205ED7] focus:text-[#205ED7] bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%229%22%20height%3D%226%22%20viewBox%3D%220%200%209%206%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M1%201L4.5%205L8%201%22%20stroke%3D%236b7280%22%20stroke-width%3D%221%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat md:bg-[right_36px_center] bg-[right_20px_center] bg-[length:9px_6px] md:border-b-0 border-b border-gray-200`}
+                      
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
                     >
@@ -1127,7 +1176,7 @@ function Hero() {
                     </select>
 
                     <button 
-                      className={`flex items-center bg-white border-none rounded-full py-2 px-5 ml-2 mr-2 text-base text-indigo-700 font-medium shadow-sm transition-all hover:border-indigo-600 md:inline-flex hidden ${showAdvancedOptions ? 'border-indigo-600' : ''}`}
+                      className="flex items-center bg-white border-none rounded-full py-2 px-5 ml-2 mr-2 text-base text-indigo-700 font-medium shadow-sm transition-all hover:border-indigo-600 md:inline-flex hidden"
                       type="button"
                       onClick={() => setShowAdvancedOptions((prev) => !prev)}
                       aria-label="Show filters"
@@ -1138,6 +1187,8 @@ function Hero() {
                       </svg>
                       <span className="font-semibold tracking-wider">Filters</span>
                     </button>
+                    </>
+                    )}
 
                     <button 
                       className="bg-[#FE8E0A] md:rounded-r-xl rounded-xl w-full md:w-[135px] md:h-[67px] h-12 sm:h-[50px] border-none cursor-pointer flex items-center justify-center transition-all hover:bg-[#ff7700] hover:shadow-lg active:scale-[0.98] flex-shrink-0 relative overflow-hidden group font-outfit font-semibold text-white text-sm sm:text-base"
@@ -1147,7 +1198,10 @@ function Hero() {
                     </button>
                   </div>
 
+                  
+
                   {/* Advanced Options - Inside search container, animated when filter button is toggled */}
+                  {(searchMode === 'manual' || userSelectedMode === 'hybrid') && (
                   <div
                     className={`w-full transition-all duration-300 ease-out origin-top ${
                       showAdvancedOptions
@@ -1208,22 +1262,228 @@ function Hero() {
                       </div>
                     </div>
                   </div>
+                  )}
+
               </div>
+
+              {/* Phase 2: AI Loading Indicator */}
+              {isAILoading && searchMode === 'ai' && (
+                <div className="mt-2 sm:mt-3 text-center">
+                  <p className="font-outfit text-xs sm:text-sm text-gray-500">
+                    ✦ Searching with AI...
+                  </p>
+                </div>
+              )}
+
+              {/* Phase 4: AI Results Section */}
+              {searchMode === 'ai' && !isAILoading && aiResults && aiResults.length > 0 && (
+                <div className="mt-4 sm:mt-6 w-full max-w-full">
+                  {/* AI Response Banner */}
+                  <div className="mb-4 px-4 sm:px-0">
+                    <div className="flex items-start gap-2 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-blue-50/80 border border-blue-200/50">
+                      <span className="text-blue-600 text-lg flex-shrink-0 mt-0.5">✦</span>
+                      <p className="font-outfit text-sm sm:text-base text-gray-700">{aiResponse}</p>
+                    </div>
+                  </div>
+
+                  {/* Phase 6: Filter Pills */}
+                  {aiExtractedFilters && Object.keys(aiExtractedFilters).length > 0 && (
+                    <div className="mb-4 px-4 sm:px-0">
+                      <div className="flex gap-2 flex-wrap items-center">
+                        {aiExtractedFilters.location && (
+                          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 font-outfit text-xs">
+                            <span>✦ {aiExtractedFilters.location}</span>
+                            <button
+                              className="hover:text-gray-900 cursor-pointer"
+                              onClick={() => {
+                                const updated = { ...aiExtractedFilters }
+                                delete updated.location
+                                setAiExtractedFilters(updated)
+                                setSearchQuery('')
+                              }}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        )}
+                        {aiExtractedFilters.property_type && (
+                          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 font-outfit text-xs">
+                            <span>{aiExtractedFilters.property_type}</span>
+                            <button
+                              className="hover:text-gray-900 cursor-pointer"
+                              onClick={() => {
+                                const updated = { ...aiExtractedFilters }
+                                delete updated.property_type
+                                setAiExtractedFilters(updated)
+                              }}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        )}
+                        {aiExtractedFilters.bedrooms && (
+                          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 font-outfit text-xs">
+                            <span>{aiExtractedFilters.bedrooms} bedrooms</span>
+                            <button
+                              className="hover:text-gray-900 cursor-pointer"
+                              onClick={() => {
+                                const updated = { ...aiExtractedFilters }
+                                delete updated.bedrooms
+                                setAiExtractedFilters(updated)
+                              }}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        )}
+                        {(aiExtractedFilters.min_price || aiExtractedFilters.max_price) && (
+                          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 font-outfit text-xs">
+                            <span>
+                              ₱{aiExtractedFilters.min_price || '0'} - ₱{aiExtractedFilters.max_price || 'any'}
+                            </span>
+                            <button
+                              className="hover:text-gray-900 cursor-pointer"
+                              onClick={() => {
+                                const updated = { ...aiExtractedFilters }
+                                delete updated.min_price
+                                delete updated.max_price
+                                setAiExtractedFilters(updated)
+                              }}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        )}
+                        {Object.keys(aiExtractedFilters).length > 0 && (
+                          <button
+                            className="text-gray-500 hover:text-gray-700 font-outfit text-xs ml-2"
+                            onClick={() => {
+                              setAiExtractedFilters({})
+                              setAiResults([])
+                              setAiResponse(null)
+                              setSearchQuery('')
+                            }}
+                          >
+                            Clear all
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Property Cards Grid - max 6 cards */}
+                  <div className="mb-4 px-4 sm:px-0">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                      <Suspense fallback={null}>
+                        {aiResults.slice(0, 6).map((property, index) => (
+                          <SimplePropertyCard
+                            key={`${property.id}-${index}`}
+                            id={property.id}
+                            title={property.title}
+                            location={property.location || property.city || property.street_address || 'Location not specified'}
+                            price={`₱${property.price.toLocaleString('en-US')}${property.price_type ? `/${property.price_type}` : ''}`}
+                            image={property.image_url || (property.image ? getImageUrl(property.image) : ASSETS.PLACEHOLDER_PROPERTY_MAIN)}
+                            bedrooms={property.bedrooms}
+                            bathrooms={property.bathrooms}
+                            area={property.area}
+                          />
+                        ))}
+                      </Suspense>
+                    </div>
+                  </div>
+
+                  {/* See All Button and Clear Search */}
+                  <div className="flex gap-2 px-4 sm:px-0 items-center justify-center flex-wrap">
+                    <button
+                      className="px-4 sm:px-6 py-2 sm:py-3 rounded-lg bg-rental-blue-600 text-white font-outfit font-medium text-sm hover:bg-rental-blue-700 transition-colors"
+                      onClick={() => {
+                        // Phase 5: Build query params from AI extracted filters and redirect
+                        const params = new URLSearchParams()
+                        
+                        // Add the original search query for reference
+                        if (searchQuery.trim()) {
+                          params.set('search', searchQuery.trim())
+                        }
+                        
+                        if (aiExtractedFilters) {
+                          if (aiExtractedFilters.location) {
+                            params.set('location', aiExtractedFilters.location)
+                          }
+                          if (aiExtractedFilters.property_type) {
+                            params.set('type', aiExtractedFilters.property_type)
+                          }
+                          if (aiExtractedFilters.bedrooms) {
+                            params.set('minBeds', aiExtractedFilters.bedrooms.toString())
+                          }
+                          if (aiExtractedFilters.bathrooms) {
+                            params.set('minBaths', aiExtractedFilters.bathrooms.toString())
+                          }
+                          if (aiExtractedFilters.min_price) {
+                            params.set('priceMin', aiExtractedFilters.min_price.toString())
+                          }
+                          if (aiExtractedFilters.max_price) {
+                            params.set('priceMax', aiExtractedFilters.max_price.toString())
+                          }
+                          // Add amenities if present
+                          if (aiExtractedFilters.amenities && Array.isArray(aiExtractedFilters.amenities)) {
+                            params.set('amenities', aiExtractedFilters.amenities.join(','))
+                          }
+                        }
+                        
+                        const queryString = params.toString()
+                        router.push(`/properties${queryString ? `?${queryString}` : ''}`)
+                      }}
+                    >
+                      See all {aiTotalCount} results →
+                    </button>
+                    <button
+                      className="px-3 sm:px-4 py-2 sm:py-3 text-gray-600 font-outfit text-sm hover:text-gray-900 transition-colors"
+                      onClick={() => {
+                        setSearchQuery('')
+                        setAiResponse(null)
+                        setAiResults(null)
+                        setAiTotalCount(0)
+                        setAiExtractedFilters(null)
+                        setAiConversationId(undefined)
+                      }}
+                    >
+                      ✕ Clear search
+                    </button>
+                  </div>
+
+                  
+                </div>
+              )}
+
+              {/* Phase 4: Loading Placeholders */}
+              {isAILoading && searchMode === 'ai' && (
+                <div className="mt-4 sm:mt-6 w-full max-w-full px-4 sm:px-0">
+                  {/* Loading Banner Placeholder */}
+                  <div className="mb-4 h-16 rounded-lg bg-gray-200 animate-pulse" />
+                  
+                  {/* Loading Cards Placeholders */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="h-64 rounded-lg bg-gray-200 animate-pulse" />
+                    ))}
+                  </div>
+                </div>
+              )}
             </>
           )}
         </FadeInOnView>
 
-        {/* Recommended Searches - Outside search container; in chat mode on mobile: compact single-line scroll so chat has more room */}
+        {/* Recommended Searches - Outside search container; stable spacing */}
         <FadeInOnView
           delayMs={420}
           as="div"
-          className={`relative z-10 w-full max-w-4xl px-2 sm:px-5 ${isChatMode ? 'mt-2 sm:mt-3.5 mb-20 sm:mb-28 md:mb-32' : 'mt-3 sm:mt-3.5'}`}
+          className="relative z-10 w-full max-w-4xl px-2 sm:px-5 mt-6 sm:mt-8"
         >
-          <div className={`flex gap-1.5 sm:gap-2 justify-center ${isChatMode ? 'flex-nowrap overflow-x-auto overflow-y-hidden py-1 -mx-2 px-2 [scrollbar-width:none] sm:flex-wrap sm:overflow-visible' : 'flex-wrap'}`}>
+          <div className="flex gap-1.5 sm:gap-2 justify-center flex-wrap">
             {recommendedSearches.map((search, index) => (
               <button
                 key={index}
-                className={`py-1.5 sm:py-2 px-3 sm:px-4 bg-white/95 border border-white/30 rounded-[20px] text-gray-700 font-outfit text-xs sm:text-[13px] font-normal cursor-pointer transition-all hover:bg-[#205ED7] hover:text-white hover:border-[#205ED7] hover:-translate-y-px hover:shadow-md touch-manipulation ${isChatMode ? 'flex-shrink-0 whitespace-nowrap sm:whitespace-normal sm:break-words' : 'whitespace-normal break-words max-w-full'}`}
+                className="py-2 sm:py-2.5 px-3 sm:px-4 bg-white/95 border border-white/30 rounded-[20px] text-gray-700 font-outfit text-xs sm:text-[13px] font-normal cursor-pointer transition-all hover:bg-[#205ED7] hover:text-white hover:border-[#205ED7] hover:-translate-y-px hover:shadow-md touch-manipulation whitespace-nowrap"
                 onClick={() => handleRecommendedSearch(search)}
               >
                 {search}
@@ -1233,13 +1493,13 @@ function Hero() {
         </FadeInOnView>
       </div>
 
-      {/* Scroll-down indicator - centered at bottom, fades out on scroll */}
+      {/* Scroll-down indicator - stable positioning */}
       {!isChatMode && (
         <button
           type="button"
           onClick={scrollToContent}
           aria-label="Scroll to content below"
-          className={`absolute bottom-6 sm:bottom-10 left-0 right-0 mx-auto w-fit z-[110] flex flex-col items-center gap-1 transition-all duration-300 ease-out ${
+          className={`absolute bottom-8 left-0 right-0 mx-auto w-fit z-[110] flex flex-col items-center gap-2 transition-all duration-300 ease-out ${
             showScrollArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
         >
@@ -1264,69 +1524,6 @@ function Hero() {
       <div className={isChatMode ? 'max-md:hidden' : ''}>
         <HeroBanner />
       </div>
-
-      {/* Conversation History Sidebar */}
-      {showHistory && (
-        <div className="fixed inset-0 bg-black/50 z-[1000] flex items-center justify-end transition-opacity duration-300" onClick={() => setShowHistory(false)}>
-          <div className="w-full max-w-md h-full bg-white shadow-2xl flex flex-col animate-[slideInRight_0.3s_ease-out]" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gradient-to-r from-rental-blue-50 to-white">
-              <h3 className="font-outfit text-lg font-semibold text-gray-900 m-0">Conversation History</h3>
-              <button
-                className="p-2 hover:bg-white rounded-lg transition-colors text-gray-600 hover:text-gray-900 flex items-center justify-center cursor-pointer"
-                onClick={() => setShowHistory(false)}
-                aria-label="Close history"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              {isLoadingConversations ? (
-                <div className="text-center py-8 text-gray-500 font-outfit text-sm">Loading conversations...</div>
-              ) : conversations.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 font-outfit text-sm">No conversations yet</div>
-              ) : (
-                conversations.map((conv) => (
-                  <div
-                    key={conv.conversation_id}
-                    className={`mb-2 p-3 rounded-lg border transition-all flex items-center justify-between gap-2 ${
-                      conversationId === conv.conversation_id 
-                        ? 'bg-rental-blue-50 border-rental-blue-200' 
-                        : 'bg-white border-gray-200 hover:bg-gray-50'
-                    }`}
-                  >
-                    <button
-                      className="flex-1 text-left min-w-0 p-0 border-none bg-transparent cursor-pointer"
-                      onClick={() => handleLoadConversation(conv.conversation_id)}
-                    >
-                      <div className="flex flex-col gap-1">
-                        <h4 className="font-outfit text-sm font-medium text-gray-900 m-0 truncate">{conv.title}</h4>
-                        <p className="font-outfit text-xs text-gray-500 m-0">
-                          {conv.message_count} message{conv.message_count !== 1 ? 's' : ''} • {new Date(conv.last_message_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </button>
-                    <button
-                      className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors text-gray-400 hover:text-red-600 hover:bg-red-50 p-0 border-none cursor-pointer flex-shrink-0"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleDeleteConversation(conv.conversation_id)
-                      }}
-                      aria-label="Delete conversation"
-                      title="Delete conversation"
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
     </section>
   )

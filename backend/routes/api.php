@@ -41,6 +41,7 @@ Route::post('/property/search', [PropertySearchController::class, 'search']);
 
 // Conversation management endpoints
 Route::get('/property/search/suggested-prompts', [PropertySearchController::class, 'suggestedPrompts']);
+Route::get('/property/search/queries', [PropertySearchController::class, 'propertySearchQueries']);
 Route::post('/property/search/generate-property-description', [PropertySearchController::class, 'generatePropertyDescription']);
 Route::get('/property/search/conversations', [PropertySearchController::class, 'listConversations']);
 Route::get('/property/search/conversation/{conversationId}', [PropertySearchController::class, 'getConversation']);
@@ -50,27 +51,55 @@ Route::delete('/property/search/conversation/{conversationId}', [PropertySearchC
 // Groq AI endpoints
 Route::post('/groq/chat', [GroqChatController::class, 'chat']);
 
-// Listing Assistant endpoints (AI-powered property listing)
+// Listing Assistant endpoints (SIMPLIFIED FOR SEARCH - Set B Phase 2)
+// Kept endpoints: getConversation, deleteConversation, listConversations
+// Removed endpoints: see set-b-phase-1-audit.md section 3
 Route::prefix('listing/assistant')->group(function () {
     // Public endpoints (conversation can be created without auth)
-    Route::post('/', [ListingAssistantController::class, 'processMessage']);
-    Route::post('/new', [ListingAssistantController::class, 'startNewConversation']);
+    // REMOVED IN SEARCH REFACTOR: processMessage - use /property/search instead
+    // Route::post('/', [ListingAssistantController::class, 'processMessage']);
+    
+    // REMOVED IN SEARCH REFACTOR: startNewConversation - use /property/search with no conversation_id
+    // Route::post('/new', [ListingAssistantController::class, 'startNewConversation']);
+    
+    // KEPT: Load conversation history
     Route::get('/{conversationId}', [ListingAssistantController::class, 'getConversation']);
-    Route::post('/{conversationId}/reset', [ListingAssistantController::class, 'resetConversation']);
-    Route::post('/{conversationId}/generate-description', [ListingAssistantController::class, 'generateDescription']);
-    Route::post('/{conversationId}/upload-images', [ListingAssistantController::class, 'uploadImages']);
-    Route::delete('/{conversationId}/images/{imageIndex}', [ListingAssistantController::class, 'deleteImage']);
-    Route::patch('/{conversationId}/data', [ListingAssistantController::class, 'updateData']);
-    Route::post('/{conversationId}/auto-save', [ListingAssistantController::class, 'autoSave']);
-    Route::post('/{conversationId}/map-coordinates', [ListingAssistantController::class, 'saveMapCoordinates']);
-    Route::post('/{conversationId}/set-field', [ListingAssistantController::class, 'setField']);
+    
+    // REMOVED IN SEARCH REFACTOR: resetConversation - handled client-side
+    // Route::post('/{conversationId}/reset', [ListingAssistantController::class, 'resetConversation']);
+    
+    // REMOVED IN SEARCH REFACTOR: generateDescription - not property creation
+    // Route::post('/{conversationId}/generate-description', [ListingAssistantController::class, 'generateDescription']);
+    
+    // REMOVED IN SEARCH REFACTOR: uploadImages - not property creation
+    // Route::post('/{conversationId}/upload-images', [ListingAssistantController::class, 'uploadImages']);
+    
+    // REMOVED IN SEARCH REFACTOR: deleteImage - not property creation
+    // Route::delete('/{conversationId}/images/{imageIndex}', [ListingAssistantController::class, 'deleteImage']);
+    
+    // REMOVED IN SEARCH REFACTOR: updateData - not property creation
+    // Route::patch('/{conversationId}/data', [ListingAssistantController::class, 'updateData']);
+    
+    // REMOVED IN SEARCH REFACTOR: autoSave - not property creation
+    // Route::post('/{conversationId}/auto-save', [ListingAssistantController::class, 'autoSave']);
+    
+    // REMOVED IN SEARCH REFACTOR: saveMapCoordinates - not property creation
+    // Route::post('/{conversationId}/map-coordinates', [ListingAssistantController::class, 'saveMapCoordinates']);
+    
+    // REMOVED IN SEARCH REFACTOR: setField - not property creation
+    // Route::post('/{conversationId}/set-field', [ListingAssistantController::class, 'setField']);
+    
+    // KEPT: Delete conversation
     Route::delete('/{conversationId}', [ListingAssistantController::class, 'deleteConversation']);
 });
 
-// Protected listing assistant endpoints
+// Protected listing assistant endpoints (SIMPLIFIED)
 Route::middleware('auth:sanctum')->prefix('listing/assistant')->group(function () {
+    // KEPT: List user conversations
     Route::get('/conversations', [ListingAssistantController::class, 'listConversations']);
-    Route::post('/{conversationId}/submit', [ListingAssistantController::class, 'submitListing']);
+    
+    // REMOVED IN SEARCH REFACTOR: submitListing - not property creation
+    // Route::post('/{conversationId}/submit', [ListingAssistantController::class, 'submitListing']);
 });
 
 // Protected property routes

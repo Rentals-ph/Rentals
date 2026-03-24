@@ -114,6 +114,7 @@ export interface PropertySearchResponse {
   conversation_id?: string
   response_type: 'search' | 'conversational'
   is_search: boolean
+  input_label?: string
 }
 
 // Conversation types
@@ -180,10 +181,11 @@ export const api = {
   delete: <T>(endpoint: string) => apiRequest<T>(endpoint, { method: 'DELETE' }),
   
   // Property search API
-  searchProperties: async (query: string, conversationId?: string): Promise<ApiResponse<PropertySearchResponse>> => {
+  searchProperties: async (query: string, conversationId?: string, filters?: Record<string, any>): Promise<ApiResponse<PropertySearchResponse>> => {
     return api.post<PropertySearchResponse>('/property/search', {
       query,
       conversation_id: conversationId,
+      ...filters, // Spread any additional filter parameters
     })
   },
   
@@ -207,6 +209,11 @@ export const api = {
   /** AI-generated suggested prompts for the chat UI. data.prompts = strings, data.fromAI = true when from AI. */
   getSuggestedPrompts: async (): Promise<ApiResponse<{ prompts: string[]; fromAI: boolean }>> => {
     return api.get<{ prompts: string[]; fromAI: boolean }>('/property/search/suggested-prompts')
+  },
+
+  /** AI-generated diverse property search queries for input label rotation. data.searches = strings */
+  getPropertySearchQueries: async (): Promise<ApiResponse<{ searches: string[]; fromAI: boolean }>> => {
+    return api.get<{ searches: string[]; fromAI: boolean }>('/property/search/queries')
   },
 
   /** Generate property description from category + title (backend only; no API keys in client). */
